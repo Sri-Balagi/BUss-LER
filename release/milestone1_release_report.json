@@ -1,0 +1,18 @@
+{
+  "start_time": "2026-06-25T14:56:16.380110Z",
+  "end_time": "2026-06-25T14:56:32.034923Z",
+  "status": "CERTIFIED",
+  "checks_passed": 19,
+  "checks_failed": 0,
+  "warnings": 0,
+  "latency_metrics": {
+    "health": "2.94ms",
+    "entity_create": "197.12ms",
+    "entity_retrieve": "196.70ms",
+    "entity_update": "368.22ms",
+    "twin_create": "745.87ms",
+    "twin_retrieve": "190.40ms",
+    "twin_update": "202.68ms"
+  },
+  "failures": []
+}

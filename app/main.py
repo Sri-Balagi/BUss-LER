@@ -5,12 +5,14 @@ lifespan context manager for external service initialization, and
 registers all API routers.
 """
 
+import time
 from contextlib import asynccontextmanager
 
 import structlog
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.errors import register_exception_handlers
 from app.api.v1.router import api_router
 from app.config import get_settings
 from app.services.qdrant import QdrantService
@@ -59,6 +61,21 @@ def create_app() -> FastAPI:
         redoc_url="/redoc" if settings.app_debug else None,
     )
 
+    # Request Logging Middleware
+    @app.middleware("http")
+    async def log_requests(request: Request, call_next):
+        start_time = time.time()
+        response = await call_next(request)
+        duration = time.time() - start_time
+        logger.info(
+            "Request processed",
+            method=request.method,
+            path=request.url.path,
+            status=response.status_code,
+            duration=round(duration, 4),
+        )
+        return response
+
     # Configure CORS
     app.add_middleware(
         CORSMiddleware,
@@ -67,6 +84,9 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    # Register exception handlers
+    register_exception_handlers(app)
 
     # Register routers
     app.include_router(api_router, prefix="/api/v1")

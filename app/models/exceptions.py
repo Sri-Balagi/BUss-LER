@@ -119,3 +119,14 @@ class RepositoryError(BizOSError):
             detail=detail,
         )
         self.operation = operation
+
+
+class ServiceError(BizOSError):
+    """Raised when a service-level orchestration or business rule fails."""
+
+    def __init__(self, operation: str, detail: str | None = None) -> None:
+        super().__init__(
+            message=f"Service operation failed: {operation}",
+            detail=detail,
+        )
+        self.operation = operation

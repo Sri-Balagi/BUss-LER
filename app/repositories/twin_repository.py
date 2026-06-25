@@ -262,6 +262,10 @@ class TwinRepository:
         - ``TWIN_NOT_FOUND:<uuid>`` with ERRCODE P0002
         - ``VERSION_CONFLICT:expected=N, actual=M`` with ERRCODE P0001
         """
+        error_msg = getattr(original_exc, "message", "")
+        if not error_msg:
+            error_msg = str(original_exc)
+            
         if "TWIN_NOT_FOUND" in error_msg:
             raise TwinNotFoundError(str(twin_id)) from original_exc
 

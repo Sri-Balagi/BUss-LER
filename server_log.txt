@@ -1,0 +1,11 @@
+INFO:     Started server process [5408]
+INFO:     Waiting for application startup.
+2026-06-25 20:26:31 [info     ] Starting BizOS API             env=development
+2026-06-25 20:26:31 [info     ] Initializing Supabase client
+2026-06-25 20:26:31 [info     ] Initializing Qdrant client and collections
+2026-06-25 20:26:31 [info     ] Qdrant collection already exists collection=bizos_memories
+2026-06-25 20:26:31 [info     ] Startup complete
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8001 (Press CTRL+C to quit)
+2026-06-25 20:26:32 [info     ] Request processed              duration=0.0028 method=GET path=/api/v1/health status=200
+INFO:     127.0.0.1:62323 - "GET /api/v1/health HTTP/1.1" 200 OK
