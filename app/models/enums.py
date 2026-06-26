@@ -91,12 +91,27 @@ class ConstraintSeverity(str, Enum):
 # =============================================================================
 
 
-class MemoryType(str, Enum):
-    """Type of long-term memory."""
+class MemoryCategory(str, Enum):
+    """Business-oriented classification of a memory."""
 
-    EPISODIC = "episodic"
-    SEMANTIC = "semantic"
-    PROCEDURAL = "procedural"
+    OBSERVATION = "observation"
+    EVENT = "event"
+    INTERACTION = "interaction"
+    DECISION = "decision"
+    TASK = "task"
+    REFLECTION = "reflection"
+    GOAL_PROGRESS = "goal_progress"
+    ALERT = "alert"
+    SYSTEM = "system"
+
+
+class EmbeddingStatus(str, Enum):
+    """Lifecycle status of a memory embedding process."""
+
+    PENDING = "pending"
+    PROCESSING = "processing"
+    COMPLETED = "completed"
+    FAILED = "failed"
 
 
 class MemorySource(str, Enum):

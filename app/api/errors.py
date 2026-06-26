@@ -12,6 +12,9 @@ from app.models.exceptions import (
     ServiceError,
     TwinNotFoundError,
     VersionConflictError,
+    MemoryNotFoundError,
+    DuplicateMemoryError,
+    AIKernelError,
 )
 
 logger = structlog.get_logger()
@@ -19,6 +22,14 @@ logger = structlog.get_logger()
 
 async def entity_not_found_handler(request: Request, exc: EntityNotFoundError) -> JSONResponse:
     logger.warning("Entity not found", url=str(request.url), detail=exc.detail)
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={"detail": exc.message},
+    )
+
+
+async def memory_not_found_handler(request: Request, exc: MemoryNotFoundError) -> JSONResponse:
+    logger.warning("Memory not found", url=str(request.url), detail=exc.detail)
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
         content={"detail": exc.message},
@@ -49,6 +60,14 @@ async def duplicate_twin_handler(request: Request, exc: DuplicateTwinError) -> J
     )
 
 
+async def duplicate_memory_handler(request: Request, exc: DuplicateMemoryError) -> JSONResponse:
+    logger.warning("Duplicate memory", url=str(request.url), detail=exc.detail)
+    return JSONResponse(
+        status_code=status.HTTP_409_CONFLICT,
+        content={"detail": exc.message},
+    )
+
+
 async def domain_validation_handler(request: Request, exc: DomainValidationError) -> JSONResponse:
     logger.warning("Domain validation failed", url=str(request.url), detail=exc.detail)
     return JSONResponse(
@@ -73,12 +92,23 @@ async def service_error_handler(request: Request, exc: ServiceError) -> JSONResp
     )
 
 
+async def ai_kernel_error_handler(request: Request, exc: AIKernelError) -> JSONResponse:
+    logger.error("AI Kernel error", url=str(request.url), detail=exc.detail)
+    return JSONResponse(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        content={"detail": "An internal AI capability failed. Please try again later."},
+    )
+
+
 def register_exception_handlers(app: FastAPI) -> None:
     """Register all domain exception handlers to the FastAPI app."""
     app.add_exception_handler(EntityNotFoundError, entity_not_found_handler)
     app.add_exception_handler(TwinNotFoundError, twin_not_found_handler)
+    app.add_exception_handler(MemoryNotFoundError, memory_not_found_handler)
     app.add_exception_handler(VersionConflictError, version_conflict_handler)
     app.add_exception_handler(DuplicateTwinError, duplicate_twin_handler)
+    app.add_exception_handler(DuplicateMemoryError, duplicate_memory_handler)
     app.add_exception_handler(DomainValidationError, domain_validation_handler)
     app.add_exception_handler(RepositoryError, repository_error_handler)
     app.add_exception_handler(ServiceError, service_error_handler)
+    app.add_exception_handler(AIKernelError, ai_kernel_error_handler)

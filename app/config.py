@@ -25,6 +25,9 @@ class Settings(BaseSettings):
     # --- Qdrant ---
     qdrant_host: str = "localhost"
     qdrant_port: int = 6333
+    qdrant_collection: str = "memories"
+    qdrant_vector_size: int = 768  # Fully configurable default
+    qdrant_distance_metric: str = "Cosine"
 
     # --- Gemini ---
     gemini_api_key: str
@@ -37,7 +40,12 @@ class Settings(BaseSettings):
     # --- Gemini Model Names ---
     gemini_pro_model: str = "gemini-2.5-pro"
     gemini_flash_model: str = "gemini-2.5-flash"
-    gemini_embedding_model: str = "text-embedding-004"
+    gemini_embedding_model: str = "gemini-embedding-001"
+    
+    # --- Feature Flags ---
+    enable_background_processing: bool = True
+    enable_ai_summarization: bool = True
+    enable_vector_storage: bool = True
 
     @property
     def is_production(self) -> bool:

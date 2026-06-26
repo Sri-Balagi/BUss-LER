@@ -16,7 +16,8 @@ def test_request_logging_middleware(client):
             method="GET",
             path="/api/v1/health",
             status=200,
-            duration=mock_logger.call_args[1]["duration"]
+            duration=mock_logger.call_args[1]["duration"],
+            request_id=None
         )
         assert isinstance(mock_logger.call_args[1]["duration"], float)
 

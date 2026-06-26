@@ -16,11 +16,12 @@ from app.models.enums import (
     ConstraintType,
     ConversationRole,
     ConversationStatus,
+    EmbeddingStatus,
     EntityType,
     GoalStatus,
     GoalType,
+    MemoryCategory,
     MemorySource,
-    MemoryType,
     OutcomeVerdict,
     ResourceType,
 )
@@ -145,45 +146,6 @@ class Constraint(DomainBaseModel):
     created_at: datetime
     updated_at: datetime
 
-
-# =============================================================================
-# Memory Models
-# =============================================================================
-
-
-class MemoryCreate(DomainBaseModel):
-    """Schema for creating a memory."""
-
-    content: str = Field(..., min_length=1, max_length=10000)
-    memory_type: MemoryType
-    source: MemorySource
-    importance: float = Field(default=0.5, ge=0.0, le=1.0)
-    domain_tags: list[str] = Field(default_factory=list)
-    context_tags: list[str] = Field(default_factory=list)
-
-
-class Memory(DomainBaseModel):
-    """Full memory object."""
-
-    id: UUID
-    entity_id: UUID
-    memory_type: MemoryType
-    content: str
-    summary: str | None
-    source: MemorySource
-    importance: float = Field(..., ge=0.0, le=1.0)
-    emotional_valence: float = Field(..., ge=-1.0, le=1.0)
-    qdrant_point_id: UUID | None
-    collection_name: str | None
-    domain_tags: list[str]
-    context_tags: list[str]
-    access_count: int
-    last_accessed: datetime | None
-    is_consolidated: bool
-    classifier_source: str = Field(default="rules")
-    classifier_confidence: float = Field(default=1.0)
-    created_at: datetime
-    updated_at: datetime
 
 
 # =============================================================================

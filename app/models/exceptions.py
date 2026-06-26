@@ -5,11 +5,11 @@ These exceptions are raised by the service layer and caught by
 the API layer to return appropriate HTTP status codes.
 
 Mapping:
-    NotFoundError       → 404 Not Found
-    VersionConflictError → 409 Conflict
-    DuplicateTwinError  → 409 Conflict
-    ValidationError     → 422 Unprocessable Entity
-    RepositoryError     → 500 Internal Server Error
+    NotFoundError       -> 404 Not Found
+    VersionConflictError -> 409 Conflict
+    DuplicateTwinError  -> 409 Conflict
+    ValidationError     -> 422 Unprocessable Entity
+    RepositoryError     -> 500 Internal Server Error
 """
 
 
@@ -121,6 +121,20 @@ class RepositoryError(BizOSError):
         self.operation = operation
 
 
+class VectorDatabaseError(RepositoryError):
+    """Raised when a Qdrant SDK operation fails.
+    
+    This abstracts away the underlying HTTP or connection errors
+    raised by the Qdrant client.
+    """
+
+    def __init__(self, operation: str, detail: str | None = None) -> None:
+        super().__init__(
+            operation=operation,
+            detail=detail or "An unexpected error occurred in the vector database.",
+        )
+
+
 class ServiceError(BizOSError):
     """Raised when a service-level orchestration or business rule fails."""
 
@@ -130,3 +144,40 @@ class ServiceError(BizOSError):
             detail=detail,
         )
         self.operation = operation
+
+
+class MemoryNotFoundError(BizOSError):
+    """Raised when a memory cannot be found."""
+
+    def __init__(self, memory_id: str) -> None:
+        super().__init__(
+            message=f"Memory not found: {memory_id}",
+            detail="The requested memory does not exist or has been permanently deleted.",
+        )
+        self.memory_id = memory_id
+
+
+class DuplicateMemoryError(RepositoryError):
+    """Raised when a unique constraint on memories is violated."""
+    
+    def __init__(self, detail: str = "Memory already exists"):
+        super().__init__(operation="memory_create", detail=detail)
+
+
+class AIKernelError(BizOSError):
+    """Base exception for all AI Kernel operations."""
+    
+    def __init__(self, provider: str, operation: str, detail: str):
+        super().__init__(
+            message=f"AI Kernel ({provider}) failed during {operation}: {detail}",
+            detail=detail
+        )
+        self.provider = provider
+        self.operation = operation
+
+
+class ProviderConfigurationError(AIKernelError):
+    """Raised when an AI provider is misconfigured or missing credentials."""
+    
+    def __init__(self, provider: str, detail: str):
+        super().__init__(provider=provider, operation="configuration", detail=detail)

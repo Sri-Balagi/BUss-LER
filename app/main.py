@@ -67,12 +67,18 @@ def create_app() -> FastAPI:
         start_time = time.time()
         response = await call_next(request)
         duration = time.time() - start_time
+        # Attach request_id if available from OperationContext
+        request_id = getattr(request.state, "request_id", None)
+        if request_id:
+            response.headers["X-Request-ID"] = request_id
+
         logger.info(
             "Request processed",
             method=request.method,
             path=request.url.path,
             status=response.status_code,
             duration=round(duration, 4),
+            request_id=request_id,
         )
         return response
 

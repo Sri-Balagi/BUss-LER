@@ -89,5 +89,6 @@ def test_qdrant_service_init(mock_env):
         
         mock_client.assert_called_once_with(
             host="localhost",
-            port=6333
+            port=6333,
+            timeout=10.0
         )

@@ -1,0 +1,88 @@
+-- =============================================================================
+-- Migration: 002_memory_engine_schema
+-- Description: Creates the memories table for Milestone 2.
+-- Notes:
+--   - Stores structured metadata ONLY.
+--   - Qdrant will store the actual embeddings under a matching collection name.
+-- =============================================================================
+
+-- =============================================================================
+-- 1. ENUMS
+-- =============================================================================
+
+CREATE TYPE memory_category_enum AS ENUM (
+    'observation',
+    'event',
+    'interaction',
+    'decision',
+    'task',
+    'reflection',
+    'goal_progress',
+    'alert',
+    'system'
+);
+
+CREATE TYPE memory_source_enum AS ENUM (
+    'conversation',
+    'document',
+    'execution',
+    'observation',
+    'user_input'
+);
+
+CREATE TYPE embedding_status_enum AS ENUM (
+    'pending',
+    'processing',
+    'completed',
+    'failed'
+);
+
+-- =============================================================================
+-- 2. TABLES
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS memories (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    twin_id UUID NOT NULL REFERENCES digital_twins(id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    summary TEXT,
+    memory_category memory_category_enum NOT NULL,
+    source memory_source_enum NOT NULL,
+    importance NUMERIC(3,2) NOT NULL DEFAULT 0.50 CHECK (importance >= 0.00 AND importance <= 1.00),
+    embedding_status embedding_status_enum NOT NULL DEFAULT 'pending',
+    embedding_model VARCHAR(255),
+    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    deleted_at TIMESTAMPTZ
+);
+
+-- =============================================================================
+-- 3. INDEXES
+-- =============================================================================
+
+-- Fast lookup of memories by twin
+CREATE INDEX idx_memories_twin_id ON memories(twin_id);
+
+-- Filter by category
+CREATE INDEX idx_memories_category ON memories(memory_category);
+
+-- Filter by embedding status (crucial for background workers polling for 'pending')
+CREATE INDEX idx_memories_embedding_status ON memories(embedding_status);
+
+-- JSONB indexing for metadata filtering
+CREATE INDEX idx_memories_metadata ON memories USING GIN (metadata);
+
+-- =============================================================================
+-- 4. TRIGGERS
+-- =============================================================================
+
+CREATE TRIGGER update_memories_updated_at
+    BEFORE UPDATE ON memories
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- =============================================================================
+-- MIGRATION COMPLETE
+-- =============================================================================
