@@ -181,3 +181,147 @@ class ProviderConfigurationError(AIKernelError):
     
     def __init__(self, provider: str, detail: str):
         super().__init__(provider=provider, operation="configuration", detail=detail)
+
+
+# =============================================================================
+# Intent Engine Errors (Milestone 3)
+# =============================================================================
+
+
+class IntentNotFoundError(NotFoundError):
+    """Raised when an intent lookup fails."""
+
+    def __init__(self, intent_id: str) -> None:
+        super().__init__(
+            message=f"Intent not found: {intent_id}",
+            detail=f"No intent exists with ID '{intent_id}'.",
+        )
+        self.intent_id = intent_id
+
+
+class IntentClassificationError(ServiceError):
+    """Raised when AI intent classification fails or produces invalid output."""
+
+    def __init__(self, detail: str) -> None:
+        super().__init__(
+            operation="intent_classification",
+            detail=detail,
+        )
+
+
+class InvalidIntentTransitionError(BizOSError):
+    """Raised when an invalid intent state transition is attempted."""
+
+    def __init__(self, current: str, target: str, intent_id: str) -> None:
+        super().__init__(
+            message=f"Invalid intent transition for {intent_id}: {current} -> {target}",
+        )
+
+
+class GoalNotFoundError(NotFoundError):
+    """Raised when a goal lookup fails."""
+
+    def __init__(self, goal_id: str) -> None:
+        super().__init__(
+            message=f"Goal not found: {goal_id}",
+            detail=f"No goal exists with ID '{goal_id}'.",
+        )
+        self.goal_id = goal_id
+
+
+class InvalidGoalTransitionError(BizOSError):
+    """Raised when an invalid goal state transition is attempted."""
+
+    def __init__(self, current: str, target: str, goal_id: str) -> None:
+        super().__init__(
+            message=f"Invalid goal transition for {goal_id}: {current} -> {target}",
+        )
+
+
+class PlanNotFoundError(NotFoundError):
+    """Raised when a plan lookup fails."""
+
+    def __init__(self, plan_id: str) -> None:
+        super().__init__(
+            message=f"Plan not found: {plan_id}",
+            detail=f"No plan exists with ID '{plan_id}'.",
+        )
+        self.plan_id = plan_id
+
+
+class InvalidPlanTransitionError(BizOSError):
+    """Raised when an invalid plan state transition is attempted."""
+
+    def __init__(self, current: str, target: str, plan_id: str) -> None:
+        super().__init__(
+            message=f"Invalid plan transition for {plan_id}: {current} -> {target}",
+        )
+
+
+class PlanGenerationError(ServiceError):
+    """Raised when AI plan generation fails or produces invalid output."""
+
+    def __init__(self, detail: str) -> None:
+        super().__init__(
+            operation="plan_generation",
+            detail=detail,
+        )
+
+
+class RecommendationNotFoundError(NotFoundError):
+    """Raised when a recommendation lookup fails."""
+
+    def __init__(self, recommendation_id: str) -> None:
+        super().__init__(
+            message=f"Recommendation not found: {recommendation_id}",
+            detail=f"No recommendation exists with ID '{recommendation_id}'.",
+        )
+        self.recommendation_id = recommendation_id
+
+
+class RecommendationGenerationError(ServiceError):
+    """Raised when AI recommendation generation fails or produces invalid output."""
+
+    def __init__(self, detail: str) -> None:
+        super().__init__(
+            operation="recommendation_generation",
+            detail=detail,
+        )
+
+
+class CognitiveTraceNotFoundError(NotFoundError):
+    """Raised when a cognitive trace lookup fails."""
+
+    def __init__(self, trace_id: str) -> None:
+        super().__init__(
+            message=f"Cognitive trace not found: {trace_id}",
+            detail=f"No cognitive trace exists with ID '{trace_id}'.",
+        )
+        self.trace_id = trace_id
+
+
+class ContextBuildError(ServiceError):
+    """Raised when the ContextBuilder fails to assemble a CognitiveContext."""
+
+    def __init__(self, detail: str) -> None:
+        super().__init__(
+            operation="context_build",
+            detail=detail,
+        )
+
+
+class AIOutputValidationError(ServiceError):
+    """Raised when AI structured output fails Pydantic or business validation.
+
+    This enforces the AI Output Validation pipeline:
+        AI Provider → Structured JSON → Pydantic Validation →
+        Business Validation → Domain Object → Persistence
+
+    Raw LLM responses must never cross service boundaries.
+    """
+
+    def __init__(self, operation: str, detail: str) -> None:
+        super().__init__(
+            operation=f"ai_output_validation.{operation}",
+            detail=detail,
+        )

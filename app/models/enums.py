@@ -184,3 +184,79 @@ class ConversationRole(str, Enum):
     ASSISTANT = "assistant"
     SYSTEM = "system"
     TOOL = "tool"
+
+
+# =============================================================================
+# Intent Enums
+# =============================================================================
+
+
+class IntentType(str, Enum):
+    """Business-domain classification of a user intent."""
+
+    INVENTORY = "inventory"
+    CALENDAR = "calendar"
+    ANALYTICS = "analytics"
+    FINANCE = "finance"
+    COMMUNICATION = "communication"
+    TASK_MANAGEMENT = "task_management"
+    REPORTING = "reporting"
+    RESEARCH = "research"
+    GENERAL = "general"
+
+
+class IntentStatus(str, Enum):
+    """Lifecycle status of an intent."""
+
+    PENDING = "pending"
+    CLASSIFIED = "classified"
+    CONFIRMED = "confirmed"
+    FULFILLED = "fulfilled"
+    REJECTED = "rejected"
+    EXPIRED = "expired"
+
+
+class IntentConfidence(str, Enum):
+    """AI classification confidence band for an intent."""
+
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
+
+
+# =============================================================================
+# Plan Enums
+# =============================================================================
+
+
+class PlanStatus(str, Enum):
+    """Lifecycle status of a generated plan."""
+
+    DRAFT = "draft"
+    APPROVED = "approved"
+    EXECUTING = "executing"
+    COMPLETED = "completed"
+    ABANDONED = "abandoned"
+
+
+# =============================================================================
+# Recommendation Enums
+# =============================================================================
+
+
+class RecommendationStatus(str, Enum):
+    """Lifecycle status of a proactive recommendation."""
+
+    NEW = "new"
+    ACKNOWLEDGED = "acknowledged"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+    EXPIRED = "expired"
+
+
+class RecommendationConfidence(str, Enum):
+    """AI confidence band for a generated recommendation."""
+
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"

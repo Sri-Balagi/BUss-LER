@@ -1,5 +1,6 @@
 import time
 from abc import ABC, abstractmethod
+from datetime import datetime, timezone
 from typing import Optional
 from uuid import UUID
 
@@ -181,7 +182,7 @@ class MemoryMetadataRepository(AbstractMemoryRepository):
         try:
             response = (
                 await self._client.table(self._table_name)
-                .update({"deleted_at": "now()"})
+                .update({"deleted_at": datetime.now(timezone.utc).isoformat()})
                 .eq("id", str(memory_id))
                 .is_("deleted_at", "null")
                 .execute()
