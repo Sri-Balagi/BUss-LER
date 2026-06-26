@@ -1,69 +1,115 @@
-# BizOS
+# BizOS — AI-Native Operating System for Entities
 
-BizOS is an AI Operating System for Entities. It understands an entity, builds a digital twin of it, and helps it achieve its goals through planning, reasoning, memory, simulation, and autonomous execution.
+[![Version](https://img.shields.io/badge/version-v2.0.0-blue.svg)](https://github.com/your-org/bizos/releases)
+[![Python](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115.0-009688.svg?logo=fastapi)](https://fastapi.tiangolo.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **Current Status**: Milestone 0 — Core foundations, database connections, and domain models.
+> **BizOS is not a chatbot, a dashboard, or a CRM.** It is a foundational AI Operating System designed to understand an entity, build a digital twin of it, and help it achieve its goals through planning, reasoning, memory, simulation, and autonomous execution.
 
-## Project Structure
+---
 
-- `app/`: FastAPI application code.
-  - `api/`: API routers and endpoints.
-  - `models/`: Pydantic schemas and enums (Business Foundation Model).
-  - `services/`: Wrappers for external services (Supabase, Qdrant, Gemini).
-- `tests/`: Pytest test suite.
+## 🌟 Project Vision
 
-## Installation
+The future of AI is not conversational—it is agentic and autonomous. BizOS provides the architectural foundation for AI agents to possess persistent memory, robust state management, and provider-agnostic cognitive capabilities. 
 
-The project uses `uv` for dependency management.
+By modeling businesses, individuals, or systems as **Digital Twins**, BizOS allows AI to step out of the chat window and seamlessly integrate into real-world operational logic.
+
+## 🚀 Why BizOS?
+
+* **AI-Native from Day One:** Built specifically for LLM and vector-based operations.
+* **Provider Agnostic Kernel:** Swap between Gemini, OpenAI, or Local LLMs without rewriting business logic.
+* **Event-Driven Resilience:** Asynchronous background processing backed by Tenacity loops.
+* **Strict Layered Architecture:** Enterprise-grade separation of API, Services, Repositories, and Providers.
+
+## 🧠 Key Features
+
+* **Digital Twin Management:** Track the state, metadata, and history of any modeled entity.
+* **Semantic Memory Engine:** Embed, store, and semantically search a Twin's contextual experiences.
+* **Event Bus:** Decoupled memory summarization and vector processing pipelines.
+* **Qdrant Vector Integration:** High-performance semantic indexing.
+
+## 🏗 Architecture Overview
+
+BizOS adheres to a strict Layered Architecture combined with Domain-Driven concepts.
+
+> **[View Architecture Index](docs/Architecture_Index.md)** for deep dives into individual subsystems.
+
+*(Recommended: Add Architecture Diagram Screenshot here)*
+
+## 🛠 Technology Stack
+
+* **Core:** Python 3.12+, FastAPI, Pydantic v2
+* **Database:** PostgreSQL (via Supabase)
+* **Vector Store:** Qdrant
+* **AI Providers:** Google Gemini (Primary), extensibility for others
+* **Resilience:** Tenacity, Structlog
+
+## 📁 Project Structure
+
+```text
+bizos/
+├── app/
+│   ├── api/v1/         # Versioned REST endpoints
+│   ├── core/           # Operation context and config
+│   ├── events/         # Event Bus and Handlers
+│   ├── models/         # DTOs, schemas, and enums
+│   ├── repositories/   # Persistence (Supabase, Qdrant)
+│   ├── services/       # Business logic (Memory, Twins, AI Kernel)
+│   └── workers/        # Background processing
+├── docs/               # Architecture and operational documentation
+├── migrations/         # SQL Schema migrations
+├── tests/              # E2E, Integration, Unit, and Chaos tests
+```
+
+## ⚙️ Installation
+
+BizOS uses [`uv`](https://github.com/astral-sh/uv) for lightning-fast dependency management.
 
 1. Ensure Python 3.12+ is installed.
-2. Install `uv` if you haven't already.
-3. Install dependencies:
-
-```bash
-uv sync
-```
-
-Or using standard pip:
-
-```bash
-pip install -e ".[dev]"
-```
-
-## Environment Setup
-
-1. Copy the example environment file:
+2. Install dependencies:
+   ```bash
+   uv sync
+   # Or using standard pip:
+   pip install -e ".[dev]"
+   ```
+3. Set up your environment variables:
    ```bash
    cp .env.example .env
    ```
-2. Fill in the required values in `.env`:
-   - `SUPABASE_URL` and `SUPABASE_KEY` (from your Supabase project)
-   - `GEMINI_API_KEY` (from Google AI Studio)
 
-## Running Infrastructure
+## 🚦 Quick Start
 
-Qdrant runs locally via Docker. To start it:
+1. **Start Infrastructure:**
+   Ensure you have your Supabase credentials in `.env`, then start Qdrant locally:
+   ```bash
+   docker-compose up -d
+   ```
 
-```bash
-docker-compose up -d
-```
+2. **Run the API Server:**
+   ```bash
+   uv run uvicorn app.main:app --reload
+   ```
 
-## Running the Application
+3. **Verify Health:**
+   Check the sub-system health at `http://localhost:8000/api/v1/health/memory` or view the Swagger UI at `http://localhost:8000/docs`.
 
-To start the FastAPI development server:
+## 🗺 Roadmap
 
-```bash
-uv run uvicorn app.main:app --reload
-```
+* **Milestone 1:** Digital Twin Foundation ✅
+* **Milestone 2:** Memory Engine (v2.0.0) ✅
+* **Milestone 3:** Goals & Intent Engine ⏳ (Next)
+* **Milestone 4:** Agent Swarms & Delegation
+* **Milestone 5:** Temporal Simulation Reality
 
-The API will be available at `http://localhost:8000`.
-Check the health endpoint at `http://localhost:8000/api/v1/health`.
-API documentation is available at `http://localhost:8000/docs`.
+## 🤝 Contributing
 
-## Running Tests
+We welcome contributions from the community! Please read our [Contributing Guide](CONTRIBUTING.md) to understand our development process, branching strategy, and coding standards.
 
-To run the test suite:
+## 🛡 Security
 
-```bash
-uv run pytest
-```
+Please review our [Security Policy](SECURITY.md) for information on reporting vulnerabilities and our disclosure policy.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
