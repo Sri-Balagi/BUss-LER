@@ -34,12 +34,12 @@ class QdrantService:
     @classmethod
     async def initialize_collections(cls, settings: Settings) -> None:
         """Ensure required collections exist with correct parameters.
-        
+
         This method is idempotent and should be called on startup.
         """
         client = cls.get_client(settings)
         collection_name = settings.qdrant_collection
-        
+
         try:
             exists = await client.collection_exists(collection_name=collection_name)
             if not exists:
@@ -49,7 +49,7 @@ class QdrantService:
                     vector_size=settings.qdrant_vector_size,
                     distance=settings.qdrant_distance_metric,
                 )
-                
+
                 distance_metric = models.Distance.COSINE
                 if settings.qdrant_distance_metric.upper() == "EUCLID":
                     distance_metric = models.Distance.EUCLID
@@ -65,9 +65,9 @@ class QdrantService:
                     ),
                     optimizers_config=models.OptimizersConfigDiff(
                         indexing_threshold=100
-                    )
+                    ),
                 )
-                
+
                 # Apply initialization metadata (collection versioning)
                 # We can store this in Qdrant using collection properties or just log it.
                 logger.info(
@@ -75,14 +75,14 @@ class QdrantService:
                     collection=collection_name,
                     version="v1",
                 )
-                
+
                 # Create standard payload indices for hybrid filtering
                 indices = [
                     ("twin_id", models.PayloadSchemaType.KEYWORD),
                     ("memory_category", models.PayloadSchemaType.KEYWORD),
                     ("source", models.PayloadSchemaType.KEYWORD),
                 ]
-                
+
                 for field_name, schema_type in indices:
                     await client.create_payload_index(
                         collection_name=collection_name,
@@ -90,8 +90,10 @@ class QdrantService:
                         field_schema=schema_type,
                     )
             else:
-                logger.info("Qdrant collection already exists", collection=collection_name)
-                
+                logger.info(
+                    "Qdrant collection already exists", collection=collection_name
+                )
+
         except Exception as e:
             logger.error("Failed to initialize Qdrant collections", error=str(e))
             raise
@@ -99,38 +101,40 @@ class QdrantService:
     @classmethod
     async def health_check(cls, settings: Settings) -> dict:
         """Validate Qdrant connectivity and collection state.
-        
+
         Returns:
             dict with health status details.
         """
         client = cls.get_client(settings)
         collection_name = settings.qdrant_collection
         status = {"status": "unhealthy", "qdrant": False, "collection": False}
-        
+
         try:
             # 1. Test connectivity
             collections = await client.get_collections()
             status["qdrant"] = True
-            
+
             # 2. Test collection configuration
             collection_names = [c.name for c in collections.collections]
             if collection_name in collection_names:
                 info = await client.get_collection(collection_name)
                 config_size = info.config.params.vectors.size
-                
+
                 if config_size == settings.qdrant_vector_size:
                     status["collection"] = True
                     status["vector_size"] = config_size
                     status["status"] = "healthy"
                 else:
-                    status["detail"] = f"Vector size mismatch. Expected {settings.qdrant_vector_size}, got {config_size}"
+                    status["detail"] = (
+                        f"Vector size mismatch. Expected {settings.qdrant_vector_size}, got {config_size}"
+                    )
             else:
                 status["detail"] = f"Collection '{collection_name}' not found."
 
         except Exception as e:
             logger.error("Qdrant health check failed", error=str(e))
             status["detail"] = str(e)
-            
+
         return status
 
     @classmethod

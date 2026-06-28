@@ -21,7 +21,7 @@ from app.models.enterprise_context import (
     PaginatedContextLifecycles,
 )
 from app.models.enums import ContextStatus
-from app.models.exceptions import ContextAssemblyError, NotFoundError, RepositoryError
+from app.models.exceptions import NotFoundError, RepositoryError
 
 logger = structlog.get_logger(__name__)
 
@@ -29,7 +29,6 @@ _TABLE = "enterprise_contexts"
 
 
 class AbstractEnterpriseContextRepository(ABC):
-
     @abstractmethod
     async def create(self, data: ContextLifecycleCreate) -> ContextLifecycleMetadata:
         """Persist a new context lifecycle record with BUILDING status."""
@@ -85,7 +84,10 @@ class EnterpriseContextRepository(AbstractEnterpriseContextRepository):
         }
         try:
             result = await self._client.table(_TABLE).insert(payload).execute()
-            return ContextLifecycleMetadata(**result.data[0])
+            row = result.data[0]
+            if "id" in row:
+                row["context_id"] = row.pop("id")
+            return ContextLifecycleMetadata(**row)
         except Exception as exc:
             raise RepositoryError(operation="context.create", detail=str(exc)) from exc
 
@@ -101,11 +103,16 @@ class EnterpriseContextRepository(AbstractEnterpriseContextRepository):
             )
             if not result.data:
                 raise NotFoundError(f"EnterpriseContext not found: {context_id}")
-            return ContextLifecycleMetadata(**result.data)
+            row = result.data
+            if "id" in row:
+                row["context_id"] = row.pop("id")
+            return ContextLifecycleMetadata(**row)
         except NotFoundError:
             raise
         except Exception as exc:
-            raise RepositoryError(operation="context.get_by_id", detail=str(exc)) from exc
+            raise RepositoryError(
+                operation="context.get_by_id", detail=str(exc)
+            ) from exc
 
     async def update_status(
         self,
@@ -131,9 +138,14 @@ class EnterpriseContextRepository(AbstractEnterpriseContextRepository):
                 .eq("id", str(context_id))
                 .execute()
             )
-            return ContextLifecycleMetadata(**result.data[0])
+            row = result.data[0]
+            if "id" in row:
+                row["context_id"] = row.pop("id")
+            return ContextLifecycleMetadata(**row)
         except Exception as exc:
-            raise RepositoryError(operation="context.update_status", detail=str(exc)) from exc
+            raise RepositoryError(
+                operation="context.update_status", detail=str(exc)
+            ) from exc
 
     async def list_by_twin(
         self,
@@ -154,7 +166,13 @@ class EnterpriseContextRepository(AbstractEnterpriseContextRepository):
             if status:
                 query = query.eq("status", status.value)
             result = await query.execute()
-            items = [ContextLifecycleMetadata(**row) for row in result.data]
+
+            items = []
+            for row in result.data:
+                if "id" in row:
+                    row["context_id"] = row.pop("id")
+                items.append(ContextLifecycleMetadata(**row))
+
             return PaginatedContextLifecycles(
                 items=items,
                 total_count=result.count or 0,
@@ -162,7 +180,9 @@ class EnterpriseContextRepository(AbstractEnterpriseContextRepository):
                 offset=offset,
             )
         except Exception as exc:
-            raise RepositoryError(operation="context.list_by_twin", detail=str(exc)) from exc
+            raise RepositoryError(
+                operation="context.list_by_twin", detail=str(exc)
+            ) from exc
 
     async def health_check(self) -> dict:
         try:

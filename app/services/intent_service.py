@@ -10,7 +10,6 @@ Responsibilities:
 
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
-from typing import Optional
 from uuid import UUID
 
 import structlog
@@ -24,7 +23,6 @@ from app.models.commands import (
 )
 from app.models.enums import IntentStatus
 from app.models.events import IntentClassifiedEvent, IntentCreatedEvent
-from app.models.exceptions import IntentNotFoundError
 from app.models.intent import Intent, IntentCreate, IntentUpdate, PaginatedIntents
 from app.models.queries import IntentListQuery
 from app.models.results import ClassifyIntentResult, CreateIntentResult
@@ -36,13 +34,16 @@ logger = structlog.get_logger(__name__)
 
 
 class AbstractIntentService(ABC):
-
     @abstractmethod
-    async def create_intent(self, ctx: OperationContext, cmd: CreateIntentCommand) -> CreateIntentResult:
+    async def create_intent(
+        self, ctx: OperationContext, cmd: CreateIntentCommand
+    ) -> CreateIntentResult:
         pass
 
     @abstractmethod
-    async def classify_intent(self, ctx: OperationContext, cmd: ClassifyIntentCommand) -> ClassifyIntentResult:
+    async def classify_intent(
+        self, ctx: OperationContext, cmd: ClassifyIntentCommand
+    ) -> ClassifyIntentResult:
         pass
 
     @abstractmethod
@@ -50,15 +51,21 @@ class AbstractIntentService(ABC):
         pass
 
     @abstractmethod
-    async def list_intents(self, ctx: OperationContext, query: IntentListQuery) -> PaginatedIntents:
+    async def list_intents(
+        self, ctx: OperationContext, query: IntentListQuery
+    ) -> PaginatedIntents:
         pass
 
     @abstractmethod
-    async def update_intent_status(self, ctx: OperationContext, cmd: UpdateIntentStatusCommand) -> Intent:
+    async def update_intent_status(
+        self, ctx: OperationContext, cmd: UpdateIntentStatusCommand
+    ) -> Intent:
         pass
 
     @abstractmethod
-    async def delete_intent(self, ctx: OperationContext, cmd: DeleteIntentCommand) -> None:
+    async def delete_intent(
+        self, ctx: OperationContext, cmd: DeleteIntentCommand
+    ) -> None:
         pass
 
     @abstractmethod
@@ -79,7 +86,9 @@ class IntentService(AbstractIntentService):
         self._event_bus = event_bus
         self._classifier = classifier
 
-    async def create_intent(self, ctx: OperationContext, cmd: CreateIntentCommand) -> CreateIntentResult:
+    async def create_intent(
+        self, ctx: OperationContext, cmd: CreateIntentCommand
+    ) -> CreateIntentResult:
         log = logger.bind(correlation_id=ctx.correlation_id, twin_id=str(cmd.twin_id))
         log.info("Creating intent")
 
@@ -102,7 +111,9 @@ class IntentService(AbstractIntentService):
         log.info("Intent created", intent_id=str(intent.id))
         return CreateIntentResult(intent=intent, dispatched_events=1)
 
-    async def classify_intent(self, ctx: OperationContext, cmd: ClassifyIntentCommand) -> ClassifyIntentResult:
+    async def classify_intent(
+        self, ctx: OperationContext, cmd: ClassifyIntentCommand
+    ) -> ClassifyIntentResult:
         """Classify an existing intent using the IntentClassifier.
 
         Pipeline:
@@ -121,7 +132,9 @@ class IntentService(AbstractIntentService):
         log.info("Classifying intent")
 
         if self._classifier is None:
-            raise ValueError("IntentClassifier dependency not injected into IntentService.")
+            raise ValueError(
+                "IntentClassifier dependency not injected into IntentService."
+            )
 
         # Step 1: Fetch intent
         intent = await self._repository.get_by_id(cmd.intent_id)
@@ -174,7 +187,9 @@ class IntentService(AbstractIntentService):
         log.info("Fetching intent")
         return await self._repository.get_by_id(intent_id)
 
-    async def list_intents(self, ctx: OperationContext, query: IntentListQuery) -> PaginatedIntents:
+    async def list_intents(
+        self, ctx: OperationContext, query: IntentListQuery
+    ) -> PaginatedIntents:
         log = logger.bind(correlation_id=ctx.correlation_id, twin_id=str(query.twin_id))
         log.info("Listing intents")
         return await self._repository.list_by_twin(
@@ -186,8 +201,12 @@ class IntentService(AbstractIntentService):
             include_deleted=query.include_deleted,
         )
 
-    async def update_intent_status(self, ctx: OperationContext, cmd: UpdateIntentStatusCommand) -> Intent:
-        log = logger.bind(correlation_id=ctx.correlation_id, intent_id=str(cmd.intent_id))
+    async def update_intent_status(
+        self, ctx: OperationContext, cmd: UpdateIntentStatusCommand
+    ) -> Intent:
+        log = logger.bind(
+            correlation_id=ctx.correlation_id, intent_id=str(cmd.intent_id)
+        )
         log.info("Updating intent status", target_status=cmd.target_status.value)
 
         intent = await self._repository.get_by_id(cmd.intent_id)
@@ -199,8 +218,12 @@ class IntentService(AbstractIntentService):
         update_data = IntentUpdate(status=new_status)
         return await self._repository.update(intent.id, update_data)
 
-    async def delete_intent(self, ctx: OperationContext, cmd: DeleteIntentCommand) -> None:
-        log = logger.bind(correlation_id=ctx.correlation_id, intent_id=str(cmd.intent_id))
+    async def delete_intent(
+        self, ctx: OperationContext, cmd: DeleteIntentCommand
+    ) -> None:
+        log = logger.bind(
+            correlation_id=ctx.correlation_id, intent_id=str(cmd.intent_id)
+        )
         log.info("Deleting intent")
         await self._repository.soft_delete(cmd.intent_id)
         log.info("Intent soft deleted")
@@ -211,7 +234,9 @@ class IntentService(AbstractIntentService):
     @staticmethod
     def _derive_title(analysis) -> str:
         """Generate a concise title from the IntentAnalysis."""
-        entity_names = [e.get("value", "") for e in analysis.entities[:2] if e.get("value")]
+        entity_names = [
+            e.get("value", "") for e in analysis.entities[:2] if e.get("value")
+        ]
         base = analysis.intent_type.value.replace("_", " ").title()
         if entity_names:
             return f"{base}: {', '.join(entity_names)}"

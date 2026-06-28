@@ -10,7 +10,6 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, Query
-from pydantic import Field
 
 from app.api.v1.dependencies import get_cognitive_trace_service, get_operation_context
 from app.models.queries import CognitiveTraceListQuery

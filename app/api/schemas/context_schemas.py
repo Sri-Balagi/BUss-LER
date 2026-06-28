@@ -9,25 +9,30 @@ from pydantic import BaseModel, Field
 from app.models.enums import ContextStatus, ConversationStatus, ConversationRole
 from app.models.enterprise_context import (
     ContextMetadata,
-    ContextLifecycleMetadata,
     ContextWindow,
     ContextSection,
 )
-from app.models.conversation import ConversationThread, ConversationTurn
 
 
 # =============================================================================
 # Context Engine API Schemas
 # =============================================================================
 
+
 class BuildContextRequest(BaseModel):
     """Request to force-build an EnterpriseContext."""
-    policy_id: str = Field(default="full", description="ID of the ContextPolicy to apply.")
-    intent_id: Optional[UUID] = Field(default=None, description="Optional Intent ID that triggered this build.")
+
+    policy_id: str = Field(
+        default="full", description="ID of the ContextPolicy to apply."
+    )
+    intent_id: Optional[UUID] = Field(
+        default=None, description="Optional Intent ID that triggered this build."
+    )
 
 
 class ContextLifecycleResponse(BaseModel):
     """Response representing a Context Lifecycle record (metadata only)."""
+
     id: UUID
     twin_id: UUID
     policy_id: str
@@ -44,6 +49,7 @@ class ContextLifecycleResponse(BaseModel):
 
 class PaginatedContextLifecyclesResponse(BaseModel):
     """Paginated list of context lifecycles."""
+
     items: List[ContextLifecycleResponse]
     total_count: int
     limit: int
@@ -52,6 +58,7 @@ class PaginatedContextLifecyclesResponse(BaseModel):
 
 class EnterpriseContextResponse(BaseModel):
     """Full EnterpriseContext response (only returned during live builds or from cache)."""
+
     context_id: UUID
     twin_id: UUID
     intent_id: Optional[UUID] = None
@@ -66,14 +73,17 @@ class EnterpriseContextResponse(BaseModel):
 # Conversation API Schemas
 # =============================================================================
 
+
 class ConversationThreadCreateRequest(BaseModel):
     """Request to create a new conversation thread."""
+
     title: Optional[str] = None
     metadata: Optional[Dict[str, Any]] = None
 
 
 class ConversationThreadResponse(BaseModel):
     """Response for a conversation thread."""
+
     id: UUID
     twin_id: UUID
     title: Optional[str]
@@ -87,6 +97,7 @@ class ConversationThreadResponse(BaseModel):
 
 class PaginatedConversationThreadsResponse(BaseModel):
     """Paginated list of conversation threads."""
+
     items: List[ConversationThreadResponse]
     total_count: int
     limit: int
@@ -95,6 +106,7 @@ class PaginatedConversationThreadsResponse(BaseModel):
 
 class ConversationTurnCreateRequest(BaseModel):
     """Request to append a turn to a conversation."""
+
     role: ConversationRole
     content: str
     agent_id: Optional[UUID] = None
@@ -105,6 +117,7 @@ class ConversationTurnCreateRequest(BaseModel):
 
 class ConversationTurnResponse(BaseModel):
     """Response for a conversation turn."""
+
     id: UUID
     thread_id: UUID
     role: ConversationRole

@@ -12,9 +12,14 @@ from app.models.schemas import DomainBaseModel
 
 # ======================= Plan Schemas =======================
 
+
 class GeneratePlanRequest(DomainBaseModel):
-    goal_id: Optional[UUID] = Field(default=None, description="Goal to generate a plan for.")
-    intent_id: Optional[UUID] = Field(default=None, description="Intent that triggers the plan.")
+    goal_id: Optional[UUID] = Field(
+        default=None, description="Goal to generate a plan for."
+    )
+    intent_id: Optional[UUID] = Field(
+        default=None, description="Intent that triggers the plan."
+    )
 
 
 class PlanStepResponse(DomainBaseModel):
@@ -51,6 +56,7 @@ class PaginatedPlanResponse(DomainBaseModel):
 
 
 # ======================= Recommendation Schemas =======================
+
 
 class GenerateRecommendationsRequest(DomainBaseModel):
     intent_id: Optional[UUID] = Field(

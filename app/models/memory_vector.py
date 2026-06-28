@@ -17,19 +17,33 @@ class MemoryVectorPayload(DomainBaseModel):
     Full memory data remains in PostgreSQL.
     """
 
-    memory_id: UUID = Field(..., description="The unique identifier matching the PostgreSQL memory record.")
+    memory_id: UUID = Field(
+        ..., description="The unique identifier matching the PostgreSQL memory record."
+    )
     twin_id: UUID = Field(..., description="The Digital Twin this memory belongs to.")
-    memory_category: MemoryCategory = Field(..., description="The business classification of the memory.")
+    memory_category: MemoryCategory = Field(
+        ..., description="The business classification of the memory."
+    )
     source: MemorySource = Field(..., description="The source system or interaction.")
-    importance: Decimal = Field(..., max_digits=3, decimal_places=2, description="Significance score.")
-    created_at: datetime = Field(..., description="Timestamp of memory creation for time-weighted retrieval.")
+    importance: Decimal = Field(
+        ..., max_digits=3, decimal_places=2, description="Significance score."
+    )
+    created_at: datetime = Field(
+        ..., description="Timestamp of memory creation for time-weighted retrieval."
+    )
     updated_at: datetime = Field(..., description="Timestamp of last modification.")
 
 
 class MemoryVectorPoint(DomainBaseModel):
     """Represents a fully resolved Qdrant Point for ingestion or retrieval."""
 
-    id: UUID = Field(..., description="The Qdrant Point ID, which matches the memory_id.")
+    id: UUID = Field(
+        ..., description="The Qdrant Point ID, which matches the memory_id."
+    )
     vector: list[float] = Field(..., description="The raw embedding vector.")
-    payload: MemoryVectorPayload = Field(..., description="The structured metadata payload.")
-    score: Optional[float] = Field(None, description="Similarity score returned during search.")
+    payload: MemoryVectorPayload = Field(
+        ..., description="The structured metadata payload."
+    )
+    score: Optional[float] = Field(
+        None, description="Similarity score returned during search."
+    )

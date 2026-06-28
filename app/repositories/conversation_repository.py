@@ -16,9 +16,7 @@ from app.models.conversation import (
     ConversationThreadCreate,
     ConversationTurn,
     ConversationTurnCreate,
-    ConversationWithTurns,
     PaginatedConversationThreads,
-    PaginatedConversationTurns,
 )
 from app.models.enums import ConversationStatus
 from app.models.exceptions import ConversationNotFoundError, RepositoryError
@@ -30,7 +28,6 @@ _TURNS_TABLE = "conversation_turns"
 
 
 class AbstractConversationRepository(ABC):
-
     @abstractmethod
     async def create_thread(self, data: ConversationThreadCreate) -> ConversationThread:
         pass
@@ -89,7 +86,9 @@ class ConversationRepository(AbstractConversationRepository):
             result = await self._client.table(_THREADS_TABLE).insert(payload).execute()
             return ConversationThread(**result.data[0])
         except Exception as exc:
-            raise RepositoryError(operation="conversation.create_thread", detail=str(exc)) from exc
+            raise RepositoryError(
+                operation="conversation.create_thread", detail=str(exc)
+            ) from exc
 
     async def get_thread(self, thread_id: UUID) -> ConversationThread:
         try:
@@ -107,7 +106,9 @@ class ConversationRepository(AbstractConversationRepository):
         except ConversationNotFoundError:
             raise
         except Exception as exc:
-            raise RepositoryError(operation="conversation.get_thread", detail=str(exc)) from exc
+            raise RepositoryError(
+                operation="conversation.get_thread", detail=str(exc)
+            ) from exc
 
     async def add_turn(self, data: ConversationTurnCreate) -> ConversationTurn:
         now = datetime.now(timezone.utc).isoformat()
@@ -145,7 +146,9 @@ class ConversationRepository(AbstractConversationRepository):
             )
             return ConversationTurn(**result.data[0])
         except Exception as exc:
-            raise RepositoryError(operation="conversation.add_turn", detail=str(exc)) from exc
+            raise RepositoryError(
+                operation="conversation.add_turn", detail=str(exc)
+            ) from exc
 
     async def get_recent_turns(
         self, thread_id: UUID, limit: int = 20
@@ -161,7 +164,9 @@ class ConversationRepository(AbstractConversationRepository):
             )
             return [ConversationTurn(**row) for row in result.data]
         except Exception as exc:
-            raise RepositoryError(operation="conversation.get_recent_turns", detail=str(exc)) from exc
+            raise RepositoryError(
+                operation="conversation.get_recent_turns", detail=str(exc)
+            ) from exc
 
     async def list_threads(
         self,
@@ -190,18 +195,22 @@ class ConversationRepository(AbstractConversationRepository):
                 offset=offset,
             )
         except Exception as exc:
-            raise RepositoryError(operation="conversation.list_threads", detail=str(exc)) from exc
+            raise RepositoryError(
+                operation="conversation.list_threads", detail=str(exc)
+            ) from exc
 
     async def archive_thread(self, thread_id: UUID) -> ConversationThread:
         now = datetime.now(timezone.utc).isoformat()
         try:
             result = (
                 await self._client.table(_THREADS_TABLE)
-                .update({
-                    "status": ConversationStatus.ARCHIVED.value,
-                    "archived_at": now,
-                    "updated_at": now,
-                })
+                .update(
+                    {
+                        "status": ConversationStatus.ARCHIVED.value,
+                        "archived_at": now,
+                        "updated_at": now,
+                    }
+                )
                 .eq("id", str(thread_id))
                 .execute()
             )
@@ -211,7 +220,9 @@ class ConversationRepository(AbstractConversationRepository):
         except ConversationNotFoundError:
             raise
         except Exception as exc:
-            raise RepositoryError(operation="conversation.archive_thread", detail=str(exc)) from exc
+            raise RepositoryError(
+                operation="conversation.archive_thread", detail=str(exc)
+            ) from exc
 
     async def health_check(self) -> dict:
         try:

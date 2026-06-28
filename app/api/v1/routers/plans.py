@@ -42,7 +42,7 @@ def _map_plan(plan) -> PlanResponse:
         estimated_effort=plan.estimated_effort,
         confidence=plan.confidence,
         status=plan.status,
-        cognitive_trace_id=None, # Passed separately if generated
+        cognitive_trace_id=None,  # Passed separately if generated
         created_at=plan.created_at,
         updated_at=plan.updated_at,
     )
@@ -87,7 +87,12 @@ async def list_plans(
     plan_service: AbstractPlanService = Depends(get_plan_service),
 ) -> PaginatedPlanResponse:
     result = await plan_service.list_plans(
-        ctx=ctx, twin_id=twin_id, goal_id=goal_id, intent_id=intent_id, limit=limit, offset=offset
+        ctx=ctx,
+        twin_id=twin_id,
+        goal_id=goal_id,
+        intent_id=intent_id,
+        limit=limit,
+        offset=offset,
     )
     return PaginatedPlanResponse(
         items=[_map_plan(p) for p in result.items],

@@ -23,8 +23,12 @@ class PlanStep(DomainBaseModel):
     """A single step within an execution plan."""
 
     step_number: int = Field(..., ge=1, description="Ordered position of this step.")
-    action: str = Field(..., description="Human-readable description of the action to take.")
-    expected_outcome: str = Field(..., description="What should happen if this step succeeds.")
+    action: str = Field(
+        ..., description="Human-readable description of the action to take."
+    )
+    expected_outcome: str = Field(
+        ..., description="What should happen if this step succeeds."
+    )
     depends_on: List[int] = Field(
         default_factory=list,
         description="Step numbers this step depends on completing first.",

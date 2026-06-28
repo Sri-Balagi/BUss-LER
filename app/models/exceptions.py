@@ -123,7 +123,7 @@ class RepositoryError(BizOSError):
 
 class VectorDatabaseError(RepositoryError):
     """Raised when a Qdrant SDK operation fails.
-    
+
     This abstracts away the underlying HTTP or connection errors
     raised by the Qdrant client.
     """
@@ -159,18 +159,18 @@ class MemoryNotFoundError(BizOSError):
 
 class DuplicateMemoryError(RepositoryError):
     """Raised when a unique constraint on memories is violated."""
-    
+
     def __init__(self, detail: str = "Memory already exists"):
         super().__init__(operation="memory_create", detail=detail)
 
 
 class AIKernelError(BizOSError):
     """Base exception for all AI Kernel operations."""
-    
+
     def __init__(self, provider: str, operation: str, detail: str):
         super().__init__(
             message=f"AI Kernel ({provider}) failed during {operation}: {detail}",
-            detail=detail
+            detail=detail,
         )
         self.provider = provider
         self.operation = operation
@@ -178,7 +178,7 @@ class AIKernelError(BizOSError):
 
 class ProviderConfigurationError(AIKernelError):
     """Raised when an AI provider is misconfigured or missing credentials."""
-    
+
     def __init__(self, provider: str, detail: str):
         super().__init__(provider=provider, operation="configuration", detail=detail)
 
@@ -326,24 +326,47 @@ class AIOutputValidationError(ServiceError):
             detail=detail,
         )
 
+
 # =============================================================================
 # Context Engine Exceptions (Milestone 4)
 # =============================================================================
 
+
 class ContextAssemblyError(ServiceError):
     """Raised when EnterpriseContext assembly fails completely."""
+
     def __init__(self, detail: str) -> None:
         super().__init__(operation="context_assembly", detail=detail)
 
+
 class ContextValidationError(ServiceError):
     """Raised when the DefaultContextValidator rejects an assembled context."""
+
     def __init__(self, errors: list[str]) -> None:
         detail = "; ".join(errors)
         super().__init__(operation="context_validation", detail=detail)
         self.errors = errors
 
+
+class InvalidStateTransitionError(BizOSError):
+    """Raised when an invalid state transition is attempted."""
+
+    def __init__(
+        self, resource: str, current_status: str, target_status: str, allowed: list[str]
+    ) -> None:
+        super().__init__(
+            message=f"Invalid {resource} transition: {current_status} -> {target_status}",
+            detail=f"Allowed next states from {current_status} are: {allowed}",
+        )
+        self.resource = resource
+        self.current_status = current_status
+        self.target_status = target_status
+        self.allowed = allowed
+
+
 class ContextDependencyCycleError(BizOSError):
     """Raised when a circular provider dependency is registered."""
+
     def __init__(self, cycle: list[str]) -> None:
         cycle_str = " → ".join(cycle)
         super().__init__(
@@ -355,8 +378,10 @@ class ContextDependencyCycleError(BizOSError):
         )
         self.cycle = cycle
 
+
 class ProviderNotRegisteredError(BizOSError):
     """Raised when a requested ContextSource has no registered provider."""
+
     def __init__(self, source: str) -> None:
         super().__init__(
             message=f"Context provider not registered: {source}",
@@ -367,12 +392,13 @@ class ProviderNotRegisteredError(BizOSError):
         )
         self.source = source
 
+
 class ConversationNotFoundError(NotFoundError):
     """Raised when a conversation thread or turn lookup fails."""
+
     def __init__(self, thread_id: str) -> None:
         super().__init__(
             message=f"Conversation thread not found: {thread_id}",
             detail=f"No conversation thread exists with ID '{thread_id}'.",
         )
         self.thread_id = thread_id
-

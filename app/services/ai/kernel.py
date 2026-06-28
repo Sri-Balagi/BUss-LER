@@ -4,7 +4,14 @@ import json
 
 import structlog
 
-from app.models.ai import AIRequest, AIResponse, EmbeddingRequest, EmbeddingResponse, ClassifyRequest, ClassifyResponse
+from app.models.ai import (
+    AIRequest,
+    AIResponse,
+    EmbeddingRequest,
+    EmbeddingResponse,
+    ClassifyRequest,
+    ClassifyResponse,
+)
 from app.services.ai.prompts import PromptManager
 from app.services.ai.router import ProviderRouter
 
@@ -95,7 +102,7 @@ class AIKernel(AbstractAIKernel):
 
     async def generate(self, request: AIRequest) -> AIResponse:
         provider = self._router.get_active_provider()
-        
+
         # 1. Resolve prompt
         resolved_prompt = self._prompt_manager.resolve(
             request.prompt_id, request.version, request.context
@@ -119,7 +126,7 @@ class AIKernel(AbstractAIKernel):
 
     async def embed(self, request: EmbeddingRequest) -> EmbeddingResponse:
         provider = self._router.get_active_provider()
-        
+
         response = await provider.embed(request)
 
         logger.info(
@@ -139,7 +146,7 @@ class AIKernel(AbstractAIKernel):
         request = AIRequest(
             prompt_id="memory_summarization",
             version="v1",
-            context={"memory_content": text}
+            context={"memory_content": text},
         )
         response = await self.generate(request)
         return response.content
@@ -156,7 +163,9 @@ class AIKernel(AbstractAIKernel):
 
         # Resolve the classification prompt
         resolved_prompt = self._prompt_manager.resolve(
-            request.prompt_id, request.version, {"content": request.content, **request.context}
+            request.prompt_id,
+            request.version,
+            {"content": request.content, **request.context},
         )
 
         # Build a generate request using the classification prompt

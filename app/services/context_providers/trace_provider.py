@@ -41,15 +41,17 @@ class TraceContextProvider(AbstractContextProvider):
                     confidence=1.0,
                     citations=[str(trace.id)],
                 )
-                items.append(ContextItem(
-                    item_id=uuid4(),
-                    source=ContextSource.TRACE,
-                    priority=ContextPriority.BACKGROUND,
-                    content=content,
-                    domain_object_id=trace.id,
-                    token_estimate=len(content) // 4,
-                    provenance=prov,
-                ))
+                items.append(
+                    ContextItem(
+                        item_id=uuid4(),
+                        source=ContextSource.TRACE,
+                        priority=ContextPriority.BACKGROUND,
+                        content=content,
+                        domain_object_id=trace.id,
+                        token_estimate=len(content) // 4,
+                        provenance=prov,
+                    )
+                )
         except Exception as exc:
             logger.warning("TraceContextProvider failed", error=str(exc))
 

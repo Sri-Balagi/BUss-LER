@@ -25,9 +25,9 @@ class AbstractContextProvider(ABC):
     @abstractmethod
     async def provide(
         self,
-        ctx,                  # OperationContext
+        ctx,  # OperationContext
         twin_id: UUID,
-        policy,               # ContextPolicy
+        policy,  # ContextPolicy
     ):
         """Fetch context from the underlying service and return a ContextSection."""
         pass

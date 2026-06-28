@@ -16,12 +16,9 @@ from app.models.enums import (
     ConstraintType,
     ConversationRole,
     ConversationStatus,
-    EmbeddingStatus,
     EntityType,
     GoalStatus,
     GoalType,
-    MemoryCategory,
-    MemorySource,
     OutcomeVerdict,
     ResourceType,
 )
@@ -145,7 +142,6 @@ class Constraint(DomainBaseModel):
     metadata: dict
     created_at: datetime
     updated_at: datetime
-
 
 
 # =============================================================================

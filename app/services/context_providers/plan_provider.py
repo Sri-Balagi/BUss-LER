@@ -37,15 +37,17 @@ class PlanContextProvider(AbstractContextProvider):
                     confidence=1.0,
                     citations=[str(plan.id)],
                 )
-                items.append(ContextItem(
-                    item_id=uuid4(),
-                    source=ContextSource.PLAN,
-                    priority=ContextPriority.HIGH,
-                    content=content,
-                    domain_object_id=plan.id,
-                    token_estimate=len(content) // 4,
-                    provenance=prov,
-                ))
+                items.append(
+                    ContextItem(
+                        item_id=uuid4(),
+                        source=ContextSource.PLAN,
+                        priority=ContextPriority.HIGH,
+                        content=content,
+                        domain_object_id=plan.id,
+                        token_estimate=len(content) // 4,
+                        provenance=prov,
+                    )
+                )
         except Exception as exc:
             logger.warning("PlanContextProvider failed", error=str(exc))
 

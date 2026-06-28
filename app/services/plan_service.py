@@ -23,7 +23,6 @@ logger = structlog.get_logger(__name__)
 
 
 class AbstractPlanService(ABC):
-
     @abstractmethod
     async def get_plan(self, ctx: OperationContext, plan_id: UUID) -> Plan:
         pass
@@ -41,12 +40,13 @@ class AbstractPlanService(ABC):
         pass
 
     @abstractmethod
-    async def update_plan_status(self, ctx: OperationContext, cmd: UpdatePlanStatusCommand) -> Plan:
+    async def update_plan_status(
+        self, ctx: OperationContext, cmd: UpdatePlanStatusCommand
+    ) -> Plan:
         pass
 
 
 class PlanService(AbstractPlanService):
-
     def __init__(self, repository: AbstractPlanRepository, event_bus: EventBus) -> None:
         self._repository = repository
         self._event_bus = event_bus
@@ -68,15 +68,21 @@ class PlanService(AbstractPlanService):
         log = logger.bind(correlation_id=ctx.correlation_id, twin_id=str(twin_id))
         log.info("Listing plans")
         return await self._repository.list_by_twin(
-            twin_id=twin_id, goal_id=goal_id, intent_id=intent_id, limit=limit, offset=offset
+            twin_id=twin_id,
+            goal_id=goal_id,
+            intent_id=intent_id,
+            limit=limit,
+            offset=offset,
         )
 
-    async def update_plan_status(self, ctx: OperationContext, cmd: UpdatePlanStatusCommand) -> Plan:
+    async def update_plan_status(
+        self, ctx: OperationContext, cmd: UpdatePlanStatusCommand
+    ) -> Plan:
         log = logger.bind(correlation_id=ctx.correlation_id, plan_id=str(cmd.plan_id))
         log.info("Updating plan status", target=cmd.target_status.value)
 
         plan = await self._repository.get_by_id(cmd.plan_id)
-        
+
         new_status = PlanStateMachine.transition(
             plan_id=plan.id,
             current_status=plan.status,

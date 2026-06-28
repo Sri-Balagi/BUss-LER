@@ -25,7 +25,6 @@ from app.api.v1.dependencies import (
 )
 from app.models.commands import GenerateRecommendationsCommand
 from app.models.enums import RecommendationStatus
-from app.repositories.recommendation_repository import AbstractRecommendationRepository
 from app.core.context import OperationContext
 from app.services.recommendation_engine import AbstractRecommendationEngine
 
@@ -62,14 +61,16 @@ async def generate_recommendations(
     twin_id: uuid.UUID,
     body: GenerateRecommendationsRequest,
     ctx: OperationContext = Depends(get_operation_context),
-    recommendation_engine: AbstractRecommendationEngine = Depends(get_recommendation_engine),
+    recommendation_engine: AbstractRecommendationEngine = Depends(
+        get_recommendation_engine
+    ),
 ) -> PaginatedRecommendationResponse:
     cmd = GenerateRecommendationsCommand(
         twin_id=twin_id,
         intent_id=body.intent_id,
     )
     result = await recommendation_engine.generate_recommendations(ctx, cmd)
-    
+
     items = []
     for rec in result.recommendations:
         mapped = _map_recommendation(rec)
@@ -86,6 +87,7 @@ async def generate_recommendations(
 
 
 from app.services.recommendation_service import AbstractRecommendationService
+
 
 @router.get(
     "/twins/{twin_id}/recommendations",
@@ -137,9 +139,9 @@ async def update_recommendation_status(
     rec_service: AbstractRecommendationService = Depends(get_recommendation_service),
 ) -> RecommendationResponse:
     from app.models.commands import UpdateRecommendationStatusCommand
+
     cmd = UpdateRecommendationStatusCommand(
-        recommendation_id=recommendation_id,
-        target_status=body.target_status
+        recommendation_id=recommendation_id, target_status=body.target_status
     )
     updated = await rec_service.update_recommendation_status(ctx, cmd)
     return _map_recommendation(updated)

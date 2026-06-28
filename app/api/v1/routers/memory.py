@@ -1,5 +1,4 @@
 import uuid
-from typing import Dict, Any
 
 from fastapi import APIRouter, Depends, Query, status
 
@@ -18,7 +17,11 @@ from app.api.v1.dependencies import (
     check_rate_limit,
     audit_log_request,
 )
-from app.models.commands import CreateMemoryCommand, DeleteMemoryCommand, RestoreMemoryCommand
+from app.models.commands import (
+    CreateMemoryCommand,
+    DeleteMemoryCommand,
+    RestoreMemoryCommand,
+)
 from app.models.queries import MemorySearchQuery
 from app.services.memory_service import MemoryService
 from app.core.context import OperationContext
@@ -73,10 +76,10 @@ async def list_memories(
     ctx: OperationContext = Depends(get_operation_context),
 ) -> PaginatedMemoryResponse:
     """List memories."""
-    # We will need a list_memories method on the service! 
+    # We will need a list_memories method on the service!
     # Let's map this directly to the metadata repo for now, OR better, through the service.
     # The prompt implies retrieving paginated DTOs via the service.
-    # The service might need a `list_memories` method. 
+    # The service might need a `list_memories` method.
     # For now, assume it exists or we will implement it.
     result = await service.list_memories(
         ctx=ctx,
@@ -86,14 +89,14 @@ async def list_memories(
         offset=offset,
         include_deleted=include_deleted,
     )
-    
+
     items = [MemoryResponse(**m.model_dump()) for m in result.items]
-    
+
     return PaginatedMemoryResponse(
         items=items,
         total_count=result.total_count,
         limit=result.limit,
-        offset=result.offset
+        offset=result.offset,
     )
 
 
@@ -192,16 +195,16 @@ async def query_memory(
         min_importance=request.min_importance,
     )
     result = await service.search_memories(ctx, query)
-    
+
     items = []
     for item in result.items:
         items.append(
             MemorySearchResponseItem(
                 memory=MemoryResponse(**item.memory.model_dump()),
-                similarity_score=item.similarity_score
+                similarity_score=item.similarity_score,
             )
         )
-        
+
     return MemorySearchResponse(
         items=items,
         total_count=result.total_count,

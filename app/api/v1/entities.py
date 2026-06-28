@@ -89,7 +89,7 @@ async def delete_entity(
     entity_service: EntityService = Depends(get_entity_service),
 ) -> None:
     """Soft-delete an entity.
-    
+
     This also logically deactivates its associated Digital Twin.
     """
     await entity_service.delete(entity_id)

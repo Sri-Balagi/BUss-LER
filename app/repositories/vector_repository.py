@@ -1,6 +1,6 @@
 """Vector Repository Module.
 
-Defines the abstract interface for all vector repositories and 
+Defines the abstract interface for all vector repositories and
 implements the specific MemoryVectorRepository for Qdrant persistence.
 """
 
@@ -78,7 +78,7 @@ class MemoryVectorRepository(AbstractVectorRepository):
             )
             if not result:
                 return None
-                
+
             record = result[0]
             return MemoryVectorPoint(
                 id=UUID(record.id),
@@ -121,7 +121,7 @@ class MemoryVectorRepository(AbstractVectorRepository):
                 with_payload=True,
                 with_vectors=True,
             )
-            
+
             points = []
             for hit in results.points:
                 points.append(
@@ -133,6 +133,6 @@ class MemoryVectorRepository(AbstractVectorRepository):
                     )
                 )
             return points
-            
+
         except Exception as e:
             raise VectorDatabaseError(operation="search", detail=str(e))

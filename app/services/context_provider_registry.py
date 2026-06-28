@@ -28,7 +28,7 @@ class RegistrationEntry:
 
     def __init__(
         self,
-        provider,                             # AbstractContextProvider (typed at runtime)
+        provider,  # AbstractContextProvider (typed at runtime)
         metadata: ProviderMetadata,
         freshness_policy: ContextFreshnessPolicy,
         retry_config: ProviderRetryConfig,

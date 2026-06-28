@@ -12,10 +12,16 @@ from app.models.schemas import DomainBaseModel
 class MemoryBase(DomainBaseModel):
     """Base Memory schema with common attributes."""
 
-    title: str = Field(..., max_length=255, description="Human-readable title for UI & debugging.")
+    title: str = Field(
+        ..., max_length=255, description="Human-readable title for UI & debugging."
+    )
     content: str = Field(..., description="The actual memory text.")
-    summary: Optional[str] = Field(None, description="AI-generated summary, populated asynchronously.")
-    memory_category: MemoryCategory = Field(..., description="Business-oriented classification.")
+    summary: Optional[str] = Field(
+        None, description="AI-generated summary, populated asynchronously."
+    )
+    memory_category: MemoryCategory = Field(
+        ..., description="Business-oriented classification."
+    )
     source: MemorySource = Field(..., description="The origin of the memory.")
     importance: Decimal = Field(
         default=Decimal("0.50"),
@@ -30,9 +36,13 @@ class MemoryBase(DomainBaseModel):
         description="Status of the vector embedding generation.",
     )
     embedding_model: Optional[str] = Field(
-        None, max_length=255, description="Model tracking for the embedding (e.g., gemini-1.5-pro)."
+        None,
+        max_length=255,
+        description="Model tracking for the embedding (e.g., gemini-1.5-pro).",
     )
-    metadata: Dict[str, Any] = Field(default_factory=dict, description="Schemaless structured metadata.")
+    metadata: Dict[str, Any] = Field(
+        default_factory=dict, description="Schemaless structured metadata."
+    )
 
 
 class MemoryCreate(MemoryBase):
@@ -55,9 +65,15 @@ class MemoryUpdate(DomainBaseModel):
         decimal_places=2,
         description="Updated importance score.",
     )
-    embedding_status: Optional[EmbeddingStatus] = Field(None, description="Updated embedding status.")
-    embedding_model: Optional[str] = Field(None, max_length=255, description="Updated embedding model.")
-    metadata: Optional[Dict[str, Any]] = Field(None, description="Updated structured metadata.")
+    embedding_status: Optional[EmbeddingStatus] = Field(
+        None, description="Updated embedding status."
+    )
+    embedding_model: Optional[str] = Field(
+        None, max_length=255, description="Updated embedding model."
+    )
+    metadata: Optional[Dict[str, Any]] = Field(
+        None, description="Updated structured metadata."
+    )
 
 
 class Memory(MemoryBase):
@@ -72,21 +88,23 @@ class Memory(MemoryBase):
 
 class MemorySearchResult(DomainBaseModel):
     """A memory result decorated with semantic similarity."""
-    
+
     memory: Memory
-    similarity_score: float = Field(..., description="Cosine similarity score (0.0 to 1.0)")
+    similarity_score: float = Field(
+        ..., description="Cosine similarity score (0.0 to 1.0)"
+    )
 
 
 class MemorySearchResults(DomainBaseModel):
     """Wrapper for multiple search results."""
-    
+
     items: list[MemorySearchResult]
     total_count: int
 
 
 class PaginatedMemories(DomainBaseModel):
     """Pagination wrapper for Memory listings."""
-    
+
     items: list[Memory]
     total_count: int
     limit: int

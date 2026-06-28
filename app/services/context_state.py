@@ -17,12 +17,16 @@ from app.models.exceptions import InvalidStateTransitionError
 
 # Allowed transitions: current_status → set of valid next statuses
 _ALLOWED_TRANSITIONS: dict[ContextStatus, set[ContextStatus]] = {
-    ContextStatus.BUILDING:  {ContextStatus.ASSEMBLED, ContextStatus.EXPIRED},
-    ContextStatus.ASSEMBLED: {ContextStatus.OPTIMIZED, ContextStatus.CONSUMED, ContextStatus.EXPIRED},
+    ContextStatus.BUILDING: {ContextStatus.ASSEMBLED, ContextStatus.EXPIRED},
+    ContextStatus.ASSEMBLED: {
+        ContextStatus.OPTIMIZED,
+        ContextStatus.CONSUMED,
+        ContextStatus.EXPIRED,
+    },
     ContextStatus.OPTIMIZED: {ContextStatus.CONSUMED, ContextStatus.EXPIRED},
-    ContextStatus.CONSUMED:  {ContextStatus.ARCHIVED, ContextStatus.EXPIRED},
-    ContextStatus.EXPIRED:   {ContextStatus.ARCHIVED},
-    ContextStatus.ARCHIVED:  set(),   # terminal
+    ContextStatus.CONSUMED: {ContextStatus.ARCHIVED, ContextStatus.EXPIRED},
+    ContextStatus.EXPIRED: {ContextStatus.ARCHIVED},
+    ContextStatus.ARCHIVED: set(),  # terminal
 }
 
 

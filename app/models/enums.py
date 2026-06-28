@@ -315,9 +315,9 @@ class ContextPriority(str, Enum):
 class RefreshStrategy(str, Enum):
     """Cache refresh strategy for a context provider."""
 
-    LAZY = "lazy"       # Refresh only on cache miss
-    EAGER = "eager"     # Refresh in background before expiry
-    FORCED = "forced"   # Always re-fetch, bypass cache
+    LAZY = "lazy"  # Refresh only on cache miss
+    EAGER = "eager"  # Refresh in background before expiry
+    FORCED = "forced"  # Always re-fetch, bypass cache
 
 
 # =============================================================================
@@ -440,6 +440,6 @@ class ContextPriority(str, Enum):
 class RefreshStrategy(str, Enum):
     """Cache refresh strategy for a context provider."""
 
-    LAZY = "lazy"       # Refresh only on cache miss
-    EAGER = "eager"     # Refresh in background before expiry
-    FORCED = "forced"   # Always re-fetch, bypass cache
+    LAZY = "lazy"  # Refresh only on cache miss
+    EAGER = "eager"  # Refresh in background before expiry
+    FORCED = "forced"  # Always re-fetch, bypass cache

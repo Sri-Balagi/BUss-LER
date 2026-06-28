@@ -24,7 +24,7 @@ logger = structlog.get_logger()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifecycle manager for the FastAPI application.
-    
+
     Handles startup and shutdown events for external service connections.
     """
     settings = get_settings()
@@ -38,10 +38,10 @@ async def lifespan(app: FastAPI):
         # Initialize Qdrant client and collections
         logger.info("Initializing Qdrant client and collections")
         await QdrantService.initialize_collections(settings)
-        
+
         logger.info("Startup complete")
         yield
-        
+
     finally:
         # Graceful shutdown
         logger.info("Shutting down BizOS API")
@@ -51,7 +51,7 @@ async def lifespan(app: FastAPI):
 def create_app() -> FastAPI:
     """Factory function to create the FastAPI application instance."""
     settings = get_settings()
-    
+
     app = FastAPI(
         title="BizOS API",
         description="AI Operating System for Entities",

@@ -13,7 +13,6 @@ logger = structlog.get_logger(__name__)
 
 
 class RecommendationContextProvider(AbstractContextProvider):
-
     def __init__(self, recommendation_service) -> None:
         self._recommendation_service = recommendation_service
 
@@ -36,15 +35,17 @@ class RecommendationContextProvider(AbstractContextProvider):
                     confidence=0.8,
                     citations=[str(rec.id)],
                 )
-                items.append(ContextItem(
-                    item_id=uuid4(),
-                    source=ContextSource.RECOMMENDATION,
-                    priority=ContextPriority.MEDIUM,
-                    content=content,
-                    domain_object_id=rec.id,
-                    token_estimate=len(content) // 4,
-                    provenance=prov,
-                ))
+                items.append(
+                    ContextItem(
+                        item_id=uuid4(),
+                        source=ContextSource.RECOMMENDATION,
+                        priority=ContextPriority.MEDIUM,
+                        content=content,
+                        domain_object_id=rec.id,
+                        token_estimate=len(content) // 4,
+                        provenance=prov,
+                    )
+                )
         except Exception as exc:
             logger.warning("RecommendationContextProvider failed", error=str(exc))
 

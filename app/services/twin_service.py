@@ -8,7 +8,7 @@ from uuid import UUID
 
 import structlog
 
-from app.models.exceptions import TwinNotFoundError, ServiceError, RepositoryError
+from app.models.exceptions import ServiceError, RepositoryError
 from app.models.twin import (
     ChangeType,
     DigitalTwin,
@@ -99,7 +99,10 @@ class TwinService:
                 changed_by="system",
                 changed_fields=["state", "metadata"],
                 old_values=None,
-                new_values={"state": twin.state, "metadata": twin.metadata.model_dump()},
+                new_values={
+                    "state": twin.state,
+                    "metadata": twin.metadata.model_dump(),
+                },
             )
         except RepositoryError as exc:
             # Compensating Action (Rollback)
@@ -109,13 +112,13 @@ class TwinService:
                 error=str(exc),
             )
             await self._twin_repo.delete(twin.id)
-            raise ServiceError("twin.init", "Failed to initialize twin state. Rolled back.") from exc
+            raise ServiceError(
+                "twin.init", "Failed to initialize twin state. Rolled back."
+            ) from exc
 
         return twin
 
-    async def update_twin(
-        self, twin_id: UUID, data: DigitalTwinUpdate
-    ) -> DigitalTwin:
+    async def update_twin(self, twin_id: UUID, data: DigitalTwinUpdate) -> DigitalTwin:
         """Update a twin atomically.
 
         This delegates entirely to the TwinRepository RPC function,

@@ -11,11 +11,10 @@ Responsibilities:
 Table: intents
 """
 
-import json
 import time
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
-from typing import List, Optional
+from typing import Optional
 from uuid import UUID
 
 import structlog
@@ -94,13 +93,17 @@ class IntentRepository(AbstractIntentRepository):
             insert_data["metadata"] = data.metadata
 
         try:
-            response = await self._client.table(self._table_name).insert(insert_data).execute()
+            response = (
+                await self._client.table(self._table_name).insert(insert_data).execute()
+            )
         except Exception as exc:
             logger.error("Failed to create intent", error=str(exc))
             raise RepositoryError("intent.create", str(exc)) from exc
 
         duration_ms = (time.time() - start) * 1000
-        logger.info("Created intent", intent_id=response.data[0]["id"], latency_ms=duration_ms)
+        logger.info(
+            "Created intent", intent_id=response.data[0]["id"], latency_ms=duration_ms
+        )
         return self._deserialize(response.data[0])
 
     async def get_by_id(self, intent_id: UUID) -> Intent:
@@ -113,7 +116,9 @@ class IntentRepository(AbstractIntentRepository):
                 .execute()
             )
         except Exception as exc:
-            logger.error("Failed to fetch intent", intent_id=str(intent_id), error=str(exc))
+            logger.error(
+                "Failed to fetch intent", intent_id=str(intent_id), error=str(exc)
+            )
             raise RepositoryError("intent.get_by_id", str(exc)) from exc
 
         if not response.data:
@@ -146,7 +151,11 @@ class IntentRepository(AbstractIntentRepository):
             if intent_type:
                 query = query.eq("intent_type", intent_type.value)
 
-            response = await query.order("created_at", desc=True).range(offset, offset + limit - 1).execute()
+            response = (
+                await query.order("created_at", desc=True)
+                .range(offset, offset + limit - 1)
+                .execute()
+            )
         except Exception as exc:
             logger.error("Failed to list intents", twin_id=str(twin_id), error=str(exc))
             raise RepositoryError("intent.list_by_twin", str(exc)) from exc
@@ -154,8 +163,15 @@ class IntentRepository(AbstractIntentRepository):
         items = [self._deserialize(row) for row in response.data]
         total = response.count if response.count is not None else len(items)
         duration_ms = (time.time() - start) * 1000
-        logger.debug("Listed intents", twin_id=str(twin_id), count=len(items), latency_ms=duration_ms)
-        return PaginatedIntents(items=items, total_count=total, limit=limit, offset=offset)
+        logger.debug(
+            "Listed intents",
+            twin_id=str(twin_id),
+            count=len(items),
+            latency_ms=duration_ms,
+        )
+        return PaginatedIntents(
+            items=items, total_count=total, limit=limit, offset=offset
+        )
 
     async def update(self, intent_id: UUID, data: IntentUpdate) -> Intent:
         start = time.time()
@@ -169,11 +185,17 @@ class IntentRepository(AbstractIntentRepository):
         # IntentAnalysis serialization
         if "analysis" in update_data and update_data["analysis"] is not None:
             analysis_obj = data.analysis
-            update_data["analysis"] = analysis_obj.model_dump() if analysis_obj else None
+            update_data["analysis"] = (
+                analysis_obj.model_dump() if analysis_obj else None
+            )
         # Datetime serialization
-        if "classified_at" in update_data and isinstance(update_data["classified_at"], datetime):
+        if "classified_at" in update_data and isinstance(
+            update_data["classified_at"], datetime
+        ):
             update_data["classified_at"] = update_data["classified_at"].isoformat()
-        if "fulfilled_at" in update_data and isinstance(update_data["fulfilled_at"], datetime):
+        if "fulfilled_at" in update_data and isinstance(
+            update_data["fulfilled_at"], datetime
+        ):
             update_data["fulfilled_at"] = update_data["fulfilled_at"].isoformat()
 
         if not update_data:
@@ -187,7 +209,9 @@ class IntentRepository(AbstractIntentRepository):
                 .execute()
             )
         except Exception as exc:
-            logger.error("Failed to update intent", intent_id=str(intent_id), error=str(exc))
+            logger.error(
+                "Failed to update intent", intent_id=str(intent_id), error=str(exc)
+            )
             raise RepositoryError("intent.update", str(exc)) from exc
 
         if not response.data:
@@ -208,14 +232,18 @@ class IntentRepository(AbstractIntentRepository):
                 .execute()
             )
         except Exception as exc:
-            logger.error("Failed to soft delete intent", intent_id=str(intent_id), error=str(exc))
+            logger.error(
+                "Failed to soft delete intent", intent_id=str(intent_id), error=str(exc)
+            )
             raise RepositoryError("intent.soft_delete", str(exc)) from exc
 
         if not response.data:
             raise IntentNotFoundError(str(intent_id))
 
         duration_ms = (time.time() - start) * 1000
-        logger.info("Soft deleted intent", intent_id=str(intent_id), latency_ms=duration_ms)
+        logger.info(
+            "Soft deleted intent", intent_id=str(intent_id), latency_ms=duration_ms
+        )
 
     async def health_check(self) -> dict:
         status = {"status": "unhealthy", "database": False, "table": False}
@@ -231,6 +259,7 @@ class IntentRepository(AbstractIntentRepository):
     def _deserialize(row: dict) -> Intent:
         """Map raw Supabase row dict to Intent domain model."""
         from app.models.intent import IntentAnalysis
+
         # Deserialize nested JSONB analysis
         if row.get("analysis") and isinstance(row["analysis"], dict):
             row["analysis"] = IntentAnalysis.model_validate(row["analysis"])

@@ -10,6 +10,7 @@ class OperationContext(DomainBaseModel):
     Encapsulates operational metadata passed across system layers.
     Enables distributed tracing, audit logging, and cleaner service signatures.
     """
+
     request_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     correlation_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     twin_id: Optional[uuid.UUID] = Field(default=None)

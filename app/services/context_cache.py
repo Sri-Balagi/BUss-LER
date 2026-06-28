@@ -15,7 +15,6 @@ from typing import Dict, Optional, Tuple
 import structlog
 
 from app.models.enterprise_context import EnterpriseContext
-from app.models.enums import ContextSource
 from app.services.context_freshness import ContextFreshnessPolicy
 
 logger = structlog.get_logger(__name__)
@@ -90,6 +89,7 @@ class MemoryContextCache(AbstractContextCache):
         ttl_seconds: int,
     ) -> None:
         from datetime import timedelta
+
         now = datetime.now(timezone.utc)
         expires_at = now + timedelta(seconds=ttl_seconds)
         self._store[cache_key] = (context, now, expires_at)
@@ -112,6 +112,7 @@ class MemoryContextCache(AbstractContextCache):
         if event_bus is not None:
             try:
                 from app.models.events import ContextInvalidatedEvent
+
                 event = ContextInvalidatedEvent(
                     correlation_id=cache_key,
                     cache_key=cache_key,
@@ -120,7 +121,9 @@ class MemoryContextCache(AbstractContextCache):
                 )
                 event_bus.publish(event)
             except Exception as exc:
-                logger.warning("Failed to publish ContextInvalidatedEvent", error=str(exc))
+                logger.warning(
+                    "Failed to publish ContextInvalidatedEvent", error=str(exc)
+                )
 
     async def is_fresh(
         self,
@@ -147,16 +150,34 @@ class RedisContextCache(AbstractContextCache):
     """
 
     async def get(self, cache_key: str) -> Optional[EnterpriseContext]:
-        raise NotImplementedError("RedisContextCache is not implemented in Milestone 4.")
+        raise NotImplementedError(
+            "RedisContextCache is not implemented in Milestone 4."
+        )
 
-    async def set(self, cache_key: str, context: EnterpriseContext, ttl_seconds: int) -> None:
-        raise NotImplementedError("RedisContextCache is not implemented in Milestone 4.")
+    async def set(
+        self, cache_key: str, context: EnterpriseContext, ttl_seconds: int
+    ) -> None:
+        raise NotImplementedError(
+            "RedisContextCache is not implemented in Milestone 4."
+        )
 
-    async def invalidate(self, cache_key: str, twin_id, reason: str = "manual_invalidation", event_bus=None) -> None:
-        raise NotImplementedError("RedisContextCache is not implemented in Milestone 4.")
+    async def invalidate(
+        self,
+        cache_key: str,
+        twin_id,
+        reason: str = "manual_invalidation",
+        event_bus=None,
+    ) -> None:
+        raise NotImplementedError(
+            "RedisContextCache is not implemented in Milestone 4."
+        )
 
-    async def is_fresh(self, cache_key: str, freshness_policy: ContextFreshnessPolicy) -> bool:
-        raise NotImplementedError("RedisContextCache is not implemented in Milestone 4.")
+    async def is_fresh(
+        self, cache_key: str, freshness_policy: ContextFreshnessPolicy
+    ) -> bool:
+        raise NotImplementedError(
+            "RedisContextCache is not implemented in Milestone 4."
+        )
 
 
 @staticmethod

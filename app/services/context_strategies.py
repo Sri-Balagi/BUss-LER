@@ -38,10 +38,10 @@ logger = structlog.get_logger(__name__)
 # =============================================================================
 
 _PRIORITY_WEIGHTS: dict[ContextPriority, float] = {
-    ContextPriority.CRITICAL:   1.0,
-    ContextPriority.HIGH:       0.75,
-    ContextPriority.MEDIUM:     0.50,
-    ContextPriority.LOW:        0.25,
+    ContextPriority.CRITICAL: 1.0,
+    ContextPriority.HIGH: 0.75,
+    ContextPriority.MEDIUM: 0.50,
+    ContextPriority.LOW: 0.25,
     ContextPriority.BACKGROUND: 0.05,
 }
 
@@ -58,7 +58,7 @@ _SECTION_PRIORITY_ORDER: list[ContextSource] = [
     ContextSource.EXTERNAL,
 ]
 
-_RECENCY_DECAY_LAMBDA = 0.05   # e^(-λ · age_hours)
+_RECENCY_DECAY_LAMBDA = 0.05  # e^(-λ · age_hours)
 
 
 # =============================================================================
@@ -112,17 +112,15 @@ class DefaultContextRanker(AbstractContextRanker):
                 updated_provenance = item.provenance.model_copy(
                     update={"ranking_score": score}
                 )
-                updated_item = item.model_copy(update={"provenance": updated_provenance})
+                updated_item = item.model_copy(
+                    update={"provenance": updated_provenance}
+                )
                 updated_items.append(updated_item)
 
-            ranked_sections.append(
-                section.model_copy(update={"items": updated_items})
-            )
+            ranked_sections.append(section.model_copy(update={"items": updated_items}))
 
         # Sort sections by priority order
-        ranked_sections.sort(
-            key=lambda s: self._section_order(s.source)
-        )
+        ranked_sections.sort(key=lambda s: self._section_order(s.source))
         return ranked_sections
 
     @staticmethod
@@ -210,10 +208,12 @@ class DefaultContextCompressor(AbstractContextCompressor):
             collapsed_items = self._collapse_low_priority(deduped_items)
             new_token_estimate = sum(i.token_estimate for i in collapsed_items)
             compressed.append(
-                section.model_copy(update={
-                    "items": collapsed_items,
-                    "token_estimate": new_token_estimate,
-                })
+                section.model_copy(
+                    update={
+                        "items": collapsed_items,
+                        "token_estimate": new_token_estimate,
+                    }
+                )
             )
 
         return compressed
@@ -243,12 +243,15 @@ class DefaultContextCompressor(AbstractContextCompressor):
             # Keep highest ranked; compress the rest into its provenance
             best = max(group_items, key=lambda i: i.provenance.ranking_score)
             origin_ids = [i.item_id for i in group_items if i.item_id != best.item_id]
-            updated_prov = best.provenance.model_copy(update={
-                "compression_origin": list(best.provenance.compression_origin) + origin_ids,
-                "compression_reason": (
-                    f"Deduplicated {len(group_items)} items with identical semantic fingerprint."
-                ),
-            })
+            updated_prov = best.provenance.model_copy(
+                update={
+                    "compression_origin": list(best.provenance.compression_origin)
+                    + origin_ids,
+                    "compression_reason": (
+                        f"Deduplicated {len(group_items)} items with identical semantic fingerprint."
+                    ),
+                }
+            )
             result.append(best.model_copy(update={"provenance": updated_prov}))
 
         return result
@@ -394,8 +397,10 @@ class DefaultContextWindowBuilder(AbstractContextWindowBuilder):
         if not packed_items:
             return None, excluded, budget
 
-        packed = section.model_copy(update={
-            "items": packed_items,
-            "token_estimate": sum(i.token_estimate for i in packed_items),
-        })
+        packed = section.model_copy(
+            update={
+                "items": packed_items,
+                "token_estimate": sum(i.token_estimate for i in packed_items),
+            }
+        )
         return packed, excluded, budget

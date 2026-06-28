@@ -50,15 +50,17 @@ class GoalContextProvider(AbstractContextProvider):
                     confidence=1.0,
                     citations=[str(goal.id)],
                 )
-                items.append(ContextItem(
-                    item_id=uuid4(),
-                    source=ContextSource.GOAL,
-                    priority=ctx_priority,
-                    content=content,
-                    domain_object_id=goal.id,
-                    token_estimate=token_est,
-                    provenance=prov,
-                ))
+                items.append(
+                    ContextItem(
+                        item_id=uuid4(),
+                        source=ContextSource.GOAL,
+                        priority=ctx_priority,
+                        content=content,
+                        domain_object_id=goal.id,
+                        token_estimate=token_est,
+                        provenance=prov,
+                    )
+                )
         except Exception as exc:
             logger.warning("GoalContextProvider failed", error=str(exc))
 

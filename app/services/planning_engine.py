@@ -14,7 +14,6 @@ Validation pipeline:
 
 import time
 from abc import ABC, abstractmethod
-from typing import Optional
 from uuid import UUID
 
 import structlog
@@ -24,10 +23,9 @@ from app.events.bus import EventBus
 from app.models.ai import ClassifyRequest
 from app.models.cognitive_trace import CognitiveTraceCreate, CognitiveTraceTokenUsage
 from app.models.commands import GeneratePlanCommand
-from app.models.enums import PlanStatus
 from app.models.events import PlanGeneratedEvent
 from app.models.exceptions import AIOutputValidationError, PlanGenerationError
-from app.models.plan import Plan, PlanCreate, PlanStep
+from app.models.plan import PlanCreate
 from app.models.results import GeneratePlanResult
 from app.repositories.plan_repository import AbstractPlanRepository
 from app.services.ai.kernel import AbstractAIKernel
@@ -45,9 +43,10 @@ _PROMPT_VERSION = "v1"
 
 
 class AbstractPlanningEngine(ABC):
-
     @abstractmethod
-    async def generate_plan(self, ctx: OperationContext, cmd: GeneratePlanCommand) -> GeneratePlanResult:
+    async def generate_plan(
+        self, ctx: OperationContext, cmd: GeneratePlanCommand
+    ) -> GeneratePlanResult:
         pass
 
 
@@ -70,7 +69,9 @@ class PlanningEngine(AbstractPlanningEngine):
         self._trace_service = trace_service
         self._event_bus = event_bus
 
-    async def generate_plan(self, ctx: OperationContext, cmd: GeneratePlanCommand) -> GeneratePlanResult:
+    async def generate_plan(
+        self, ctx: OperationContext, cmd: GeneratePlanCommand
+    ) -> GeneratePlanResult:
         log = logger.bind(
             correlation_id=ctx.correlation_id,
             twin_id=str(cmd.twin_id),
@@ -97,7 +98,9 @@ class PlanningEngine(AbstractPlanningEngine):
         )
 
         # Step 3: Build AI classify request
-        context_dict = PromptContextBuilder.build_from_enterprise_context(enterprise_context)
+        context_dict = PromptContextBuilder.build_from_enterprise_context(
+            enterprise_context
+        )
         context_dict["goal_title"] = goal.title if goal else "General business goal"
         context_dict["goal_description"] = goal.description or "" if goal else ""
 
@@ -142,10 +145,14 @@ class PlanningEngine(AbstractPlanningEngine):
         from app.models.enums import ContextSource
 
         def _extract_ids(source: ContextSource) -> list[UUID]:
-            section = next((s for s in enterprise_context.sections if s.source == source), None)
+            section = next(
+                (s for s in enterprise_context.sections if s.source == source), None
+            )
             if not section:
                 return []
-            return [item.domain_object_id for item in section.items if item.domain_object_id]
+            return [
+                item.domain_object_id for item in section.items if item.domain_object_id
+            ]
 
         goal_ids_used = _extract_ids(ContextSource.GOAL)
         memory_ids_used = _extract_ids(ContextSource.MEMORY)
@@ -181,7 +188,9 @@ class PlanningEngine(AbstractPlanningEngine):
             trace_result = await self._trace_service.record_operation(ctx, trace_data)
             cognitive_trace = trace_result.trace
         except Exception as trace_exc:
-            log.warning("CognitiveTrace recording failed (non-critical)", error=str(trace_exc))
+            log.warning(
+                "CognitiveTrace recording failed (non-critical)", error=str(trace_exc)
+            )
 
         # Step 9: Publish event
         event = PlanGeneratedEvent(
@@ -194,7 +203,12 @@ class PlanningEngine(AbstractPlanningEngine):
         )
         await self._event_bus.publish(event, ctx)
 
-        log.info("Plan generated", plan_id=str(plan.id), step_count=len(plan.steps), latency_ms=latency_ms)
-        return GeneratePlanResult(plan=plan, cognitive_trace=cognitive_trace, dispatched_events=1)
-
-
+        log.info(
+            "Plan generated",
+            plan_id=str(plan.id),
+            step_count=len(plan.steps),
+            latency_ms=latency_ms,
+        )
+        return GeneratePlanResult(
+            plan=plan, cognitive_trace=cognitive_trace, dispatched_events=1
+        )

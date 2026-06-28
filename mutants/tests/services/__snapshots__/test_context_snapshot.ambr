@@ -1,0 +1,40 @@
+# serializer version: 1
+# name: test_context_section_snapshot
+  dict({
+    'items': list([
+      dict({
+        'content': 'Stable business knowledge snapshot test.',
+        'content_type': 'memory',
+        'domain_object_id': '87654321-4321-8765-4321-876543210987',
+        'item_id': '12345678-1234-5678-1234-567812345678',
+        'metadata': dict({
+        }),
+        'priority': 'medium',
+        'provenance': dict({
+          'citations': list([
+            'doc_123',
+          ]),
+          'compression_origin': list([
+          ]),
+          'compression_reason': None,
+          'confidence': 0.95,
+          'provider': 'memory',
+          'ranking_score': 0.85,
+          'reasoning_metadata': dict({
+          }),
+          'retrieval_timestamp': '2025-01-01T12:00:00Z',
+          'service_name': 'test_service',
+        }),
+        'source': 'memory',
+        'token_estimate': 12,
+      }),
+    ]),
+    'metadata': dict({
+    }),
+    'priority': 'medium',
+    'retrieved_at': '2025-01-01T12:00:00Z',
+    'section_id': '12345678-1234-5678-1234-567812345678',
+    'source': 'memory',
+    'token_estimate': 12,
+  })
+# ---

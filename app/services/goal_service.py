@@ -10,7 +10,7 @@ Responsibilities:
 
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
-from typing import List, Optional
+from typing import List
 from uuid import UUID
 
 import structlog
@@ -25,8 +25,12 @@ from app.models.commands import (
     UpdateGoalStatusCommand,
 )
 from app.models.enums import GoalStatus
-from app.models.events import GoalCompletedEvent, GoalCreatedEvent, GoalStatusChangedEvent
-from app.models.goal import Goal, GoalCreate, GoalIntentLink, GoalUpdate, PaginatedGoals
+from app.models.events import (
+    GoalCompletedEvent,
+    GoalCreatedEvent,
+    GoalStatusChangedEvent,
+)
+from app.models.goal import Goal, GoalCreate, GoalUpdate, PaginatedGoals
 from app.models.queries import GoalListQuery
 from app.models.results import CreateGoalResult, LinkIntentToGoalResult
 from app.repositories.goal_repository import AbstractGoalRepository
@@ -37,9 +41,10 @@ logger = structlog.get_logger(__name__)
 
 
 class AbstractGoalService(ABC):
-
     @abstractmethod
-    async def create_goal(self, ctx: OperationContext, cmd: CreateGoalCommand) -> CreateGoalResult:
+    async def create_goal(
+        self, ctx: OperationContext, cmd: CreateGoalCommand
+    ) -> CreateGoalResult:
         pass
 
     @abstractmethod
@@ -47,7 +52,9 @@ class AbstractGoalService(ABC):
         pass
 
     @abstractmethod
-    async def list_goals(self, ctx: OperationContext, query: GoalListQuery) -> PaginatedGoals:
+    async def list_goals(
+        self, ctx: OperationContext, query: GoalListQuery
+    ) -> PaginatedGoals:
         pass
 
     @abstractmethod
@@ -55,19 +62,27 @@ class AbstractGoalService(ABC):
         pass
 
     @abstractmethod
-    async def update_progress(self, ctx: OperationContext, cmd: UpdateGoalProgressCommand) -> Goal:
+    async def update_progress(
+        self, ctx: OperationContext, cmd: UpdateGoalProgressCommand
+    ) -> Goal:
         pass
 
     @abstractmethod
-    async def update_goal_status(self, ctx: OperationContext, cmd: UpdateGoalStatusCommand) -> Goal:
+    async def update_goal_status(
+        self, ctx: OperationContext, cmd: UpdateGoalStatusCommand
+    ) -> Goal:
         pass
 
     @abstractmethod
-    async def link_intent_to_goal(self, ctx: OperationContext, cmd: LinkIntentToGoalCommand) -> LinkIntentToGoalResult:
+    async def link_intent_to_goal(
+        self, ctx: OperationContext, cmd: LinkIntentToGoalCommand
+    ) -> LinkIntentToGoalResult:
         pass
 
     @abstractmethod
-    async def get_active_goals(self, ctx: OperationContext, twin_id: UUID) -> List[Goal]:
+    async def get_active_goals(
+        self, ctx: OperationContext, twin_id: UUID
+    ) -> List[Goal]:
         pass
 
     @abstractmethod
@@ -90,7 +105,9 @@ class GoalService(AbstractGoalService):
         self._repository = repository
         self._event_bus = event_bus
 
-    async def create_goal(self, ctx: OperationContext, cmd: CreateGoalCommand) -> CreateGoalResult:
+    async def create_goal(
+        self, ctx: OperationContext, cmd: CreateGoalCommand
+    ) -> CreateGoalResult:
         log = logger.bind(correlation_id=ctx.correlation_id, twin_id=str(cmd.twin_id))
         log.info("Creating goal", title=cmd.title)
 
@@ -122,7 +139,9 @@ class GoalService(AbstractGoalService):
         log.info("Fetching goal")
         return await self._repository.get_by_id(goal_id)
 
-    async def list_goals(self, ctx: OperationContext, query: GoalListQuery) -> PaginatedGoals:
+    async def list_goals(
+        self, ctx: OperationContext, query: GoalListQuery
+    ) -> PaginatedGoals:
         log = logger.bind(correlation_id=ctx.correlation_id, twin_id=str(query.twin_id))
         log.info("Listing goals")
         return await self._repository.list_by_twin(
@@ -137,10 +156,14 @@ class GoalService(AbstractGoalService):
     async def update_goal(self, ctx: OperationContext, cmd: UpdateGoalCommand) -> Goal:
         log = logger.bind(correlation_id=ctx.correlation_id, goal_id=str(cmd.goal_id))
         log.info("Updating goal")
-        update_data = GoalUpdate(**cmd.model_dump(exclude={"goal_id"}, exclude_unset=True, exclude_none=True))
+        update_data = GoalUpdate(
+            **cmd.model_dump(exclude={"goal_id"}, exclude_unset=True, exclude_none=True)
+        )
         return await self._repository.update(cmd.goal_id, update_data)
 
-    async def update_progress(self, ctx: OperationContext, cmd: UpdateGoalProgressCommand) -> Goal:
+    async def update_progress(
+        self, ctx: OperationContext, cmd: UpdateGoalProgressCommand
+    ) -> Goal:
         log = logger.bind(correlation_id=ctx.correlation_id, goal_id=str(cmd.goal_id))
         log.info("Updating goal progress", progress=cmd.progress)
 
@@ -153,7 +176,9 @@ class GoalService(AbstractGoalService):
 
         return updated
 
-    async def update_goal_status(self, ctx: OperationContext, cmd: UpdateGoalStatusCommand) -> Goal:
+    async def update_goal_status(
+        self, ctx: OperationContext, cmd: UpdateGoalStatusCommand
+    ) -> Goal:
         log = logger.bind(correlation_id=ctx.correlation_id, goal_id=str(cmd.goal_id))
         log.info("Updating goal status", target=cmd.target_status.value)
 
@@ -169,15 +194,14 @@ class GoalService(AbstractGoalService):
         update_data = GoalUpdate(status=new_status)
         if new_status == GoalStatus.COMPLETED:
             update_data = GoalUpdate(
-                status=new_status,
-                completed_at=datetime.now(timezone.utc).isoformat()
+                status=new_status, completed_at=datetime.now(timezone.utc).isoformat()
             )
-        elif previous_status == GoalStatus.COMPLETED and new_status != GoalStatus.COMPLETED:
+        elif (
+            previous_status == GoalStatus.COMPLETED
+            and new_status != GoalStatus.COMPLETED
+        ):
             # Clear completed_at if transitioning back out of completed
-            update_data = GoalUpdate(
-                status=new_status,
-                completed_at=None
-            )
+            update_data = GoalUpdate(status=new_status, completed_at=None)
 
         updated = await self._repository.update(goal.id, update_data)
 
@@ -214,7 +238,9 @@ class GoalService(AbstractGoalService):
         link = await self._repository.link_intent(cmd.intent_id, cmd.goal_id)
         return LinkIntentToGoalResult(link=link)
 
-    async def get_active_goals(self, ctx: OperationContext, twin_id: UUID) -> List[Goal]:
+    async def get_active_goals(
+        self, ctx: OperationContext, twin_id: UUID
+    ) -> List[Goal]:
         log = logger.bind(correlation_id=ctx.correlation_id, twin_id=str(twin_id))
         log.info("Fetching active goals")
         return await self._repository.get_active_goals(twin_id)
@@ -229,6 +255,7 @@ class GoalService(AbstractGoalService):
 
     async def _complete_goal(self, ctx: OperationContext, goal: Goal) -> Goal:
         """Internal helper to mark a goal completed when progress hits 100%."""
-        from app.models.commands import UpdateGoalStatusCommand as StatusCmd
-        cmd = UpdateGoalStatusCommand(goal_id=goal.id, target_status=GoalStatus.COMPLETED)
+        cmd = UpdateGoalStatusCommand(
+            goal_id=goal.id, target_status=GoalStatus.COMPLETED
+        )
         return await self.update_goal_status(ctx, cmd)

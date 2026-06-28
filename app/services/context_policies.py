@@ -11,7 +11,7 @@ Factory methods provide pre-configured policies for common use cases.
 Future milestones extend policies rather than modifying ContextEngine.
 """
 
-from typing import List, Optional
+from typing import List
 
 from app.models.enums import ContextSource
 from app.models.schemas import DomainBaseModel
@@ -28,6 +28,7 @@ class ContextPolicy(DomainBaseModel):
     Policies are the primary control surface for the ContextEngine.
     The engine never hard-codes assembly logic — all decisions flow through policy.
     """
+
     policy_id: str
     description: str = ""
 
@@ -43,7 +44,7 @@ class ContextPolicy(DomainBaseModel):
     ranker_type: str = "default"
     compressor_type: str = "default"
     window_builder_type: str = "default"
-    
+
     # --- Reserve Configuration ---
     critical_reserve: float = 0.1
 
@@ -126,7 +127,8 @@ class ContextPolicy(DomainBaseModel):
             enabled_providers=list(ContextSource),
             required_providers=[ContextSource.GOAL, ContextSource.TWIN],
             optional_providers=[
-                s for s in ContextSource
+                s
+                for s in ContextSource
                 if s not in [ContextSource.GOAL, ContextSource.TWIN]
             ],
             token_budget=_DEFAULT_TOKEN_BUDGET,
@@ -141,7 +143,8 @@ class ContextPolicy(DomainBaseModel):
             enabled_providers=list(ContextSource),
             required_providers=[ContextSource.INTENT, ContextSource.GOAL],
             optional_providers=[
-                s for s in ContextSource
+                s
+                for s in ContextSource
                 if s not in [ContextSource.INTENT, ContextSource.GOAL]
             ],
             token_budget=_DEFAULT_TOKEN_BUDGET,

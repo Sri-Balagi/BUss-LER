@@ -14,11 +14,11 @@ Validation pipeline:
 
 import time
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List
 from uuid import UUID
 
 import structlog
-from pydantic import ValidationError, TypeAdapter
+from pydantic import ValidationError
 
 from app.events.bus import EventBus
 from app.models.ai import ClassifyRequest
@@ -44,7 +44,6 @@ _PROMPT_VERSION = "v1"
 
 
 class AbstractRecommendationEngine(ABC):
-
     @abstractmethod
     async def generate_recommendations(
         self, ctx: OperationContext, cmd: GenerateRecommendationsCommand
@@ -93,7 +92,9 @@ class RecommendationEngine(AbstractRecommendationEngine):
         )
 
         # Step 2: Build AI classify request
-        context_dict = PromptContextBuilder.build_from_enterprise_context(enterprise_context)
+        context_dict = PromptContextBuilder.build_from_enterprise_context(
+            enterprise_context
+        )
 
         classify_request = ClassifyRequest(
             prompt_id=_PROMPT_ID,
@@ -123,10 +124,14 @@ class RecommendationEngine(AbstractRecommendationEngine):
         from app.models.enums import ContextSource
 
         def _extract_ids(source: ContextSource) -> list[UUID]:
-            section = next((s for s in enterprise_context.sections if s.source == source), None)
+            section = next(
+                (s for s in enterprise_context.sections if s.source == source), None
+            )
             if not section:
                 return []
-            return [item.domain_object_id for item in section.items if item.domain_object_id]
+            return [
+                item.domain_object_id for item in section.items if item.domain_object_id
+            ]
 
         goal_ids_used = _extract_ids(ContextSource.GOAL)
         memory_ids_used = _extract_ids(ContextSource.MEMORY)
@@ -137,7 +142,7 @@ class RecommendationEngine(AbstractRecommendationEngine):
             try:
                 # Map AI response fields to RecommendationCreate
                 create_data = RecommendationCreate(
-                    title=item.get("title", f"Recommendation {i+1}"),
+                    title=item.get("title", f"Recommendation {i + 1}"),
                     body=item.get("body", ""),
                     rationale=item.get("rationale", ""),
                     confidence=self._parse_confidence(item.get("confidence", "medium")),
@@ -152,7 +157,9 @@ class RecommendationEngine(AbstractRecommendationEngine):
                         if j < len(goal_ids_used)
                     ],
                     originating_plan_id=None,
-                    trigger_context={"enterprise_context_id": str(enterprise_context.context_id)},
+                    trigger_context={
+                        "enterprise_context_id": str(enterprise_context.context_id)
+                    },
                     explainability_metadata={
                         "explainability_note": item.get("explainability_note", ""),
                         "prompt_version": f"{_PROMPT_ID}_{_PROMPT_VERSION}",
@@ -161,14 +168,18 @@ class RecommendationEngine(AbstractRecommendationEngine):
                     },
                 )
             except (ValidationError, Exception) as exc:
-                log.warning("Skipping invalid recommendation item", index=i, error=str(exc))
+                log.warning(
+                    "Skipping invalid recommendation item", index=i, error=str(exc)
+                )
                 continue
 
             rec = await self._repository.create(twin_id=cmd.twin_id, data=create_data)
             recommendations.append(rec)
 
         if not recommendations:
-            raise RecommendationGenerationError("AI produced no valid recommendations after validation.")
+            raise RecommendationGenerationError(
+                "AI produced no valid recommendations after validation."
+            )
 
         # Step 6: Record CognitiveTrace (passive)
         cognitive_trace = None
@@ -201,7 +212,9 @@ class RecommendationEngine(AbstractRecommendationEngine):
             trace_result = await self._trace_service.record_operation(ctx, trace_data)
             cognitive_trace = trace_result.trace
         except Exception as trace_exc:
-            log.warning("CognitiveTrace recording failed (non-critical)", error=str(trace_exc))
+            log.warning(
+                "CognitiveTrace recording failed (non-critical)", error=str(trace_exc)
+            )
 
         # Step 7: Publish event
         event = RecommendationGeneratedEvent(
@@ -212,7 +225,11 @@ class RecommendationEngine(AbstractRecommendationEngine):
         )
         await self._event_bus.publish(event, ctx)
 
-        log.info("Recommendations generated", count=len(recommendations), latency_ms=latency_ms)
+        log.info(
+            "Recommendations generated",
+            count=len(recommendations),
+            latency_ms=latency_ms,
+        )
         return GenerateRecommendationsResult(
             recommendations=recommendations,
             cognitive_trace=cognitive_trace,
@@ -227,5 +244,3 @@ class RecommendationEngine(AbstractRecommendationEngine):
             "low": RecommendationConfidence.LOW,
         }
         return mapping.get(value.lower(), RecommendationConfidence.MEDIUM)
-
-

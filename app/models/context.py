@@ -20,6 +20,7 @@ from app.models.goal import Goal
 
 class ContextMemory(DomainBaseModel):
     """A memory retrieved for context."""
+
     memory_id: UUID
     content: str
     similarity_score: float

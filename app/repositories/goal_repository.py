@@ -100,13 +100,17 @@ class GoalRepository(AbstractGoalRepository):
             insert_data["parent_goal_id"] = str(data.parent_goal_id)
 
         try:
-            response = await self._client.table(self._table).insert(insert_data).execute()
+            response = (
+                await self._client.table(self._table).insert(insert_data).execute()
+            )
         except Exception as exc:
             logger.error("Failed to create goal", error=str(exc))
             raise RepositoryError("goal.create", str(exc)) from exc
 
         duration_ms = (time.time() - start) * 1000
-        logger.info("Created goal", goal_id=response.data[0]["id"], latency_ms=duration_ms)
+        logger.info(
+            "Created goal", goal_id=response.data[0]["id"], latency_ms=duration_ms
+        )
         return Goal.model_validate(response.data[0])
 
     async def get_by_id(self, goal_id: UUID) -> Goal:
@@ -124,7 +128,11 @@ class GoalRepository(AbstractGoalRepository):
         if not response.data:
             raise GoalNotFoundError(str(goal_id))
 
-        logger.debug("Fetched goal", goal_id=str(goal_id), latency_ms=(time.time() - start) * 1000)
+        logger.debug(
+            "Fetched goal",
+            goal_id=str(goal_id),
+            latency_ms=(time.time() - start) * 1000,
+        )
         return Goal.model_validate(response.data[0])
 
     async def list_by_twin(
@@ -160,8 +168,15 @@ class GoalRepository(AbstractGoalRepository):
 
         items = [Goal.model_validate(row) for row in response.data]
         total = response.count if response.count is not None else len(items)
-        logger.debug("Listed goals", twin_id=str(twin_id), count=len(items), latency_ms=(time.time() - start) * 1000)
-        return PaginatedGoals(items=items, total_count=total, limit=limit, offset=offset)
+        logger.debug(
+            "Listed goals",
+            twin_id=str(twin_id),
+            count=len(items),
+            latency_ms=(time.time() - start) * 1000,
+        )
+        return PaginatedGoals(
+            items=items, total_count=total, limit=limit, offset=offset
+        )
 
     async def get_active_goals(self, twin_id: UUID) -> List[Goal]:
         """Retrieve ACTIVE and IN_PROGRESS goals ordered by priority."""
@@ -204,7 +219,11 @@ class GoalRepository(AbstractGoalRepository):
         if not response.data:
             raise GoalNotFoundError(str(goal_id))
 
-        logger.info("Updated goal", goal_id=str(goal_id), latency_ms=(time.time() - start) * 1000)
+        logger.info(
+            "Updated goal",
+            goal_id=str(goal_id),
+            latency_ms=(time.time() - start) * 1000,
+        )
         return Goal.model_validate(response.data[0])
 
     async def soft_delete(self, goal_id: UUID) -> None:
@@ -234,7 +253,9 @@ class GoalRepository(AbstractGoalRepository):
         except Exception as exc:
             raise RepositoryError("goal.link_intent", str(exc)) from exc
 
-        logger.info("Linked intent to goal", intent_id=str(intent_id), goal_id=str(goal_id))
+        logger.info(
+            "Linked intent to goal", intent_id=str(intent_id), goal_id=str(goal_id)
+        )
         return GoalIntentLink.model_validate(response.data[0])
 
     async def health_check(self) -> dict:

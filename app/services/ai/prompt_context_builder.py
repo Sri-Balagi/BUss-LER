@@ -16,9 +16,17 @@ class PromptContextBuilder:
     def build_context_dict(cognitive_context: CognitiveContext) -> Dict[str, Any]:
         """Convert CognitiveContext into a dictionary for ClassifyRequest."""
         return {
-            "intent_summary": str(cognitive_context.current_intent.raw_text if cognitive_context.current_intent else "No active intent."),
-            "active_goals_context": PromptContextBuilder._format_goals(cognitive_context.active_goals),
-            "memory_context": PromptContextBuilder._format_memories(cognitive_context.relevant_memories),
+            "intent_summary": str(
+                cognitive_context.current_intent.raw_text
+                if cognitive_context.current_intent
+                else "No active intent."
+            ),
+            "active_goals_context": PromptContextBuilder._format_goals(
+                cognitive_context.active_goals
+            ),
+            "memory_context": PromptContextBuilder._format_memories(
+                cognitive_context.relevant_memories
+            ),
             "business_state": str(cognitive_context.business_state or {}),
         }
 
@@ -28,8 +36,8 @@ class PromptContextBuilder:
             return "No relevant memories available."
         lines = []
         for i, mem in enumerate(memories, 1):
-            category = mem.category or 'memory'
-            safe_content = mem.content.replace('{', '{{').replace('}', '}}')
+            category = mem.category or "memory"
+            safe_content = mem.content.replace("{", "{{").replace("}", "}}")
             lines.append(f"{i}. [{category}] {safe_content[:200]}")
         return "\n".join(lines)
 
@@ -74,6 +82,6 @@ class PromptContextBuilder:
         for i, item in enumerate(section.items, 1):
             # Show priority indicator for context item
             priority = item.priority.value.upper() if item.priority else "MEDIUM"
-            safe_content = item.content.strip().replace('{', '{{').replace('}', '}}')
+            safe_content = item.content.strip().replace("{", "{{").replace("}", "}}")
             lines.append(f"[{priority}] {safe_content}")
         return "\n".join(lines)

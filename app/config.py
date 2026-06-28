@@ -41,7 +41,7 @@ class Settings(BaseSettings):
     gemini_pro_model: str = "gemini-2.5-pro"
     gemini_flash_model: str = "gemini-2.5-flash"
     gemini_embedding_model: str = "gemini-embedding-001"
-    
+
     # --- Feature Flags ---
     enable_background_processing: bool = True
     enable_ai_summarization: bool = True

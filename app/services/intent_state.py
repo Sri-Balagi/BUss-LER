@@ -41,9 +41,9 @@ class IntentStateMachine:
             IntentStatus.REJECTED,
             IntentStatus.EXPIRED,
         ],
-        IntentStatus.FULFILLED: [],   # Terminal
-        IntentStatus.REJECTED: [],    # Terminal
-        IntentStatus.EXPIRED: [],     # Terminal
+        IntentStatus.FULFILLED: [],  # Terminal
+        IntentStatus.REJECTED: [],  # Terminal
+        IntentStatus.EXPIRED: [],  # Terminal
     }
 
     @classmethod

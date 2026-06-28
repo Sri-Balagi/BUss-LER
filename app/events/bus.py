@@ -10,6 +10,7 @@ logger = structlog.get_logger(__name__)
 
 EventHandler = Callable[[DomainEvent], Coroutine[Any, Any, None]]
 
+
 class EventBus(ABC):
     """
     Abstract interface for publishing and subscribing to DomainEvents.
@@ -49,21 +50,35 @@ class BackgroundTasksEventBus(EventBus):
             self._handlers[event_type] = []
         if handler not in self._handlers[event_type]:
             self._handlers[event_type].append(handler)
-        logger.debug("Handler subscribed to EventBus", event_type=event_type.__name__, handler=handler.__name__)
+        logger.debug(
+            "Handler subscribed to EventBus",
+            event_type=event_type.__name__,
+            handler=handler.__name__,
+        )
 
     def unsubscribe(self, event_type: Type[DomainEvent], handler: EventHandler) -> None:
         if event_type in self._handlers and handler in self._handlers[event_type]:
             self._handlers[event_type].remove(handler)
-            logger.debug("Handler unsubscribed from EventBus", event_type=event_type.__name__, handler=handler.__name__)
+            logger.debug(
+                "Handler unsubscribed from EventBus",
+                event_type=event_type.__name__,
+                handler=handler.__name__,
+            )
 
     def publish(self, event: DomainEvent) -> None:
         if not self._background_tasks:
-            logger.warning("No background_tasks provided, EventBus dropped event", event_id=str(event.event_id))
+            logger.warning(
+                "No background_tasks provided, EventBus dropped event",
+                event_id=str(event.event_id),
+            )
             return
 
         handlers = self._handlers.get(type(event), [])
         if not handlers:
-            logger.debug("No handlers registered for event on EventBus", event_type=type(event).__name__)
+            logger.debug(
+                "No handlers registered for event on EventBus",
+                event_type=type(event).__name__,
+            )
             return
 
         logger.info(
@@ -72,6 +87,6 @@ class BackgroundTasksEventBus(EventBus):
             event_id=str(event.event_id),
             correlation_id=event.correlation_id,
         )
-        
+
         for handler in handlers:
             self._background_tasks.add_task(handler, event)

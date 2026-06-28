@@ -24,7 +24,9 @@ class GeminiProvider(AbstractAIProvider):
     def __init__(self, settings: Settings):
         self.settings = settings
         if not settings.gemini_api_key:
-            raise ProviderConfigurationError(self.provider_name, "GEMINI_API_KEY is not set.")
+            raise ProviderConfigurationError(
+                self.provider_name, "GEMINI_API_KEY is not set."
+            )
         self.client = genai.Client(api_key=settings.gemini_api_key)
 
     @property
@@ -33,7 +35,7 @@ class GeminiProvider(AbstractAIProvider):
 
     async def generate(self, request: AIRequest, prompt_text: str) -> AIResponse:
         model = self.settings.gemini_flash_model
-        
+
         config_kwargs = {"temperature": 0.7}
         if request.system_instruction:
             config_kwargs["system_instruction"] = request.system_instruction
@@ -50,8 +52,16 @@ class GeminiProvider(AbstractAIProvider):
             latency = (time.time() - start_time) * 1000
 
             # Extract token usage safely based on the SDK structure
-            prompt_tokens = getattr(response.usage_metadata, "prompt_token_count", None) if hasattr(response, "usage_metadata") else None
-            completion_tokens = getattr(response.usage_metadata, "candidates_token_count", None) if hasattr(response, "usage_metadata") else None
+            prompt_tokens = (
+                getattr(response.usage_metadata, "prompt_token_count", None)
+                if hasattr(response, "usage_metadata")
+                else None
+            )
+            completion_tokens = (
+                getattr(response.usage_metadata, "candidates_token_count", None)
+                if hasattr(response, "usage_metadata")
+                else None
+            )
 
             metadata = AIResponseMetadata(
                 provider=self.provider_name,

@@ -1,14 +1,17 @@
 import time
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
-from typing import Optional
 from uuid import UUID
 
 import structlog
 from supabase import AsyncClient
 
 from app.models.enums import EmbeddingStatus
-from app.models.exceptions import DuplicateMemoryError, MemoryNotFoundError, RepositoryError
+from app.models.exceptions import (
+    DuplicateMemoryError,
+    MemoryNotFoundError,
+    RepositoryError,
+)
 from app.models.memory import Memory, MemoryCreate, MemoryUpdate, PaginatedMemories
 
 logger = structlog.get_logger()
@@ -64,7 +67,9 @@ class AbstractMemoryRepository(ABC):
         pass
 
     @abstractmethod
-    async def update_embedding_status(self, memory_id: UUID, status: EmbeddingStatus) -> Memory:
+    async def update_embedding_status(
+        self, memory_id: UUID, status: EmbeddingStatus
+    ) -> Memory:
         """Update the vector embedding status of a memory."""
         pass
 
@@ -97,22 +102,32 @@ class MemoryMetadataRepository(AbstractMemoryRepository):
             insert_data["metadata"] = data.metadata
 
         try:
-            response = await self._client.table(self._table_name).insert(insert_data).execute()
+            response = (
+                await self._client.table(self._table_name).insert(insert_data).execute()
+            )
         except Exception as exc:
             error_str = str(exc).lower()
-            if "duplicate" in error_str or "23505" in error_str or "unique" in error_str:
+            if (
+                "duplicate" in error_str
+                or "23505" in error_str
+                or "unique" in error_str
+            ):
                 raise DuplicateMemoryError(detail=str(exc)) from exc
             logger.error("Failed to create memory metadata", error=str(exc))
             raise RepositoryError("memory.create", str(exc)) from exc
 
         duration_ms = (time.time() - start_time) * 1000
-        logger.info("Created memory metadata", memory_id=response.data[0]["id"], latency_ms=duration_ms)
+        logger.info(
+            "Created memory metadata",
+            memory_id=response.data[0]["id"],
+            latency_ms=duration_ms,
+        )
         return Memory.model_validate(response.data[0])
 
     async def update(self, memory_id: UUID, data: MemoryUpdate) -> Memory:
         start_time = time.time()
         update_data = data.model_dump(exclude_unset=True, exclude_none=True)
-        
+
         # Enums and Decimals need mapping to strings/floats for Supabase
         if "memory_category" in update_data:
             update_data["memory_category"] = update_data["memory_category"].value
@@ -120,36 +135,56 @@ class MemoryMetadataRepository(AbstractMemoryRepository):
             update_data["source"] = update_data["source"].value
         if "importance" in update_data:
             update_data["importance"] = float(update_data["importance"])
-            
+
         if not update_data:
             return await self.get_by_id(memory_id)
 
         try:
-            response = await self._client.table(self._table_name).update(update_data).eq("id", str(memory_id)).execute()
+            response = (
+                await self._client.table(self._table_name)
+                .update(update_data)
+                .eq("id", str(memory_id))
+                .execute()
+            )
         except Exception as exc:
-            logger.error("Failed to update memory metadata", memory_id=str(memory_id), error=str(exc))
+            logger.error(
+                "Failed to update memory metadata",
+                memory_id=str(memory_id),
+                error=str(exc),
+            )
             raise RepositoryError("memory.update", str(exc)) from exc
 
         if not response.data:
             raise MemoryNotFoundError(str(memory_id))
 
         duration_ms = (time.time() - start_time) * 1000
-        logger.info("Updated memory metadata", memory_id=str(memory_id), latency_ms=duration_ms)
+        logger.info(
+            "Updated memory metadata", memory_id=str(memory_id), latency_ms=duration_ms
+        )
         return Memory.model_validate(response.data[0])
 
     async def get_by_id(self, memory_id: UUID) -> Memory:
         start_time = time.time()
         try:
-            response = await self._client.table(self._table_name).select("*").eq("id", str(memory_id)).execute()
+            response = (
+                await self._client.table(self._table_name)
+                .select("*")
+                .eq("id", str(memory_id))
+                .execute()
+            )
         except Exception as exc:
-            logger.error("Failed to fetch memory", memory_id=str(memory_id), error=str(exc))
+            logger.error(
+                "Failed to fetch memory", memory_id=str(memory_id), error=str(exc)
+            )
             raise RepositoryError("memory.get_by_id", str(exc)) from exc
 
         if not response.data:
             raise MemoryNotFoundError(str(memory_id))
 
         duration_ms = (time.time() - start_time) * 1000
-        logger.info("Fetched memory by ID", memory_id=str(memory_id), latency_ms=duration_ms)
+        logger.info(
+            "Fetched memory by ID", memory_id=str(memory_id), latency_ms=duration_ms
+        )
         return Memory.model_validate(response.data[0])
 
     async def list_by_twin(
@@ -161,21 +196,38 @@ class MemoryMetadataRepository(AbstractMemoryRepository):
     ) -> PaginatedMemories:
         start_time = time.time()
         try:
-            query = self._client.table(self._table_name).select("*", count="exact").eq("twin_id", str(twin_id))
+            query = (
+                self._client.table(self._table_name)
+                .select("*", count="exact")
+                .eq("twin_id", str(twin_id))
+            )
             if not include_deleted:
                 query = query.is_("deleted_at", "null")
 
-            response = await query.order("created_at", desc=True).range(offset, offset + limit - 1).execute()
+            response = (
+                await query.order("created_at", desc=True)
+                .range(offset, offset + limit - 1)
+                .execute()
+            )
         except Exception as exc:
-            logger.error("Failed to list memories", twin_id=str(twin_id), error=str(exc))
+            logger.error(
+                "Failed to list memories", twin_id=str(twin_id), error=str(exc)
+            )
             raise RepositoryError("memory.list_by_twin", str(exc)) from exc
 
         items = [Memory.model_validate(row) for row in response.data]
         total = response.count if response.count is not None else len(items)
 
         duration_ms = (time.time() - start_time) * 1000
-        logger.info("Listed memories for twin", twin_id=str(twin_id), count=len(items), latency_ms=duration_ms)
-        return PaginatedMemories(items=items, total_count=total, limit=limit, offset=offset)
+        logger.info(
+            "Listed memories for twin",
+            twin_id=str(twin_id),
+            count=len(items),
+            latency_ms=duration_ms,
+        )
+        return PaginatedMemories(
+            items=items, total_count=total, limit=limit, offset=offset
+        )
 
     async def soft_delete(self, memory_id: UUID) -> None:
         start_time = time.time()
@@ -188,14 +240,18 @@ class MemoryMetadataRepository(AbstractMemoryRepository):
                 .execute()
             )
         except Exception as exc:
-            logger.error("Failed to soft delete memory", memory_id=str(memory_id), error=str(exc))
+            logger.error(
+                "Failed to soft delete memory", memory_id=str(memory_id), error=str(exc)
+            )
             raise RepositoryError("memory.soft_delete", str(exc)) from exc
 
         if not response.data:
             raise MemoryNotFoundError(str(memory_id))
 
         duration_ms = (time.time() - start_time) * 1000
-        logger.info("Soft deleted memory", memory_id=str(memory_id), latency_ms=duration_ms)
+        logger.info(
+            "Soft deleted memory", memory_id=str(memory_id), latency_ms=duration_ms
+        )
 
     async def restore(self, memory_id: UUID) -> None:
         start_time = time.time()
@@ -207,14 +263,20 @@ class MemoryMetadataRepository(AbstractMemoryRepository):
                 .execute()
             )
         except Exception as exc:
-            logger.error("Failed to restore memory", memory_id=str(memory_id), error=str(exc))
+            logger.error(
+                "Failed to restore memory", memory_id=str(memory_id), error=str(exc)
+            )
             raise RepositoryError("memory.restore", str(exc)) from exc
 
         if not response.data:
             raise MemoryNotFoundError(str(memory_id))
 
         duration_ms = (time.time() - start_time) * 1000
-        logger.info("Restored soft-deleted memory", memory_id=str(memory_id), latency_ms=duration_ms)
+        logger.info(
+            "Restored soft-deleted memory",
+            memory_id=str(memory_id),
+            latency_ms=duration_ms,
+        )
 
     async def exists(self, memory_id: UUID) -> bool:
         start_time = time.time()
@@ -228,11 +290,17 @@ class MemoryMetadataRepository(AbstractMemoryRepository):
                 .execute()
             )
         except Exception as exc:
-            logger.error("Failed to check memory existence", memory_id=str(memory_id), error=str(exc))
+            logger.error(
+                "Failed to check memory existence",
+                memory_id=str(memory_id),
+                error=str(exc),
+            )
             raise RepositoryError("memory.exists", str(exc)) from exc
 
         duration_ms = (time.time() - start_time) * 1000
-        logger.info("Checked memory exists", memory_id=str(memory_id), latency_ms=duration_ms)
+        logger.info(
+            "Checked memory exists", memory_id=str(memory_id), latency_ms=duration_ms
+        )
         return len(response.data) > 0
 
     async def update_summary(self, memory_id: UUID, summary: str) -> Memory:
@@ -245,17 +313,25 @@ class MemoryMetadataRepository(AbstractMemoryRepository):
                 .execute()
             )
         except Exception as exc:
-            logger.error("Failed to update memory summary", memory_id=str(memory_id), error=str(exc))
+            logger.error(
+                "Failed to update memory summary",
+                memory_id=str(memory_id),
+                error=str(exc),
+            )
             raise RepositoryError("memory.update_summary", str(exc)) from exc
 
         if not response.data:
             raise MemoryNotFoundError(str(memory_id))
 
         duration_ms = (time.time() - start_time) * 1000
-        logger.info("Updated memory summary", memory_id=str(memory_id), latency_ms=duration_ms)
+        logger.info(
+            "Updated memory summary", memory_id=str(memory_id), latency_ms=duration_ms
+        )
         return Memory.model_validate(response.data[0])
 
-    async def update_embedding_status(self, memory_id: UUID, status: EmbeddingStatus) -> Memory:
+    async def update_embedding_status(
+        self, memory_id: UUID, status: EmbeddingStatus
+    ) -> Memory:
         start_time = time.time()
         try:
             response = (
@@ -265,20 +341,34 @@ class MemoryMetadataRepository(AbstractMemoryRepository):
                 .execute()
             )
         except Exception as exc:
-            logger.error("Failed to update memory embedding status", memory_id=str(memory_id), error=str(exc))
+            logger.error(
+                "Failed to update memory embedding status",
+                memory_id=str(memory_id),
+                error=str(exc),
+            )
             raise RepositoryError("memory.update_embedding_status", str(exc)) from exc
 
         if not response.data:
             raise MemoryNotFoundError(str(memory_id))
 
         duration_ms = (time.time() - start_time) * 1000
-        logger.info("Updated memory embedding status", memory_id=str(memory_id), status=status.value, latency_ms=duration_ms)
+        logger.info(
+            "Updated memory embedding status",
+            memory_id=str(memory_id),
+            status=status.value,
+            latency_ms=duration_ms,
+        )
         return Memory.model_validate(response.data[0])
 
     async def health_check(self) -> dict:
         status = {"status": "unhealthy", "database": False, "table": False}
         try:
-            response = await self._client.table(self._table_name).select("id").limit(1).execute()
+            response = (
+                await self._client.table(self._table_name)
+                .select("id")
+                .limit(1)
+                .execute()
+            )
             status["database"] = True
             status["table"] = True
             status["status"] = "healthy"

@@ -55,7 +55,7 @@ class GoalStateMachine:
         ],
         GoalStatus.COMPLETED: [],  # Terminal
         GoalStatus.ABANDONED: [
-            GoalStatus.ACTIVE,     # Allows reactivation
+            GoalStatus.ACTIVE,  # Allows reactivation
         ],
     }
 

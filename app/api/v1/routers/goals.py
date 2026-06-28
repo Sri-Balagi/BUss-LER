@@ -94,7 +94,9 @@ async def list_goals(
     ctx: OperationContext = Depends(get_operation_context),
     goal_service: AbstractGoalService = Depends(get_goal_service),
 ) -> PaginatedGoalResponse:
-    query = GoalListQuery(twin_id=twin_id, status=status, goal_type=goal_type, limit=limit, offset=offset)
+    query = GoalListQuery(
+        twin_id=twin_id, status=status, goal_type=goal_type, limit=limit, offset=offset
+    )
     result = await goal_service.list_goals(ctx, query)
     return PaginatedGoalResponse(
         items=[_map_goal(g) for g in result.items],

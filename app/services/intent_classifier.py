@@ -15,8 +15,6 @@ CognitiveTrace is recorded after every successful classification.
 
 import time
 from abc import ABC, abstractmethod
-from typing import Optional
-from uuid import UUID
 
 import structlog
 from pydantic import ValidationError
@@ -38,9 +36,10 @@ _PROMPT_VERSION = "v1"
 
 
 class AbstractIntentClassifier(ABC):
-
     @abstractmethod
-    async def classify(self, ctx: OperationContext, intent: Intent) -> ClassifyIntentResult:
+    async def classify(
+        self, ctx: OperationContext, intent: Intent
+    ) -> ClassifyIntentResult:
         """Classify an intent and return a validated ClassifyIntentResult."""
         pass
 
@@ -65,7 +64,9 @@ class IntentClassifier(AbstractIntentClassifier):
         self._ai_kernel = ai_kernel
         self._trace_service = trace_service
 
-    async def classify(self, ctx: OperationContext, intent: Intent) -> ClassifyIntentResult:
+    async def classify(
+        self, ctx: OperationContext, intent: Intent
+    ) -> ClassifyIntentResult:
         log = logger.bind(
             correlation_id=ctx.correlation_id,
             intent_id=str(intent.id),
@@ -91,7 +92,9 @@ class IntentClassifier(AbstractIntentClassifier):
             raise IntentClassificationError(str(exc)) from exc
         except Exception as exc:
             log.error("AIKernel.classify() failed unexpectedly", error=str(exc))
-            raise IntentClassificationError(f"Unexpected classification failure: {exc}") from exc
+            raise IntentClassificationError(
+                f"Unexpected classification failure: {exc}"
+            ) from exc
 
         latency_ms = (time.monotonic() * 1000) - start_ms
 
@@ -151,7 +154,9 @@ class IntentClassifier(AbstractIntentClassifier):
             cognitive_trace = trace_result.trace
         except Exception as trace_exc:
             # Trace failures NEVER fail the classification — passivity guarantee
-            log.warning("CognitiveTrace recording failed (non-critical)", error=str(trace_exc))
+            log.warning(
+                "CognitiveTrace recording failed (non-critical)", error=str(trace_exc)
+            )
 
         log.info(
             "Intent classified successfully",

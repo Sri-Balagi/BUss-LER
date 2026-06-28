@@ -27,6 +27,7 @@ class ConversationContextProvider(AbstractContextProvider):
         try:
             # First, find the active thread for this twin
             from app.models.enums import ConversationStatus
+
             threads_result = await self._conversation_service.list_threads(
                 ctx, twin_id, status=ConversationStatus.ACTIVE, limit=1
             )
@@ -45,15 +46,17 @@ class ConversationContextProvider(AbstractContextProvider):
                         confidence=1.0,
                         citations=[str(turn.id)],
                     )
-                    items.append(ContextItem(
-                        item_id=uuid4(),
-                        source=ContextSource.CONVERSATION,
-                        priority=ContextPriority.MEDIUM,
-                        content=content,
-                        domain_object_id=turn.id,
-                        token_estimate=token_est,
-                        provenance=prov,
-                    ))
+                    items.append(
+                        ContextItem(
+                            item_id=uuid4(),
+                            source=ContextSource.CONVERSATION,
+                            priority=ContextPriority.MEDIUM,
+                            content=content,
+                            domain_object_id=turn.id,
+                            token_estimate=token_est,
+                            provenance=prov,
+                        )
+                    )
         except Exception as exc:
             logger.warning("ConversationContextProvider failed", error=str(exc))
 

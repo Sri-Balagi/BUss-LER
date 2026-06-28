@@ -31,11 +31,10 @@ from app.services.goal_service import AbstractGoalService
 
 logger = structlog.get_logger(__name__)
 
-_MEMORY_SEARCH_LIMIT = 5   # Maximum memories retrieved for context
+_MEMORY_SEARCH_LIMIT = 5  # Maximum memories retrieved for context
 
 
 class AbstractContextBuilder(ABC):
-
     @abstractmethod
     async def build(
         self,
@@ -80,22 +79,31 @@ class ContextBuilder(AbstractContextBuilder):
                 try:
                     from app.models.queries import MemorySearchQuery
                     from app.models.context import ContextMemory
+
                     search_query = MemorySearchQuery(
                         twin_id=twin_id,
                         query_text=search_text,
                         limit=_MEMORY_SEARCH_LIMIT,
                     )
-                    search_result = await self._memory_service.search_memories(ctx, search_query)
+                    search_result = await self._memory_service.search_memories(
+                        ctx, search_query
+                    )
                     for item in search_result.items:
-                        relevant_memories.append(ContextMemory(
-                            memory_id=item.memory.id,
-                            content=item.memory.content,
-                            similarity_score=item.similarity_score,
-                            category=item.memory.memory_category.value if item.memory.memory_category else None,
-                        ))
+                        relevant_memories.append(
+                            ContextMemory(
+                                memory_id=item.memory.id,
+                                content=item.memory.content,
+                                similarity_score=item.similarity_score,
+                                category=item.memory.memory_category.value
+                                if item.memory.memory_category
+                                else None,
+                            )
+                        )
                         memory_ids_used.append(item.memory.id)
                 except Exception as mem_exc:
-                    log.warning("Memory search failed during context build", error=str(mem_exc))
+                    log.warning(
+                        "Memory search failed during context build", error=str(mem_exc)
+                    )
 
             context = CognitiveContext(
                 twin_id=twin_id,
@@ -107,7 +115,9 @@ class ContextBuilder(AbstractContextBuilder):
                 business_state={},
                 memory_ids_used=memory_ids_used,
                 goal_ids_used=goal_ids_used,
-                estimated_token_count=self._estimate_tokens(active_goals, relevant_memories),
+                estimated_token_count=self._estimate_tokens(
+                    active_goals, relevant_memories
+                ),
             )
 
             log.info(

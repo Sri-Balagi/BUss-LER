@@ -14,7 +14,6 @@ from app.models.enums import (
     GoalStatus,
     GoalType,
     IntentStatus,
-    IntentType,
     MemoryCategory,
     MemorySource,
     PlanStatus,
@@ -29,6 +28,7 @@ from app.models.enums import (
 
 class CreateMemoryCommand(DomainBaseModel):
     """Command to create a new memory."""
+
     twin_id: uuid.UUID
     content: str
     title: str = "Untitled"
@@ -40,11 +40,13 @@ class CreateMemoryCommand(DomainBaseModel):
 
 class DeleteMemoryCommand(DomainBaseModel):
     """Command to soft-delete a memory."""
+
     memory_id: uuid.UUID
 
 
 class RestoreMemoryCommand(DomainBaseModel):
     """Command to restore a soft-deleted memory."""
+
     memory_id: uuid.UUID
 
 
@@ -55,6 +57,7 @@ class RestoreMemoryCommand(DomainBaseModel):
 
 class CreateIntentCommand(DomainBaseModel):
     """Command to create a new raw intent (before classification)."""
+
     twin_id: uuid.UUID
     raw_text: str
     metadata: Dict[str, Any] = Field(default_factory=dict)
@@ -62,18 +65,21 @@ class CreateIntentCommand(DomainBaseModel):
 
 class ClassifyIntentCommand(DomainBaseModel):
     """Command to classify an existing intent using AIKernel.classify()."""
+
     intent_id: uuid.UUID
     twin_id: uuid.UUID
 
 
 class UpdateIntentStatusCommand(DomainBaseModel):
     """Command to transition an intent's lifecycle status via IntentStateMachine."""
+
     intent_id: uuid.UUID
     target_status: IntentStatus
 
 
 class DeleteIntentCommand(DomainBaseModel):
     """Command to soft-delete an intent."""
+
     intent_id: uuid.UUID
 
 
@@ -84,6 +90,7 @@ class DeleteIntentCommand(DomainBaseModel):
 
 class CreateGoalCommand(DomainBaseModel):
     """Command to create a new goal."""
+
     twin_id: uuid.UUID
     title: str
     description: Optional[str] = None
@@ -97,6 +104,7 @@ class CreateGoalCommand(DomainBaseModel):
 
 class UpdateGoalCommand(DomainBaseModel):
     """Command to update a goal's attributes."""
+
     goal_id: uuid.UUID
     title: Optional[str] = None
     description: Optional[str] = None
@@ -109,24 +117,28 @@ class UpdateGoalCommand(DomainBaseModel):
 
 class UpdateGoalProgressCommand(DomainBaseModel):
     """Command to update a goal's completion progress."""
+
     goal_id: uuid.UUID
     progress: float = Field(..., ge=0.0, le=100.0)
 
 
 class UpdateGoalStatusCommand(DomainBaseModel):
     """Command to transition a goal's lifecycle status via GoalStateMachine."""
+
     goal_id: uuid.UUID
     target_status: GoalStatus
 
 
 class LinkIntentToGoalCommand(DomainBaseModel):
     """Command to create an association between an Intent and a Goal."""
+
     intent_id: uuid.UUID
     goal_id: uuid.UUID
 
 
 class DeleteGoalCommand(DomainBaseModel):
     """Command to soft-delete a goal."""
+
     goal_id: uuid.UUID
 
 
@@ -137,6 +149,7 @@ class DeleteGoalCommand(DomainBaseModel):
 
 class GeneratePlanCommand(DomainBaseModel):
     """Command to generate a plan for a goal using the PlanningEngine."""
+
     twin_id: uuid.UUID
     goal_id: Optional[uuid.UUID] = None
     intent_id: Optional[uuid.UUID] = None
@@ -144,6 +157,7 @@ class GeneratePlanCommand(DomainBaseModel):
 
 class UpdatePlanStatusCommand(DomainBaseModel):
     """Command to transition a plan's lifecycle status via PlanStateMachine."""
+
     plan_id: uuid.UUID
     target_status: PlanStatus
 
@@ -155,6 +169,7 @@ class UpdatePlanStatusCommand(DomainBaseModel):
 
 class GenerateRecommendationsCommand(DomainBaseModel):
     """Command to generate proactive recommendations for a twin."""
+
     twin_id: uuid.UUID
     intent_id: Optional[uuid.UUID] = Field(
         default=None,
@@ -164,5 +179,6 @@ class GenerateRecommendationsCommand(DomainBaseModel):
 
 class UpdateRecommendationStatusCommand(DomainBaseModel):
     """Command to update a recommendation's user response status."""
+
     recommendation_id: uuid.UUID
     target_status: RecommendationStatus

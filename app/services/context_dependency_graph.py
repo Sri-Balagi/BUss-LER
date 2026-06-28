@@ -62,7 +62,9 @@ class ContextDependencyGraph:
         # in_degree: how many active dependencies each provider is waiting for
         in_degree: Dict[ContextSource, int] = {p: 0 for p in active_set}
         # dependents: for each provider, which providers depend on it
-        dependents: Dict[ContextSource, List[ContextSource]] = {p: [] for p in active_set}
+        dependents: Dict[ContextSource, List[ContextSource]] = {
+            p: [] for p in active_set
+        }
 
         for provider in active_set:
             deps = self._dependencies.get(provider, set())
@@ -73,9 +75,7 @@ class ContextDependencyGraph:
 
         # Kahn's algorithm — build batches
         batches: List[List[ContextSource]] = []
-        queue: deque[ContextSource] = deque(
-            p for p in active_set if in_degree[p] == 0
-        )
+        queue: deque[ContextSource] = deque(p for p in active_set if in_degree[p] == 0)
 
         while queue:
             # Everything currently in the queue can run concurrently

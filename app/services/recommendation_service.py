@@ -24,9 +24,10 @@ logger = structlog.get_logger(__name__)
 
 
 class AbstractRecommendationService(ABC):
-
     @abstractmethod
-    async def get_recommendation(self, ctx: OperationContext, recommendation_id: UUID) -> Recommendation:
+    async def get_recommendation(
+        self, ctx: OperationContext, recommendation_id: UUID
+    ) -> Recommendation:
         pass
 
     @abstractmethod
@@ -41,18 +42,25 @@ class AbstractRecommendationService(ABC):
         pass
 
     @abstractmethod
-    async def update_recommendation_status(self, ctx: OperationContext, cmd: UpdateRecommendationStatusCommand) -> Recommendation:
+    async def update_recommendation_status(
+        self, ctx: OperationContext, cmd: UpdateRecommendationStatusCommand
+    ) -> Recommendation:
         pass
 
 
 class RecommendationService(AbstractRecommendationService):
-
-    def __init__(self, repository: AbstractRecommendationRepository, event_bus: EventBus) -> None:
+    def __init__(
+        self, repository: AbstractRecommendationRepository, event_bus: EventBus
+    ) -> None:
         self._repository = repository
         self._event_bus = event_bus
 
-    async def get_recommendation(self, ctx: OperationContext, recommendation_id: UUID) -> Recommendation:
-        log = logger.bind(correlation_id=ctx.correlation_id, rec_id=str(recommendation_id))
+    async def get_recommendation(
+        self, ctx: OperationContext, recommendation_id: UUID
+    ) -> Recommendation:
+        log = logger.bind(
+            correlation_id=ctx.correlation_id, rec_id=str(recommendation_id)
+        )
         log.info("Fetching recommendation")
         return await self._repository.get_by_id(recommendation_id)
 
@@ -70,20 +78,25 @@ class RecommendationService(AbstractRecommendationService):
             twin_id=twin_id, status=status, limit=limit, offset=offset
         )
 
-    async def update_recommendation_status(self, ctx: OperationContext, cmd: UpdateRecommendationStatusCommand) -> Recommendation:
-        log = logger.bind(correlation_id=ctx.correlation_id, rec_id=str(cmd.recommendation_id))
+    async def update_recommendation_status(
+        self, ctx: OperationContext, cmd: UpdateRecommendationStatusCommand
+    ) -> Recommendation:
+        log = logger.bind(
+            correlation_id=ctx.correlation_id, rec_id=str(cmd.recommendation_id)
+        )
         log.info("Updating recommendation status", target=cmd.target_status.value)
 
         rec = await self._repository.get_by_id(cmd.recommendation_id)
-        
+
         # Determine if we should set acknowledged_at
         ack_time = None
-        if cmd.target_status in [RecommendationStatus.ACCEPTED, RecommendationStatus.REJECTED]:
+        if cmd.target_status in [
+            RecommendationStatus.ACCEPTED,
+            RecommendationStatus.REJECTED,
+        ]:
             ack_time = datetime.now(timezone.utc).isoformat()
 
         updated = await self._repository.update_status(
-            recommendation_id=rec.id,
-            status=cmd.target_status,
-            acknowledged_at=ack_time
+            recommendation_id=rec.id, status=cmd.target_status, acknowledged_at=ack_time
         )
         return updated

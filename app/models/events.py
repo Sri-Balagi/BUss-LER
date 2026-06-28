@@ -8,6 +8,7 @@ from app.models.schemas import DomainBaseModel
 
 class EventType(str, Enum):
     """Lifecycle event types."""
+
     CREATED = "CREATED"
     PROCESSING = "PROCESSING"
     COMPLETED = "COMPLETED"
@@ -21,11 +22,18 @@ class EventType(str, Enum):
 
 class DomainEvent(DomainBaseModel):
     """Base class for all BizOS events."""
+
     event_id: uuid.UUID = Field(default_factory=uuid.uuid4)
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    correlation_id: str = Field(..., description="Trace ID linking operations together.")
-    causation_id: Optional[str] = Field(default=None, description="The ID of the event that caused this event.")
-    source: str = Field(default="bizos-core", description="The system that emitted the event.")
+    correlation_id: str = Field(
+        ..., description="Trace ID linking operations together."
+    )
+    causation_id: Optional[str] = Field(
+        default=None, description="The ID of the event that caused this event."
+    )
+    source: str = Field(
+        default="bizos-core", description="The system that emitted the event."
+    )
     version: str = Field(default="1.0", description="Event schema version.")
 
 
@@ -36,6 +44,7 @@ class DomainEvent(DomainBaseModel):
 
 class MemoryLifecycleEvent(DomainEvent):
     """Event triggered during memory lifecycle transitions."""
+
     memory_id: uuid.UUID = Field(...)
     twin_id: uuid.UUID = Field(...)
     event_type: EventType = Field(...)
@@ -48,6 +57,7 @@ class MemoryLifecycleEvent(DomainEvent):
 
 class IntentCreatedEvent(DomainEvent):
     """Emitted when a new intent record is persisted."""
+
     intent_id: uuid.UUID
     twin_id: uuid.UUID
     raw_text: str
@@ -55,6 +65,7 @@ class IntentCreatedEvent(DomainEvent):
 
 class IntentClassifiedEvent(DomainEvent):
     """Emitted when an intent has been successfully classified by the AI Kernel."""
+
     intent_id: uuid.UUID
     twin_id: uuid.UUID
     intent_type: str
@@ -68,6 +79,7 @@ class IntentClassifiedEvent(DomainEvent):
 
 class GoalCreatedEvent(DomainEvent):
     """Emitted when a new goal record is persisted."""
+
     goal_id: uuid.UUID
     twin_id: uuid.UUID
     title: str
@@ -75,6 +87,7 @@ class GoalCreatedEvent(DomainEvent):
 
 class GoalStatusChangedEvent(DomainEvent):
     """Emitted when a goal's lifecycle status transitions."""
+
     goal_id: uuid.UUID
     twin_id: uuid.UUID
     previous_status: str
@@ -83,6 +96,7 @@ class GoalStatusChangedEvent(DomainEvent):
 
 class GoalCompletedEvent(DomainEvent):
     """Emitted when a goal reaches the COMPLETED status."""
+
     goal_id: uuid.UUID
     twin_id: uuid.UUID
     title: str
@@ -95,6 +109,7 @@ class GoalCompletedEvent(DomainEvent):
 
 class PlanGeneratedEvent(DomainEvent):
     """Emitted when a new plan is generated and persisted."""
+
     plan_id: uuid.UUID
     twin_id: uuid.UUID
     goal_id: Optional[uuid.UUID] = None
@@ -109,6 +124,7 @@ class PlanGeneratedEvent(DomainEvent):
 
 class RecommendationGeneratedEvent(DomainEvent):
     """Emitted when one or more recommendations are generated and persisted."""
+
     twin_id: uuid.UUID
     recommendation_ids: list[uuid.UUID]
     count: int
@@ -125,6 +141,7 @@ class CognitiveTraceRecordedEvent(DomainEvent):
     Future analytics workers subscribe to this event without modifying
     existing services. No worker implementation is required in Milestone 3.
     """
+
     trace_id: uuid.UUID
     twin_id: uuid.UUID
     operation_type: str
@@ -139,6 +156,7 @@ class CognitiveTraceRecordedEvent(DomainEvent):
 
 class ContextBuiltEvent(DomainEvent):
     """Emitted when a complete EnterpriseContext is successfully assembled."""
+
     context_id: uuid.UUID
     twin_id: uuid.UUID
     policy_id: str
@@ -153,6 +171,7 @@ class ContextPartiallyBuiltEvent(DomainEvent):
     is_usable indicates whether the partial context can still be consumed
     (True when no required_providers failed).
     """
+
     context_id: uuid.UUID
     twin_id: uuid.UUID
     successful_providers: list[str]
@@ -162,6 +181,7 @@ class ContextPartiallyBuiltEvent(DomainEvent):
 
 class ContextCompressedEvent(DomainEvent):
     """Emitted after context compression completes."""
+
     context_id: uuid.UUID
     twin_id: uuid.UUID
     items_before: int
@@ -171,6 +191,7 @@ class ContextCompressedEvent(DomainEvent):
 
 class ContextWindowCreatedEvent(DomainEvent):
     """Emitted when a ContextWindow is produced by AbstractContextWindowBuilder."""
+
     context_id: uuid.UUID
     twin_id: uuid.UUID
     token_estimate: int
@@ -180,6 +201,7 @@ class ContextWindowCreatedEvent(DomainEvent):
 
 class ContextExpiredEvent(DomainEvent):
     """Emitted when a context lifecycle record transitions to EXPIRED."""
+
     context_id: uuid.UUID
     twin_id: uuid.UUID
 
@@ -189,6 +211,7 @@ class ContextInvalidatedEvent(DomainEvent):
 
     Published by the cache layer — never bypasses the EventBus.
     """
+
     cache_key: str
     twin_id: uuid.UUID
     reason: str
@@ -196,6 +219,7 @@ class ContextInvalidatedEvent(DomainEvent):
 
 class ContextProviderFailedEvent(DomainEvent):
     """Emitted when a provider exhausts all retries during context assembly."""
+
     context_id: Optional[uuid.UUID]
     twin_id: uuid.UUID
     provider: str
@@ -210,6 +234,7 @@ class ContextProviderFailedEvent(DomainEvent):
 
 class ConversationUpdatedEvent(DomainEvent):
     """Emitted when a turn is added to a ConversationThread."""
+
     thread_id: uuid.UUID
     twin_id: uuid.UUID
     turn_count: int

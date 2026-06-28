@@ -58,13 +58,15 @@ class TwinRepository:
 
         try:
             response = (
-                await self._client.table(self._table_name)
-                .insert(insert_data)
-                .execute()
+                await self._client.table(self._table_name).insert(insert_data).execute()
             )
         except Exception as exc:
             error_str = str(exc).lower()
-            if "duplicate" in error_str or "23505" in error_str or "unique" in error_str:
+            if (
+                "duplicate" in error_str
+                or "23505" in error_str
+                or "unique" in error_str
+            ):
                 raise DuplicateTwinError(str(data.entity_id)) from exc
             logger.error("Failed to create twin", error=str(exc))
             raise RepositoryError("twin.create", str(exc)) from exc
@@ -121,7 +123,9 @@ class TwinRepository:
                 .execute()
             )
         except Exception as exc:
-            logger.error("Failed to get twin by entity", entity_id=str(entity_id), error=str(exc))
+            logger.error(
+                "Failed to get twin by entity", entity_id=str(entity_id), error=str(exc)
+            )
             raise RepositoryError("twin.get_by_entity_id", str(exc)) from exc
 
         if not response.data:
@@ -265,7 +269,7 @@ class TwinRepository:
         error_msg = getattr(original_exc, "message", "")
         if not error_msg:
             error_msg = str(original_exc)
-            
+
         if "TWIN_NOT_FOUND" in error_msg:
             raise TwinNotFoundError(str(twin_id)) from original_exc
 

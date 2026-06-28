@@ -40,15 +40,17 @@ class TwinContextProvider(AbstractContextProvider):
                 confidence=1.0,
                 citations=[str(twin.id)],
             )
-            items.append(ContextItem(
-                item_id=uuid4(),
-                source=ContextSource.TWIN,
-                priority=ContextPriority.HIGH,
-                content=content,
-                domain_object_id=twin.id,
-                token_estimate=len(content) // 4,
-                provenance=prov,
-            ))
+            items.append(
+                ContextItem(
+                    item_id=uuid4(),
+                    source=ContextSource.TWIN,
+                    priority=ContextPriority.HIGH,
+                    content=content,
+                    domain_object_id=twin.id,
+                    token_estimate=len(content) // 4,
+                    provenance=prov,
+                )
+            )
         except Exception as exc:
             logger.warning("TwinContextProvider failed", error=str(exc))
 

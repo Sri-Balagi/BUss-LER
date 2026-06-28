@@ -5,7 +5,6 @@ Handles conversation threads, turns, and context injection.
 
 import uuid
 from typing import Optional
-from datetime import datetime, timezone
 
 import structlog
 
@@ -19,7 +18,6 @@ from app.models.conversation import (
 )
 from app.models.enums import ConversationRole, ConversationStatus
 from app.models.events import ConversationUpdatedEvent
-from app.models.exceptions import ConversationNotFoundError
 from app.repositories.conversation_repository import AbstractConversationRepository
 
 logger = structlog.get_logger(__name__)
@@ -45,7 +43,7 @@ class ConversationService:
     ) -> ConversationThread:
         """Create a new conversation thread."""
         log = ctx.bind_to_logger(logger).bind(twin_id=str(twin_id))
-        
+
         # In a real system, you might want to auto-archive previous active threads
         # For M4, we just create a new one
         create_cmd = ConversationThreadCreate(
@@ -53,12 +51,14 @@ class ConversationService:
             title=title,
             metadata=metadata or {},
         )
-        
+
         thread = await self._repository.create_thread(create_cmd)
         log.info("Conversation thread created", thread_id=str(thread.id))
         return thread
 
-    async def get_thread(self, ctx: OperationContext, thread_id: uuid.UUID) -> ConversationThread:
+    async def get_thread(
+        self, ctx: OperationContext, thread_id: uuid.UUID
+    ) -> ConversationThread:
         """Retrieve a thread by ID."""
         return await self._repository.get_thread(thread_id)
 
@@ -75,10 +75,10 @@ class ConversationService:
     ) -> ConversationTurn:
         """Append a new turn to the conversation thread."""
         log = ctx.bind_to_logger(logger).bind(thread_id=str(thread_id), role=role.value)
-        
+
         # Verify thread exists
         thread = await self._repository.get_thread(thread_id)
-        
+
         # Prepare the turn creation payload
         create_cmd = self._prepare_turn_create(
             thread_id=thread.id,
@@ -89,9 +89,9 @@ class ConversationService:
             tool_calls=tool_calls,
             metadata=metadata,
         )
-        
+
         turn = await self._repository.add_turn(create_cmd)
-        
+
         if self._event_bus:
             try:
                 event = ConversationUpdatedEvent(
@@ -103,11 +103,15 @@ class ConversationService:
                 )
                 self._event_bus.publish(event)
             except Exception as exc:
-                log.warning("Failed to publish ConversationUpdatedEvent", error=str(exc))
-                
-        log.info("Conversation turn added", turn_id=str(turn.id), turn_index=turn.turn_index)
+                log.warning(
+                    "Failed to publish ConversationUpdatedEvent", error=str(exc)
+                )
+
+        log.info(
+            "Conversation turn added", turn_id=str(turn.id), turn_index=turn.turn_index
+        )
         return turn
-        
+
     def _prepare_turn_create(
         self,
         thread_id: uuid.UUID,

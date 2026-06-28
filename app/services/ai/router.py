@@ -13,7 +13,9 @@ class ProviderRouter:
         self._registry = registry
         self._default_provider = default_provider
 
-    def get_active_provider(self, requested_provider: Optional[str] = None) -> AbstractAIProvider:
+    def get_active_provider(
+        self, requested_provider: Optional[str] = None
+    ) -> AbstractAIProvider:
         """
         Return the requested provider, or the default if none is specified.
         In the future, this can inspect capabilities or load balance.

@@ -22,6 +22,7 @@ class MemoryContextProvider(AbstractContextProvider):
         items = []
         try:
             from app.models.queries import MemorySearchQuery
+
             intent_text = ""
             # Use intent raw_text if available in policy metadata
             search_query = MemorySearchQuery(
@@ -40,15 +41,17 @@ class MemoryContextProvider(AbstractContextProvider):
                     confidence=float(item.similarity_score),
                     citations=[str(item.memory.id)],
                 )
-                items.append(ContextItem(
-                    item_id=uuid4(),
-                    source=ContextSource.MEMORY,
-                    priority=ContextPriority.MEDIUM,
-                    content=content,
-                    domain_object_id=item.memory.id,
-                    token_estimate=token_est,
-                    provenance=prov,
-                ))
+                items.append(
+                    ContextItem(
+                        item_id=uuid4(),
+                        source=ContextSource.MEMORY,
+                        priority=ContextPriority.MEDIUM,
+                        content=content,
+                        domain_object_id=item.memory.id,
+                        token_estimate=token_est,
+                        provenance=prov,
+                    )
+                )
         except Exception as exc:
             logger.warning("MemoryContextProvider failed", error=str(exc))
 

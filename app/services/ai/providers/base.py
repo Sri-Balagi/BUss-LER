@@ -3,6 +3,7 @@ from typing import Dict, Any
 
 from app.models.ai import AIRequest, AIResponse, EmbeddingRequest, EmbeddingResponse
 
+
 class AbstractAIProvider(ABC):
     """
     Abstract interface for AI Providers.

@@ -48,9 +48,7 @@ class EntityService:
             offset=offset,
         )
 
-    async def create_entity(
-        self, user_id: UUID, data: EntityCreate
-    ) -> Entity:
+    async def create_entity(self, user_id: UUID, data: EntityCreate) -> Entity:
         """Create a new entity.
 
         Args:

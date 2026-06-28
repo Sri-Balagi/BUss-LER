@@ -48,9 +48,7 @@ class EntityRepository:
 
         try:
             response = (
-                await self._client.table(self._table_name)
-                .insert(insert_data)
-                .execute()
+                await self._client.table(self._table_name).insert(insert_data).execute()
             )
         except Exception as exc:
             logger.error("Failed to create entity", error=str(exc))
@@ -79,7 +77,9 @@ class EntityRepository:
                 .execute()
             )
         except Exception as exc:
-            logger.error("Failed to get entity", entity_id=str(entity_id), error=str(exc))
+            logger.error(
+                "Failed to get entity", entity_id=str(entity_id), error=str(exc)
+            )
             raise RepositoryError("entity.get_by_id", str(exc)) from exc
 
         if not response.data:
@@ -110,9 +110,7 @@ class EntityRepository:
             RepositoryError: If the query fails.
         """
         try:
-            query = self._client.table(self._table_name).select(
-                "*", count="exact"
-            )
+            query = self._client.table(self._table_name).select("*", count="exact")
 
             if user_id is not None:
                 query = query.eq("user_id", str(user_id))
@@ -166,7 +164,9 @@ class EntityRepository:
                 .execute()
             )
         except Exception as exc:
-            logger.error("Failed to update entity", entity_id=str(entity_id), error=str(exc))
+            logger.error(
+                "Failed to update entity", entity_id=str(entity_id), error=str(exc)
+            )
             raise RepositoryError("entity.update", str(exc)) from exc
 
         if not response.data:
@@ -194,7 +194,9 @@ class EntityRepository:
                 .execute()
             )
         except Exception as exc:
-            logger.error("Failed to soft-delete entity", entity_id=str(entity_id), error=str(exc))
+            logger.error(
+                "Failed to soft-delete entity", entity_id=str(entity_id), error=str(exc)
+            )
             raise RepositoryError("entity.soft_delete", str(exc)) from exc
 
         if not response.data:

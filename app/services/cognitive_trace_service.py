@@ -12,7 +12,6 @@ Integration points in M3:
 """
 
 from abc import ABC, abstractmethod
-from typing import Optional
 from uuid import UUID
 
 import structlog
@@ -20,7 +19,6 @@ import structlog
 from app.models.cognitive_trace import (
     CognitiveTrace,
     CognitiveTraceCreate,
-    CognitiveTraceTokenUsage,
     PaginatedCognitiveTraces,
 )
 from app.models.events import CognitiveTraceRecordedEvent
@@ -35,17 +33,22 @@ logger = structlog.get_logger(__name__)
 
 
 class AbstractCognitiveTraceService(ABC):
-
     @abstractmethod
-    async def record_operation(self, ctx: OperationContext, data: CognitiveTraceCreate) -> CreateCognitiveTraceResult:
+    async def record_operation(
+        self, ctx: OperationContext, data: CognitiveTraceCreate
+    ) -> CreateCognitiveTraceResult:
         pass
 
     @abstractmethod
-    async def retrieve_trace(self, ctx: OperationContext, trace_id: UUID) -> CognitiveTrace:
+    async def retrieve_trace(
+        self, ctx: OperationContext, trace_id: UUID
+    ) -> CognitiveTrace:
         pass
 
     @abstractmethod
-    async def list_traces(self, ctx: OperationContext, query: CognitiveTraceListQuery) -> PaginatedCognitiveTraces:
+    async def list_traces(
+        self, ctx: OperationContext, query: CognitiveTraceListQuery
+    ) -> PaginatedCognitiveTraces:
         pass
 
     @abstractmethod
@@ -64,7 +67,9 @@ class CognitiveTraceService(AbstractCognitiveTraceService):
         self._repository = repository
         self._event_bus = event_bus
 
-    async def record_operation(self, ctx: OperationContext, data: CognitiveTraceCreate) -> CreateCognitiveTraceResult:
+    async def record_operation(
+        self, ctx: OperationContext, data: CognitiveTraceCreate
+    ) -> CreateCognitiveTraceResult:
         """Persist a cognitive trace and emit CognitiveTraceRecordedEvent."""
         log = logger.bind(
             correlation_id=ctx.correlation_id,
@@ -90,15 +95,23 @@ class CognitiveTraceService(AbstractCognitiveTraceService):
         )
         await self._event_bus.publish(event, ctx)
 
-        log.info("Cognitive trace recorded", trace_id=str(trace.id), latency_ms=trace.latency_ms)
+        log.info(
+            "Cognitive trace recorded",
+            trace_id=str(trace.id),
+            latency_ms=trace.latency_ms,
+        )
         return CreateCognitiveTraceResult(trace=trace, dispatched_events=1)
 
-    async def retrieve_trace(self, ctx: OperationContext, trace_id: UUID) -> CognitiveTrace:
+    async def retrieve_trace(
+        self, ctx: OperationContext, trace_id: UUID
+    ) -> CognitiveTrace:
         log = logger.bind(correlation_id=ctx.correlation_id, trace_id=str(trace_id))
         log.info("Retrieving cognitive trace")
         return await self._repository.get_by_id(trace_id)
 
-    async def list_traces(self, ctx: OperationContext, query: CognitiveTraceListQuery) -> PaginatedCognitiveTraces:
+    async def list_traces(
+        self, ctx: OperationContext, query: CognitiveTraceListQuery
+    ) -> PaginatedCognitiveTraces:
         log = logger.bind(correlation_id=ctx.correlation_id, twin_id=str(query.twin_id))
         log.info("Listing cognitive traces")
         return await self._repository.list_by_twin(

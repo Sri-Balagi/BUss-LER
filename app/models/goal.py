@@ -17,8 +17,12 @@ from app.models.schemas import DomainBaseModel
 class GoalBase(DomainBaseModel):
     """Base Goal schema with common attributes."""
 
-    title: str = Field(..., min_length=1, max_length=500, description="Short goal title.")
-    description: Optional[str] = Field(None, max_length=5000, description="Detailed goal description.")
+    title: str = Field(
+        ..., min_length=1, max_length=500, description="Short goal title."
+    )
+    description: Optional[str] = Field(
+        None, max_length=5000, description="Detailed goal description."
+    )
     goal_type: GoalType = Field(
         default=GoalType.STRATEGIC,
         description="Hierarchical level of this goal.",
@@ -29,7 +33,9 @@ class GoalBase(DomainBaseModel):
         le=10,
         description="Priority score 1 (lowest) to 10 (highest).",
     )
-    target_date: Optional[datetime] = Field(None, description="Optional deadline for the goal.")
+    target_date: Optional[datetime] = Field(
+        None, description="Optional deadline for the goal."
+    )
     success_criteria: List[str] = Field(
         default_factory=list,
         description="List of measurable success conditions.",
@@ -38,7 +44,9 @@ class GoalBase(DomainBaseModel):
         None,
         description="Parent goal for hierarchical decomposition.",
     )
-    metadata: Dict[str, Any] = Field(default_factory=dict, description="Schemaless structured metadata.")
+    metadata: Dict[str, Any] = Field(
+        default_factory=dict, description="Schemaless structured metadata."
+    )
 
 
 class GoalCreate(GoalBase):
@@ -67,7 +75,9 @@ class Goal(GoalBase):
     id: UUID
     twin_id: UUID
     status: GoalStatus = GoalStatus.DRAFT
-    progress: float = Field(default=0.0, ge=0.0, le=100.0, description="Completion percentage 0-100.")
+    progress: float = Field(
+        default=0.0, ge=0.0, le=100.0, description="Completion percentage 0-100."
+    )
     completed_at: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime

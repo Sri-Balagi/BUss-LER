@@ -47,7 +47,9 @@ def _map_intent(intent) -> IntentResponse:
         title=intent.title,
         intent_type=intent.intent_type,
         status=intent.status,
-        analysis=IntentAnalysisResponse(**intent.analysis.model_dump()) if intent.analysis else None,
+        analysis=IntentAnalysisResponse(**intent.analysis.model_dump())
+        if intent.analysis
+        else None,
         metadata=intent.metadata,
         classified_at=intent.classified_at,
         fulfilled_at=intent.fulfilled_at,
@@ -69,7 +71,9 @@ async def create_intent(
     ctx: OperationContext = Depends(get_operation_context),
     intent_service: AbstractIntentService = Depends(get_intent_service),
 ) -> IntentResponse:
-    cmd = CreateIntentCommand(twin_id=twin_id, raw_text=body.raw_text, metadata=body.metadata)
+    cmd = CreateIntentCommand(
+        twin_id=twin_id, raw_text=body.raw_text, metadata=body.metadata
+    )
     result = await intent_service.create_intent(ctx, cmd)
     return _map_intent(result.intent)
 
@@ -91,17 +95,23 @@ async def classify_intent(
     intent_service: AbstractIntentService = Depends(get_intent_service),
 ) -> ClassifyIntentResponse:
     # Step 1: Create
-    create_cmd = CreateIntentCommand(twin_id=twin_id, raw_text=body.raw_text, metadata=body.metadata)
+    create_cmd = CreateIntentCommand(
+        twin_id=twin_id, raw_text=body.raw_text, metadata=body.metadata
+    )
     create_result = await intent_service.create_intent(ctx, create_cmd)
 
     # Step 2: Classify
-    classify_cmd = ClassifyIntentCommand(intent_id=create_result.intent.id, twin_id=twin_id)
+    classify_cmd = ClassifyIntentCommand(
+        intent_id=create_result.intent.id, twin_id=twin_id
+    )
     classify_result = await intent_service.classify_intent(ctx, classify_cmd)
 
     return ClassifyIntentResponse(
         intent=_map_intent(classify_result.intent),
         analysis=IntentAnalysisResponse(**classify_result.analysis.model_dump()),
-        cognitive_trace_id=classify_result.cognitive_trace.id if classify_result.cognitive_trace else None,
+        cognitive_trace_id=classify_result.cognitive_trace.id
+        if classify_result.cognitive_trace
+        else None,
     )
 
 
@@ -120,7 +130,11 @@ async def list_intents(
     intent_service: AbstractIntentService = Depends(get_intent_service),
 ) -> PaginatedIntentResponse:
     query = IntentListQuery(
-        twin_id=twin_id, status=status, intent_type=intent_type, limit=limit, offset=offset
+        twin_id=twin_id,
+        status=status,
+        intent_type=intent_type,
+        limit=limit,
+        offset=offset,
     )
     result = await intent_service.list_intents(ctx, query)
     return PaginatedIntentResponse(
@@ -156,7 +170,9 @@ async def update_intent_status(
     ctx: OperationContext = Depends(get_operation_context),
     intent_service: AbstractIntentService = Depends(get_intent_service),
 ) -> IntentResponse:
-    cmd = UpdateIntentStatusCommand(intent_id=intent_id, target_status=body.target_status)
+    cmd = UpdateIntentStatusCommand(
+        intent_id=intent_id, target_status=body.target_status
+    )
     updated = await intent_service.update_intent_status(ctx, cmd)
     return _map_intent(updated)
 

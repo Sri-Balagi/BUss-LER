@@ -23,7 +23,10 @@ class IntentContextProvider(AbstractContextProvider):
         try:
             from app.models.queries import IntentListQuery
             from app.models.enums import IntentStatus
-            query = IntentListQuery(twin_id=twin_id, limit=1, status=IntentStatus.CLASSIFIED)
+
+            query = IntentListQuery(
+                twin_id=twin_id, limit=1, status=IntentStatus.CLASSIFIED
+            )
             result = await self._intent_service.list_intents(ctx, query)
             if result.items:
                 intent = result.items[0]
@@ -39,15 +42,17 @@ class IntentContextProvider(AbstractContextProvider):
                     confidence=1.0,
                     citations=[str(intent.id)],
                 )
-                items.append(ContextItem(
-                    item_id=uuid4(),
-                    source=ContextSource.INTENT,
-                    priority=ContextPriority.CRITICAL,
-                    content=content,
-                    domain_object_id=intent.id,
-                    token_estimate=len(content) // 4,
-                    provenance=prov,
-                ))
+                items.append(
+                    ContextItem(
+                        item_id=uuid4(),
+                        source=ContextSource.INTENT,
+                        priority=ContextPriority.CRITICAL,
+                        content=content,
+                        domain_object_id=intent.id,
+                        token_estimate=len(content) // 4,
+                        provenance=prov,
+                    )
+                )
         except Exception as exc:
             logger.warning("IntentContextProvider failed", error=str(exc))
 

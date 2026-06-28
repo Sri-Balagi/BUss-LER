@@ -21,9 +21,14 @@ logger = structlog.get_logger(__name__)
 
 
 class AbstractPlanRepository(ABC):
-
     @abstractmethod
-    async def create(self, twin_id: UUID, goal_id: Optional[UUID], intent_id: Optional[UUID], data: PlanCreate) -> Plan:
+    async def create(
+        self,
+        twin_id: UUID,
+        goal_id: Optional[UUID],
+        intent_id: Optional[UUID],
+        data: PlanCreate,
+    ) -> Plan:
         pass
 
     @abstractmethod
@@ -51,13 +56,18 @@ class AbstractPlanRepository(ABC):
 
 
 class PlanRepository(AbstractPlanRepository):
-
     _table = "plans"
 
     def __init__(self, client: AsyncClient) -> None:
         self._client = client
 
-    async def create(self, twin_id: UUID, goal_id: Optional[UUID], intent_id: Optional[UUID], data: PlanCreate) -> Plan:
+    async def create(
+        self,
+        twin_id: UUID,
+        goal_id: Optional[UUID],
+        intent_id: Optional[UUID],
+        data: PlanCreate,
+    ) -> Plan:
         start = time.time()
         insert_data = {
             "twin_id": str(twin_id),
@@ -77,16 +87,27 @@ class PlanRepository(AbstractPlanRepository):
             insert_data["estimated_effort"] = data.estimated_effort
 
         try:
-            response = await self._client.table(self._table).insert(insert_data).execute()
+            response = (
+                await self._client.table(self._table).insert(insert_data).execute()
+            )
         except Exception as exc:
             raise RepositoryError("plan.create", str(exc)) from exc
 
-        logger.info("Created plan", plan_id=response.data[0]["id"], latency_ms=(time.time() - start) * 1000)
+        logger.info(
+            "Created plan",
+            plan_id=response.data[0]["id"],
+            latency_ms=(time.time() - start) * 1000,
+        )
         return self._deserialize(response.data[0])
 
     async def get_by_id(self, plan_id: UUID) -> Plan:
         try:
-            response = await self._client.table(self._table).select("*").eq("id", str(plan_id)).execute()
+            response = (
+                await self._client.table(self._table)
+                .select("*")
+                .eq("id", str(plan_id))
+                .execute()
+            )
         except Exception as exc:
             raise RepositoryError("plan.get_by_id", str(exc)) from exc
 
@@ -103,18 +124,28 @@ class PlanRepository(AbstractPlanRepository):
         offset: int = 0,
     ) -> PaginatedPlans:
         try:
-            query = self._client.table(self._table).select("*", count="exact").eq("twin_id", str(twin_id))
+            query = (
+                self._client.table(self._table)
+                .select("*", count="exact")
+                .eq("twin_id", str(twin_id))
+            )
             if goal_id:
                 query = query.eq("goal_id", str(goal_id))
             if intent_id:
                 query = query.eq("intent_id", str(intent_id))
-            response = await query.order("created_at", desc=True).range(offset, offset + limit - 1).execute()
+            response = (
+                await query.order("created_at", desc=True)
+                .range(offset, offset + limit - 1)
+                .execute()
+            )
         except Exception as exc:
             raise RepositoryError("plan.list_by_twin", str(exc)) from exc
 
         items = [self._deserialize(row) for row in response.data]
         total = response.count if response.count is not None else len(items)
-        return PaginatedPlans(items=items, total_count=total, limit=limit, offset=offset)
+        return PaginatedPlans(
+            items=items, total_count=total, limit=limit, offset=offset
+        )
 
     async def update_status(self, plan_id: UUID, status: PlanStatus) -> Plan:
         try:
@@ -143,6 +174,7 @@ class PlanRepository(AbstractPlanRepository):
     @staticmethod
     def _deserialize(row: dict) -> Plan:
         from app.models.plan import PlanStep
+
         if row.get("steps") and isinstance(row["steps"], list):
             row["steps"] = [PlanStep.model_validate(s) for s in row["steps"]]
         return Plan.model_validate(row)

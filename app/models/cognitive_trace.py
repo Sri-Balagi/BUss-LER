@@ -51,7 +51,9 @@ class CognitiveTrace(DomainBaseModel):
         ),
     )
     provider: str = Field(..., description="AI provider used (e.g., 'gemini').")
-    model: str = Field(..., description="Exact model name used (e.g., 'gemini-2.5-flash').")
+    model: str = Field(
+        ..., description="Exact model name used (e.g., 'gemini-2.5-flash')."
+    )
     prompt_version: str = Field(
         ...,
         description=(
@@ -67,9 +69,15 @@ class CognitiveTrace(DomainBaseModel):
     )
 
     # --- Related domain objects ---
-    intent_id: Optional[UUID] = Field(default=None, description="Intent that was classified or consumed.")
-    goal_id: Optional[UUID] = Field(default=None, description="Goal that was planned for or consumed.")
-    plan_id: Optional[UUID] = Field(default=None, description="Plan that was generated.")
+    intent_id: Optional[UUID] = Field(
+        default=None, description="Intent that was classified or consumed."
+    )
+    goal_id: Optional[UUID] = Field(
+        default=None, description="Goal that was planned for or consumed."
+    )
+    plan_id: Optional[UUID] = Field(
+        default=None, description="Plan that was generated."
+    )
     recommendation_id: Optional[UUID] = Field(
         default=None,
         description="Recommendation that was generated.",
@@ -102,21 +110,34 @@ class CognitiveTrace(DomainBaseModel):
     )
 
     # --- Performance ---
-    latency_ms: float = Field(..., ge=0.0, description="End-to-end AI operation latency in milliseconds.")
+    latency_ms: float = Field(
+        ..., ge=0.0, description="End-to-end AI operation latency in milliseconds."
+    )
     token_usage: CognitiveTraceTokenUsage = Field(
         default_factory=CognitiveTraceTokenUsage,
         description="Token consumption breakdown.",
     )
 
     # --- M4 Context Observability ---
-    context_id: Optional[UUID] = Field(default=None, description="ID of the EnterpriseContext used.")
-    context_sources_used: List[str] = Field(default_factory=list, description="List of ContextSource providers invoked.")
-    compression_ratio: Optional[float] = Field(default=None, ge=0.0, le=1.0, description="Items retained / Items total.")
+    context_id: Optional[UUID] = Field(
+        default=None, description="ID of the EnterpriseContext used."
+    )
+    context_sources_used: List[str] = Field(
+        default_factory=list, description="List of ContextSource providers invoked."
+    )
+    compression_ratio: Optional[float] = Field(
+        default=None, ge=0.0, le=1.0, description="Items retained / Items total."
+    )
     ranking_latency_ms: Optional[float] = Field(default=None, ge=0.0)
     compression_latency_ms: Optional[float] = Field(default=None, ge=0.0)
     window_latency_ms: Optional[float] = Field(default=None, ge=0.0)
-    token_estimate: Optional[int] = Field(default=None, description="Estimated context tokens consumed.")
-    per_provider_latency_ms: Dict[str, float] = Field(default_factory=dict, description="Latency per provider during Context Engine build.")
+    token_estimate: Optional[int] = Field(
+        default=None, description="Estimated context tokens consumed."
+    )
+    per_provider_latency_ms: Dict[str, float] = Field(
+        default_factory=dict,
+        description="Latency per provider during Context Engine build.",
+    )
 
     # --- Timestamps ---
     created_at: datetime
@@ -146,7 +167,9 @@ class CognitiveTraceCreate(DomainBaseModel):
     reasoning_summary: str
     confidence: Optional[float] = Field(default=None, ge=0.0, le=1.0)
     latency_ms: float
-    token_usage: CognitiveTraceTokenUsage = Field(default_factory=CognitiveTraceTokenUsage)
+    token_usage: CognitiveTraceTokenUsage = Field(
+        default_factory=CognitiveTraceTokenUsage
+    )
 
     # --- M4 Context Observability ---
     context_id: Optional[UUID] = None

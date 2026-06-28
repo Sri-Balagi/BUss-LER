@@ -19,14 +19,22 @@ from app.services.context_cache import MemoryContextCache
 from app.services.context_dependency_graph import build_default_dependency_graph
 from app.services.context_engine import ContextEngine
 from app.services.context_provider_registry import ContextProviderRegistry
-from app.services.context_providers.business_state_provider import BusinessStateContextProvider
-from app.services.context_providers.conversation_provider import ConversationContextProvider
-from app.services.context_providers.external_provider import ExternalIntegrationContextProvider
+from app.services.context_providers.business_state_provider import (
+    BusinessStateContextProvider,
+)
+from app.services.context_providers.conversation_provider import (
+    ConversationContextProvider,
+)
+from app.services.context_providers.external_provider import (
+    ExternalIntegrationContextProvider,
+)
 from app.services.context_providers.goal_provider import GoalContextProvider
 from app.services.context_providers.intent_provider import IntentContextProvider
 from app.services.context_providers.memory_provider import MemoryContextProvider
 from app.services.context_providers.plan_provider import PlanContextProvider
-from app.services.context_providers.recommendation_provider import RecommendationContextProvider
+from app.services.context_providers.recommendation_provider import (
+    RecommendationContextProvider,
+)
 from app.services.context_providers.trace_provider import TraceContextProvider
 from app.services.context_providers.twin_provider import TwinContextProvider
 from app.services.context_strategies import (
@@ -73,43 +81,69 @@ async def get_context_registry(
 
     registry.register(
         provider=MemoryContextProvider(memory_service),
-        metadata=ProviderMetadata(source=ContextSource.MEMORY, name="MemoryProvider", version="1.0"),
+        metadata=ProviderMetadata(
+            source=ContextSource.MEMORY, name="MemoryProvider", version="1.0"
+        ),
     )
     registry.register(
         provider=IntentContextProvider(intent_service),
-        metadata=ProviderMetadata(source=ContextSource.INTENT, name="IntentProvider", version="1.0"),
+        metadata=ProviderMetadata(
+            source=ContextSource.INTENT, name="IntentProvider", version="1.0"
+        ),
     )
     registry.register(
         provider=GoalContextProvider(goal_service),
-        metadata=ProviderMetadata(source=ContextSource.GOAL, name="GoalProvider", version="1.0"),
+        metadata=ProviderMetadata(
+            source=ContextSource.GOAL, name="GoalProvider", version="1.0"
+        ),
     )
     registry.register(
         provider=PlanContextProvider(plan_service),
-        metadata=ProviderMetadata(source=ContextSource.PLAN, name="PlanProvider", version="1.0"),
+        metadata=ProviderMetadata(
+            source=ContextSource.PLAN, name="PlanProvider", version="1.0"
+        ),
     )
     registry.register(
         provider=RecommendationContextProvider(recommendation_service),
-        metadata=ProviderMetadata(source=ContextSource.RECOMMENDATION, name="RecommendationProvider", version="1.0"),
+        metadata=ProviderMetadata(
+            source=ContextSource.RECOMMENDATION,
+            name="RecommendationProvider",
+            version="1.0",
+        ),
     )
     registry.register(
         provider=TwinContextProvider(twin_service),
-        metadata=ProviderMetadata(source=ContextSource.TWIN, name="TwinProvider", version="1.0"),
+        metadata=ProviderMetadata(
+            source=ContextSource.TWIN, name="TwinProvider", version="1.0"
+        ),
     )
     registry.register(
         provider=ConversationContextProvider(conversation_service),
-        metadata=ProviderMetadata(source=ContextSource.CONVERSATION, name="ConversationProvider", version="1.0"),
+        metadata=ProviderMetadata(
+            source=ContextSource.CONVERSATION,
+            name="ConversationProvider",
+            version="1.0",
+        ),
     )
     registry.register(
         provider=TraceContextProvider(trace_service),
-        metadata=ProviderMetadata(source=ContextSource.TRACE, name="TraceProvider", version="1.0"),
+        metadata=ProviderMetadata(
+            source=ContextSource.TRACE, name="TraceProvider", version="1.0"
+        ),
     )
     registry.register(
         provider=BusinessStateContextProvider(twin_service),
-        metadata=ProviderMetadata(source=ContextSource.BUSINESS_STATE, name="BusinessStateProvider", version="1.0"),
+        metadata=ProviderMetadata(
+            source=ContextSource.BUSINESS_STATE,
+            name="BusinessStateProvider",
+            version="1.0",
+        ),
     )
     registry.register(
         provider=ExternalIntegrationContextProvider(),
-        metadata=ProviderMetadata(source=ContextSource.EXTERNAL, name="ExternalProvider", version="1.0"),
+        metadata=ProviderMetadata(
+            source=ContextSource.EXTERNAL, name="ExternalProvider", version="1.0"
+        ),
     )
 
     return registry
@@ -121,6 +155,7 @@ _validator = DefaultContextValidator()
 _ranker = DefaultContextRanker()
 _compressor = DefaultContextCompressor()
 _window_builder = DefaultContextWindowBuilder()
+
 
 async def get_context_engine(
     registry: ContextProviderRegistry = Depends(get_context_registry),

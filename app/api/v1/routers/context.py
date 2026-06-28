@@ -21,7 +21,9 @@ from app.core.context import OperationContext
 from app.models.enterprise_context import EnterpriseContextCreate
 from app.models.enums import ContextStatus
 from app.services.context_engine import AbstractContextEngine
-from app.repositories.enterprise_context_repository import AbstractEnterpriseContextRepository
+from app.repositories.enterprise_context_repository import (
+    AbstractEnterpriseContextRepository,
+)
 
 logger = structlog.get_logger(__name__)
 

@@ -5,7 +5,6 @@ and exponential backoff retry. No single provider can block assembly indefinitel
 """
 
 import asyncio
-import time
 import random
 from typing import Optional, Union, Tuple, Type
 from uuid import UUID
@@ -31,8 +30,9 @@ class ProviderRetryConfig(DomainBaseModel):
         jitter:          Whether to apply jitter to the delay.
         retry_on:        Exception classes that trigger a retry.
     """
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
-    
+
     timeout_seconds: float = 5.0
     max_retries: int = 2
     backoff_base: float = 1.0
@@ -103,7 +103,7 @@ async def provide_with_retry(
                     attempt=attempt,
                 )
                 break
-            
+
             exc_name = type(exc).__name__
             last_error = f"{exc_name}: {exc}"
             logger.warning(
@@ -119,7 +119,7 @@ async def provide_with_retry(
             delay = retry_config.backoff_base * (2 ** (attempt - 1))
             if retry_config.jitter:
                 delay = delay * random.uniform(0.5, 1.5)
-            
+
             delay = min(delay, retry_config.max_delay)
             await asyncio.sleep(delay)
 
@@ -135,6 +135,7 @@ async def provide_with_retry(
     if event_bus is not None:
         try:
             from app.models.events import ContextProviderFailedEvent
+
             event = ContextProviderFailedEvent(
                 correlation_id=ctx.correlation_id,
                 context_id=context_id,
@@ -145,7 +146,9 @@ async def provide_with_retry(
             )
             event_bus.publish(event)
         except Exception as evt_exc:
-            logger.warning("Failed to publish ContextProviderFailedEvent", error=str(evt_exc))
+            logger.warning(
+                "Failed to publish ContextProviderFailedEvent", error=str(evt_exc)
+            )
 
     return ProviderFailureRecord(
         provider=source,

@@ -8,7 +8,7 @@ Conversation threads are twin-scoped and persisted in Supabase.
 
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from pydantic import Field
 
@@ -26,6 +26,7 @@ class ConversationThread(DomainBaseModel):
 
     Provides short-term working memory.  Each thread belongs to a Digital Twin.
     """
+
     id: UUID
     twin_id: UUID
     title: Optional[str] = Field(default=None, max_length=500)
@@ -43,6 +44,7 @@ class ConversationThread(DomainBaseModel):
 
 class ConversationThreadCreate(DomainBaseModel):
     """Write model for starting a new conversation thread."""
+
     twin_id: UUID
     title: Optional[str] = Field(default=None, max_length=500)
     metadata: Dict[str, Any] = Field(default_factory=dict)
@@ -58,6 +60,7 @@ class ConversationTurn(DomainBaseModel):
 
     Ordered by turn_index. Role follows ConversationRole: user, assistant, system, tool.
     """
+
     id: UUID
     thread_id: UUID
     role: ConversationRole
@@ -75,6 +78,7 @@ class ConversationTurn(DomainBaseModel):
 
 class ConversationTurnCreate(DomainBaseModel):
     """Write model for appending a turn to a thread."""
+
     thread_id: UUID
     role: ConversationRole
     content: str = Field(..., min_length=1, max_length=50000)
@@ -91,6 +95,7 @@ class ConversationTurnCreate(DomainBaseModel):
 
 class ConversationWithTurns(DomainBaseModel):
     """Conversation thread with all of its turns included."""
+
     thread: ConversationThread
     turns: List[ConversationTurn] = Field(default_factory=list)
 
@@ -102,6 +107,7 @@ class ConversationWithTurns(DomainBaseModel):
 
 class PaginatedConversationThreads(DomainBaseModel):
     """Pagination wrapper for conversation thread listings."""
+
     items: List[ConversationThread]
     total_count: int
     limit: int
@@ -110,6 +116,7 @@ class PaginatedConversationThreads(DomainBaseModel):
 
 class PaginatedConversationTurns(DomainBaseModel):
     """Pagination wrapper for conversation turn listings."""
+
     items: List[ConversationTurn]
     total_count: int
     limit: int

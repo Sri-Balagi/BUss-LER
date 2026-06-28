@@ -6,7 +6,7 @@ No mutation, no business logic. Pure data containers for read parameters.
 
 import uuid
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 from pydantic import Field
 
 from app.models.schemas import DomainBaseModel
@@ -27,6 +27,7 @@ from app.models.enums import (
 
 class MemorySearchQuery(DomainBaseModel):
     """Encapsulates parameters for searching memories."""
+
     twin_id: uuid.UUID
     query_text: str = Field(..., description="The semantic search string.")
     limit: int = Field(default=10, ge=1, le=100)
@@ -45,9 +46,14 @@ class MemorySearchQuery(DomainBaseModel):
 
 class IntentListQuery(DomainBaseModel):
     """Encapsulates parameters for listing intents."""
+
     twin_id: uuid.UUID
-    status: Optional[IntentStatus] = Field(default=None, description="Filter by lifecycle status.")
-    intent_type: Optional[IntentType] = Field(default=None, description="Filter by intent type.")
+    status: Optional[IntentStatus] = Field(
+        default=None, description="Filter by lifecycle status."
+    )
+    intent_type: Optional[IntentType] = Field(
+        default=None, description="Filter by intent type."
+    )
     limit: int = Field(default=20, ge=1, le=100)
     offset: int = Field(default=0, ge=0)
     include_deleted: bool = Field(default=False)
@@ -60,9 +66,14 @@ class IntentListQuery(DomainBaseModel):
 
 class GoalListQuery(DomainBaseModel):
     """Encapsulates parameters for listing goals."""
+
     twin_id: uuid.UUID
-    status: Optional[GoalStatus] = Field(default=None, description="Filter by lifecycle status.")
-    goal_type: Optional[GoalType] = Field(default=None, description="Filter by goal type.")
+    status: Optional[GoalStatus] = Field(
+        default=None, description="Filter by lifecycle status."
+    )
+    goal_type: Optional[GoalType] = Field(
+        default=None, description="Filter by goal type."
+    )
     limit: int = Field(default=20, ge=1, le=100)
     offset: int = Field(default=0, ge=0)
     include_deleted: bool = Field(default=False)
@@ -75,9 +86,14 @@ class GoalListQuery(DomainBaseModel):
 
 class PlanListQuery(DomainBaseModel):
     """Encapsulates parameters for listing plans."""
+
     twin_id: uuid.UUID
-    goal_id: Optional[uuid.UUID] = Field(default=None, description="Filter by associated goal.")
-    intent_id: Optional[uuid.UUID] = Field(default=None, description="Filter by originating intent.")
+    goal_id: Optional[uuid.UUID] = Field(
+        default=None, description="Filter by associated goal."
+    )
+    intent_id: Optional[uuid.UUID] = Field(
+        default=None, description="Filter by originating intent."
+    )
     limit: int = Field(default=20, ge=1, le=100)
     offset: int = Field(default=0, ge=0)
 
@@ -89,8 +105,11 @@ class PlanListQuery(DomainBaseModel):
 
 class RecommendationListQuery(DomainBaseModel):
     """Encapsulates parameters for listing recommendations."""
+
     twin_id: uuid.UUID
-    status: Optional[RecommendationStatus] = Field(default=None, description="Filter by status.")
+    status: Optional[RecommendationStatus] = Field(
+        default=None, description="Filter by status."
+    )
     limit: int = Field(default=20, ge=1, le=100)
     offset: int = Field(default=0, ge=0)
 
@@ -102,6 +121,7 @@ class RecommendationListQuery(DomainBaseModel):
 
 class CognitiveTraceListQuery(DomainBaseModel):
     """Encapsulates parameters for listing cognitive traces."""
+
     twin_id: uuid.UUID
     operation_type: Optional[str] = Field(
         default=None,

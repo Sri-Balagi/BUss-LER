@@ -8,6 +8,7 @@ from app.services.ai.registry import ProviderRegistry
 from app.services.ai.router import ProviderRouter
 from app.services.ai.prompts import PromptManager
 
+
 async def get_ai_kernel(settings: Settings = Depends(get_settings)) -> AbstractAIKernel:
     registry = ProviderRegistry()
     registry.register(GeminiProvider(settings))

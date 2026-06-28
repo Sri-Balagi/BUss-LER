@@ -16,6 +16,7 @@ from app.services.context_policies import ContextPolicy
 
 class ValidationResult(DomainBaseModel):
     """Result of context validation."""
+
     is_valid: bool
     errors: List[str] = []
     warnings: List[str] = []
@@ -119,11 +120,15 @@ class DefaultContextValidator(AbstractContextValidator):
                 if item.provenance:
                     conf = item.provenance.confidence
                     if not (0.0 <= conf <= 1.0):
-                        errors.append(f"ContextItem '{item.item_id}' has invalid confidence: {conf}")
-                    
+                        errors.append(
+                            f"ContextItem '{item.item_id}' has invalid confidence: {conf}"
+                        )
+
                     rank = item.provenance.ranking_score
                     if not (0.0 <= rank <= 1.0):
-                        errors.append(f"ContextItem '{item.item_id}' has invalid ranking_score: {rank}")
+                        errors.append(
+                            f"ContextItem '{item.item_id}' has invalid ranking_score: {rank}"
+                        )
 
         # 8. Critical section verification
         if ContextSource.GOAL in policy.required_providers:

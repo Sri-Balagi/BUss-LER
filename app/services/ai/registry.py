@@ -19,5 +19,7 @@ class ProviderRegistry:
     def get_provider(self, name: str) -> AbstractAIProvider:
         """Retrieve a registered provider by name."""
         if name not in self._providers:
-            raise ProviderConfigurationError(name, f"Provider '{name}' is not registered.")
+            raise ProviderConfigurationError(
+                name, f"Provider '{name}' is not registered."
+            )
         return self._providers[name]

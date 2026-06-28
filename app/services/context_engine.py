@@ -9,8 +9,8 @@ Never accesses databases or providers directly.
 import asyncio
 import time
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Tuple
-from uuid import UUID, uuid4
+from typing import Dict, List, Tuple
+from uuid import uuid4
 
 import structlog
 
@@ -25,9 +25,9 @@ from app.models.enterprise_context import (
     ContextLifecycleCreate,
     ContextLifecycleUpdate,
 )
-from app.models.enums import ContextStatus, ContextSource
+from app.models.enums import ContextStatus
 from app.models.events import (
-    ContextBuiltEvent, 
+    ContextBuiltEvent,
     ContextPartiallyBuiltEvent,
     ContextCompressedEvent,
     ContextWindowCreatedEvent,
@@ -38,7 +38,9 @@ from app.models.exceptions import (
 )
 from app.services.context_policies import BUILT_IN_POLICIES
 from app.services.context_retry import provide_with_retry
-from app.repositories.enterprise_context_repository import AbstractEnterpriseContextRepository
+from app.repositories.enterprise_context_repository import (
+    AbstractEnterpriseContextRepository,
+)
 
 logger = structlog.get_logger(__name__)
 
@@ -59,15 +61,15 @@ class ContextEngine(AbstractContextEngine):
 
     def __init__(
         self,
-        provider_registry,          # ContextProviderRegistry
-        dependency_graph,           # ContextDependencyGraph
-        validator,                  # AbstractContextValidator
-        ranker,                     # AbstractContextRanker
-        compressor,                 # AbstractContextCompressor
-        window_builder,             # AbstractContextWindowBuilder
+        provider_registry,  # ContextProviderRegistry
+        dependency_graph,  # ContextDependencyGraph
+        validator,  # AbstractContextValidator
+        ranker,  # AbstractContextRanker
+        compressor,  # AbstractContextCompressor
+        window_builder,  # AbstractContextWindowBuilder
         repository: AbstractEnterpriseContextRepository = None,
-        event_bus=None,             # EventBus
-        trace_service=None,         # AbstractCognitiveTraceService
+        event_bus=None,  # EventBus
+        trace_service=None,  # AbstractCognitiveTraceService
     ) -> None:
         self._registry = provider_registry
         self._graph = dependency_graph
@@ -93,7 +95,7 @@ class ContextEngine(AbstractContextEngine):
             raise ContextAssemblyError(f"Unknown context policy: {command.policy_id}")
 
         context_id = uuid4()
-        
+
         # Persist BUILDING lifecycle
         if self._repository:
             await self._repository.create(
@@ -101,7 +103,7 @@ class ContextEngine(AbstractContextEngine):
                     context_id=context_id,
                     twin_id=command.twin_id,
                     policy_id=policy.policy_id,
-                    schema_version="1.0"
+                    schema_version="1.0",
                 )
             )
 
@@ -111,7 +113,7 @@ class ContextEngine(AbstractContextEngine):
         sections, failures, provider_latencies = await self._execute_providers(
             ctx, command, policy, execution_plan
         )
-        
+
         # Check Required Providers
         failed_sources = {f.provider for f in failures}
         missing_required = failed_sources.intersection(policy.required_providers)
@@ -122,8 +124,7 @@ class ContextEngine(AbstractContextEngine):
         # Update lifecycle to ASSEMBLED
         if self._repository:
             await self._repository.update_status(
-                context_id, 
-                ContextLifecycleUpdate(status=ContextStatus.ASSEMBLED)
+                context_id, ContextLifecycleUpdate(status=ContextStatus.ASSEMBLED)
             )
 
         # 3. Validate
@@ -133,13 +134,21 @@ class ContextEngine(AbstractContextEngine):
         ranked_sections, rank_latency = self._rank(sections, policy)
 
         # 5. Compress
-        compressed_sections, comp_latency, comp_ratio, token_before, token_after, items_before, items_after = self._compress(
-            ranked_sections, policy, ctx, context_id, command
-        )
+        (
+            compressed_sections,
+            comp_latency,
+            comp_ratio,
+            token_before,
+            token_after,
+            items_before,
+            items_after,
+        ) = self._compress(ranked_sections, policy, ctx, context_id, command)
 
         # 6. Build Window
-        window, win_latency = self._build_window(compressed_sections, policy, ctx, context_id, command)
-        
+        window, win_latency = self._build_window(
+            compressed_sections, policy, ctx, context_id, command
+        )
+
         total_latency = (time.perf_counter() - start_time) * 1000
 
         # 7. Assemble EnterpriseContext
@@ -175,16 +184,26 @@ class ContextEngine(AbstractContextEngine):
         # Update lifecycle to OPTIMIZED
         if self._repository:
             await self._repository.update_status(
-                context_id, 
+                context_id,
                 ContextLifecycleUpdate(
-                    status=ContextStatus.OPTIMIZED,
-                    is_partial=len(failures) > 0
-                )
+                    status=ContextStatus.OPTIMIZED, is_partial=len(failures) > 0
+                ),
             )
 
         # 8. Events and Traces
-        await self._publish_events(ctx, context, sections, failures, policy, total_latency)
-        self._record_trace(ctx, context, total_latency, rank_latency, comp_latency, win_latency, comp_ratio, provider_latencies)
+        await self._publish_events(
+            ctx, context, sections, failures, policy, total_latency
+        )
+        self._record_trace(
+            ctx,
+            context,
+            total_latency,
+            rank_latency,
+            comp_latency,
+            win_latency,
+            comp_ratio,
+            provider_latencies,
+        )
 
         log.info(
             "EnterpriseContext assembled",
@@ -234,7 +253,9 @@ class ContextEngine(AbstractContextEngine):
 
         return sections, failures, provider_latencies
 
-    async def _execute_single_provider(self, provider, retry_config, ctx, twin_id, policy, source):
+    async def _execute_single_provider(
+        self, provider, retry_config, ctx, twin_id, policy, source
+    ):
         start = time.perf_counter()
         result = await provide_with_retry(
             provider=provider,
@@ -259,7 +280,9 @@ class ContextEngine(AbstractContextEngine):
         latency = (time.perf_counter() - start) * 1000
         return ranked, latency
 
-    def _compress(self, sections, policy, ctx, context_id, command) -> Tuple[List[ContextSection], float, float, int, int, int, int]:
+    def _compress(
+        self, sections, policy, ctx, context_id, command
+    ) -> Tuple[List[ContextSection], float, float, int, int, int, int]:
         start = time.perf_counter()
         token_before = sum(s.token_estimate for s in sections)
         items_before = sum(s.item_count for s in sections)
@@ -282,14 +305,26 @@ class ContextEngine(AbstractContextEngine):
                     compression_ratio=comp_ratio,
                 )
             )
-            
-        return compressed, latency, comp_ratio, token_before, token_after, items_before, items_after
 
-    def _build_window(self, sections, policy, ctx, context_id, command) -> Tuple[ContextWindow, float]:
+        return (
+            compressed,
+            latency,
+            comp_ratio,
+            token_before,
+            token_after,
+            items_before,
+            items_after,
+        )
+
+    def _build_window(
+        self, sections, policy, ctx, context_id, command
+    ) -> Tuple[ContextWindow, float]:
         start = time.perf_counter()
         # Extract critical reserve from policy dynamically
         critical_reserve = getattr(policy, "critical_reserve", 0.1)
-        window = self._window_builder.build_window(sections, policy.token_budget, critical_reserve=critical_reserve)
+        window = self._window_builder.build_window(
+            sections, policy.token_budget, critical_reserve=critical_reserve
+        )
         latency = (time.perf_counter() - start) * 1000
 
         if self._event_bus:
@@ -303,13 +338,15 @@ class ContextEngine(AbstractContextEngine):
                     overflow=window.overflow,
                 )
             )
-            
+
         return window, latency
 
-    async def _publish_events(self, ctx, context, sections, failures, policy, total_latency):
+    async def _publish_events(
+        self, ctx, context, sections, failures, policy, total_latency
+    ):
         if not self._event_bus:
             return
-            
+
         if failures:
             self._event_bus.publish(
                 ContextPartiallyBuiltEvent(
@@ -334,12 +371,26 @@ class ContextEngine(AbstractContextEngine):
                 )
             )
 
-    def _record_trace(self, ctx, context, total_latency, rank_latency, comp_latency, win_latency, comp_ratio, provider_latencies):
+    def _record_trace(
+        self,
+        ctx,
+        context,
+        total_latency,
+        rank_latency,
+        comp_latency,
+        win_latency,
+        comp_ratio,
+        provider_latencies,
+    ):
         if not self._trace_service:
             return
-            
+
         try:
-            from app.models.cognitive_trace import CognitiveTraceCreate, CognitiveTraceTokenUsage
+            from app.models.cognitive_trace import (
+                CognitiveTraceCreate,
+                CognitiveTraceTokenUsage,
+            )
+
             trace = CognitiveTraceCreate(
                 twin_id=context.twin_id,
                 operation_type="enterprise_context_build",
@@ -362,4 +413,6 @@ class ContextEngine(AbstractContextEngine):
             )
             asyncio.create_task(self._trace_service.record_trace(ctx, trace))
         except Exception as trace_exc:
-            logger.warning("Failed to record Context assembly trace", error=str(trace_exc))
+            logger.warning(
+                "Failed to record Context assembly trace", error=str(trace_exc)
+            )

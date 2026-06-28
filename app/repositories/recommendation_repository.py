@@ -2,7 +2,7 @@
 
 Responsibilities: Persistence only. Table: recommendations
 
-Recommendations are primarily immutable after creation, 
+Recommendations are primarily immutable after creation,
 however, their lifecycle status and acknowledgement timestamps can be updated.
 """
 
@@ -16,13 +16,16 @@ from supabase import AsyncClient
 
 from app.models.enums import RecommendationStatus
 from app.models.exceptions import RecommendationNotFoundError, RepositoryError
-from app.models.recommendation import Recommendation, RecommendationCreate, PaginatedRecommendations
+from app.models.recommendation import (
+    Recommendation,
+    RecommendationCreate,
+    PaginatedRecommendations,
+)
 
 logger = structlog.get_logger(__name__)
 
 
 class AbstractRecommendationRepository(ABC):
-
     @abstractmethod
     async def create(self, twin_id: UUID, data: RecommendationCreate) -> Recommendation:
         pass
@@ -56,7 +59,6 @@ class AbstractRecommendationRepository(ABC):
 
 
 class RecommendationRepository(AbstractRecommendationRepository):
-
     _table = "recommendations"
 
     def __init__(self, client: AsyncClient) -> None:
@@ -80,11 +82,17 @@ class RecommendationRepository(AbstractRecommendationRepository):
             insert_data["originating_plan_id"] = str(data.originating_plan_id)
 
         try:
-            response = await self._client.table(self._table).insert(insert_data).execute()
+            response = (
+                await self._client.table(self._table).insert(insert_data).execute()
+            )
         except Exception as exc:
             raise RepositoryError("recommendation.create", str(exc)) from exc
 
-        logger.info("Created recommendation", rec_id=response.data[0]["id"], latency_ms=(time.time() - start) * 1000)
+        logger.info(
+            "Created recommendation",
+            rec_id=response.data[0]["id"],
+            latency_ms=(time.time() - start) * 1000,
+        )
         return self._deserialize(response.data[0])
 
     async def get_by_id(self, recommendation_id: UUID) -> Recommendation:
@@ -117,13 +125,19 @@ class RecommendationRepository(AbstractRecommendationRepository):
             )
             if status:
                 query = query.eq("status", status.value)
-            response = await query.order("created_at", desc=True).range(offset, offset + limit - 1).execute()
+            response = (
+                await query.order("created_at", desc=True)
+                .range(offset, offset + limit - 1)
+                .execute()
+            )
         except Exception as exc:
             raise RepositoryError("recommendation.list_by_twin", str(exc)) from exc
 
         items = [self._deserialize(row) for row in response.data]
         total = response.count if response.count is not None else len(items)
-        return PaginatedRecommendations(items=items, total_count=total, limit=limit, offset=offset)
+        return PaginatedRecommendations(
+            items=items, total_count=total, limit=limit, offset=offset
+        )
 
     async def update_status(
         self,
@@ -161,9 +175,14 @@ class RecommendationRepository(AbstractRecommendationRepository):
     @staticmethod
     def _deserialize(row: dict) -> Recommendation:
         from uuid import UUID as PUUID
+
         # Deserialize UUID arrays
         if row.get("supporting_memory_ids"):
-            row["supporting_memory_ids"] = [PUUID(mid) for mid in row["supporting_memory_ids"]]
+            row["supporting_memory_ids"] = [
+                PUUID(mid) for mid in row["supporting_memory_ids"]
+            ]
         if row.get("supporting_goal_ids"):
-            row["supporting_goal_ids"] = [PUUID(gid) for gid in row["supporting_goal_ids"]]
+            row["supporting_goal_ids"] = [
+                PUUID(gid) for gid in row["supporting_goal_ids"]
+            ]
         return Recommendation.model_validate(row)

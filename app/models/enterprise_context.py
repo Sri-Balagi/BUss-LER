@@ -39,6 +39,7 @@ class ContextSchemaVersion(str):
     Increment when the shape of EnterpriseContext changes in a backward-incompatible way.
     Stored alongside every persisted context record to enable future migration tooling.
     """
+
     V1 = "1.0"
 
 
@@ -51,6 +52,7 @@ class ContextInstanceVersion(DomainBaseModel):
     Distinct from schema version: schema version tracks the class definition,
     instance version identifies this specific assembly run.
     """
+
     context_id: UUID
     schema_version: str = Field(default=CURRENT_CONTEXT_SCHEMA_VERSION)
     assembled_at: datetime
@@ -69,8 +71,11 @@ class ContextProvenance(DomainBaseModel):
     Never stripped during compression. Compression updates compression_origin
     and compression_reason to maintain full traceability.
     """
+
     provider: ContextSource
-    service_name: str = Field(..., description="The service class that produced this item.")
+    service_name: str = Field(
+        ..., description="The service class that produced this item."
+    )
     retrieval_timestamp: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc)
     )
@@ -109,10 +114,13 @@ class ContextItem(DomainBaseModel):
     Each item carries full provenance and is independently rankable,
     compressible, and traceable.
     """
+
     item_id: UUID = Field(default_factory=uuid4)
     source: ContextSource
     priority: ContextPriority = ContextPriority.MEDIUM
-    content: str = Field(..., description="Textual representation of this context item.")
+    content: str = Field(
+        ..., description="Textual representation of this context item."
+    )
     content_type: str = Field(
         default="text",
         description="Format of content: 'text', 'json', 'summary'.",
@@ -131,6 +139,7 @@ class ContextSection(DomainBaseModel):
 
     Sections are the unit of ranking and compression.
     """
+
     section_id: UUID = Field(default_factory=uuid4)
     source: ContextSource
     priority: ContextPriority = ContextPriority.MEDIUM
@@ -159,10 +168,13 @@ class ContextWindow(DomainBaseModel):
     Contains the ranked, compressed, budget-fitted context sections ready for
     injection into PromptContextBuilder → PromptManager → AIKernel.
     """
+
     window_id: UUID = Field(default_factory=uuid4)
     sections: List[ContextSection] = Field(default_factory=list)
     token_estimate: int = Field(default=0, ge=0)
-    budget: int = Field(..., ge=0, description="Configured token budget for this window.")
+    budget: int = Field(
+        ..., ge=0, description="Configured token budget for this window."
+    )
     items_included: int = Field(default=0, ge=0)
     items_excluded: int = Field(default=0, ge=0)
     overflow: bool = Field(
@@ -184,10 +196,13 @@ class ContextSummary(DomainBaseModel):
     Used for UI display and high-level BI reporting.
     Does not replace the full EnterpriseContext — always derived from it.
     """
+
     summary_id: UUID = Field(default_factory=uuid4)
     context_id: UUID
     twin_id: UUID
-    narrative: str = Field(..., description="Human-readable summary of assembled context.")
+    narrative: str = Field(
+        ..., description="Human-readable summary of assembled context."
+    )
     source_count: int = Field(default=0)
     token_estimate: int = Field(default=0)
     compression_ratio: Optional[float] = Field(default=None, ge=0.0, le=1.0)
@@ -205,6 +220,7 @@ class ContextMetadata(DomainBaseModel):
     Populated by ContextEngine during assembly. Used by CognitiveTrace and
     operational monitoring.
     """
+
     schema_version: str = Field(default=CURRENT_CONTEXT_SCHEMA_VERSION)
     policy_id: str
     assembled_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -236,6 +252,7 @@ class ProviderFailureRecord(DomainBaseModel):
     Stored in EnterpriseContext.metadata.missing_providers.
     Ensures transparency about what information could not be assembled.
     """
+
     provider: ContextSource
     error_type: str
     error_message: str
@@ -253,6 +270,7 @@ class ProviderMetadata(DomainBaseModel):
 
     Stored in ContextProviderRegistry alongside the provider instance.
     """
+
     source: ContextSource
     name: str
     version: str = Field(default="1.0")
@@ -274,6 +292,7 @@ class ProviderDependency(DomainBaseModel):
 
     Used by ContextDependencyGraph to determine execution order.
     """
+
     provider: ContextSource
     depends_on: List[ContextSource] = Field(
         default_factory=list,
@@ -287,6 +306,7 @@ class ExecutionPlan(DomainBaseModel):
     batches: Each inner list contains providers that are safe to run concurrently.
              The outer list is ordered — batch N must complete before batch N+1 starts.
     """
+
     batches: List[List[ContextSource]]
     total_providers: int
 
@@ -309,6 +329,7 @@ class EnterpriseContext(DomainBaseModel):
       - Multi-agent safe: Frozen Pydantic model allows concurrent reads without mutation
       - Explainable: All provenance is preserved through compression
     """
+
     model_config = ConfigDict(frozen=True, from_attributes=True, extra="ignore")
 
     # --- Identity ---
@@ -363,6 +384,7 @@ class EnterpriseContextCreate(DomainBaseModel):
 
     Passed to ContextEngine.build() to specify what should be assembled.
     """
+
     twin_id: UUID
     policy_id: str
     intent_id: Optional[UUID] = None
@@ -381,6 +403,7 @@ class ContextLifecycleMetadata(DomainBaseModel):
     Kept separate from EnterpriseContext to preserve its frozen contract.
     Persisted in enterprise_contexts table.
     """
+
     context_id: UUID
     twin_id: UUID
     status: ContextStatus = ContextStatus.BUILDING
@@ -400,6 +423,7 @@ class ContextLifecycleMetadata(DomainBaseModel):
 
 class ContextLifecycleCreate(DomainBaseModel):
     """Write model for creating a context lifecycle record."""
+
     context_id: UUID
     twin_id: UUID
     policy_id: str
@@ -408,6 +432,7 @@ class ContextLifecycleCreate(DomainBaseModel):
 
 class ContextLifecycleUpdate(DomainBaseModel):
     """Write model for transitioning context lifecycle status."""
+
     status: ContextStatus
     assembled_at: Optional[datetime] = None
     expires_at: Optional[datetime] = None
@@ -423,6 +448,7 @@ class ContextLifecycleUpdate(DomainBaseModel):
 
 class PaginatedContextLifecycles(DomainBaseModel):
     """Pagination wrapper for context lifecycle listings."""
+
     items: List[ContextLifecycleMetadata]
     total_count: int
     limit: int

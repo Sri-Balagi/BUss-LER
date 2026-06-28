@@ -10,6 +10,7 @@ logger = structlog.get_logger(__name__)
 
 EventHandler = Callable[[DomainEvent], Coroutine[Any, Any, None]]
 
+
 class AbstractEventDispatcher(ABC):
     """
     Abstract interface for dispatching DomainEvents.
@@ -45,19 +46,28 @@ class BackgroundTasksEventDispatcher(AbstractEventDispatcher):
         if event_type not in self._handlers:
             self._handlers[event_type] = []
         self._handlers[event_type].append(handler)
-        logger.debug("Subscribed handler to event", event_type=event_type.__name__, handler=handler.__name__)
+        logger.debug(
+            "Subscribed handler to event",
+            event_type=event_type.__name__,
+            handler=handler.__name__,
+        )
 
     def dispatch(self, event: DomainEvent) -> None:
         """
         Schedules the handlers to run in FastAPI's background tasks pool.
         """
         if not self._background_tasks:
-            logger.warning("No background_tasks provided, event dropped", event_id=str(event.event_id))
+            logger.warning(
+                "No background_tasks provided, event dropped",
+                event_id=str(event.event_id),
+            )
             return
 
         handlers = self._handlers.get(type(event), [])
         if not handlers:
-            logger.debug("No handlers registered for event", event_type=type(event).__name__)
+            logger.debug(
+                "No handlers registered for event", event_type=type(event).__name__
+            )
             return
 
         logger.info(
@@ -66,6 +76,6 @@ class BackgroundTasksEventDispatcher(AbstractEventDispatcher):
             event_id=str(event.event_id),
             correlation_id=event.correlation_id,
         )
-        
+
         for handler in handlers:
             self._background_tasks.add_task(handler, event)

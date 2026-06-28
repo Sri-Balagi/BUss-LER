@@ -7,7 +7,6 @@ The cache layer uses these policies instead of relying solely on raw TTL values.
 """
 
 from datetime import datetime, timedelta, timezone
-from typing import Optional
 
 from app.models.enums import ContextSource, RefreshStrategy
 from app.models.schemas import DomainBaseModel
@@ -22,9 +21,10 @@ class ContextFreshnessPolicy(DomainBaseModel):
         cache_ttl_seconds:  How long the cache entry lives regardless of staleness.
         refresh_strategy:   How the cache should handle approaching expiry.
     """
+
     provider: ContextSource
-    max_age_seconds: int = 300          # 5 minutes default
-    cache_ttl_seconds: int = 600        # 10 minutes default TTL
+    max_age_seconds: int = 300  # 5 minutes default
+    cache_ttl_seconds: int = 600  # 10 minutes default TTL
     refresh_strategy: RefreshStrategy = RefreshStrategy.LAZY
 
     def is_stale(self, retrieved_at: datetime) -> bool:
@@ -50,7 +50,7 @@ DEFAULT_FRESHNESS_POLICIES: dict[ContextSource, ContextFreshnessPolicy] = {
     ),
     ContextSource.INTENT: ContextFreshnessPolicy(
         provider=ContextSource.INTENT,
-        max_age_seconds=60,        # Intent is very fresh — 1 minute max
+        max_age_seconds=60,  # Intent is very fresh — 1 minute max
         cache_ttl_seconds=120,
         refresh_strategy=RefreshStrategy.FORCED,  # Always re-fetch intent
     ),
@@ -80,7 +80,7 @@ DEFAULT_FRESHNESS_POLICIES: dict[ContextSource, ContextFreshnessPolicy] = {
     ),
     ContextSource.CONVERSATION: ContextFreshnessPolicy(
         provider=ContextSource.CONVERSATION,
-        max_age_seconds=30,        # Conversation is highly dynamic
+        max_age_seconds=30,  # Conversation is highly dynamic
         cache_ttl_seconds=60,
         refresh_strategy=RefreshStrategy.FORCED,
     ),
@@ -98,7 +98,7 @@ DEFAULT_FRESHNESS_POLICIES: dict[ContextSource, ContextFreshnessPolicy] = {
     ),
     ContextSource.EXTERNAL: ContextFreshnessPolicy(
         provider=ContextSource.EXTERNAL,
-        max_age_seconds=1800,      # External integrations are slow — 30 min
+        max_age_seconds=1800,  # External integrations are slow — 30 min
         cache_ttl_seconds=3600,
         refresh_strategy=RefreshStrategy.LAZY,
     ),
