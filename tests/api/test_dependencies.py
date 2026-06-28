@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 from uuid import UUID
 
 from fastapi import Request, BackgroundTasks
@@ -46,7 +46,7 @@ async def test_get_supabase_client(mock_settings):
 
 @pytest.mark.asyncio
 async def test_get_qdrant_client(mock_settings):
-    with patch("app.services.qdrant.QdrantService.get_client", new_callable=AsyncMock) as mock_get_client:
+    with patch("app.services.qdrant.QdrantService.get_client", new_callable=Mock) as mock_get_client:
         mock_get_client.return_value = "qdrant_client"
         client = await get_qdrant_client(mock_settings)
         assert client == "qdrant_client"

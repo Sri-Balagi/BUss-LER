@@ -32,7 +32,7 @@ from app.models.commands import (
 )
 from app.models.enums import IntentStatus, IntentType
 from app.models.queries import IntentListQuery
-from app.services.context import OperationContext
+from app.core.context import OperationContext
 from app.services.intent_service import AbstractIntentService
 
 router = APIRouter(prefix="/v1", tags=["Intents"])

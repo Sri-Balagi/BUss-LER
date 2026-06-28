@@ -26,7 +26,7 @@ import structlog
 from app.models.context import CognitiveContext
 from app.models.exceptions import ContextBuildError
 from app.models.intent import Intent
-from app.services.context import OperationContext
+from app.core.context import OperationContext
 from app.services.goal_service import AbstractGoalService
 
 logger = structlog.get_logger(__name__)

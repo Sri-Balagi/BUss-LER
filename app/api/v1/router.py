@@ -18,6 +18,10 @@ from app.api.v1.routers.plans import router as plan_router
 from app.api.v1.routers.recommendations import router as recommendation_router
 from app.api.v1.routers.cognitive_traces import router as cognitive_trace_router
 
+# M4 Routers
+from app.api.v1.routers.context import router as context_router
+from app.api.v1.routers.conversations import router as conversations_router
+
 # Main API v1 router
 api_router = APIRouter()
 
@@ -34,3 +38,7 @@ api_router.include_router(goal_router)
 api_router.include_router(plan_router)
 api_router.include_router(recommendation_router)
 api_router.include_router(cognitive_trace_router)
+
+# Include M4 Context Engine routers
+api_router.include_router(context_router)
+api_router.include_router(conversations_router)

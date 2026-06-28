@@ -55,3 +55,12 @@ from app.api.v1.dependencies_recommendation import (
     get_recommendation_service,
     get_recommendation_engine,
 )
+
+from app.api.v1.dependencies_context import (
+    get_context_repository,
+    get_conversation_repository,
+    get_conversation_service,
+    get_context_registry,
+    get_context_engine,
+    get_context_cache,
+)

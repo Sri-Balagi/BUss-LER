@@ -15,7 +15,7 @@ from uuid import UUID
 
 import structlog
 
-from app.events.bus import AbstractEventBus
+from app.events.bus import EventBus
 from app.models.commands import (
     ClassifyIntentCommand,
     CreateIntentCommand,
@@ -29,7 +29,7 @@ from app.models.intent import Intent, IntentCreate, IntentUpdate, PaginatedInten
 from app.models.queries import IntentListQuery
 from app.models.results import ClassifyIntentResult, CreateIntentResult
 from app.repositories.intent_repository import AbstractIntentRepository
-from app.services.context import OperationContext
+from app.core.context import OperationContext
 from app.services.intent_state import IntentStateMachine
 
 logger = structlog.get_logger(__name__)
@@ -72,7 +72,7 @@ class IntentService(AbstractIntentService):
     def __init__(
         self,
         repository: AbstractIntentRepository,
-        event_bus: AbstractEventBus,
+        event_bus: EventBus,
         classifier=None,  # AbstractIntentClassifier — injected to avoid circular import
     ) -> None:
         self._repository = repository

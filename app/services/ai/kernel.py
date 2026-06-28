@@ -59,6 +59,29 @@ class AbstractAIKernel(ABC):
         """
         pass
 
+    @abstractmethod
+    async def classify(self, request: ClassifyRequest) -> ClassifyResponse:
+        """Perform structured AI classification.
+
+        This is the dedicated cognitive capability for classification tasks.
+        It must return a ClassifyResponse whose raw_json has been extracted
+        from the provider's response and is ready for Pydantic validation
+        by the calling service.
+
+        Contract:
+          - The provider must return valid JSON matching the expected schema.
+          - ClassifyResponse.raw_json is NOT validated here — the caller
+            (e.g., IntentClassifier) validates it against the domain schema.
+          - Free-form text responses are rejected.
+
+        Future capabilities (not implemented in M3):
+          - reason()
+          - reflect()
+          - plan()
+          - simulate()
+        """
+        pass
+
 
 class AIKernel(AbstractAIKernel):
     """

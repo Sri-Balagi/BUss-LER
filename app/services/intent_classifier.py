@@ -28,7 +28,7 @@ from app.models.intent import Intent, IntentAnalysis
 from app.models.results import ClassifyIntentResult
 from app.services.ai.kernel import AbstractAIKernel
 from app.services.cognitive_trace_service import AbstractCognitiveTraceService
-from app.services.context import OperationContext
+from app.core.context import OperationContext
 
 logger = structlog.get_logger(__name__)
 

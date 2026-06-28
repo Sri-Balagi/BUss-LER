@@ -50,7 +50,7 @@ async def test_health_memory_all_healthy(mock_metadata_repo, mock_vector_repo, m
 @pytest.mark.asyncio
 async def test_health_memory_degraded(mock_metadata_repo, mock_vector_repo, mock_ai_kernel):
     # Simulate DB failure
-    mock_metadata_repo.list_by_twin_id.side_effect = Exception("DB Connection Failed")
+    mock_metadata_repo.list_by_twin.side_effect = Exception("DB Connection Failed")
     
     app.dependency_overrides[get_memory_metadata_repository] = lambda: mock_metadata_repo
     app.dependency_overrides[get_memory_vector_repository] = lambda: mock_vector_repo

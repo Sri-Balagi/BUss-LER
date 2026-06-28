@@ -20,7 +20,7 @@ from uuid import UUID
 import structlog
 from pydantic import ValidationError, TypeAdapter
 
-from app.events.bus import AbstractEventBus
+from app.events.bus import EventBus
 from app.models.ai import ClassifyRequest
 from app.models.cognitive_trace import CognitiveTraceCreate, CognitiveTraceTokenUsage
 from app.models.commands import GenerateRecommendationsCommand
@@ -33,8 +33,9 @@ from app.repositories.recommendation_repository import AbstractRecommendationRep
 from app.services.ai.kernel import AbstractAIKernel
 from app.services.ai.prompt_context_builder import PromptContextBuilder
 from app.services.cognitive_trace_service import AbstractCognitiveTraceService
-from app.services.context import OperationContext
-from app.services.context_builder import AbstractContextBuilder
+from app.core.context import OperationContext
+from app.services.context_engine import AbstractContextEngine
+from app.models.enterprise_context import EnterpriseContextCreate
 
 logger = structlog.get_logger(__name__)
 
@@ -58,13 +59,13 @@ class RecommendationEngine(AbstractRecommendationEngine):
         self,
         ai_kernel: AbstractAIKernel,
         repository: AbstractRecommendationRepository,
-        context_builder: AbstractContextBuilder,
+        context_engine: AbstractContextEngine,
         trace_service: AbstractCognitiveTraceService,
-        event_bus: AbstractEventBus,
+        event_bus: EventBus,
     ) -> None:
         self._ai_kernel = ai_kernel
         self._repository = repository
-        self._context_builder = context_builder
+        self._context_engine = context_engine
         self._trace_service = trace_service
         self._event_bus = event_bus
 
@@ -81,11 +82,18 @@ class RecommendationEngine(AbstractRecommendationEngine):
         log.info("Generating recommendations")
         start_ms = time.monotonic() * 1000
 
-        # Step 1: Build cognitive context
-        cognitive_context = await self._context_builder.build(ctx=ctx, twin_id=cmd.twin_id)
+        # Step 1: Build enterprise context
+        enterprise_context = await self._context_engine.build(
+            ctx=ctx,
+            command=EnterpriseContextCreate(
+                twin_id=cmd.twin_id,
+                policy_id="recommendation",
+                intent_id=cmd.intent_id,
+            ),
+        )
 
         # Step 2: Build AI classify request
-        context_dict = PromptContextBuilder.build_context_dict(cognitive_context)
+        context_dict = PromptContextBuilder.build_from_enterprise_context(enterprise_context)
 
         classify_request = ClassifyRequest(
             prompt_id=_PROMPT_ID,
@@ -112,6 +120,17 @@ class RecommendationEngine(AbstractRecommendationEngine):
                 detail=f"AI returned {type(raw).__name__}, expected a JSON array of recommendations.",
             )
 
+        from app.models.enums import ContextSource
+
+        def _extract_ids(source: ContextSource) -> list[UUID]:
+            section = next((s for s in enterprise_context.sections if s.source == source), None)
+            if not section:
+                return []
+            return [item.domain_object_id for item in section.items if item.domain_object_id]
+
+        goal_ids_used = _extract_ids(ContextSource.GOAL)
+        memory_ids_used = _extract_ids(ContextSource.MEMORY)
+
         # Step 5: Persist recommendations
         recommendations: List[Recommendation] = []
         for i, item in enumerate(raw):
@@ -123,17 +142,17 @@ class RecommendationEngine(AbstractRecommendationEngine):
                     rationale=item.get("rationale", ""),
                     confidence=self._parse_confidence(item.get("confidence", "medium")),
                     supporting_memory_ids=[
-                        cognitive_context.memory_ids_used[j]
+                        memory_ids_used[j]
                         for j in item.get("supporting_memory_refs", [])
-                        if j < len(cognitive_context.memory_ids_used)
+                        if j < len(memory_ids_used)
                     ],
                     supporting_goal_ids=[
-                        cognitive_context.goal_ids_used[j]
+                        goal_ids_used[j]
                         for j in item.get("supporting_goal_refs", [])
-                        if j < len(cognitive_context.goal_ids_used)
+                        if j < len(goal_ids_used)
                     ],
                     originating_plan_id=None,
-                    trigger_context={"cognitive_context_assembled_at": str(cognitive_context.assembled_at)},
+                    trigger_context={"enterprise_context_id": str(enterprise_context.context_id)},
                     explainability_metadata={
                         "explainability_note": item.get("explainability_note", ""),
                         "prompt_version": f"{_PROMPT_ID}_{_PROMPT_VERSION}",
@@ -169,12 +188,12 @@ class RecommendationEngine(AbstractRecommendationEngine):
                 operation_context_id=ctx.correlation_id,
                 intent_id=cmd.intent_id,
                 recommendation_id=recommendations[0].id if recommendations else None,
-                goal_ids_used=cognitive_context.goal_ids_used,
-                memory_ids_used=cognitive_context.memory_ids_used,
+                goal_ids_used=goal_ids_used,
+                memory_ids_used=memory_ids_used,
                 reasoning_summary=(
                     f"Generated {len(recommendations)} recommendation(s) "
-                    f"from {len(cognitive_context.active_goals)} active goals "
-                    f"and {len(cognitive_context.relevant_memories)} relevant memories."
+                    f"from {len(goal_ids_used)} active goals "
+                    f"and {len(memory_ids_used)} relevant memories."
                 ),
                 latency_ms=latency_ms,
                 token_usage=token_usage,

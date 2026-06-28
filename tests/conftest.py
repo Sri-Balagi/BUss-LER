@@ -13,7 +13,6 @@ from fastapi import Depends
 from supabase import AsyncClient
 
 from app.api.v1.dependencies import (
-    get_current_user,
     get_entity_repository,
     get_entity_service,
     get_history_repository,
@@ -36,6 +35,18 @@ from app.services.supabase import SupabaseService
 def reset_singletons():
     """Reset singletons so each async test gets a client bound to its own event loop."""
     SupabaseService.reset()
+
+
+@pytest.fixture(autouse=True)
+def mock_qdrant_init(monkeypatch):
+    """Mock QdrantService.initialize_collections to prevent real connection attempts during tests."""
+    from app.services.qdrant import QdrantService
+    
+    async def mock_init(*args, **kwargs):
+        pass
+        
+    monkeypatch.setattr(QdrantService, "initialize_collections", mock_init)
+
 
 
 from unittest.mock import AsyncMock, Mock

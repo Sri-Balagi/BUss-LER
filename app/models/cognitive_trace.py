@@ -108,6 +108,16 @@ class CognitiveTrace(DomainBaseModel):
         description="Token consumption breakdown.",
     )
 
+    # --- M4 Context Observability ---
+    context_id: Optional[UUID] = Field(default=None, description="ID of the EnterpriseContext used.")
+    context_sources_used: List[str] = Field(default_factory=list, description="List of ContextSource providers invoked.")
+    compression_ratio: Optional[float] = Field(default=None, ge=0.0, le=1.0, description="Items retained / Items total.")
+    ranking_latency_ms: Optional[float] = Field(default=None, ge=0.0)
+    compression_latency_ms: Optional[float] = Field(default=None, ge=0.0)
+    window_latency_ms: Optional[float] = Field(default=None, ge=0.0)
+    token_estimate: Optional[int] = Field(default=None, description="Estimated context tokens consumed.")
+    per_provider_latency_ms: Dict[str, float] = Field(default_factory=dict, description="Latency per provider during Context Engine build.")
+
     # --- Timestamps ---
     created_at: datetime
 
@@ -137,6 +147,17 @@ class CognitiveTraceCreate(DomainBaseModel):
     confidence: Optional[float] = Field(default=None, ge=0.0, le=1.0)
     latency_ms: float
     token_usage: CognitiveTraceTokenUsage = Field(default_factory=CognitiveTraceTokenUsage)
+
+    # --- M4 Context Observability ---
+    context_id: Optional[UUID] = None
+    context_sources_used: List[str] = Field(default_factory=list)
+    compression_ratio: Optional[float] = Field(default=None, ge=0.0, le=1.0)
+    ranking_latency_ms: Optional[float] = None
+    compression_latency_ms: Optional[float] = None
+    window_latency_ms: Optional[float] = None
+    token_estimate: Optional[int] = None
+    per_provider_latency_ms: Dict[str, float] = Field(default_factory=dict)
+
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
 

@@ -76,3 +76,43 @@ class ClassifyResponse(DomainBaseModel):
     )
     metadata: AIResponseMetadata = Field(..., description="Provider and execution metadata.")
 
+
+
+class ClassifyRequest(DomainBaseModel):
+    """Domain model for requesting structured AI classification.
+
+    Used exclusively by AIKernel.classify().
+    The AI must return a structured JSON response validated against a Pydantic schema.
+    Free-form text responses are prohibited.
+    """
+    prompt_id: str = Field(..., description="The versioned prompt ID for classification.")
+    version: str = Field(default="v1", description="The prompt version.")
+    content: str = Field(..., description="The raw text content to classify.")
+    context: dict = Field(
+        default_factory=dict,
+        description="Additional context variables for prompt interpolation.",
+    )
+    system_instruction: Optional[str] = Field(
+        None,
+        description="Optional system-level instructions for the classification task.",
+    )
+
+
+class ClassifyResponse(DomainBaseModel):
+    """Domain model for structured AI classification responses.
+
+    The raw_json field contains the validated JSON extracted from the AI response.
+    Services must validate raw_json against their expected Pydantic schema before use.
+
+    Validation pipeline enforced by callers:
+        ClassifyResponse.raw_json → Pydantic schema → domain object → persistence
+    """
+    raw_json: dict = Field(
+        ...,
+        description=(
+            "Validated JSON payload from the AI provider. "
+            "Must be validated by the caller against the expected domain schema."
+        ),
+    )
+    metadata: AIResponseMetadata = Field(..., description="Provider and execution metadata.")
+

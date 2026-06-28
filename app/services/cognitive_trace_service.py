@@ -28,8 +28,8 @@ from app.models.exceptions import RepositoryError
 from app.models.queries import CognitiveTraceListQuery
 from app.models.results import CreateCognitiveTraceResult
 from app.repositories.cognitive_trace_repository import AbstractCognitiveTraceRepository
-from app.services.context import OperationContext
-from app.events.bus import AbstractEventBus
+from app.core.context import OperationContext
+from app.events.bus import EventBus
 
 logger = structlog.get_logger(__name__)
 
@@ -59,7 +59,7 @@ class CognitiveTraceService(AbstractCognitiveTraceService):
     def __init__(
         self,
         repository: AbstractCognitiveTraceRepository,
-        event_bus: AbstractEventBus,
+        event_bus: EventBus,
     ) -> None:
         self._repository = repository
         self._event_bus = event_bus

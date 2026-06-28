@@ -16,7 +16,7 @@ from app.api.v1.dependencies import get_cognitive_trace_service, get_operation_c
 from app.models.queries import CognitiveTraceListQuery
 from app.models.schemas import DomainBaseModel
 from app.services.cognitive_trace_service import AbstractCognitiveTraceService
-from app.services.context import OperationContext
+from app.core.context import OperationContext
 
 router = APIRouter(prefix="/v1", tags=["Cognitive Traces"])
 

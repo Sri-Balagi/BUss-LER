@@ -4,7 +4,9 @@ from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_excep
 
 from app.models.ai import EmbeddingRequest
 from app.models.enums import EmbeddingStatus
-from app.models.events import MemoryLifecycleEvent, EventType
+from app.models.events import MemoryLifecycleEvent
+from app.core.context import OperationContext
+from app.models.events import EventType
 from app.models.exceptions import BizOSError
 from app.services.ai.kernel import AbstractAIKernel
 from app.services.memory_service import AbstractMemoryService

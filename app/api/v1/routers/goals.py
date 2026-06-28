@@ -37,7 +37,7 @@ from app.models.commands import (
 )
 from app.models.enums import GoalStatus, GoalType
 from app.models.queries import GoalListQuery
-from app.services.context import OperationContext
+from app.core.context import OperationContext
 from app.services.goal_service import AbstractGoalService
 
 router = APIRouter(prefix="/v1", tags=["Goals"])

@@ -131,3 +131,86 @@ class CognitiveTraceRecordedEvent(DomainEvent):
     prompt_version: str
     latency_ms: float
 
+
+# =============================================================================
+# Context Engine Events (Milestone 4)
+# =============================================================================
+
+
+class ContextBuiltEvent(DomainEvent):
+    """Emitted when a complete EnterpriseContext is successfully assembled."""
+    context_id: uuid.UUID
+    twin_id: uuid.UUID
+    policy_id: str
+    source_count: int
+    token_estimate: int
+    assembly_latency_ms: float
+
+
+class ContextPartiallyBuiltEvent(DomainEvent):
+    """Emitted when an EnterpriseContext is assembled with one or more provider failures.
+
+    is_usable indicates whether the partial context can still be consumed
+    (True when no required_providers failed).
+    """
+    context_id: uuid.UUID
+    twin_id: uuid.UUID
+    successful_providers: list[str]
+    failed_providers: list[str]
+    is_usable: bool
+
+
+class ContextCompressedEvent(DomainEvent):
+    """Emitted after context compression completes."""
+    context_id: uuid.UUID
+    twin_id: uuid.UUID
+    items_before: int
+    items_after: int
+    compression_ratio: float
+
+
+class ContextWindowCreatedEvent(DomainEvent):
+    """Emitted when a ContextWindow is produced by AbstractContextWindowBuilder."""
+    context_id: uuid.UUID
+    twin_id: uuid.UUID
+    token_estimate: int
+    items_included: int
+    overflow: bool
+
+
+class ContextExpiredEvent(DomainEvent):
+    """Emitted when a context lifecycle record transitions to EXPIRED."""
+    context_id: uuid.UUID
+    twin_id: uuid.UUID
+
+
+class ContextInvalidatedEvent(DomainEvent):
+    """Emitted when a context cache entry is invalidated.
+
+    Published by the cache layer — never bypasses the EventBus.
+    """
+    cache_key: str
+    twin_id: uuid.UUID
+    reason: str
+
+
+class ContextProviderFailedEvent(DomainEvent):
+    """Emitted when a provider exhausts all retries during context assembly."""
+    context_id: Optional[uuid.UUID]
+    twin_id: uuid.UUID
+    provider: str
+    attempts: int
+    last_error: str
+
+
+# =============================================================================
+# Conversation Events (Milestone 4)
+# =============================================================================
+
+
+class ConversationUpdatedEvent(DomainEvent):
+    """Emitted when a turn is added to a ConversationThread."""
+    thread_id: uuid.UUID
+    twin_id: uuid.UUID
+    turn_count: int
+    role: str

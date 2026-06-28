@@ -325,3 +325,54 @@ class AIOutputValidationError(ServiceError):
             operation=f"ai_output_validation.{operation}",
             detail=detail,
         )
+
+# =============================================================================
+# Context Engine Exceptions (Milestone 4)
+# =============================================================================
+
+class ContextAssemblyError(ServiceError):
+    """Raised when EnterpriseContext assembly fails completely."""
+    def __init__(self, detail: str) -> None:
+        super().__init__(operation="context_assembly", detail=detail)
+
+class ContextValidationError(ServiceError):
+    """Raised when the DefaultContextValidator rejects an assembled context."""
+    def __init__(self, errors: list[str]) -> None:
+        detail = "; ".join(errors)
+        super().__init__(operation="context_validation", detail=detail)
+        self.errors = errors
+
+class ContextDependencyCycleError(BizOSError):
+    """Raised when a circular provider dependency is registered."""
+    def __init__(self, cycle: list[str]) -> None:
+        cycle_str = " → ".join(cycle)
+        super().__init__(
+            message=f"Circular provider dependency detected: {cycle_str}",
+            detail=(
+                f"The following dependency cycle was found in ContextDependencyGraph: {cycle_str}. "
+                "Remove or restructure the dependency to break the cycle."
+            ),
+        )
+        self.cycle = cycle
+
+class ProviderNotRegisteredError(BizOSError):
+    """Raised when a requested ContextSource has no registered provider."""
+    def __init__(self, source: str) -> None:
+        super().__init__(
+            message=f"Context provider not registered: {source}",
+            detail=(
+                f"No provider has been registered for ContextSource '{source}'. "
+                "Register the provider via ContextProviderRegistry.register() before building contexts."
+            ),
+        )
+        self.source = source
+
+class ConversationNotFoundError(NotFoundError):
+    """Raised when a conversation thread or turn lookup fails."""
+    def __init__(self, thread_id: str) -> None:
+        super().__init__(
+            message=f"Conversation thread not found: {thread_id}",
+            detail=f"No conversation thread exists with ID '{thread_id}'.",
+        )
+        self.thread_id = thread_id
+

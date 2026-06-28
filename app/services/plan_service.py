@@ -12,11 +12,11 @@ from uuid import UUID
 
 import structlog
 
-from app.events.bus import AbstractEventBus
+from app.events.bus import EventBus
 from app.models.commands import UpdatePlanStatusCommand
 from app.models.plan import Plan, PaginatedPlans
 from app.repositories.plan_repository import AbstractPlanRepository
-from app.services.context import OperationContext
+from app.core.context import OperationContext
 from app.services.plan_state import PlanStateMachine
 
 logger = structlog.get_logger(__name__)
@@ -47,7 +47,7 @@ class AbstractPlanService(ABC):
 
 class PlanService(AbstractPlanService):
 
-    def __init__(self, repository: AbstractPlanRepository, event_bus: AbstractEventBus) -> None:
+    def __init__(self, repository: AbstractPlanRepository, event_bus: EventBus) -> None:
         self._repository = repository
         self._event_bus = event_bus
 

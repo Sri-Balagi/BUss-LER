@@ -15,6 +15,8 @@ from app.models.exceptions import (
     MemoryNotFoundError,
     DuplicateMemoryError,
     AIKernelError,
+    NotFoundError,
+    BizOSError,
 )
 
 logger = structlog.get_logger()
@@ -28,6 +30,22 @@ async def entity_not_found_handler(request: Request, exc: EntityNotFoundError) -
     )
 
 
+async def generic_not_found_handler(request: Request, exc: NotFoundError) -> JSONResponse:
+    logger.warning("Resource not found", url=str(request.url), detail=exc.detail)
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={"detail": exc.message},
+    )
+
+
+async def generic_bizos_error_handler(request: Request, exc: BizOSError) -> JSONResponse:
+    logger.warning("BizOS domain error", url=str(request.url), detail=exc.detail)
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content={"detail": exc.message},
+    )
+
+
 async def memory_not_found_handler(request: Request, exc: MemoryNotFoundError) -> JSONResponse:
     logger.warning("Memory not found", url=str(request.url), detail=exc.detail)
     return JSONResponse(
@@ -36,10 +54,42 @@ async def memory_not_found_handler(request: Request, exc: MemoryNotFoundError) -
     )
 
 
+async def generic_not_found_handler(request: Request, exc: NotFoundError) -> JSONResponse:
+    logger.warning("Resource not found", url=str(request.url), detail=exc.detail)
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={"detail": exc.message},
+    )
+
+
+async def generic_bizos_error_handler(request: Request, exc: BizOSError) -> JSONResponse:
+    logger.warning("BizOS domain error", url=str(request.url), detail=exc.detail)
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content={"detail": exc.message},
+    )
+
+
 async def twin_not_found_handler(request: Request, exc: TwinNotFoundError) -> JSONResponse:
     logger.warning("Twin not found", url=str(request.url), detail=exc.detail)
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
+        content={"detail": exc.message},
+    )
+
+
+async def generic_not_found_handler(request: Request, exc: NotFoundError) -> JSONResponse:
+    logger.warning("Resource not found", url=str(request.url), detail=exc.detail)
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={"detail": exc.message},
+    )
+
+
+async def generic_bizos_error_handler(request: Request, exc: BizOSError) -> JSONResponse:
+    logger.warning("BizOS domain error", url=str(request.url), detail=exc.detail)
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
         content={"detail": exc.message},
     )
 
@@ -112,3 +162,5 @@ def register_exception_handlers(app: FastAPI) -> None:
     app.add_exception_handler(RepositoryError, repository_error_handler)
     app.add_exception_handler(ServiceError, service_error_handler)
     app.add_exception_handler(AIKernelError, ai_kernel_error_handler)
+    app.add_exception_handler(NotFoundError, generic_not_found_handler)
+    app.add_exception_handler(BizOSError, generic_bizos_error_handler)

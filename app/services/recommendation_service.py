@@ -13,12 +13,12 @@ from datetime import datetime, timezone
 
 import structlog
 
-from app.events.bus import AbstractEventBus
+from app.events.bus import EventBus
 from app.models.commands import UpdateRecommendationStatusCommand
 from app.models.enums import RecommendationStatus
 from app.models.recommendation import Recommendation, PaginatedRecommendations
 from app.repositories.recommendation_repository import AbstractRecommendationRepository
-from app.services.context import OperationContext
+from app.core.context import OperationContext
 
 logger = structlog.get_logger(__name__)
 
@@ -47,7 +47,7 @@ class AbstractRecommendationService(ABC):
 
 class RecommendationService(AbstractRecommendationService):
 
-    def __init__(self, repository: AbstractRecommendationRepository, event_bus: AbstractEventBus) -> None:
+    def __init__(self, repository: AbstractRecommendationRepository, event_bus: EventBus) -> None:
         self._repository = repository
         self._event_bus = event_bus
 

@@ -26,7 +26,7 @@ from app.api.v1.dependencies import (
 from app.models.commands import GenerateRecommendationsCommand
 from app.models.enums import RecommendationStatus
 from app.repositories.recommendation_repository import AbstractRecommendationRepository
-from app.services.context import OperationContext
+from app.core.context import OperationContext
 from app.services.recommendation_engine import AbstractRecommendationEngine
 
 router = APIRouter(prefix="/v1", tags=["Recommendations"])

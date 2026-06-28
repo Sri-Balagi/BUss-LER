@@ -36,6 +36,15 @@ class GoalType(str, Enum):
     HABIT = "habit"
 
 
+class GoalPriority(str, Enum):
+    """Priority level of a goal."""
+
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+
 class GoalStatus(str, Enum):
     """Lifecycle status of a goal."""
 
@@ -260,3 +269,177 @@ class RecommendationConfidence(str, Enum):
     HIGH = "high"
     MEDIUM = "medium"
     LOW = "low"
+
+
+# =============================================================================
+# Context Engine Enums (Milestone 4)
+# =============================================================================
+
+
+class ContextSource(str, Enum):
+    """Identifies which cognitive subsystem contributed a context section."""
+
+    MEMORY = "memory"
+    INTENT = "intent"
+    GOAL = "goal"
+    PLAN = "plan"
+    RECOMMENDATION = "recommendation"
+    TWIN = "twin"
+    CONVERSATION = "conversation"
+    TRACE = "trace"
+    BUSINESS_STATE = "business_state"
+    EXTERNAL = "external"
+
+
+class ContextStatus(str, Enum):
+    """Lifecycle status of an EnterpriseContext assembly."""
+
+    BUILDING = "building"
+    ASSEMBLED = "assembled"
+    OPTIMIZED = "optimized"
+    CONSUMED = "consumed"
+    EXPIRED = "expired"
+    ARCHIVED = "archived"
+
+
+class ContextPriority(str, Enum):
+    """Priority tier for a context section or item."""
+
+    CRITICAL = "critical"
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
+    BACKGROUND = "background"
+
+
+class RefreshStrategy(str, Enum):
+    """Cache refresh strategy for a context provider."""
+
+    LAZY = "lazy"       # Refresh only on cache miss
+    EAGER = "eager"     # Refresh in background before expiry
+    FORCED = "forced"   # Always re-fetch, bypass cache
+
+
+# =============================================================================
+# Intent Enums
+# =============================================================================
+
+
+class IntentType(str, Enum):
+    """Business-domain classification of a user intent."""
+
+    INVENTORY = "inventory"
+    CALENDAR = "calendar"
+    ANALYTICS = "analytics"
+    FINANCE = "finance"
+    COMMUNICATION = "communication"
+    TASK_MANAGEMENT = "task_management"
+    REPORTING = "reporting"
+    RESEARCH = "research"
+    GENERAL = "general"
+
+
+class IntentStatus(str, Enum):
+    """Lifecycle status of an intent."""
+
+    PENDING = "pending"
+    CLASSIFIED = "classified"
+    CONFIRMED = "confirmed"
+    FULFILLED = "fulfilled"
+    REJECTED = "rejected"
+    EXPIRED = "expired"
+
+
+class IntentConfidence(str, Enum):
+    """AI classification confidence band for an intent."""
+
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
+
+
+# =============================================================================
+# Plan Enums
+# =============================================================================
+
+
+class PlanStatus(str, Enum):
+    """Lifecycle status of a generated plan."""
+
+    DRAFT = "draft"
+    APPROVED = "approved"
+    EXECUTING = "executing"
+    COMPLETED = "completed"
+    ABANDONED = "abandoned"
+
+
+# =============================================================================
+# Recommendation Enums
+# =============================================================================
+
+
+class RecommendationStatus(str, Enum):
+    """Lifecycle status of a proactive recommendation."""
+
+    NEW = "new"
+    ACKNOWLEDGED = "acknowledged"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+    EXPIRED = "expired"
+
+
+class RecommendationConfidence(str, Enum):
+    """AI confidence band for a generated recommendation."""
+
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
+
+
+# =============================================================================
+# Context Engine Enums (Milestone 4)
+# =============================================================================
+
+
+class ContextSource(str, Enum):
+    """Identifies which cognitive subsystem contributed a context section."""
+
+    MEMORY = "memory"
+    INTENT = "intent"
+    GOAL = "goal"
+    PLAN = "plan"
+    RECOMMENDATION = "recommendation"
+    TWIN = "twin"
+    CONVERSATION = "conversation"
+    TRACE = "trace"
+    BUSINESS_STATE = "business_state"
+    EXTERNAL = "external"
+
+
+class ContextStatus(str, Enum):
+    """Lifecycle status of an EnterpriseContext assembly."""
+
+    BUILDING = "building"
+    ASSEMBLED = "assembled"
+    OPTIMIZED = "optimized"
+    CONSUMED = "consumed"
+    EXPIRED = "expired"
+    ARCHIVED = "archived"
+
+
+class ContextPriority(str, Enum):
+    """Priority tier for a context section or item."""
+
+    CRITICAL = "critical"
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
+    BACKGROUND = "background"
+
+
+class RefreshStrategy(str, Enum):
+    """Cache refresh strategy for a context provider."""
+
+    LAZY = "lazy"       # Refresh only on cache miss
+    EAGER = "eager"     # Refresh in background before expiry
+    FORCED = "forced"   # Always re-fetch, bypass cache

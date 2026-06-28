@@ -19,7 +19,7 @@ from app.api.schemas.plan_rec import (
 )
 from app.api.v1.dependencies import get_operation_context, get_planning_engine
 from app.models.commands import GeneratePlanCommand
-from app.services.context import OperationContext
+from app.core.context import OperationContext
 from app.services.planning_engine import AbstractPlanningEngine
 
 from app.api.v1.dependencies import get_plan_service

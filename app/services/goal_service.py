@@ -15,7 +15,7 @@ from uuid import UUID
 
 import structlog
 
-from app.events.bus import AbstractEventBus
+from app.events.bus import EventBus
 from app.models.commands import (
     CreateGoalCommand,
     DeleteGoalCommand,
@@ -30,7 +30,7 @@ from app.models.goal import Goal, GoalCreate, GoalIntentLink, GoalUpdate, Pagina
 from app.models.queries import GoalListQuery
 from app.models.results import CreateGoalResult, LinkIntentToGoalResult
 from app.repositories.goal_repository import AbstractGoalRepository
-from app.services.context import OperationContext
+from app.core.context import OperationContext
 from app.services.goal_state import GoalStateMachine
 
 logger = structlog.get_logger(__name__)
@@ -85,7 +85,7 @@ class GoalService(AbstractGoalService):
     def __init__(
         self,
         repository: AbstractGoalRepository,
-        event_bus: AbstractEventBus,
+        event_bus: EventBus,
     ) -> None:
         self._repository = repository
         self._event_bus = event_bus
