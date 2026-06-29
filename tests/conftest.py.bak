@@ -6,7 +6,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 
-from app.api.v1.dependencies import (
+from app.api.v1.dependencies_core import (
     get_entity_repository,
     get_entity_service,
     get_history_repository,

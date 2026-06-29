@@ -1,0 +1,22 @@
+from abc import ABC, abstractmethod
+from typing import List, Optional
+
+from app.intelligence.intake.intent.models import ExecutiveIntent
+from app.intelligence.intake.kpi.models import KPIAssessment
+from app.intelligence.workspaces.world_model.world_model import BusinessWorldModel
+from app.intelligence.intake.situation.models import SituationAssessment
+
+class IIntentEngine(ABC):
+    @abstractmethod
+    def parse_intent(self, raw_request: str) -> ExecutiveIntent:
+        pass
+
+class IKPIEngine(ABC):
+    @abstractmethod
+    def evaluate_metric(self, kpi_id: str, current: float, target: float) -> KPIAssessment:
+        pass
+
+class ISituationAnalysisEngine(ABC):
+    @abstractmethod
+    def analyze(self, intent: Optional[ExecutiveIntent], kpis: List[KPIAssessment], world_model: BusinessWorldModel) -> SituationAssessment:
+        pass
