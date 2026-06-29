@@ -1,16 +1,13 @@
 import pytest
 import asyncio
-from uuid import uuid4
 import time
 
-from app.runtime.tasks.models import TaskPriority
 from app.runtime.tasks.state import TaskState
-from app.runtime.policies.sequential import SequentialExecutionPolicy
 from app.runtime.policies.parallel import ParallelExecutionPolicy
 from app.runtime.retry.strategy import DefaultRetryStrategy
 from app.runtime.retry.backoff import FixedDelay
 
-from tests.runtime.certification.test_e2e_certification import e2e_env, create_e2e_task, E2EScheduler
+from tests.runtime.certification.test_e2e_certification import create_e2e_task, E2EScheduler, e2e_env  # noqa: F401, F811
 
 @pytest.mark.anyio
 async def test_stress_certification(e2e_env):

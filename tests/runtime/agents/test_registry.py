@@ -1,11 +1,10 @@
-import pytest
 from app.runtime.agents.registry import AgentRegistry, ResolutionContext
 from app.runtime.agents.monitor import AgentHealthMonitor
 from app.runtime.agents.ranking import HealthRankingStrategy
 from app.runtime.agents.specification import AgentSpecification
 from app.runtime.agents.capability import Capability
 from app.runtime.agents.permissions import AgentPermission
-from app.runtime.agents.interfaces import IAgentFactory, BaseAgent
+from app.runtime.agents.interfaces import IAgentFactory
 
 class MockFactory(IAgentFactory):
     def create_agent(self, spec): pass

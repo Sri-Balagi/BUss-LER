@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Optional
 from app.runtime.capabilities.models.request import CapabilityRequest
 from app.runtime.capabilities.models.result import CapabilityResult
 from app.runtime.capabilities.context import CapabilityContext

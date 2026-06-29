@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 from app.intelligence.strategy.library.models import StrategyDefinition, StrategyCatalog
 
 class StrategyLibrary:

@@ -1,4 +1,3 @@
-from typing import Any
 from app.intelligence.strategy.policy.models import PolicyAssessment, PolicyStatus, PolicyViolation
 from app.intelligence.strategy.objectives.models import ExecutiveObjective
 

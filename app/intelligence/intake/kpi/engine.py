@@ -1,4 +1,3 @@
-from typing import List, Dict, Any
 from app.intelligence.intake.kpi.models import KPIAssessment, KPIStatus
 
 class KPIEngine:

@@ -1,6 +1,6 @@
 from enum import Enum
 from pydantic import BaseModel, Field
-from typing import Dict, Any, Optional
+from typing import Optional
 
 class ReasoningMode(str, Enum):
     """Declarative reasoning modes that affect controller behavior."""

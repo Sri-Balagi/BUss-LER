@@ -1,6 +1,5 @@
 from enum import Enum
 from pydantic import BaseModel
-from typing import Any
 
 class KPIStatus(str, Enum):
     HEALTHY = "HEALTHY"

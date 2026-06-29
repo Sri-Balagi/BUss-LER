@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Any
 from app.runtime.agents.specification import AgentSpecification
 from app.runtime.agents.context import AgentContext
 from app.runtime.agents.results import AgentResult

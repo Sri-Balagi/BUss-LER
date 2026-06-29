@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any
+from typing import List, Dict
 
 from app.intelligence.oversight.cycle.models import CognitiveCycleState
 from app.intelligence.decision.planning.models import ExecutivePlan

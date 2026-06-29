@@ -1,5 +1,4 @@
-import pytest
-from app.runtime.agents.specification import AgentSpecification, ExecutionType
+from app.runtime.agents.specification import AgentSpecification
 from app.runtime.agents.interfaces import BaseAgent
 from app.runtime.agents.factories import TransientFactory, SingletonFactory
 

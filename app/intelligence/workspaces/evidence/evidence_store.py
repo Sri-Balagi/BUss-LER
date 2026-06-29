@@ -1,4 +1,3 @@
-from typing import List
 
 class Evidence:
     def __init__(self, fact_id: str, description: str, source: str):

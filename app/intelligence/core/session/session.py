@@ -1,5 +1,5 @@
 import uuid
-from typing import Optional, Dict, Any
+from typing import Optional, Any
 
 from app.intelligence.core.session.models import ReasoningMode, CognitiveMetrics, SessionBudget, TerminationPolicy
 from enum import Enum

@@ -1,6 +1,6 @@
 [project]
 name = "bizos"
-version = "4.0.0"
+version = "6.0.0"
 description = "BizOS - The AI Operating System for Entities"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -38,15 +38,9 @@ testpaths = ["tests"]
 
 [tool.coverage.run]
 omit = [
-    "app/services/gemini.py",
-    "app/services/qdrant.py",
-    "app/services/ai/*",
-    "app/repositories/*",
-    "app/services/conversation_service.py",
-    "app/services/plan_service.py",
-    "app/services/recommendation_service.py",
-    "app/services/cognitive_trace_service.py",
-    "app/api/*"
+    ".venv/*",
+    "mutants/*",
+    "tests/*",
 ]
 
 [dependency-groups]
@@ -59,3 +53,18 @@ dev = [
     "pytest-xdist>=3.8.0",
     "syrupy>=5.3.4",
 ]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP"]
+ignore = ["E501", "B008"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["F401", "F811"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 70

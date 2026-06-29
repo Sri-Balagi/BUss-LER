@@ -1,4 +1,3 @@
-from typing import List, Optional
 from app.intelligence.intake.intent.models import ExecutiveIntent, IntentClassification, IntentEntity
 
 class IntentEngine:

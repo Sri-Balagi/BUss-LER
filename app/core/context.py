@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional
 from pydantic import Field
-from app.models.schemas import DomainBaseModel
+from app.interfaces.http.schemas.base import DomainBaseModel
 
 
 class OperationContext(DomainBaseModel):

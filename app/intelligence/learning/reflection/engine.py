@@ -1,5 +1,4 @@
 import uuid
-from typing import Any
 from app.intelligence.learning.reflection.models import ReflectionReport, ReflectionFinding, ReflectionSeverity
 from app.intelligence.oversight.cycle.models import CognitiveCycleState
 

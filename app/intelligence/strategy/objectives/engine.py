@@ -1,5 +1,4 @@
 import uuid
-from typing import List, Optional
 from app.intelligence.intake.intent.models import ExecutiveIntent
 from app.intelligence.strategy.objectives.models import (
     ExecutiveObjective, ObjectiveStatus, ObjectivePriority, BusinessHorizon

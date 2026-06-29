@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Any, Callable
+from typing import List, Callable
 
 class Hypothesis:
     def __init__(self, description: str):

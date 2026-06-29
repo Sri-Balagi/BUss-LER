@@ -1,0 +1,30 @@
+﻿# CODEOWNERS — BizOS v6.0.0
+# Defines code ownership for review requirements.
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default: all changes require review
+* @bizos-team
+
+# Frozen Kernels — require principal architect review
+/app/runtime/ @runtime-team @principal-architect
+/app/intelligence/ @intelligence-team @principal-architect
+/app/intelligence/runtime_bridge/ @principal-architect
+
+# Infrastructure — require infrastructure team review
+/app/infrastructure/ @infrastructure-team
+
+# Public interfaces — require API team review
+/app/interfaces/ @api-team
+
+# Platform concerns
+/app/platform/ @platform-team
+
+# Documentation
+/docs/ @docs-team @principal-architect
+
+# Schema migrations — require DB team review
+/migrations/ @db-team @principal-architect
+
+# CI/CD and project configuration
+/pyproject.toml @platform-team @principal-architect
+/.github/ @platform-team

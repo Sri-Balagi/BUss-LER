@@ -1,6 +1,5 @@
 import pytest
 from app.runtime.capabilities.models.specification import CapabilitySpecification
-from app.runtime.capabilities.permissions import CapabilityPermission
 from app.runtime.capabilities.models.resolution import CapabilityResolutionContext
 from app.runtime.capabilities.resolution import ExactMatchStrategy, NewestCompatibleStrategy
 from app.runtime.capabilities.registry import CapabilityRegistry

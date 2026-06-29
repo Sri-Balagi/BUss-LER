@@ -1,5 +1,4 @@
 import uuid
-from typing import List, Dict
 from app.intelligence.strategy.objectives.models import ExecutiveObjective
 from app.intelligence.strategy.goals.models import Goal, GoalStatus, GoalCollection
 

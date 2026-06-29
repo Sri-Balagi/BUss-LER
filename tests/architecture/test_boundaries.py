@@ -51,7 +51,7 @@ def test_api_layer_never_imports_repositories():
             ):
                 continue
 
-            assert not imp.startswith("app.repositories"), (
+            assert not imp.startswith("app.infrastructure.persistence.postgres.repositories"), (
                 f"API file {filepath.name} illegally imports repository module: {imp}"
             )
 
@@ -82,7 +82,7 @@ def test_repositories_never_import_ai_kernel():
     for filepath in repo_files:
         imports = get_imports_for_file(filepath)
         for imp in imports:
-            assert not imp.startswith("app.services.ai"), (
+            assert not imp.startswith("app.infrastructure.ai"), (
                 f"Repository file {filepath.name} illegally imports AI layer: {imp}"
             )
 
@@ -94,6 +94,6 @@ def test_providers_never_import_repositories():
     for filepath in provider_files:
         imports = get_imports_for_file(filepath)
         for imp in imports:
-            assert not imp.startswith("app.repositories"), (
+            assert not imp.startswith("app.infrastructure.persistence.postgres.repositories"), (
                 f"Provider file {filepath.name} illegally imports repository: {imp}"
             )

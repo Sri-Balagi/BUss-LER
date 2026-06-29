@@ -1,6 +1,6 @@
 from enum import Enum
 from pydantic import BaseModel, Field
-from typing import List, Any
+from typing import List
 
 class ConstraintType(str, Enum):
     FINANCIAL = "FINANCIAL"

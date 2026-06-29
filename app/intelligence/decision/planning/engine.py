@@ -1,5 +1,4 @@
 import uuid
-from typing import List
 from app.intelligence.decision.decision.models import ExecutiveDecision
 from app.intelligence.decision.planning.models import ExecutivePlan, PlanningStep, PlanningDependency, ExecutiveDirective
 

@@ -1,9 +1,9 @@
 import pytest
 from app.intelligence.integration.orchestrator import ExecutiveIntelligenceOrchestrator
 from app.intelligence.integration.errors import IntelligenceError
-from app.intelligence.runtime.bridge import IntelligenceRuntimeBridge
+from app.intelligence.runtime_bridge.bridge import IntelligenceRuntimeBridge
 from app.intelligence.decision.planning.models import ExecutiveDirective
-from app.intelligence.runtime.errors import RuntimeIntegrationError
+from app.intelligence.runtime_bridge.errors import RuntimeIntegrationError
 
 def test_intelligence_failure_recovery(monkeypatch):
     orchestrator = ExecutiveIntelligenceOrchestrator()

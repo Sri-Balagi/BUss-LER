@@ -1,4 +1,4 @@
-from app.intelligence.strategy.constraints.models import StrategicConstraint, StrategicConstraintSet, ConstraintType
+from app.intelligence.strategy.constraints.models import StrategicConstraint, StrategicConstraintSet
 
 class StrategicConstraintsEngine:
     """

@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any
 
 from app.intelligence.integration.models import ExecutiveIntelligenceResult
 from app.intelligence.core.session.session import CognitiveSession

@@ -1,4 +1,4 @@
-from app.models.exceptions import BizOSError
+from app.shared.exceptions.errors import BizOSError
 
 class ExecutionError(BizOSError):
     """Base exception for all runtime execution errors."""

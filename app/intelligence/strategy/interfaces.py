@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List
 
 from app.intelligence.intake.intent.models import ExecutiveIntent
 from app.intelligence.strategy.objectives.models import ExecutiveObjective
@@ -7,7 +7,7 @@ from app.intelligence.strategy.goals.models import GoalCollection, Goal
 from app.intelligence.strategy.conflict.models import ConflictAssessment
 from app.intelligence.strategy.constraints.models import StrategicConstraintSet
 from app.intelligence.strategy.policy.models import PolicyAssessment
-from app.intelligence.strategy.library.models import StrategyCatalog, StrategyDefinition
+from app.intelligence.strategy.library.models import StrategyCatalog
 from app.intelligence.strategy.timeline.models import StrategicTimeline
 
 class IExecutiveObjectivesEngine(ABC):

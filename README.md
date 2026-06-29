@@ -1,115 +1,183 @@
-# BizOS — AI-Native Operating System for Entities
+﻿# BizOS — AI Operating System for Entities
 
-[![Version](https://img.shields.io/badge/version-v2.0.0-blue.svg)](https://github.com/your-org/bizos/releases)
+[![Version](https://img.shields.io/badge/version-v6.0.0-blue.svg)](https://github.com/your-org/bizos/releases)
 [![Python](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.115.0-009688.svg?logo=fastapi)](https://fastapi.tiangolo.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Tests](https://img.shields.io/badge/tests-367%20passed-brightgreen.svg)](tests/)
+[![Coverage](https://img.shields.io/badge/coverage-78%25-yellow.svg)](htmlcov/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> **BizOS is not a chatbot, a dashboard, or a CRM.** It is a foundational AI Operating System designed to understand an entity, build a digital twin of it, and help it achieve its goals through planning, reasoning, memory, simulation, and autonomous execution.
+> **BizOS is not a chatbot, a dashboard, or a workflow tool.** It is a foundational AI Operating System — a platform that understands an entity, builds a persistent digital model of it, and autonomously orchestrates AI agents to help it achieve its goals through planning, reasoning, memory, and execution.
 
 ---
 
-## 🌟 Project Vision
+## Architecture
 
-The future of AI is not conversational—it is agentic and autonomous. BizOS provides the architectural foundation for AI agents to possess persistent memory, robust state management, and provider-agnostic cognitive capabilities. 
+BizOS v6.0.0 is organized around two frozen, production-grade kernels that communicate only through a strictly-typed bridge interface.
 
-By modeling businesses, individuals, or systems as **Digital Twins**, BizOS allows AI to step out of the chat window and seamlessly integrate into real-world operational logic.
+`
+Executive Intelligence Kernel (M6)
+Intake → Strategy → Decision → Oversight → Learning → Workspaces
+                          |
+                   Runtime Bridge  (one-way boundary)
+                          |
+Runtime OS Kernel (M5)
+Agents → Capabilities → Tasks → Scheduler → Budget → Session
+                          |
+Infrastructure Layer
+AI Kernel · PostgreSQL · Qdrant · Cache
+`
 
-## 🚀 Why BizOS?
+### Boundary Contracts
 
-* **AI-Native from Day One:** Built specifically for LLM and vector-based operations.
-* **Provider Agnostic Kernel:** Swap between Gemini, OpenAI, or Local LLMs without rewriting business logic.
-* **Event-Driven Resilience:** Asynchronous background processing backed by Tenacity loops.
-* **Strict Layered Architecture:** Enterprise-grade separation of API, Services, Repositories, and Providers.
+| Boundary | Rule |
+|----------|------|
+| Intelligence → Runtime | Allowed **only** through runtime_bridge/ |
+| Runtime → Intelligence | Forbidden |
+| Interfaces → Kernels | Inward only |
+| Infrastructure → Kernels | Never |
 
-## 🧠 Key Features
+---
 
-* **Digital Twin Management:** Track the state, metadata, and history of any modeled entity.
-* **Semantic Memory Engine:** Embed, store, and semantically search a Twin's contextual experiences.
-* **Event Bus:** Decoupled memory summarization and vector processing pipelines.
-* **Qdrant Vector Integration:** High-performance semantic indexing.
+## Technology Stack
 
-## 🏗 Architecture Overview
+| Component | Technology |
+|-----------|-----------|
+| Runtime | Python 3.12+, asyncio |
+| API Framework | FastAPI 0.115+ |
+| Domain Modeling | Pydantic v2 |
+| AI Provider | Google Gemini (primary, extensible) |
+| Persistence | PostgreSQL via Supabase |
+| Vector Store | Qdrant |
+| Logging | Structlog |
+| Testing | Pytest + Hypothesis + Syrupy |
+| Package Manager | uv |
 
-BizOS adheres to a strict Layered Architecture combined with Domain-Driven concepts.
+---
 
-> **[View Architecture Index](docs/Architecture_Index.md)** for deep dives into individual subsystems.
+## Project Structure
 
-*(Recommended: Add Architecture Diagram Screenshot here)*
-
-## 🛠 Technology Stack
-
-* **Core:** Python 3.12+, FastAPI, Pydantic v2
-* **Database:** PostgreSQL (via Supabase)
-* **Vector Store:** Qdrant
-* **AI Providers:** Google Gemini (Primary), extensibility for others
-* **Resilience:** Tenacity, Structlog
-
-## 📁 Project Structure
-
-```text
+`
 bizos/
 ├── app/
-│   ├── api/v1/         # Versioned REST endpoints
-│   ├── core/           # Operation context and config
-│   ├── events/         # Event Bus and Handlers
-│   ├── models/         # DTOs, schemas, and enums
-│   ├── repositories/   # Persistence (Supabase, Qdrant)
-│   ├── services/       # Business logic (Memory, Twins, AI Kernel)
-│   └── workers/        # Background processing
-├── docs/               # Architecture and operational documentation
-├── migrations/         # SQL Schema migrations
-├── tests/              # E2E, Integration, Unit, and Chaos tests
-```
+│   ├── bootstrap/          # Dependency composition and wiring
+│   ├── core/               # OperationContext (cross-cutting concerns)
+│   ├── infrastructure/     # AI, persistence, vectorstore, cache
+│   ├── intelligence/       # M6 Executive Intelligence Kernel [FROZEN]
+│   │   ├── core/
+│   │   ├── decision/       # Planning and recommendation engines
+│   │   ├── intake/         # Intent classification and context assembly
+│   │   ├── learning/       # Memory, cognitive trace, outcome tracking
+│   │   ├── oversight/      # Governance and compliance
+│   │   ├── runtime_bridge/ # Only approved Runtime integration channel
+│   │   ├── strategy/       # Goal management and strategy formation
+│   │   └── workspaces/
+│   ├── interfaces/         # HTTP API, CLI (planned), SDK (planned)
+│   ├── platform/           # Config, DI, telemetry, resilience
+│   ├── runtime/            # M5 Runtime OS Kernel [FROZEN]
+│   │   ├── agents/
+│   │   ├── budget/
+│   │   ├── capabilities/
+│   │   ├── policies/
+│   │   ├── queues/
+│   │   ├── retry/
+│   │   ├── scheduler/
+│   │   ├── session/
+│   │   └── tasks/
+│   └── shared/             # Universal primitives (enums, events, exceptions)
+├── docs/
+│   ├── adr/                # Architecture Decision Records
+│   ├── architecture/       # System architecture documentation
+│   ├── developer/          # Developer guides and API references
+│   ├── milestones/         # Milestone completion summaries
+│   └── operations/         # Deployment and operations guides
+├── migrations/             # SQL schema migration scripts
+├── scripts/                # Developer utilities
+├── tests/                  # Test suite (mirrors app/ exactly)
+├── .env.example
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── SECURITY.md
+├── pyproject.toml
+└── README.md
+`
 
-## ⚙️ Installation
+---
 
-BizOS uses [`uv`](https://github.com/astral-sh/uv) for lightning-fast dependency management.
+## Getting Started
 
-1. Ensure Python 3.12+ is installed.
-2. Install dependencies:
-   ```bash
-   uv sync
-   # Or using standard pip:
-   pip install -e ".[dev]"
-   ```
-3. Set up your environment variables:
-   ```bash
-   cp .env.example .env
-   ```
+### Prerequisites
+- Python 3.12+
+- [uv](https://github.com/astral-sh/uv) package manager
+- Supabase project (PostgreSQL)
+- Qdrant instance (local Docker or cloud)
 
-## 🚦 Quick Start
+### Installation
 
-1. **Start Infrastructure:**
-   Ensure you have your Supabase credentials in `.env`, then start Qdrant locally:
-   ```bash
-   docker-compose up -d
-   ```
+`ash
+git clone https://github.com/your-org/bizos.git
+cd bizos
+uv sync
+cp .env.example .env
+# Edit .env with your Supabase URL, API key, and Gemini API key
+`
 
-2. **Run the API Server:**
-   ```bash
-   uv run uvicorn app.main:app --reload
-   ```
+### Running the API
 
-3. **Verify Health:**
-   Check the sub-system health at `http://localhost:8000/api/v1/health/memory` or view the Swagger UI at `http://localhost:8000/docs`.
+`ash
+docker-compose up -d
+uv run uvicorn app.main:app --reload
+curl http://localhost:8000/health
+`
 
-## 🗺 Roadmap
+### Running Tests
 
-* **Milestone 1:** Digital Twin Foundation ✅
-* **Milestone 2:** Memory Engine (v2.0.0) ✅
-* **Milestone 3:** Goals & Intent Engine ⏳ (Next)
-* **Milestone 4:** Agent Swarms & Delegation
-* **Milestone 5:** Temporal Simulation Reality
+`ash
+uv run pytest                                    # Full suite
+uv run pytest --cov=app --cov-report=html        # With coverage
+uv run pytest tests/runtime/                     # Runtime layer only
+uv run pytest tests/intelligence/               # Intelligence layer only
+uv run pytest tests/certification/              # E2E certification
+`
 
-## 🤝 Contributing
+---
 
-We welcome contributions from the community! Please read our [Contributing Guide](CONTRIBUTING.md) to understand our development process, branching strategy, and coding standards.
+## Milestone History
 
-## 🛡 Security
+| Milestone | Description | Status |
+|-----------|-------------|--------|
+| M0 | Project Foundation | ✅ Complete |
+| M1 | Digital Twin Foundation | ✅ Complete |
+| M2 | Memory Engine | ✅ Complete |
+| M3 | AI Kernel & Provider Abstraction | ✅ Complete |
+| M4 | Context Engine | ✅ Complete |
+| M5 | Runtime OS Kernel | ✅ **Frozen** |
+| M6 | Executive Intelligence Kernel | ✅ **Frozen** |
 
-Please review our [Security Policy](SECURITY.md) for information on reporting vulnerabilities and our disclosure policy.
+---
 
-## 📄 License
+## Documentation
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+| Document | Description |
+|----------|-------------|
+| [Architecture Overview](docs/architecture/index.md) | System-wide architecture reference |
+| [AI Kernel](docs/architecture/ai_kernel.md) | AI provider abstraction and kernel design |
+| [Memory Engine](docs/architecture/memory_engine.md) | Semantic memory architecture |
+| [Developer Guide](docs/developer/api_reference.md) | API reference and integration |
+| [Configuration](docs/developer/configuration.md) | Environment variables and settings |
+| [Testing Strategy](docs/developer/testing_strategy.md) | Test architecture and conventions |
+| [Operations Runbook](docs/operations/runbook.md) | Deployment and operational procedures |
+| [ADR Catalog](docs/adr/) | Architecture Decision Records |
+
+---
+
+## Contributing
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting pull requests.
+
+## Security
+
+Please read [SECURITY.md](SECURITY.md) for our vulnerability disclosure policy.
+
+## License
+
+MIT License — see [LICENSE](LICENSE) for details.

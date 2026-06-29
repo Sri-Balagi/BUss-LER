@@ -1,10 +1,6 @@
-import pytest
 import asyncio
-from app.runtime.agents.interfaces import BaseAgent, IAgentHooks
+from app.runtime.agents.interfaces import BaseAgent
 from app.runtime.agents.results import AgentResult, AgentStatus
-from app.runtime.agents.specification import AgentSpecification, ExecutionType
-from app.runtime.agents.capability import Capability
-from app.runtime.agents.permissions import AgentPermission
 
 class BaseMockAgent(BaseAgent):
     def initialize(self, context):

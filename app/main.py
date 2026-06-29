@@ -12,11 +12,11 @@ import structlog
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.errors import register_exception_handlers
-from app.api.v1.router import api_router
+from app.interfaces.http.errors import register_exception_handlers
+from app.interfaces.http.v1.router import api_router
 from app.config import get_settings
-from app.services.qdrant import QdrantService
-from app.services.supabase import SupabaseService
+from app.infrastructure.vectorstore.qdrant import QdrantService
+from app.infrastructure.persistence.postgres.supabase import SupabaseService
 
 logger = structlog.get_logger()
 

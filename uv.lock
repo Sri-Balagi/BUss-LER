@@ -40,7 +40,7 @@ wheels = [
 
 [[package]]
 name = "bizos"
-version = "4.0.0"
+version = "6.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "fastapi" },

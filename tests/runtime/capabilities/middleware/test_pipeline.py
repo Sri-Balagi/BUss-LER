@@ -3,7 +3,6 @@ from uuid import uuid4
 from app.runtime.capabilities.models.request import CapabilityRequest
 from app.runtime.capabilities.models.result import CapabilityResult, ExecutionStatus
 from app.runtime.capabilities.context import CapabilityContext
-from app.runtime.capabilities.middleware.context import MiddlewareContext
 from app.runtime.capabilities.middleware.interfaces import IMiddleware
 from app.runtime.capabilities.middleware.decision import MiddlewareDecision
 from app.runtime.capabilities.middleware.pipeline import CapabilityPipeline

@@ -5,14 +5,14 @@ from uuid import uuid4
 from dotenv import load_dotenv
 from supabase import create_async_client
 
-from app.models.schemas import EntityCreate
-from app.models.enums import EntityType
-from app.models.twin import DigitalTwinCreate, DigitalTwinUpdate, ChangeType
-from app.repositories.entity_repository import EntityRepository
-from app.repositories.twin_repository import TwinRepository
-from app.repositories.snapshot_repository import SnapshotRepository
-from app.repositories.history_repository import HistoryRepository
-from app.models.exceptions import DuplicateTwinError, VersionConflictError
+from app.interfaces.http.schemas.base import EntityCreate
+from app.shared.enums import EntityType
+from app.interfaces.http.schemas.twin import DigitalTwinCreate, DigitalTwinUpdate, ChangeType
+from app.infrastructure.persistence.postgres.repositories.entity_repository import EntityRepository
+from app.infrastructure.persistence.postgres.repositories.twin_repository import TwinRepository
+from app.infrastructure.persistence.postgres.repositories.snapshot_repository import SnapshotRepository
+from app.infrastructure.persistence.postgres.repositories.history_repository import HistoryRepository
+from app.shared.exceptions.errors import DuplicateTwinError, VersionConflictError
 
 
 async def verify():

@@ -1,7 +1,5 @@
-import pytest
 from app.intelligence.integration.orchestrator import ExecutiveIntelligenceOrchestrator
-from app.intelligence.runtime.bridge import IntelligenceRuntimeBridge
-from app.intelligence.integration.models import CognitivePipelineState
+from app.intelligence.runtime_bridge.bridge import IntelligenceRuntimeBridge
 
 def test_end_to_end_certification():
     """
@@ -26,10 +24,10 @@ def test_end_to_end_certification():
     result = orchestrator.process_request(request)
     
     # Assertions for Intelligence Layer
-    assert result.state == CognitivePipelineState.COMPLETED
-    assert len(result.generated_artifacts) > 0
-    assert result.metrics.total_duration_ms > 0
-    assert result.metrics.iterations_taken >= 1
+    assert result.summary.state.value == "COMPLETED"
+    assert len(result.knowledge_artifacts) > 0
+    assert result.summary.metrics.duration_ms > 0
+    assert result.summary.metrics.iterations >= 1
     
     # If the decision resulted in a plan with directives, execute them through the Bridge
     # For mocking purposes, we grab any mock directives the pipeline generated

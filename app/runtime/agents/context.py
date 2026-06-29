@@ -1,4 +1,3 @@
-from typing import Any
 from app.runtime.session.execution_session import ExecutionSession
 from app.runtime.tasks.models import ITask
 from app.runtime.agents.permissions import AgentPermission

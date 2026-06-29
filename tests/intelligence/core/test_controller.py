@@ -1,5 +1,4 @@
 import pytest
-import asyncio
 from app.intelligence.core.session.session import CognitiveSession, ConvergenceStatus
 from app.intelligence.core.controller.interfaces import IConvergenceEvaluator
 from app.intelligence.core.controller.controller import DefaultCognitiveCycleController

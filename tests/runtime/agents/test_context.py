@@ -1,7 +1,6 @@
 import pytest
 from app.runtime.agents.permissions import AgentPermission
 from app.runtime.agents.context import AgentContext
-from app.runtime.agents.scope import AgentExecutionScope
 from app.runtime.session.execution_session import ExecutionSession
 from app.runtime.session.runtime_identity import RuntimeIdentity
 from app.runtime.session.working_memory import WorkingMemory
@@ -31,7 +30,7 @@ def test_agent_scope_read_permission():
     
     # Missing permission
     ctx = AgentContext(session, task, permissions=set())
-    with pytest.raises(PermissionError, match="Scope lacks permission: READ_MEMORY"):
+    with pytest.raises(PermissionError, match="Scope lacks permission: AgentPermission.READ_MEMORY"):
         ctx.scope.read_memory("user_name")
         
     # With permission
@@ -43,7 +42,7 @@ def test_agent_scope_write_permission():
     
     # Missing permission
     ctx = AgentContext(session, task, permissions={AgentPermission.READ_MEMORY})
-    with pytest.raises(PermissionError, match="Scope lacks permission: WRITE_MEMORY"):
+    with pytest.raises(PermissionError, match="Scope lacks permission: AgentPermission.WRITE_MEMORY"):
         ctx.scope.write_memory("new_key", "value")
         
     # With permission

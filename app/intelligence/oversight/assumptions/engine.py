@@ -1,5 +1,4 @@
 import uuid
-from typing import List
 from app.intelligence.oversight.assumptions.models import Assumption, AssumptionRegistry, AssumptionStatus
 
 class AssumptionManager:

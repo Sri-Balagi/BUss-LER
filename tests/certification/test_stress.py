@@ -1,4 +1,3 @@
-import pytest
 import time
 from app.intelligence.integration.orchestrator import ExecutiveIntelligenceOrchestrator
 
@@ -15,8 +14,8 @@ def test_intelligence_pipeline_stress():
     num_sessions = 100
     for i in range(num_sessions):
         result = orchestrator.process_request(f"Stress test request {i}")
-        assert result.state.value == "COMPLETED"
-        assert result.metrics.iterations_taken >= 1
+        assert result.summary.state.value == "COMPLETED"
+        assert result.summary.metrics.iterations >= 1
         
     end_time = time.time()
     total_time = end_time - start_time
@@ -28,7 +27,7 @@ def test_runtime_bridge_stress():
     """
     Simulates large DAG / massive capability scale for the bridge.
     """
-    from app.intelligence.runtime.bridge import IntelligenceRuntimeBridge
+    from app.intelligence.runtime_bridge.bridge import IntelligenceRuntimeBridge
     from app.intelligence.decision.planning.models import ExecutiveDirective
     
     bridge = IntelligenceRuntimeBridge()

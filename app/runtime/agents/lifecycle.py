@@ -4,8 +4,7 @@ from app.runtime.agents.interfaces import BaseAgent, IAgentHooks
 from app.runtime.agents.context import AgentContext
 from app.runtime.agents.results import AgentResult, AgentStatus
 from app.runtime.agents.events import (
-    AgentInitialized, AgentReady, AgentExecuting, AgentWaiting,
-    AgentSuspended, AgentCompleted, AgentFailed, AgentShutdown
+    AgentInitialized, AgentReady, AgentExecuting, AgentSuspended, AgentCompleted, AgentFailed, AgentShutdown
 )
 
 logger = logging.getLogger(__name__)

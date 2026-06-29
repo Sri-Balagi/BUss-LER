@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Any
 
 from app.intelligence.core.session.session import CognitiveSession, ConvergenceStatus
 

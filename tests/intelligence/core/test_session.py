@@ -1,4 +1,3 @@
-import pytest
 from app.intelligence.core.session.models import ReasoningMode
 from app.intelligence.core.session.session import CognitiveSession, ConvergenceStatus
 

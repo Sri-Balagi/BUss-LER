@@ -2,9 +2,9 @@ import pytest
 import uuid
 import time
 
-from app.models.memory_vector import MemoryVectorPoint, MemoryVectorPayload
-from app.models.enums import MemoryCategory, MemorySource
-from app.repositories.vector_repository import MemoryVectorRepository
+from app.infrastructure.vectorstore.models import MemoryVectorPoint, MemoryVectorPayload
+from app.shared.enums import MemoryCategory, MemorySource
+from app.infrastructure.persistence.postgres.repositories.vector_repository import MemoryVectorRepository
 from qdrant_client import AsyncQdrantClient
 from app.config import Settings
 
