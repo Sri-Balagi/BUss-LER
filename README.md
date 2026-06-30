@@ -160,12 +160,12 @@ uv run pytest tests/certification/              # E2E certification
 | Document | Description |
 |----------|-------------|
 | [Architecture Overview](docs/architecture/index.md) | System-wide architecture reference |
-| [AI Kernel](docs/architecture/ai_kernel.md) | AI provider abstraction and kernel design |
-| [Memory Engine](docs/architecture/memory_engine.md) | Semantic memory architecture |
-| [Developer Guide](docs/developer/api_reference.md) | API reference and integration |
-| [Configuration](docs/developer/configuration.md) | Environment variables and settings |
-| [Testing Strategy](docs/developer/testing_strategy.md) | Test architecture and conventions |
-| [Operations Runbook](docs/operations/runbook.md) | Deployment and operational procedures |
+| [AI Kernel](docs/architecture/Ai_Kernel.md) | AI provider abstraction and kernel design |
+| [Memory Engine](docs/architecture/Memory_Engine.md) | Semantic memory architecture |
+| [Developer Guide](docs/developer/API_Reference.md) | API reference and integration |
+| [Configuration](docs/developer/Configuration_Reference.md) | Environment variables and settings |
+| [Testing Strategy](docs/developer/Testing_Strategy.md) | Test architecture and conventions |
+| [Operations Runbook](docs/operations/RUNBOOK.md) | Deployment and operational procedures |
 | [ADR Catalog](docs/adr/) | Architecture Decision Records |
 
 ---
