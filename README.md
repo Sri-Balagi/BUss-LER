@@ -12,11 +12,13 @@
 
 ## What is BizOS?
 
-BizOS is **not** a chatbot, dashboard, workflow engine, or AI wrapper.
+Today's AI assistants can answer questions.
 
-It is an **AI Operating System** that enables businesses and digital entities to **reason, plan, remember, learn, and execute work autonomously** through a dual-kernel architecture.
+Tomorrow's AI systems will run organizations.
 
-Unlike traditional AI applications that simply respond to prompts, BizOS maintains persistent business context, strategic objectives, executive reasoning, and execution state across interactions.
+BizOS is an AI Operating System built for that future.
+
+It continuously understands an entity, remembers what matters, reasons about goals, plans complex work, coordinates execution, and learns from every outcome—allowing autonomous AI systems to operate with persistent intelligence instead of isolated conversations.
 
 ---
 
@@ -229,13 +231,13 @@ uv run pytest tests/certification/
 
 | Milestone | Status |
 |-----------|--------|
-| M0 | ✅ Complete |
-| M1 | ✅ Complete |
-| M2 | ✅ Complete |
-| M3 | ✅ Complete |
-| M4 | ✅ Complete |
-| M5 | ✅ Frozen |
-| M6 | ✅ Frozen |
+| M0 | ✅ Completed |
+| M1 | ✅ Completed |
+| M2 | ✅ Completed |
+| M3 | ✅ Completed |
+| M4 | ✅ Completed |
+| M5 | ✅ Completed |
+| M6 | ✅ Completed |
 
 ---
 
