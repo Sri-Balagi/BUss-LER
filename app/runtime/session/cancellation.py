@@ -1,6 +1,8 @@
 import asyncio
-from typing import Callable, Awaitable
+from collections.abc import Awaitable, Callable
+
 from app.runtime.interfaces.cancellation import ICancellationToken
+
 
 class CancellationToken(ICancellationToken):
     """

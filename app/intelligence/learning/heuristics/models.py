@@ -1,6 +1,8 @@
 from enum import Enum
-from pydantic import BaseModel, Field
 from typing import List
+
+from pydantic import BaseModel, Field
+
 
 class HeuristicStatus(str, Enum):
     ACTIVE = "ACTIVE"
@@ -20,4 +22,4 @@ class Heuristic(BaseModel):
 class HeuristicCatalog(BaseModel):
     """Catalog of derived business rules and shortcuts."""
     catalog_id: str
-    heuristics: List[Heuristic] = Field(default_factory=list)
+    heuristics: list[Heuristic] = Field(default_factory=list)

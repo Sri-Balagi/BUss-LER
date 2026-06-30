@@ -1,7 +1,7 @@
 import structlog
+from app.workers.memory_worker import MemoryProcessingWorker
 
 from app.shared.events.models import MemoryLifecycleEvent
-from app.workers.memory_worker import MemoryProcessingWorker
 
 logger = structlog.get_logger(__name__)
 

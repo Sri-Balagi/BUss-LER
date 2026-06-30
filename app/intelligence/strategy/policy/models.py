@@ -1,6 +1,8 @@
 from enum import Enum
-from pydantic import BaseModel, Field
 from typing import List
+
+from pydantic import BaseModel, Field
+
 
 class PolicyStatus(str, Enum):
     COMPLIANT = "COMPLIANT"
@@ -14,4 +16,4 @@ class PolicyViolation(BaseModel):
 class PolicyAssessment(BaseModel):
     """Evaluation against static business rules."""
     status: PolicyStatus
-    violations: List[PolicyViolation] = Field(default_factory=list)
+    violations: list[PolicyViolation] = Field(default_factory=list)

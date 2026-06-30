@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Callable, Coroutine, Any, Dict, List, Type
+from collections.abc import Callable, Coroutine
+from typing import Any, Dict, List, Type
 
-from fastapi import BackgroundTasks
 import structlog
+from fastapi import BackgroundTasks
 
 from app.shared.events.models import DomainEvent
 
@@ -18,12 +19,12 @@ class EventBus(ABC):
     """
 
     @abstractmethod
-    def subscribe(self, event_type: Type[DomainEvent], handler: EventHandler) -> None:
+    def subscribe(self, event_type: type[DomainEvent], handler: EventHandler) -> None:
         """Register a handler for a specific event type."""
         pass
 
     @abstractmethod
-    def unsubscribe(self, event_type: Type[DomainEvent], handler: EventHandler) -> None:
+    def unsubscribe(self, event_type: type[DomainEvent], handler: EventHandler) -> None:
         """Unregister a handler."""
         pass
 
@@ -40,12 +41,12 @@ class BackgroundTasksEventBus(EventBus):
 
     def __init__(self, background_tasks: BackgroundTasks = None):
         self._background_tasks = background_tasks
-        self._handlers: Dict[Type[DomainEvent], List[EventHandler]] = {}
+        self._handlers: dict[type[DomainEvent], list[EventHandler]] = {}
 
     def set_background_tasks(self, background_tasks: BackgroundTasks) -> None:
         self._background_tasks = background_tasks
 
-    def subscribe(self, event_type: Type[DomainEvent], handler: EventHandler) -> None:
+    def subscribe(self, event_type: type[DomainEvent], handler: EventHandler) -> None:
         if event_type not in self._handlers:
             self._handlers[event_type] = []
         if handler not in self._handlers[event_type]:
@@ -56,7 +57,7 @@ class BackgroundTasksEventBus(EventBus):
             handler=handler.__name__,
         )
 
-    def unsubscribe(self, event_type: Type[DomainEvent], handler: EventHandler) -> None:
+    def unsubscribe(self, event_type: type[DomainEvent], handler: EventHandler) -> None:
         if event_type in self._handlers and handler in self._handlers[event_type]:
             self._handlers[event_type].remove(handler)
             logger.debug(

@@ -1,5 +1,7 @@
 from typing import List
-from app.intelligence.strategy.library.models import StrategyDefinition, StrategyCatalog
+
+from app.intelligence.strategy.library.models import StrategyCatalog, StrategyDefinition
+
 
 class StrategyLibrary:
     """
@@ -15,5 +17,5 @@ class StrategyLibrary:
     def get_catalog(self) -> StrategyCatalog:
         return StrategyCatalog(strategies=self._catalog)
 
-    def retrieve_by_category(self, category: str) -> List[StrategyDefinition]:
+    def retrieve_by_category(self, category: str) -> list[StrategyDefinition]:
         return [s for s in self._catalog if s.category == category]

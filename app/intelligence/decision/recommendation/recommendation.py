@@ -15,8 +15,8 @@ from uuid import UUID
 
 from pydantic import Field
 
-from app.shared.enums import RecommendationConfidence, RecommendationStatus
 from app.interfaces.http.schemas.base import DomainBaseModel
+from app.shared.enums import RecommendationConfidence, RecommendationStatus
 
 
 class RecommendationBase(DomainBaseModel):
@@ -39,23 +39,23 @@ class RecommendationBase(DomainBaseModel):
         default=RecommendationConfidence.MEDIUM,
         description="AI confidence in the recommendation.",
     )
-    supporting_memory_ids: List[UUID] = Field(
+    supporting_memory_ids: list[UUID] = Field(
         default_factory=list,
         description="IDs of Memory records that informed this recommendation.",
     )
-    supporting_goal_ids: List[UUID] = Field(
+    supporting_goal_ids: list[UUID] = Field(
         default_factory=list,
         description="IDs of Goal records that this recommendation addresses or advances.",
     )
-    originating_plan_id: Optional[UUID] = Field(
+    originating_plan_id: UUID | None = Field(
         default=None,
         description="Plan that generated or triggered this recommendation, if any.",
     )
-    trigger_context: Dict[str, Any] = Field(
+    trigger_context: dict[str, Any] = Field(
         default_factory=dict,
         description="Snapshot of context data that triggered this recommendation.",
     )
-    explainability_metadata: Dict[str, Any] = Field(
+    explainability_metadata: dict[str, Any] = Field(
         default_factory=dict,
         description=(
             "Engineering-facing explainability data "
@@ -63,7 +63,7 @@ class RecommendationBase(DomainBaseModel):
             "Not exposed to end-users."
         ),
     )
-    metadata: Dict[str, Any] = Field(
+    metadata: dict[str, Any] = Field(
         default_factory=dict,
         description="Schemaless structured metadata.",
     )
@@ -87,13 +87,13 @@ class Recommendation(RecommendationBase):
     status: RecommendationStatus = RecommendationStatus.NEW
     created_at: datetime
     updated_at: datetime
-    acknowledged_at: Optional[datetime] = None
+    acknowledged_at: datetime | None = None
 
 
 class PaginatedRecommendations(DomainBaseModel):
     """Pagination wrapper for Recommendation listings."""
 
-    items: List[Recommendation]
+    items: list[Recommendation]
     total_count: int
     limit: int
     offset: int

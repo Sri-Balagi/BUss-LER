@@ -1,4 +1,5 @@
-from typing import Dict, Any
+from typing import Any, Dict
+
 
 class StrategicKnowledge:
     def __init__(self, k_id: str, content: Any, category: str):
@@ -12,7 +13,7 @@ class ExecutiveKnowledgeRepository:
     Differentiates strategic knowledge from factual memory.
     """
     def __init__(self):
-        self.knowledge_base: Dict[str, StrategicKnowledge] = {}
+        self.knowledge_base: dict[str, StrategicKnowledge] = {}
 
     def store_knowledge(self, knowledge: StrategicKnowledge):
         self.knowledge_base[knowledge.k_id] = knowledge

@@ -1,52 +1,97 @@
-# Contributing to BizOS
+﻿# Contributing to BizOS
 
-First off, thank you for considering contributing to BizOS! 
+Thank you for your interest in contributing to BizOS — the AI Operating System for Entities.
 
-BizOS is an AI-Native Operating System for Entities. We are building the foundational infrastructure for agentic applications, meaning our architecture, testing, and documentation standards are rigorous.
+BizOS is a production-grade platform built around two frozen kernels (M5 Runtime, M6 Intelligence).
+Our standards for architecture, testing, and documentation reflect that quality bar.
 
-## Development Setup
+---
 
-1. **Fork & Clone:** Fork the repository and clone it locally.
-2. **Install `uv`:** We use `uv` for lightning-fast dependency management.
-3. **Environment:** Run `uv sync --dev` to set up the environment and install testing dependencies.
-4. **Pre-commit:** We use `ruff` for linting and formatting. Ensure you run `uv run ruff check .` before committing.
+## Quick Start
+
+```bash
+git clone https://github.com/your-org/bizos.git
+cd bizos
+uv sync
+cp .env.example .env
+uv run pytest         # must pass before you start
+```
+
+---
+
+## Architectural Rules
+
+**These are hard rules, not guidelines:**
+
+| Rule | Detail |
+|------|--------|
+| **Never modify frozen kernels** | `app/runtime/` and `app/intelligence/` are frozen. Changes require principal architect sign-off. |
+| **No cross-kernel imports** | `runtime` may never import from `intelligence`. Reverse is allowed only via `runtime_bridge/`. |
+| **No business logic in infrastructure** | `app/infrastructure/` adapts external systems. Domain logic belongs in the kernels. |
+| **Models stay in their context** | Domain models live beside the code that owns them, not in `app/shared/`. |
+| **Tests mirror production** | Every production package has a corresponding test package at the same path under `tests/`. |
+
+---
 
 ## Branch Strategy
 
-* `main`: The stable branch. Do not commit directly to `main`.
-* `feat/*`: For new features (e.g., `feat/intent-engine`).
-* `fix/*`: For bug fixes (e.g., `fix/memory-leak`).
-* `docs/*`: For documentation updates.
+| Branch | Purpose |
+|--------|---------|
+| `main` | Stable. Never commit directly. |
+| `feat/*` | New features (`feat/cli-interface`) |
+| `fix/*` | Bug fixes (`fix/budget-overflow`) |
+| `docs/*` | Documentation only |
+| `chore/*` | Dependency updates, tooling |
+
+---
 
 ## Coding Standards
 
-* **Strict Layering:** BizOS adheres to a strict layered architecture. **Never** import a repository into an API router. The flow is strictly: API -> Service -> Repository.
-* **Typing:** All Python code must be strictly typed using modern `type` hints.
-* **Logging:** Do not use print statements or standard `logging`. Always use `structlog` and bind the `OperationContext` for traceability.
-* **AI Agnostic:** Never hardcode LLM prompts or provider-specific logic into domain services. Use the `AbstractAIKernel`.
+- **Typing**: All code must be fully typed. Use `from __future__ import annotations` + `TYPE_CHECKING` for forward references.
+- **Logging**: Always use `structlog`. Never use `print()` or `logging.getLogger()` directly.
+- **AI calls**: Never call a provider directly. Always go through `AbstractAIKernel`.
+- **Formatting**: Run `uv run ruff check . --fix` before committing.
 
-## Commit Message Conventions
+---
 
-We follow [Conventional Commits](https://www.conventionalcommits.org/):
+## Commit Conventions
 
-* `feat: added qdrant support`
-* `fix: resolved duplicate events in bus`
-* `docs: updated architecture diagrams`
-* `chore: bumped dependency versions`
+Follow [Conventional Commits](https://www.conventionalcommits.org/):
 
-## Pull Request Process
+```
+feat: add CLI interface scaffold
+fix: correct budget overflow in BudgetManager
+docs: update ADR-001 with dual-kernel rationale
+chore: upgrade pydantic to 2.11.0
+test: add property tests for SchedulerPolicy
+```
 
-1. Ensure all tests pass (`uv run pytest`).
-2. Update relevant documentation in `docs/` if your change affects architecture or APIs.
-3. Submit the PR with a clear description of the problem and your solution.
-4. A maintainer will review your code. You may be asked to add architecture tests or chaos tests if you are altering core behavior.
+---
 
-## Testing Expectations
+## Pull Request Checklist
 
-* Unit Tests are required for all new business logic.
-* Integration Tests are required for any repository or API changes.
-* **Architecture Tests:** If you add a new module, ensure it passes `tests/architecture/test_boundaries.py`.
+- [ ] All existing tests pass: `uv run pytest`
+- [ ] New code has test coverage in the correct `tests/` mirror package
+- [ ] Ruff reports no errors: `uv run ruff check app/ tests/`
+- [ ] Architecture boundaries respected (no cross-kernel imports)
+- [ ] Relevant `docs/` updated if behavior or interfaces changed
+- [ ] CHANGELOG.md entry added under `[Unreleased]`
 
-## Documentation Expectations
+---
 
-We treat documentation as code. Do not duplicate information. If you add a subsystem, link it centrally from `docs/Architecture_Index.md`.
+## Testing Requirements
+
+| Change Type | Required Tests |
+|------------|----------------|
+| New domain logic | Unit tests in mirrored `tests/` package |
+| New infrastructure adapter | Integration test |
+| New HTTP endpoint | Interface test in `tests/interfaces/` |
+| Cross-kernel change | Certification test in `tests/certification/` |
+
+---
+
+## Documentation Requirements
+
+- New subsystems: add entry to `docs/architecture/index.md`
+- Major design decisions: add an ADR to `docs/adr/`
+- New capabilities: update relevant milestone summary in `docs/milestones/`

@@ -1,7 +1,9 @@
-from enum import Enum
-from pydantic import BaseModel, Field
-from typing import List
 from datetime import datetime
+from enum import Enum
+from typing import List
+
+from pydantic import BaseModel, Field
+
 
 class KnowledgeCategory(str, Enum):
     STRATEGIC = "STRATEGIC"
@@ -18,5 +20,5 @@ class KnowledgeArtifact(BaseModel):
     artifact_id: str
     category: KnowledgeCategory
     description: str
-    source_evaluation_ids: List[str] = Field(default_factory=list)
+    source_evaluation_ids: list[str] = Field(default_factory=list)
     version: KnowledgeVersion

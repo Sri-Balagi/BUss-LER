@@ -3,15 +3,17 @@
 from fastapi import Depends
 from supabase import AsyncClient
 
-from app.interfaces.http.v1.dependencies_core import get_supabase_client, get_event_bus
+from app.infrastructure.ai.kernel import AbstractAIKernel
 from app.interfaces.http.v1.dependencies_ai import get_ai_kernel
+from app.interfaces.http.v1.dependencies_core import get_event_bus, get_supabase_client
 from app.interfaces.http.v1.dependencies_trace import get_cognitive_trace_service
 from app.shared.events.bus import EventBus
-from app.infrastructure.ai.kernel import AbstractAIKernel
 
 
 async def get_intent_repository(client: AsyncClient = Depends(get_supabase_client)):
-    from app.infrastructure.persistence.postgres.repositories.intent_repository import IntentRepository
+    from app.infrastructure.persistence.postgres.repositories.intent_repository import (
+        IntentRepository,
+    )
 
     return IntentRepository(client)
 

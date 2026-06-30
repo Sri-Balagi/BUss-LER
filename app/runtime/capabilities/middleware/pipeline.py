@@ -1,12 +1,14 @@
+import logging
 import time
-from typing import List, Callable, Awaitable
-from app.runtime.capabilities.models.request import CapabilityRequest
-from app.runtime.capabilities.models.result import CapabilityResult, ExecutionStatus
+from collections.abc import Awaitable, Callable
+from typing import List
+
 from app.runtime.capabilities.context import CapabilityContext
 from app.runtime.capabilities.middleware.context import MiddlewareContext
-from app.runtime.capabilities.middleware.interfaces import IMiddleware
 from app.runtime.capabilities.middleware.decision import MiddlewareDecision
-import logging
+from app.runtime.capabilities.middleware.interfaces import IMiddleware
+from app.runtime.capabilities.models.request import CapabilityRequest
+from app.runtime.capabilities.models.result import CapabilityResult, ExecutionStatus
 
 logger = logging.getLogger(__name__)
 
@@ -14,21 +16,21 @@ class CapabilityPipeline:
     """
     Manages the sequential execution of middlewares wrapping the capability execution.
     """
-    def __init__(self, middlewares: List[IMiddleware] = None):
+    def __init__(self, middlewares: list[IMiddleware] = None):
         self.middlewares = middlewares or []
-        
+
     def add_middleware(self, middleware: IMiddleware) -> None:
         self.middlewares.append(middleware)
-        
+
     async def execute(
-        self, 
-        request: CapabilityRequest, 
+        self,
+        request: CapabilityRequest,
         cap_context: CapabilityContext,
         capability_executor: Callable[[CapabilityRequest, CapabilityContext], Awaitable[CapabilityResult]]
     ) -> CapabilityResult:
-        
+
         mw_context = MiddlewareContext()
-        
+
         # 1. Before Execution
         for mw in self.middlewares:
             decision = await mw.before_execution(request, cap_context, mw_context)
@@ -54,7 +56,7 @@ class CapabilityPipeline:
                 )
             elif decision == MiddlewareDecision.RETRY:
                 pass
-                
+
         # 2. Execute BaseCapability
         try:
             result = await capability_executor(request, cap_context)
@@ -62,7 +64,7 @@ class CapabilityPipeline:
             # 3. On Exception
             for mw in reversed(self.middlewares):
                 await mw.on_exception(request, cap_context, mw_context, e)
-                
+
             return CapabilityResult(
                 status=ExecutionStatus.FAILURE,
                 outputs={},
@@ -70,13 +72,13 @@ class CapabilityPipeline:
                 execution_time_ms=int(time.time() * 1000) - mw_context.start_time_ms,
                 execution_trace_id=request.trace_id
             )
-            
+
         # 4. After Execution
         for mw in reversed(self.middlewares):
             result = await mw.after_execution(request, cap_context, mw_context, result)
-            
+
         # Enrich result with middleware context metrics
         result.validation_results.update(mw_context.metrics)
         result.warnings.extend(mw_context.warnings)
-        
+
         return result

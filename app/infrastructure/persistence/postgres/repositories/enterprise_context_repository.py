@@ -7,7 +7,7 @@ Table: enterprise_contexts
 """
 
 from abc import ABC, abstractmethod
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Optional
 from uuid import UUID
 
@@ -52,7 +52,7 @@ class AbstractEnterpriseContextRepository(ABC):
     async def list_by_twin(
         self,
         twin_id: UUID,
-        status: Optional[ContextStatus] = None,
+        status: ContextStatus | None = None,
         limit: int = 20,
         offset: int = 0,
     ) -> PaginatedContextLifecycles:
@@ -71,7 +71,7 @@ class EnterpriseContextRepository(AbstractEnterpriseContextRepository):
         self._client = client
 
     async def create(self, data: ContextLifecycleCreate) -> ContextLifecycleMetadata:
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         payload = {
             "id": str(data.context_id),
             "twin_id": str(data.twin_id),
@@ -119,7 +119,7 @@ class EnterpriseContextRepository(AbstractEnterpriseContextRepository):
         context_id: UUID,
         update: ContextLifecycleUpdate,
     ) -> ContextLifecycleMetadata:
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         payload: dict = {"status": update.status.value, "updated_at": now}
         if update.assembled_at is not None:
             payload["assembled_at"] = update.assembled_at.isoformat()
@@ -150,7 +150,7 @@ class EnterpriseContextRepository(AbstractEnterpriseContextRepository):
     async def list_by_twin(
         self,
         twin_id: UUID,
-        status: Optional[ContextStatus] = None,
+        status: ContextStatus | None = None,
         limit: int = 20,
         offset: int = 0,
     ) -> PaginatedContextLifecycles:

@@ -1,14 +1,16 @@
 from abc import ABC, abstractmethod
-from .identity import IRuntimeIdentity
-from .memory import IWorkingMemory
+
 from .budget import IExecutionBudget
 from .cancellation import ICancellationToken
+from .identity import IRuntimeIdentity
+from .memory import IWorkingMemory
+
 
 class IExecutionSession(ABC):
     """
     The Process Control Block (PCB) for an execution.
     """
-    
+
     @property
     @abstractmethod
     def identity(self) -> IRuntimeIdentity:
@@ -28,7 +30,7 @@ class IExecutionSession(ABC):
     @abstractmethod
     def cancellation_token(self) -> ICancellationToken:
         pass
-        
+
     @property
     @abstractmethod
     def enterprise_context_version(self) -> str:

@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 
-from app.intelligence.integration.models import ExecutiveIntelligenceResult
 from app.intelligence.core.session.session import CognitiveSession
+from app.intelligence.integration.models import ExecutiveIntelligenceResult
+
 
 class ICognitivePipeline(ABC):
     @abstractmethod

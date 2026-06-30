@@ -1,5 +1,6 @@
 from app.shared.exceptions.errors import BizOSError
 
+
 class ExecutionError(BizOSError):
     """Base exception for all runtime execution errors."""
     def __init__(self, message: str, details: dict | None = None):

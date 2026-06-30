@@ -7,6 +7,7 @@ No business logic lives here; commands are pure data containers.
 import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional
+
 from pydantic import Field
 
 from app.interfaces.http.schemas.base import DomainBaseModel
@@ -19,7 +20,6 @@ from app.shared.enums import (
     PlanStatus,
     RecommendationStatus,
 )
-
 
 # =============================================================================
 # Memory Commands (Milestone 2)
@@ -34,7 +34,7 @@ class CreateMemoryCommand(DomainBaseModel):
     title: str = "Untitled"
     source: MemorySource = MemorySource.USER_INPUT
     memory_category: MemoryCategory = MemoryCategory.OBSERVATION
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
     importance: float = Field(default=0.5, ge=0.0, le=1.0)
 
 
@@ -60,7 +60,7 @@ class CreateIntentCommand(DomainBaseModel):
 
     twin_id: uuid.UUID
     raw_text: str
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class ClassifyIntentCommand(DomainBaseModel):
@@ -93,26 +93,26 @@ class CreateGoalCommand(DomainBaseModel):
 
     twin_id: uuid.UUID
     title: str
-    description: Optional[str] = None
+    description: str | None = None
     goal_type: GoalType = GoalType.STRATEGIC
     priority: int = Field(default=5, ge=1, le=10)
-    target_date: Optional[datetime] = None
-    success_criteria: List[str] = Field(default_factory=list)
-    parent_goal_id: Optional[uuid.UUID] = None
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    target_date: datetime | None = None
+    success_criteria: list[str] = Field(default_factory=list)
+    parent_goal_id: uuid.UUID | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class UpdateGoalCommand(DomainBaseModel):
     """Command to update a goal's attributes."""
 
     goal_id: uuid.UUID
-    title: Optional[str] = None
-    description: Optional[str] = None
-    goal_type: Optional[GoalType] = None
-    priority: Optional[int] = Field(default=None, ge=1, le=10)
-    target_date: Optional[datetime] = None
-    success_criteria: Optional[List[str]] = None
-    metadata: Optional[Dict[str, Any]] = None
+    title: str | None = None
+    description: str | None = None
+    goal_type: GoalType | None = None
+    priority: int | None = Field(default=None, ge=1, le=10)
+    target_date: datetime | None = None
+    success_criteria: list[str] | None = None
+    metadata: dict[str, Any] | None = None
 
 
 class UpdateGoalProgressCommand(DomainBaseModel):
@@ -151,8 +151,8 @@ class GeneratePlanCommand(DomainBaseModel):
     """Command to generate a plan for a goal using the PlanningEngine."""
 
     twin_id: uuid.UUID
-    goal_id: Optional[uuid.UUID] = None
-    intent_id: Optional[uuid.UUID] = None
+    goal_id: uuid.UUID | None = None
+    intent_id: uuid.UUID | None = None
 
 
 class UpdatePlanStatusCommand(DomainBaseModel):
@@ -171,7 +171,7 @@ class GenerateRecommendationsCommand(DomainBaseModel):
     """Command to generate proactive recommendations for a twin."""
 
     twin_id: uuid.UUID
-    intent_id: Optional[uuid.UUID] = Field(
+    intent_id: uuid.UUID | None = Field(
         default=None,
         description="Optional intent to ground the recommendation generation.",
     )

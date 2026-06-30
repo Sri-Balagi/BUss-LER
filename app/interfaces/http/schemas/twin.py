@@ -36,7 +36,6 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from app.interfaces.http.schemas.base import DomainBaseModel
 
-
 # =============================================================================
 # Constants
 # =============================================================================

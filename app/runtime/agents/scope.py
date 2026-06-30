@@ -1,6 +1,8 @@
 from typing import Any, Optional
+
 from app.runtime.agents.permissions import AgentPermission
 from app.runtime.capabilities.executor import ICapabilityExecutor
+
 
 class AgentExecutionScope:
     """
@@ -14,7 +16,7 @@ class AgentExecutionScope:
         permissions: set[AgentPermission],
         read_memory_func,
         write_memory_func,
-        capability_executor: Optional[ICapabilityExecutor] = None,
+        capability_executor: ICapabilityExecutor | None = None,
     ):
         self._task_input = task_input
         self._permissions = frozenset(permissions)
@@ -42,8 +44,8 @@ class AgentExecutionScope:
         if AgentPermission.WRITE_MEMORY not in self._permissions:
             raise PermissionError(f"Scope lacks permission: {AgentPermission.WRITE_MEMORY}")
         self._write_memory_func(key, value)
-        
+
     @property
-    def capabilities(self) -> Optional[ICapabilityExecutor]:
+    def capabilities(self) -> ICapabilityExecutor | None:
         """Provides access to the capability runtime, if enabled."""
         return self._capability_executor

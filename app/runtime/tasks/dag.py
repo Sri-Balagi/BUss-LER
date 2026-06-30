@@ -1,8 +1,10 @@
 from uuid import UUID
-from pydantic import BaseModel, Field, ConfigDict
 
-from app.runtime.tasks.models import ITask
+from pydantic import BaseModel, ConfigDict, Field
+
 from app.runtime.core.exceptions import ExecutionError
+from app.runtime.tasks.models import ITask
+
 
 class DAGValidationError(ExecutionError):
     """Raised when the DAG is invalid (cycles, missing dependencies)."""
@@ -58,7 +60,7 @@ class TaskDAG(BaseModel):
             task = self.tasks[node_id]
             for dep_id in task.dependencies:
                 dfs(dep_id)
-            
+
             path.remove(node_id)
             visited.add(node_id)
 
@@ -89,13 +91,13 @@ class TaskDAG(BaseModel):
         while current_layer:
             layers.append(current_layer)
             next_layer = set()
-            
+
             for node in current_layer:
                 for dependent in graph[node]:
                     in_degree[dependent] -= 1
                     if in_degree[dependent] == 0:
                         next_layer.add(dependent)
-            
+
             current_layer = next_layer
 
         return layers
@@ -107,7 +109,7 @@ class TaskDAG(BaseModel):
         edge_count = sum(len(task.dependencies) for task in self.tasks.values())
         depth = len(layers)
         max_parallelism = max((len(layer) for layer in layers), default=0)
-        
+
         return GraphMetadata(
             node_count=node_count,
             edge_count=edge_count,

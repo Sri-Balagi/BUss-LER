@@ -2,20 +2,27 @@
 
 from fastapi import Depends
 
+from app.infrastructure.cache.context_cache import MemoryContextCache
+from app.infrastructure.persistence.postgres.repositories.conversation_repository import (
+    ConversationRepository,
+)
+from app.infrastructure.persistence.postgres.repositories.enterprise_context_repository import (
+    EnterpriseContextRepository,
+)
+from app.intelligence.intake.situation.enterprise_context import ProviderMetadata
+from app.interfaces.http.v1.dependencies import (
+    get_cognitive_trace_service as get_trace_service,
+)
 from app.interfaces.http.v1.dependencies import (
     get_event_bus,
-    get_supabase_client,
     get_goal_service,
     get_intent_service,
     get_memory_service,
     get_plan_service,
     get_recommendation_service,
-    get_cognitive_trace_service as get_trace_service,
+    get_supabase_client,
     get_twin_service,
 )
-from app.infrastructure.persistence.postgres.repositories.conversation_repository import ConversationRepository
-from app.infrastructure.persistence.postgres.repositories.enterprise_context_repository import EnterpriseContextRepository
-from app.infrastructure.cache.context_cache import MemoryContextCache
 from app.services.context_dependency_graph import build_default_dependency_graph
 from app.services.context_engine import ContextEngine
 from app.services.context_provider_registry import ContextProviderRegistry
@@ -44,7 +51,6 @@ from app.services.context_strategies import (
 )
 from app.services.context_validators import DefaultContextValidator
 from app.services.conversation_service import ConversationService
-from app.intelligence.intake.situation.enterprise_context import ProviderMetadata
 from app.shared.enums import ContextSource
 
 

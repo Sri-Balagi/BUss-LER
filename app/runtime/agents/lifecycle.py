@@ -1,11 +1,18 @@
-from enum import Enum
 import logging
-from app.runtime.agents.interfaces import BaseAgent, IAgentHooks
+from enum import Enum
+
 from app.runtime.agents.context import AgentContext
-from app.runtime.agents.results import AgentResult, AgentStatus
 from app.runtime.agents.events import (
-    AgentInitialized, AgentReady, AgentExecuting, AgentSuspended, AgentCompleted, AgentFailed, AgentShutdown
+    AgentCompleted,
+    AgentExecuting,
+    AgentFailed,
+    AgentInitialized,
+    AgentReady,
+    AgentShutdown,
+    AgentSuspended,
 )
+from app.runtime.agents.interfaces import BaseAgent, IAgentHooks
+from app.runtime.agents.results import AgentResult, AgentStatus
 
 logger = logging.getLogger(__name__)
 
@@ -54,39 +61,39 @@ class AgentLifecycleManager:
         self._transition(AgentState.INITIALIZED, {AgentState.CREATED})
         for hook in self._hooks:
             hook.before_initialize(self._agent)
-        
+
         self._agent.initialize(context)
-        
+
         for hook in self._hooks:
             hook.after_initialize(self._agent)
-            
+
         self._emit(AgentInitialized(agent_id=self._agent_id, task_id=self._task_id))
         self._transition(AgentState.READY, {AgentState.INITIALIZED})
         self._emit(AgentReady(agent_id=self._agent_id, task_id=self._task_id))
 
     async def execute(self) -> AgentResult:
         self._transition(AgentState.RUNNING, {AgentState.READY, AgentState.SUSPENDED})
-        
+
         for hook in self._hooks:
             hook.before_execute(self._agent)
-            
+
         self._emit(AgentExecuting(agent_id=self._agent_id, task_id=self._task_id))
-        
+
         try:
             result = await self._agent.execute()
-            
+
             if result.status == AgentStatus.SUCCESS:
                 self._transition(AgentState.COMPLETED, {AgentState.RUNNING})
                 self._emit(AgentCompleted(agent_id=self._agent_id, task_id=self._task_id, metrics=result.metrics))
             else:
                 self._transition(AgentState.FAILED, {AgentState.RUNNING})
                 self._emit(AgentFailed(agent_id=self._agent_id, task_id=self._task_id, error="Execution failed", metrics=result.metrics))
-                
+
             for hook in self._hooks:
                 hook.after_execute(self._agent, result)
-                
+
             return result
-            
+
         except Exception as e:
             self._transition(AgentState.FAILED, {AgentState.RUNNING})
             self._emit(AgentFailed(agent_id=self._agent_id, task_id=self._task_id, error=str(e)))
@@ -109,15 +116,15 @@ class AgentLifecycleManager:
 
     def shutdown(self):
         self._transition(AgentState.TERMINATED, {
-            AgentState.CREATED, AgentState.INITIALIZED, AgentState.READY, 
+            AgentState.CREATED, AgentState.INITIALIZED, AgentState.READY,
             AgentState.COMPLETED, AgentState.FAILED, AgentState.SUSPENDED, AgentState.WAITING
         })
         for hook in self._hooks:
             hook.before_shutdown(self._agent)
-            
+
         self._agent.shutdown()
-        
+
         for hook in self._hooks:
             hook.after_shutdown(self._agent)
-            
+
         self._emit(AgentShutdown(agent_id=self._agent_id, task_id=self._task_id))

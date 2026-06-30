@@ -1,6 +1,9 @@
 from enum import Enum
+
 from pydantic import BaseModel, Field
+
 from app.runtime.agents.permissions import AgentPermission
+
 
 class ExecutionType(str, Enum):
     """Supported execution models for an agent."""

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import Callable, Awaitable
+from collections.abc import Awaitable, Callable
+
 
 class ICancellationToken(ABC):
     """

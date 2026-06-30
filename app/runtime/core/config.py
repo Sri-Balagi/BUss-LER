@@ -1,5 +1,6 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 class RuntimeSettings(BaseSettings):
     """
@@ -10,7 +11,7 @@ class RuntimeSettings(BaseSettings):
     default_max_recursion: int = Field(default=5, description="Default max recursion depth for agents")
     default_max_retries: int = Field(default=3, description="Default max tool or task retries")
     default_max_cost_cents: int = Field(default=100, description="Default budget cap in cents")
-    
+
     model_config = SettingsConfigDict(env_prefix="RUNTIME_")
 
 runtime_settings = RuntimeSettings()

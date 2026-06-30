@@ -1,6 +1,8 @@
 from enum import Enum
-from pydantic import BaseModel, Field
 from typing import List
+
+from pydantic import BaseModel, Field
+
 
 class DecisionPriority(str, Enum):
     ROUTINE = "ROUTINE"
@@ -23,4 +25,4 @@ class ExecutiveDecision(BaseModel):
     selected_alternative_id: str
     rationale: str
     priority: DecisionPriority = DecisionPriority.ROUTINE
-    alternatives_considered: List[DecisionAlternative] = Field(default_factory=list)
+    alternatives_considered: list[DecisionAlternative] = Field(default_factory=list)

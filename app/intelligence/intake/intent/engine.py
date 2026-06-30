@@ -1,15 +1,20 @@
-from app.intelligence.intake.intent.models import ExecutiveIntent, IntentClassification, IntentEntity
+from app.intelligence.intake.intent.models import (
+    ExecutiveIntent,
+    IntentClassification,
+    IntentEntity,
+)
+
 
 class IntentEngine:
     """
     Transforms raw user requests into structured executive intent.
     Does not plan, prioritize, or execute.
     """
-    
+
     def parse_intent(self, raw_request: str) -> ExecutiveIntent:
         # A mock implementation of NLP/NLU mapping
         request_lower = raw_request.lower()
-        
+
         if not raw_request.strip():
             return ExecutiveIntent(
                 raw_request=raw_request,

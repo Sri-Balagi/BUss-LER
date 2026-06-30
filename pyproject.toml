@@ -16,6 +16,10 @@ dependencies = [
     "pydantic-settings>=2.6.0",
     "httpx>=0.28.0",
     "structlog>=24.4.0",
+    "prometheus-client>=0.20.0",
+    "opentelemetry-sdk>=1.27.0",
+    "opentelemetry-instrumentation-fastapi>=0.48b0",
+    "opentelemetry-exporter-otlp-proto-http>=1.27.0",
 ]
 
 [project.optional-dependencies]
@@ -45,6 +49,7 @@ omit = [
 
 [dependency-groups]
 dev = [
+    "pytest-asyncio>=0.24.0",
     "hypothesis>=6.155.7",
     "mutmut>=3.6.0",
     "pytest-benchmark>=5.2.3",
@@ -68,3 +73,10 @@ ignore = ["E501", "B008"]
 [tool.coverage.report]
 show_missing = true
 fail_under = 70
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_return_any = false
+strict = false

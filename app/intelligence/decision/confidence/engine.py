@@ -1,5 +1,10 @@
-from app.intelligence.decision.confidence.models import ConfidenceAssessment, ConfidenceScore, EvidenceWeight
+from app.intelligence.decision.confidence.models import (
+    ConfidenceAssessment,
+    ConfidenceScore,
+    EvidenceWeight,
+)
 from app.intelligence.decision.uncertainty.models import UncertaintyAssessment
+
 
 class ConfidenceEngine:
     """
@@ -8,7 +13,7 @@ class ConfidenceEngine:
     def evaluate_confidence(self, uncertainty: UncertaintyAssessment) -> ConfidenceAssessment:
         # Confidence is inversely related to uncertainty
         overall = 1.0 - uncertainty.overall_uncertainty_score
-        
+
         return ConfidenceAssessment(
             overall_score=overall,
             scores=[ConfidenceScore(category="SimulationQuality", score=0.8)],

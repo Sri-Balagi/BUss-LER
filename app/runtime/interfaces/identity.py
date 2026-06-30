@@ -1,7 +1,8 @@
 from abc import ABC
 from datetime import datetime
-from pydantic import BaseModel, Field, UUID4
 from uuid import uuid4
+
+from pydantic import UUID4, BaseModel, Field
 
 
 class IRuntimeIdentity(BaseModel, ABC):

@@ -13,16 +13,22 @@ Table: goals, intent_goal_links
 
 import time
 from abc import ABC, abstractmethod
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import List, Optional
 from uuid import UUID
 
 import structlog
 from supabase import AsyncClient
 
+from app.intelligence.strategy.goals.goal import (
+    Goal,
+    GoalCreate,
+    GoalIntentLink,
+    GoalUpdate,
+    PaginatedGoals,
+)
 from app.shared.enums import GoalStatus, GoalType
 from app.shared.exceptions.errors import GoalNotFoundError, RepositoryError
-from app.intelligence.strategy.goals.goal import Goal, GoalCreate, GoalIntentLink, GoalUpdate, PaginatedGoals
 
 logger = structlog.get_logger(__name__)
 
@@ -42,8 +48,8 @@ class AbstractGoalRepository(ABC):
     async def list_by_twin(
         self,
         twin_id: UUID,
-        status: Optional[GoalStatus] = None,
-        goal_type: Optional[GoalType] = None,
+        status: GoalStatus | None = None,
+        goal_type: GoalType | None = None,
         limit: int = 20,
         offset: int = 0,
         include_deleted: bool = False,
@@ -51,7 +57,7 @@ class AbstractGoalRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_active_goals(self, twin_id: UUID) -> List[Goal]:
+    async def get_active_goals(self, twin_id: UUID) -> list[Goal]:
         """Return goals with status IN_PROGRESS or ACTIVE, ordered by priority."""
         pass
 
@@ -138,8 +144,8 @@ class GoalRepository(AbstractGoalRepository):
     async def list_by_twin(
         self,
         twin_id: UUID,
-        status: Optional[GoalStatus] = None,
-        goal_type: Optional[GoalType] = None,
+        status: GoalStatus | None = None,
+        goal_type: GoalType | None = None,
         limit: int = 20,
         offset: int = 0,
         include_deleted: bool = False,
@@ -178,7 +184,7 @@ class GoalRepository(AbstractGoalRepository):
             items=items, total_count=total, limit=limit, offset=offset
         )
 
-    async def get_active_goals(self, twin_id: UUID) -> List[Goal]:
+    async def get_active_goals(self, twin_id: UUID) -> list[Goal]:
         """Retrieve ACTIVE and IN_PROGRESS goals ordered by priority."""
         try:
             response = (
@@ -230,7 +236,7 @@ class GoalRepository(AbstractGoalRepository):
         try:
             response = (
                 await self._client.table(self._table)
-                .update({"deleted_at": datetime.now(timezone.utc).isoformat()})
+                .update({"deleted_at": datetime.now(UTC).isoformat()})
                 .eq("id", str(goal_id))
                 .is_("deleted_at", "null")
                 .execute()

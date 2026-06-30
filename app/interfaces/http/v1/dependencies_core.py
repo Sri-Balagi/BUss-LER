@@ -1,15 +1,16 @@
 """Core dependencies for API v1 (Auth, Context, DB, EventBus)."""
 
 import uuid
-from fastapi import Depends, BackgroundTasks, Request
-from supabase import AsyncClient
+
+from fastapi import BackgroundTasks, Depends, Request
 from qdrant_client import AsyncQdrantClient
+from supabase import AsyncClient
 
 from app.config import Settings, get_settings
+from app.core.context import OperationContext
 from app.infrastructure.persistence.postgres.supabase import SupabaseService
 from app.infrastructure.vectorstore.qdrant import QdrantService
-from app.shared.events.bus import EventBus, BackgroundTasksEventBus
-from app.core.context import OperationContext
+from app.shared.events.bus import BackgroundTasksEventBus, EventBus
 
 
 async def get_supabase_client(
@@ -56,7 +57,9 @@ async def get_event_bus(background_tasks: BackgroundTasks) -> EventBus:
 
 # Core Repositories
 async def get_entity_repository(client: AsyncClient = Depends(get_supabase_client)):
-    from app.infrastructure.persistence.postgres.repositories.entity_repository import EntityRepository
+    from app.infrastructure.persistence.postgres.repositories.entity_repository import (
+        EntityRepository,
+    )
 
     return EntityRepository(client)
 
@@ -68,13 +71,17 @@ async def get_twin_repository(client: AsyncClient = Depends(get_supabase_client)
 
 
 async def get_snapshot_repository(client: AsyncClient = Depends(get_supabase_client)):
-    from app.infrastructure.persistence.postgres.repositories.snapshot_repository import SnapshotRepository
+    from app.infrastructure.persistence.postgres.repositories.snapshot_repository import (
+        SnapshotRepository,
+    )
 
     return SnapshotRepository(client)
 
 
 async def get_history_repository(client: AsyncClient = Depends(get_supabase_client)):
-    from app.infrastructure.persistence.postgres.repositories.history_repository import HistoryRepository
+    from app.infrastructure.persistence.postgres.repositories.history_repository import (
+        HistoryRepository,
+    )
 
     return HistoryRepository(client)
 

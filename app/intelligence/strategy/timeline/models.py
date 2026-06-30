@@ -1,12 +1,14 @@
-from pydantic import BaseModel, Field
-from typing import List, Optional
 from datetime import datetime
+from typing import List, Optional
+
+from pydantic import BaseModel, Field
+
 
 class StrategicMilestone(BaseModel):
     milestone_id: str
     description: str
-    target_date: Optional[datetime] = None
-    dependent_on_milestone_ids: List[str] = Field(default_factory=list)
+    target_date: datetime | None = None
+    dependent_on_milestone_ids: list[str] = Field(default_factory=list)
 
 class StrategicTimeline(BaseModel):
     """
@@ -15,4 +17,4 @@ class StrategicTimeline(BaseModel):
     """
     timeline_id: str
     horizon_label: str
-    milestones: List[StrategicMilestone] = Field(default_factory=list)
+    milestones: list[StrategicMilestone] = Field(default_factory=list)

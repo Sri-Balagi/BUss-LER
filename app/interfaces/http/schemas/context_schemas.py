@@ -1,18 +1,17 @@
 """Public API schemas for Context Engine and Conversations."""
 
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 from uuid import UUID
-from datetime import datetime
 
 from pydantic import BaseModel, Field
 
-from app.shared.enums import ContextStatus, ConversationStatus, ConversationRole
 from app.intelligence.intake.situation.enterprise_context import (
     ContextMetadata,
-    ContextWindow,
     ContextSection,
+    ContextWindow,
 )
-
+from app.shared.enums import ContextStatus, ConversationRole, ConversationStatus
 
 # =============================================================================
 # Context Engine API Schemas
@@ -25,7 +24,7 @@ class BuildContextRequest(BaseModel):
     policy_id: str = Field(
         default="full", description="ID of the ContextPolicy to apply."
     )
-    intent_id: Optional[UUID] = Field(
+    intent_id: UUID | None = Field(
         default=None, description="Optional Intent ID that triggered this build."
     )
 
@@ -39,10 +38,10 @@ class ContextLifecycleResponse(BaseModel):
     schema_version: str
     status: ContextStatus
     is_partial: bool
-    assembled_at: Optional[datetime] = None
-    expires_at: Optional[datetime] = None
-    consumed_at: Optional[datetime] = None
-    archived_at: Optional[datetime] = None
+    assembled_at: datetime | None = None
+    expires_at: datetime | None = None
+    consumed_at: datetime | None = None
+    archived_at: datetime | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -50,7 +49,7 @@ class ContextLifecycleResponse(BaseModel):
 class PaginatedContextLifecyclesResponse(BaseModel):
     """Paginated list of context lifecycles."""
 
-    items: List[ContextLifecycleResponse]
+    items: list[ContextLifecycleResponse]
     total_count: int
     limit: int
     offset: int
@@ -61,12 +60,12 @@ class EnterpriseContextResponse(BaseModel):
 
     context_id: UUID
     twin_id: UUID
-    intent_id: Optional[UUID] = None
-    operation_context_id: Optional[str] = None
+    intent_id: UUID | None = None
+    operation_context_id: str | None = None
     status: ContextStatus
     metadata: ContextMetadata
     window: ContextWindow
-    sections: List[ContextSection]
+    sections: list[ContextSection]
 
 
 # =============================================================================
@@ -77,8 +76,8 @@ class EnterpriseContextResponse(BaseModel):
 class ConversationThreadCreateRequest(BaseModel):
     """Request to create a new conversation thread."""
 
-    title: Optional[str] = None
-    metadata: Optional[Dict[str, Any]] = None
+    title: str | None = None
+    metadata: dict[str, Any] | None = None
 
 
 class ConversationThreadResponse(BaseModel):
@@ -86,11 +85,11 @@ class ConversationThreadResponse(BaseModel):
 
     id: UUID
     twin_id: UUID
-    title: Optional[str]
+    title: str | None
     status: ConversationStatus
-    summary: Optional[str]
+    summary: str | None
     turn_count: int
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
     created_at: datetime
     updated_at: datetime
 
@@ -98,7 +97,7 @@ class ConversationThreadResponse(BaseModel):
 class PaginatedConversationThreadsResponse(BaseModel):
     """Paginated list of conversation threads."""
 
-    items: List[ConversationThreadResponse]
+    items: list[ConversationThreadResponse]
     total_count: int
     limit: int
     offset: int
@@ -109,10 +108,10 @@ class ConversationTurnCreateRequest(BaseModel):
 
     role: ConversationRole
     content: str
-    agent_id: Optional[UUID] = None
+    agent_id: UUID | None = None
     tokens_used: int = 0
-    tool_calls: Optional[List[Dict[str, Any]]] = None
-    metadata: Optional[Dict[str, Any]] = None
+    tool_calls: list[dict[str, Any]] | None = None
+    metadata: dict[str, Any] | None = None
 
 
 class ConversationTurnResponse(BaseModel):
@@ -122,9 +121,9 @@ class ConversationTurnResponse(BaseModel):
     thread_id: UUID
     role: ConversationRole
     content: str
-    agent_id: Optional[UUID]
+    agent_id: UUID | None
     tokens_used: int
-    tool_calls: List[Dict[str, Any]]
+    tool_calls: list[dict[str, Any]]
     turn_index: int
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
     created_at: datetime

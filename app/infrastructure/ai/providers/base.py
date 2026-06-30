@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any
+from typing import Any, Dict
 
 from app.infrastructure.ai.models import AIRequest, AIResponse, EmbeddingRequest, EmbeddingResponse
 
@@ -31,7 +31,7 @@ class AbstractAIProvider(ABC):
         pass
 
     @abstractmethod
-    async def health_check(self) -> Dict[str, Any]:
+    async def health_check(self) -> dict[str, Any]:
         """
         Verify provider configuration and connectivity.
         Returns a dictionary with status details.

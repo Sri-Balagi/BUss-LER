@@ -1,5 +1,5 @@
 import time
-from typing import Dict, Any
+from typing import Any, Dict
 
 from google import genai
 from google.genai import types
@@ -12,8 +12,8 @@ from app.infrastructure.ai.models import (
     EmbeddingRequest,
     EmbeddingResponse,
 )
-from app.shared.exceptions.errors import AIKernelError, ProviderConfigurationError
 from app.infrastructure.ai.providers.base import AbstractAIProvider
+from app.shared.exceptions.errors import AIKernelError, ProviderConfigurationError
 
 
 class GeminiProvider(AbstractAIProvider):
@@ -103,7 +103,7 @@ class GeminiProvider(AbstractAIProvider):
         except Exception as e:
             raise AIKernelError(self.provider_name, "embed", str(e)) from e
 
-    async def health_check(self) -> Dict[str, Any]:
+    async def health_check(self) -> dict[str, Any]:
         """
         Verify Gemini API key configuration and connectivity.
         """

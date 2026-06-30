@@ -1,7 +1,13 @@
 import uuid
+
 from app.intelligence.decision.decision.models import ExecutiveDecision
 from app.intelligence.decision.planning.models import ExecutivePlan
-from app.intelligence.oversight.validation.models import ValidationAssessment, ValidationIssue, ValidationSeverity
+from app.intelligence.oversight.validation.models import (
+    ValidationAssessment,
+    ValidationIssue,
+    ValidationSeverity,
+)
+
 
 class ExecutiveValidationEngine:
     """
@@ -15,13 +21,13 @@ class ExecutiveValidationEngine:
                 description="Decision lacks a selected alternative.",
                 severity=ValidationSeverity.FATAL
             ))
-            
+
         return ValidationAssessment(
             assessment_id=str(uuid.uuid4()),
             is_valid=len(issues) == 0,
             issues=issues
         )
-        
+
     def validate_plan(self, plan: ExecutivePlan) -> ValidationAssessment:
         issues = []
         if not plan.steps:
@@ -30,7 +36,7 @@ class ExecutiveValidationEngine:
                 description="Plan has no steps.",
                 severity=ValidationSeverity.FATAL
             ))
-            
+
         return ValidationAssessment(
             assessment_id=str(uuid.uuid4()),
             is_valid=len(issues) == 0,

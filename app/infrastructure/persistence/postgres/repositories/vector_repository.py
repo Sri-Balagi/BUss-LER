@@ -12,8 +12,8 @@ from qdrant_client import AsyncQdrantClient
 from qdrant_client.http import models
 
 from app.config import Settings
-from app.shared.exceptions.errors import VectorDatabaseError
 from app.infrastructure.vectorstore.models import MemoryVectorPoint
+from app.shared.exceptions.errors import VectorDatabaseError
 
 
 class AbstractVectorRepository(ABC):
@@ -25,7 +25,7 @@ class AbstractVectorRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_by_id(self, point_id: UUID) -> Optional[MemoryVectorPoint]:
+    async def get_by_id(self, point_id: UUID) -> MemoryVectorPoint | None:
         """Retrieve a vector point by its unique ID."""
         pass
 
@@ -40,7 +40,7 @@ class AbstractVectorRepository(ABC):
         query_vector: list[float],
         twin_id: UUID,
         limit: int = 5,
-    ) -> List[MemoryVectorPoint]:
+    ) -> list[MemoryVectorPoint]:
         """Search for similar vectors filtered by twin_id."""
         pass
 
@@ -67,7 +67,7 @@ class MemoryVectorRepository(AbstractVectorRepository):
         except Exception as e:
             raise VectorDatabaseError(operation="upsert", detail=str(e))
 
-    async def get_by_id(self, point_id: UUID) -> Optional[MemoryVectorPoint]:
+    async def get_by_id(self, point_id: UUID) -> MemoryVectorPoint | None:
         """Retrieve a memory vector by its ID."""
         try:
             result = await self._client.retrieve(
@@ -103,7 +103,7 @@ class MemoryVectorRepository(AbstractVectorRepository):
         query_vector: list[float],
         twin_id: UUID,
         limit: int = 5,
-    ) -> List[MemoryVectorPoint]:
+    ) -> list[MemoryVectorPoint]:
         """Search vectors strictly filtered by twin_id."""
         try:
             results = await self._client.query_points(

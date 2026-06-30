@@ -1,5 +1,6 @@
 import time
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
 
 class MiddlewareContext:
     """
@@ -7,11 +8,11 @@ class MiddlewareContext:
     """
     def __init__(self):
         self.start_time_ms: int = int(time.time() * 1000)
-        self.metadata: Dict[str, Any] = {}
-        self.trace_data: Dict[str, Any] = {}
-        self.policy_decisions: Dict[str, Any] = {}
-        self.metrics: Dict[str, Any] = {}
-        self.warnings: List[str] = []
-        
+        self.metadata: dict[str, Any] = {}
+        self.trace_data: dict[str, Any] = {}
+        self.policy_decisions: dict[str, Any] = {}
+        self.metrics: dict[str, Any] = {}
+        self.warnings: list[str] = []
+
     def add_warning(self, warning: str) -> None:
         self.warnings.append(warning)

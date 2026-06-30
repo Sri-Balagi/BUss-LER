@@ -37,7 +37,7 @@ class AbstractCognitiveTraceRepository(ABC):
     async def list_by_twin(
         self,
         twin_id: UUID,
-        operation_type: Optional[str] = None,
+        operation_type: str | None = None,
         limit: int = 20,
         offset: int = 0,
     ) -> PaginatedCognitiveTraces:
@@ -130,7 +130,7 @@ class CognitiveTraceRepository(AbstractCognitiveTraceRepository):
     async def list_by_twin(
         self,
         twin_id: UUID,
-        operation_type: Optional[str] = None,
+        operation_type: str | None = None,
         limit: int = 20,
         offset: int = 0,
     ) -> PaginatedCognitiveTraces:
@@ -212,6 +212,7 @@ class CognitiveTraceRepository(AbstractCognitiveTraceRepository):
     @staticmethod
     def _deserialize(row: dict) -> CognitiveTrace:
         from uuid import UUID as PUUID
+
         from app.intelligence.learning.repository.cognitive_trace import CognitiveTraceTokenUsage
 
         if row.get("token_usage") and isinstance(row["token_usage"], dict):

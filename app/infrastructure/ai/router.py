@@ -14,7 +14,7 @@ class ProviderRouter:
         self._default_provider = default_provider
 
     def get_active_provider(
-        self, requested_provider: Optional[str] = None
+        self, requested_provider: str | None = None
     ) -> AbstractAIProvider:
         """
         Return the requested provider, or the default if none is specified.

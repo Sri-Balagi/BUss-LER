@@ -5,8 +5,8 @@ from uuid import UUID
 
 from pydantic import Field
 
-from app.shared.enums import EmbeddingStatus, MemoryCategory, MemorySource
 from app.interfaces.http.schemas.base import DomainBaseModel
+from app.shared.enums import EmbeddingStatus, MemoryCategory, MemorySource
 
 
 class MemoryBase(DomainBaseModel):
@@ -16,7 +16,7 @@ class MemoryBase(DomainBaseModel):
         ..., max_length=255, description="Human-readable title for UI & debugging."
     )
     content: str = Field(..., description="The actual memory text.")
-    summary: Optional[str] = Field(
+    summary: str | None = Field(
         None, description="AI-generated summary, populated asynchronously."
     )
     memory_category: MemoryCategory = Field(
@@ -35,12 +35,12 @@ class MemoryBase(DomainBaseModel):
         default=EmbeddingStatus.PENDING,
         description="Status of the vector embedding generation.",
     )
-    embedding_model: Optional[str] = Field(
+    embedding_model: str | None = Field(
         None,
         max_length=255,
         description="Model tracking for the embedding (e.g., gemini-1.5-pro).",
     )
-    metadata: Dict[str, Any] = Field(
+    metadata: dict[str, Any] = Field(
         default_factory=dict, description="Schemaless structured metadata."
     )
 
@@ -54,10 +54,10 @@ class MemoryCreate(MemoryBase):
 class MemoryUpdate(DomainBaseModel):
     """Schema for updating an existing memory."""
 
-    title: Optional[str] = Field(None, max_length=255, description="Updated title.")
-    content: Optional[str] = Field(None, description="Updated memory text.")
-    summary: Optional[str] = Field(None, description="Updated AI summary.")
-    importance: Optional[Decimal] = Field(
+    title: str | None = Field(None, max_length=255, description="Updated title.")
+    content: str | None = Field(None, description="Updated memory text.")
+    summary: str | None = Field(None, description="Updated AI summary.")
+    importance: Decimal | None = Field(
         None,
         ge=Decimal("0.00"),
         le=Decimal("1.00"),
@@ -65,13 +65,13 @@ class MemoryUpdate(DomainBaseModel):
         decimal_places=2,
         description="Updated importance score.",
     )
-    embedding_status: Optional[EmbeddingStatus] = Field(
+    embedding_status: EmbeddingStatus | None = Field(
         None, description="Updated embedding status."
     )
-    embedding_model: Optional[str] = Field(
+    embedding_model: str | None = Field(
         None, max_length=255, description="Updated embedding model."
     )
-    metadata: Optional[Dict[str, Any]] = Field(
+    metadata: dict[str, Any] | None = Field(
         None, description="Updated structured metadata."
     )
 
@@ -83,7 +83,7 @@ class Memory(MemoryBase):
     twin_id: UUID
     created_at: datetime
     updated_at: datetime
-    deleted_at: Optional[datetime] = None
+    deleted_at: datetime | None = None
 
 
 class MemorySearchResult(DomainBaseModel):

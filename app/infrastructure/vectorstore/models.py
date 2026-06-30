@@ -5,8 +5,8 @@ from uuid import UUID
 
 from pydantic import Field
 
-from app.shared.enums import MemoryCategory, MemorySource
 from app.interfaces.http.schemas.base import DomainBaseModel
+from app.shared.enums import MemoryCategory, MemorySource
 
 
 class MemoryVectorPayload(DomainBaseModel):
@@ -44,6 +44,6 @@ class MemoryVectorPoint(DomainBaseModel):
     payload: MemoryVectorPayload = Field(
         ..., description="The structured metadata payload."
     )
-    score: Optional[float] = Field(
+    score: float | None = Field(
         None, description="Similarity score returned during search."
     )

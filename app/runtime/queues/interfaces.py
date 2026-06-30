@@ -8,6 +8,7 @@ from uuid import UUID
 from app.runtime.tasks.models import ITask
 from app.runtime.tasks.state import TaskState
 
+
 class IQueue(ABC):
     """
     Abstract interface for task queues.
@@ -17,11 +18,11 @@ class IQueue(ABC):
         pass
 
     @abstractmethod
-    def dequeue(self) -> Optional[ITask]:
+    def dequeue(self) -> ITask | None:
         pass
 
     @abstractmethod
-    def peek(self) -> Optional[ITask]:
+    def peek(self) -> ITask | None:
         pass
 
     @abstractmethod
@@ -31,7 +32,7 @@ class IQueue(ABC):
     @abstractmethod
     def size(self) -> int:
         pass
-        
+
     @abstractmethod
     def get_all(self) -> list[ITask]:
         pass

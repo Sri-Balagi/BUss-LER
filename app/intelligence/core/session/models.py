@@ -1,6 +1,8 @@
 from enum import Enum
-from pydantic import BaseModel, Field
 from typing import Optional
+
+from pydantic import BaseModel, Field
+
 
 class ReasoningMode(str, Enum):
     """Declarative reasoning modes that affect controller behavior."""
@@ -26,7 +28,7 @@ class SessionBudget(BaseModel):
     """Budget constraints for a cognitive session."""
     max_iterations: int = 10
     max_duration_ms: int = 60000
-    max_llm_tokens: Optional[int] = None
+    max_llm_tokens: int | None = None
     max_simulations: int = 5
 
 class TerminationPolicy(BaseModel):

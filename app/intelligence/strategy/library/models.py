@@ -1,5 +1,7 @@
-from pydantic import BaseModel, Field
 from typing import List
+
+from pydantic import BaseModel, Field
+
 
 class StrategyDefinition(BaseModel):
     """A reusable business strategy from the catalog."""
@@ -11,4 +13,4 @@ class StrategyDefinition(BaseModel):
 
 class StrategyCatalog(BaseModel):
     """Collection of available strategies."""
-    strategies: List[StrategyDefinition] = Field(default_factory=list)
+    strategies: list[StrategyDefinition] = Field(default_factory=list)

@@ -1,7 +1,10 @@
+from typing import Any, Dict, List
+
 from pydantic import BaseModel, Field
-from typing import List, Dict, Any
+
 from app.runtime.capabilities.permissions import CapabilityPermission
 from app.runtime.capabilities.policies import CapabilityPolicy
+
 
 class CapabilitySpecification(BaseModel):
     """
@@ -11,8 +14,8 @@ class CapabilitySpecification(BaseModel):
     name: str = Field(..., description="Human-readable name.")
     category: str = Field(..., description="Category for grouping (e.g., Network, Database).")
     version: str = Field(default="1.0.0", description="Semantic version of the capability.")
-    supported_operations: List[str] = Field(default_factory=list, description="Operations this capability can perform.")
-    permissions_required: List[CapabilityPermission] = Field(default_factory=list, description="Permissions required to execute.")
+    supported_operations: list[str] = Field(default_factory=list, description="Operations this capability can perform.")
+    permissions_required: list[CapabilityPermission] = Field(default_factory=list, description="Permissions required to execute.")
     execution_mode: str = Field(default="async", description="Execution mode (async, thread, process).")
-    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional custom metadata.")
+    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional custom metadata.")
     policy: CapabilityPolicy = Field(default_factory=CapabilityPolicy, description="Execution constraints.")

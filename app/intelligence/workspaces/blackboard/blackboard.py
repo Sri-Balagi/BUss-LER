@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import List, Callable
+from collections.abc import Callable
+from typing import List
+
 
 class Hypothesis:
     def __init__(self, description: str):
@@ -20,7 +22,7 @@ class ExecutiveBlackboard(IExecutiveBlackboard):
     Subsystems post hypotheses, observations, recommendations, and simulations here.
     """
     def __init__(self):
-        self._hypotheses: List[Hypothesis] = []
+        self._hypotheses: list[Hypothesis] = []
         self._subscribers: dict = {}
 
     def post_hypothesis(self, hypothesis: Hypothesis) -> None:

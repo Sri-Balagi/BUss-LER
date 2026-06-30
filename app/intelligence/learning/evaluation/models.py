@@ -1,6 +1,8 @@
 from enum import Enum
-from pydantic import BaseModel, Field
 from typing import List
+
+from pydantic import BaseModel, Field
+
 
 class SuccessScore(str, Enum):
     ACHIEVED = "ACHIEVED"
@@ -17,4 +19,4 @@ class OutcomeEvaluation(BaseModel):
     evaluation_id: str
     plan_id: str
     overall_score: SuccessScore
-    metrics: List[OutcomeMetric] = Field(default_factory=list)
+    metrics: list[OutcomeMetric] = Field(default_factory=list)

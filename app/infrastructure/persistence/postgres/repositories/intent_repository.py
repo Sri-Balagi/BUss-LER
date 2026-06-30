@@ -13,16 +13,21 @@ Table: intents
 
 import time
 from abc import ABC, abstractmethod
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Optional
 from uuid import UUID
 
 import structlog
 from supabase import AsyncClient
 
+from app.intelligence.intake.intent.intent import (
+    Intent,
+    IntentCreate,
+    IntentUpdate,
+    PaginatedIntents,
+)
 from app.shared.enums import IntentStatus, IntentType
 from app.shared.exceptions.errors import IntentNotFoundError, RepositoryError
-from app.intelligence.intake.intent.intent import Intent, IntentCreate, IntentUpdate, PaginatedIntents
 
 logger = structlog.get_logger(__name__)
 
@@ -44,8 +49,8 @@ class AbstractIntentRepository(ABC):
     async def list_by_twin(
         self,
         twin_id: UUID,
-        status: Optional[IntentStatus] = None,
-        intent_type: Optional[IntentType] = None,
+        status: IntentStatus | None = None,
+        intent_type: IntentType | None = None,
         limit: int = 20,
         offset: int = 0,
         include_deleted: bool = False,
@@ -131,8 +136,8 @@ class IntentRepository(AbstractIntentRepository):
     async def list_by_twin(
         self,
         twin_id: UUID,
-        status: Optional[IntentStatus] = None,
-        intent_type: Optional[IntentType] = None,
+        status: IntentStatus | None = None,
+        intent_type: IntentType | None = None,
         limit: int = 20,
         offset: int = 0,
         include_deleted: bool = False,
@@ -226,7 +231,7 @@ class IntentRepository(AbstractIntentRepository):
         try:
             response = (
                 await self._client.table(self._table_name)
-                .update({"deleted_at": datetime.now(timezone.utc).isoformat()})
+                .update({"deleted_at": datetime.now(UTC).isoformat()})
                 .eq("id", str(intent_id))
                 .is_("deleted_at", "null")
                 .execute()

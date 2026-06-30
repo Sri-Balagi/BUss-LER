@@ -6,16 +6,16 @@ trace IDs, etc.) without polluting domain models.
 """
 
 from typing import List, Optional
+
 from pydantic import Field
 
-from app.interfaces.http.schemas.base import DomainBaseModel
-from app.intelligence.learning.repository.memory import Memory
-from app.intelligence.intake.intent.intent import Intent, IntentAnalysis
-from app.intelligence.strategy.goals.goal import Goal, GoalIntentLink
 from app.intelligence.decision.planning.plan import Plan
 from app.intelligence.decision.recommendation.recommendation import Recommendation
+from app.intelligence.intake.intent.intent import Intent, IntentAnalysis
 from app.intelligence.learning.repository.cognitive_trace import CognitiveTrace
-
+from app.intelligence.learning.repository.memory import Memory
+from app.intelligence.strategy.goals.goal import Goal, GoalIntentLink
+from app.interfaces.http.schemas.base import DomainBaseModel
 
 # =============================================================================
 # Memory Results (Milestone 2)
@@ -41,7 +41,7 @@ class MemorySearchResultItem(DomainBaseModel):
 class SearchMemoryResult(DomainBaseModel):
     """Result of a semantic search operation."""
 
-    items: List[MemorySearchResultItem]
+    items: list[MemorySearchResultItem]
     total_count: int
 
 
@@ -73,7 +73,7 @@ class ClassifyIntentResult(DomainBaseModel):
 
     intent: Intent
     analysis: IntentAnalysis
-    cognitive_trace: Optional[CognitiveTrace] = None
+    cognitive_trace: CognitiveTrace | None = None
     dispatched_events: int = Field(default=0)
 
 
@@ -104,7 +104,7 @@ class GeneratePlanResult(DomainBaseModel):
     """Result of a plan generation operation."""
 
     plan: Plan
-    cognitive_trace: Optional[CognitiveTrace] = None
+    cognitive_trace: CognitiveTrace | None = None
     dispatched_events: int = Field(default=0)
 
 
@@ -116,8 +116,8 @@ class GeneratePlanResult(DomainBaseModel):
 class GenerateRecommendationsResult(DomainBaseModel):
     """Result of a recommendation generation operation."""
 
-    recommendations: List[Recommendation]
-    cognitive_trace: Optional[CognitiveTrace] = None
+    recommendations: list[Recommendation]
+    cognitive_trace: CognitiveTrace | None = None
     dispatched_events: int = Field(default=0)
 
 

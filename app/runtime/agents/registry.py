@@ -1,14 +1,16 @@
-from dataclasses import dataclass, field
-from pydantic import BaseModel, Field
-from typing import Any
 import time
+from dataclasses import dataclass, field
+from typing import Any
+
+from pydantic import BaseModel, Field
 
 from app.runtime.agents.capability import Capability
-from app.runtime.agents.permissions import AgentPermission
-from app.runtime.agents.specification import AgentSpecification
 from app.runtime.agents.interfaces import IAgentFactory
-from app.runtime.agents.ranking import IRankingStrategy, RankingScore
 from app.runtime.agents.monitor import AgentHealthMonitor
+from app.runtime.agents.permissions import AgentPermission
+from app.runtime.agents.ranking import IRankingStrategy, RankingScore
+from app.runtime.agents.specification import AgentSpecification
+
 
 class ResolutionContext(BaseModel):
     """
@@ -66,37 +68,37 @@ class AgentRegistry:
     def resolve(self, context: ResolutionContext) -> ResolutionDecision:
         start_time = time.time()
         trace = ResolutionTrace()
-        
+
         candidates: list[tuple[AgentSpecification, IAgentFactory, RankingScore]] = []
-        
+
         for spec, factory in self._registry:
             trace.evaluated_candidates += 1
-            
+
             # Check Capability matching
             if not self._matches_capability(spec, context.requested_capability):
                 trace.rejected_candidates.append(spec.identity)
                 trace.rejection_reasons[spec.identity] = "Capability mismatch"
                 continue
-                
+
             # Check permissions
             if not self._has_required_permissions(spec, context.required_permissions):
                 trace.rejected_candidates.append(spec.identity)
                 trace.rejection_reasons[spec.identity] = "Insufficient permissions"
                 continue
-                
+
             # Capability matches. Query health.
             health = self._health_monitor.get_health(spec.identity)
-            
+
             # Score
             score = self._ranking_strategy.score(spec, health, context)
             trace.rankings[spec.identity] = score
-            
+
             # Filter zero-scored items if needed (e.g. unavailable)
             if score.overall_score <= 0.0:
                 trace.rejected_candidates.append(spec.identity)
                 trace.rejection_reasons[spec.identity] = "Score <= 0 (Unavailable or unhealthy)"
                 continue
-                
+
             candidates.append((spec, factory, score))
 
         trace.total_resolution_time_ms = (time.time() - start_time) * 1000.0
@@ -109,13 +111,13 @@ class AgentRegistry:
                 selection_reason="No valid candidates found",
                 trace=trace
             )
-            
+
         # Sort candidates descending by overall score
         candidates.sort(key=lambda item: item[2].overall_score, reverse=True)
-        
+
         selected_spec, selected_factory, selected_score = candidates[0]
         fallbacks = [c[0] for c in candidates[1:]]
-        
+
         return ResolutionDecision(
             selected_factory=selected_factory,
             selected_specification=selected_spec,

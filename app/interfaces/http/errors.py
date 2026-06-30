@@ -5,18 +5,18 @@ from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 
 from app.shared.exceptions.errors import (
+    AIKernelError,
+    BizOSError,
     DomainValidationError,
+    DuplicateMemoryError,
     DuplicateTwinError,
     EntityNotFoundError,
+    MemoryNotFoundError,
+    NotFoundError,
     RepositoryError,
     ServiceError,
     TwinNotFoundError,
     VersionConflictError,
-    MemoryNotFoundError,
-    DuplicateMemoryError,
-    AIKernelError,
-    NotFoundError,
-    BizOSError,
 )
 
 logger = structlog.get_logger()

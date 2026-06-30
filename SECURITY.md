@@ -1,35 +1,87 @@
-# Security Policy
+﻿# Security Policy
 
 ## Supported Versions
 
-We currently provide security updates for the following versions:
-
-| Version | Supported          |
-| ------- | ------------------ |
-| 2.0.x   | :white_check_mark: |
-| 1.0.x   | :x:                |
-| < 1.0   | :x:                |
+| Version | Supported |
+|---------|-----------|
+| 6.0.x   | ✅ Active |
+| 5.x     | ⚠️ Security patches only |
+| < 5.0   | ❌ End of life |
 
 ## Reporting a Vulnerability
 
-Security is a core priority for an AI Operating System dealing with corporate or personal memory data. 
+BizOS handles sensitive organizational data. Security is a core priority.
 
-If you discover a security vulnerability, please **DO NOT** open a public issue.
+**Do NOT open a public GitHub issue for security vulnerabilities.**
 
-Instead, please send an email to: **[MAINTAINER: Insert Security Contact Email Here]**
+Report vulnerabilities via: **security@bizos.ai** (or your configured security contact)
 
-We will acknowledge your report within 48 hours and provide a timeline for triage and resolution. 
+We will:
+- Acknowledge within **48 hours**
+- Provide a resolution timeline within **5 business days**
+- Issue a CVE if applicable
+- Credit the reporter in release notes (unless anonymity is requested)
 
-## Disclosure Policy
+Please allow time for a patch before public disclosure (coordinated disclosure).
 
-* We will privately patch the vulnerability and request a CVE if applicable.
-* We will credit the reporter in our release notes (unless you wish to remain anonymous).
-* We ask that reporters abide by coordinated disclosure and wait until a patch is released before publishing details.
+---
 
-## Security Best Practices
+## Security Architecture
 
-When deploying BizOS, ensure you follow these practices:
-* **Never commit `.env` files** or hardcode API keys (Supabase, Gemini, OpenAI).
-* **Network Isolation:** Ensure Qdrant and PostgreSQL are not exposed to the public internet. They should only be accessible via the FastAPI backend.
-* **Secrets Management:** Use Doppler, HashiCorp Vault, or AWS Secrets Manager in production instead of plain `.env` files where possible.
-* **Authentication:** The current `v2.0.0` architecture defers Authentication to an API Gateway (e.g., Kong, AWS API Gateway) or a proxy. Do not expose BizOS directly to the internet without an AuthZ layer protecting the endpoints.
+### Defense in Depth
+
+| Layer | Controls |
+|-------|---------|
+| HTTP | Security headers (HSTS, X-Frame-Options, X-Content-Type-Options, Permissions-Policy) |
+| Transport | TLS enforced in production (HSTS: max-age=31536000) |
+| API | Input validation via Pydantic v2 on all endpoints |
+| Config | Startup validation of all required secrets (fails fast on invalid config) |
+| Secrets | Never logged, never included in responses |
+| Metrics | `/metrics` endpoint — internal network only in production |
+
+### API Keys
+
+All API keys (Supabase, Gemini) are:
+- Validated at startup (minimum length check)
+- Never exposed in logs, responses, or error messages
+- Loaded exclusively from environment variables
+
+### CORS
+
+- Development: `*` (permissive)
+- Production: Set `CORS_ORIGINS` to specific allowed domains
+
+### Authentication
+
+BizOS uses Supabase RLS (Row Level Security) for data isolation.
+Do NOT expose the Supabase service role key to client-side code.
+
+---
+
+## Production Hardening Checklist
+
+- [ ] `APP_ENV=production`, `APP_DEBUG=false`
+- [ ] `CORS_ORIGINS` restricted to your domain
+- [ ] `/metrics` not publicly exposed (bind to internal network)
+- [ ] `/docs` and `/redoc` disabled (automatic when `APP_DEBUG=false`)
+- [ ] TLS termination at load balancer
+- [ ] Secrets injected via CI/CD secrets, not committed to git
+- [ ] Supabase RLS enabled on all tables
+- [ ] Dependency audit passing: `uv run pip-audit`
+- [ ] Docker image scanned for CVEs before deployment
+
+---
+
+## Dependency Security
+
+Run weekly: `uv run pip-audit`
+
+The GitHub Actions `security.yml` workflow runs this automatically on every push to main
+and on a weekly schedule.
+
+---
+
+## Known Limitations
+
+- BizOS does not implement rate limiting internally. Use a reverse proxy (Nginx, Cloudflare, AWS WAF) for rate limiting in production.
+- Session-based authentication is not implemented in v6.0.0. This is planned for v7.

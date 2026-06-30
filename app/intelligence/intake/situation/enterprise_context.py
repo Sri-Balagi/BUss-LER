@@ -18,15 +18,14 @@ Lifecycle:
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
 
 from pydantic import ConfigDict, Field
 
-from app.shared.enums import ContextPriority, ContextSource, ContextStatus
 from app.interfaces.http.schemas.base import DomainBaseModel
-
+from app.shared.enums import ContextPriority, ContextSource, ContextStatus
 
 # =============================================================================
 # Versioning
@@ -77,7 +76,7 @@ class ContextProvenance(DomainBaseModel):
         ..., description="The service class that produced this item."
     )
     retrieval_timestamp: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc)
+        default_factory=lambda: datetime.now(UTC)
     )
     confidence: float = Field(default=1.0, ge=0.0, le=1.0)
     ranking_score: float = Field(
@@ -85,19 +84,19 @@ class ContextProvenance(DomainBaseModel):
         ge=0.0,
         description="Computed by AbstractContextRanker. Higher = more relevant.",
     )
-    compression_origin: List[UUID] = Field(
+    compression_origin: list[UUID] = Field(
         default_factory=list,
         description="IDs of original ContextItems this item was compressed from.",
     )
-    compression_reason: Optional[str] = Field(
+    compression_reason: str | None = Field(
         default=None,
         description="Human-readable reason for compression decision.",
     )
-    citations: List[str] = Field(
+    citations: list[str] = Field(
         default_factory=list,
         description="Source IDs, document refs, or external citations.",
     )
-    reasoning_metadata: Dict[str, Any] = Field(
+    reasoning_metadata: dict[str, Any] = Field(
         default_factory=dict,
         description="Opaque engineering metadata. Never exposed to end users.",
     )
@@ -125,13 +124,13 @@ class ContextItem(DomainBaseModel):
         default="text",
         description="Format of content: 'text', 'json', 'summary'.",
     )
-    domain_object_id: Optional[UUID] = Field(
+    domain_object_id: UUID | None = Field(
         default=None,
         description="ID of the underlying domain object (goal ID, memory ID, etc.).",
     )
     token_estimate: int = Field(default=0, ge=0)
     provenance: ContextProvenance
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class ContextSection(DomainBaseModel):
@@ -143,10 +142,10 @@ class ContextSection(DomainBaseModel):
     section_id: UUID = Field(default_factory=uuid4)
     source: ContextSource
     priority: ContextPriority = ContextPriority.MEDIUM
-    items: List[ContextItem] = Field(default_factory=list)
+    items: list[ContextItem] = Field(default_factory=list)
     token_estimate: int = Field(default=0, ge=0)
-    retrieved_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    retrieved_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
     @property
     def item_count(self) -> int:
@@ -170,7 +169,7 @@ class ContextWindow(DomainBaseModel):
     """
 
     window_id: UUID = Field(default_factory=uuid4)
-    sections: List[ContextSection] = Field(default_factory=list)
+    sections: list[ContextSection] = Field(default_factory=list)
     token_estimate: int = Field(default=0, ge=0)
     budget: int = Field(
         ..., ge=0, description="Configured token budget for this window."
@@ -181,8 +180,8 @@ class ContextWindow(DomainBaseModel):
         default=False,
         description="True if items were excluded due to budget exhaustion.",
     )
-    built_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    built_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 # =============================================================================
@@ -205,8 +204,8 @@ class ContextSummary(DomainBaseModel):
     )
     source_count: int = Field(default=0)
     token_estimate: int = Field(default=0)
-    compression_ratio: Optional[float] = Field(default=None, ge=0.0, le=1.0)
-    generated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    compression_ratio: float | None = Field(default=None, ge=0.0, le=1.0)
+    generated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 # =============================================================================
@@ -223,22 +222,22 @@ class ContextMetadata(DomainBaseModel):
 
     schema_version: str = Field(default=CURRENT_CONTEXT_SCHEMA_VERSION)
     policy_id: str
-    assembled_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    expires_at: Optional[datetime] = None
+    assembled_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    expires_at: datetime | None = None
     total_providers_requested: int = Field(default=0)
     successful_providers: int = Field(default=0)
     failed_providers: int = Field(default=0)
-    missing_providers: List["ProviderFailureRecord"] = Field(default_factory=list)
-    ranking_latency_ms: Optional[float] = None
-    compression_latency_ms: Optional[float] = None
-    window_latency_ms: Optional[float] = None
-    total_assembly_latency_ms: Optional[float] = None
+    missing_providers: list[ProviderFailureRecord] = Field(default_factory=list)
+    ranking_latency_ms: float | None = None
+    compression_latency_ms: float | None = None
+    window_latency_ms: float | None = None
+    total_assembly_latency_ms: float | None = None
     token_estimate_before_compression: int = Field(default=0)
     token_estimate_after_compression: int = Field(default=0)
-    compression_ratio: Optional[float] = None
+    compression_ratio: float | None = None
     items_total: int = Field(default=0)
     items_retained: int = Field(default=0)
-    per_provider_latency_ms: Dict[str, float] = Field(default_factory=dict)
+    per_provider_latency_ms: dict[str, float] = Field(default_factory=dict)
 
 
 # =============================================================================
@@ -256,7 +255,7 @@ class ProviderFailureRecord(DomainBaseModel):
     provider: ContextSource
     error_type: str
     error_message: str
-    failed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    failed_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     attempts: int = Field(default=1, ge=1)
 
 
@@ -275,7 +274,7 @@ class ProviderMetadata(DomainBaseModel):
     name: str
     version: str = Field(default="1.0")
     description: str = Field(default="")
-    capability_tags: List[str] = Field(default_factory=list)
+    capability_tags: list[str] = Field(default_factory=list)
     is_optional: bool = Field(
         default=True,
         description="If False, failure of this provider aborts assembly.",
@@ -294,7 +293,7 @@ class ProviderDependency(DomainBaseModel):
     """
 
     provider: ContextSource
-    depends_on: List[ContextSource] = Field(
+    depends_on: list[ContextSource] = Field(
         default_factory=list,
         description="Providers that must complete before this provider executes.",
     )
@@ -307,7 +306,7 @@ class ExecutionPlan(DomainBaseModel):
              The outer list is ordered — batch N must complete before batch N+1 starts.
     """
 
-    batches: List[List[ContextSource]]
+    batches: list[list[ContextSource]]
     total_providers: int
 
 
@@ -339,22 +338,22 @@ class EnterpriseContext(DomainBaseModel):
 
     # --- Assembly ---
     status: ContextStatus = Field(default=ContextStatus.ASSEMBLED)
-    sections: List[ContextSection] = Field(default_factory=list)
-    window: Optional[ContextWindow] = Field(
+    sections: list[ContextSection] = Field(default_factory=list)
+    window: ContextWindow | None = Field(
         default=None,
         description="Populated after AbstractContextWindowBuilder runs.",
     )
 
     # --- Metadata & provenance ---
     metadata: ContextMetadata
-    instance_version: Optional[ContextInstanceVersion] = None
+    instance_version: ContextInstanceVersion | None = None
 
     # --- Traceability ---
-    intent_id: Optional[UUID] = None
-    operation_context_id: Optional[str] = None
+    intent_id: UUID | None = None
+    operation_context_id: str | None = None
 
     @property
-    def source_names(self) -> List[str]:
+    def source_names(self) -> list[str]:
         """Names of all contributing providers."""
         return [s.source.value for s in self.sections]
 
@@ -366,7 +365,7 @@ class EnterpriseContext(DomainBaseModel):
     def token_estimate(self) -> int:
         return sum(s.token_estimate for s in self.sections)
 
-    def get_section(self, source: ContextSource) -> Optional[ContextSection]:
+    def get_section(self, source: ContextSource) -> ContextSection | None:
         """Retrieve the section contributed by a specific provider."""
         for section in self.sections:
             if section.source == source:
@@ -387,9 +386,9 @@ class EnterpriseContextCreate(DomainBaseModel):
 
     twin_id: UUID
     policy_id: str
-    intent_id: Optional[UUID] = None
-    operation_context_id: Optional[str] = None
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    intent_id: UUID | None = None
+    operation_context_id: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 # =============================================================================
@@ -409,16 +408,16 @@ class ContextLifecycleMetadata(DomainBaseModel):
     status: ContextStatus = ContextStatus.BUILDING
     policy_id: str
     schema_version: str = Field(default=CURRENT_CONTEXT_SCHEMA_VERSION)
-    assembled_at: Optional[datetime] = None
-    expires_at: Optional[datetime] = None
-    consumed_at: Optional[datetime] = None
-    archived_at: Optional[datetime] = None
+    assembled_at: datetime | None = None
+    expires_at: datetime | None = None
+    consumed_at: datetime | None = None
+    archived_at: datetime | None = None
     is_partial: bool = Field(
         default=False,
         description="True if one or more optional providers failed during assembly.",
     )
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
 
 
 class ContextLifecycleCreate(DomainBaseModel):
@@ -434,11 +433,11 @@ class ContextLifecycleUpdate(DomainBaseModel):
     """Write model for transitioning context lifecycle status."""
 
     status: ContextStatus
-    assembled_at: Optional[datetime] = None
-    expires_at: Optional[datetime] = None
-    consumed_at: Optional[datetime] = None
-    archived_at: Optional[datetime] = None
-    is_partial: Optional[bool] = None
+    assembled_at: datetime | None = None
+    expires_at: datetime | None = None
+    consumed_at: datetime | None = None
+    archived_at: datetime | None = None
+    is_partial: bool | None = None
 
 
 # =============================================================================
@@ -449,7 +448,7 @@ class ContextLifecycleUpdate(DomainBaseModel):
 class PaginatedContextLifecycles(DomainBaseModel):
     """Pagination wrapper for context lifecycle listings."""
 
-    items: List[ContextLifecycleMetadata]
+    items: list[ContextLifecycleMetadata]
     total_count: int
     limit: int
     offset: int

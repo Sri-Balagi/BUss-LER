@@ -1,6 +1,8 @@
 from typing import Any, Dict, Optional
-from app.interfaces.http.schemas.base import DomainBaseModel
+
 from pydantic import Field
+
+from app.interfaces.http.schemas.base import DomainBaseModel
 
 
 class AIResponseMetadata(DomainBaseModel):
@@ -9,9 +11,9 @@ class AIResponseMetadata(DomainBaseModel):
     provider: str
     model: str
     latency_ms: float
-    prompt_tokens: Optional[int] = None
-    completion_tokens: Optional[int] = None
-    finish_reason: Optional[str] = None
+    prompt_tokens: int | None = None
+    completion_tokens: int | None = None
+    finish_reason: str | None = None
 
 
 class AIRequest(DomainBaseModel):
@@ -21,11 +23,11 @@ class AIRequest(DomainBaseModel):
         ..., description="The unique identifier for the versioned prompt."
     )
     version: str = Field(default="v1", description="The prompt version.")
-    context: Dict[str, Any] = Field(
+    context: dict[str, Any] = Field(
         default_factory=dict,
         description="Variables to interpolate into the prompt template.",
     )
-    system_instruction: Optional[str] = Field(
+    system_instruction: str | None = Field(
         None, description="Optional system-level instructions."
     )
 
@@ -43,7 +45,7 @@ class EmbeddingRequest(DomainBaseModel):
     """Domain model for requesting AI vector embeddings."""
 
     text: str = Field(..., description="The content to embed.")
-    model: Optional[str] = Field(
+    model: str | None = Field(
         None, description="Specific model to use (if overriding default)."
     )
 
@@ -74,7 +76,7 @@ class ClassifyRequest(DomainBaseModel):
         default_factory=dict,
         description="Additional context variables for prompt interpolation.",
     )
-    system_instruction: Optional[str] = Field(
+    system_instruction: str | None = Field(
         None,
         description="Optional system-level instructions for the classification task.",
     )

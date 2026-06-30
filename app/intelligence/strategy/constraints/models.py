@@ -1,6 +1,8 @@
 from enum import Enum
-from pydantic import BaseModel, Field
 from typing import List
+
+from pydantic import BaseModel, Field
+
 
 class ConstraintType(str, Enum):
     FINANCIAL = "FINANCIAL"
@@ -19,4 +21,4 @@ class StrategicConstraint(BaseModel):
 
 class StrategicConstraintSet(BaseModel):
     """Collection of currently active strategic constraints."""
-    constraints: List[StrategicConstraint] = Field(default_factory=list)
+    constraints: list[StrategicConstraint] = Field(default_factory=list)

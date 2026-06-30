@@ -1,16 +1,22 @@
 import uuid
 from typing import List
-from app.intelligence.learning.reflection.models import ReflectionReport
+
 from app.intelligence.learning.evaluation.models import OutcomeEvaluation
-from app.intelligence.learning.synthesis.models import KnowledgeArtifact, KnowledgeCategory, KnowledgeVersion
+from app.intelligence.learning.reflection.models import ReflectionReport
+from app.intelligence.learning.synthesis.models import (
+    KnowledgeArtifact,
+    KnowledgeCategory,
+    KnowledgeVersion,
+)
+
 
 class KnowledgeSynthesisEngine:
     """
     Synthesizes learning into reusable intelligence artifacts.
     """
-    def synthesize(self, reflection: ReflectionReport, evaluation: OutcomeEvaluation) -> List[KnowledgeArtifact]:
+    def synthesize(self, reflection: ReflectionReport, evaluation: OutcomeEvaluation) -> list[KnowledgeArtifact]:
         artifacts = []
-        
+
         # Mock logic
         if evaluation.overall_score.value == "ACHIEVED":
             artifacts.append(KnowledgeArtifact(
@@ -28,5 +34,5 @@ class KnowledgeSynthesisEngine:
                 source_evaluation_ids=[evaluation.evaluation_id],
                 version=KnowledgeVersion(version_id="v1")
             ))
-            
+
         return artifacts

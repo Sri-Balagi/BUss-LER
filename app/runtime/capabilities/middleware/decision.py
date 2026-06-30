@@ -1,5 +1,6 @@
 from enum import Enum, auto
 
+
 class MiddlewareDecision(Enum):
     """
     Determines the execution path after a middleware completes.

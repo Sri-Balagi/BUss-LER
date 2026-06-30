@@ -1,6 +1,8 @@
 from enum import Enum
-from pydantic import BaseModel, Field
 from typing import List
+
+from pydantic import BaseModel, Field
+
 
 class ConvergenceStatus(str, Enum):
     CONVERGED = "CONVERGED"
@@ -16,4 +18,4 @@ class ConvergenceAssessment(BaseModel):
     """Evaluates whether the reasoning process has reached a stable conclusion."""
     status: ConvergenceStatus
     confidence: float
-    metrics: List[StabilityMetric] = Field(default_factory=list)
+    metrics: list[StabilityMetric] = Field(default_factory=list)

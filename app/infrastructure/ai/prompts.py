@@ -10,7 +10,7 @@ Versioning convention:
 The AI Kernel resolves prompts via PromptManager.resolve(prompt_id, version, context).
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 class PromptManager:
@@ -22,7 +22,7 @@ class PromptManager:
     """
 
     def __init__(self):
-        self._prompts: Dict[str, Dict[str, str]] = {
+        self._prompts: dict[str, dict[str, str]] = {
             # =========================================================
             # Milestone 2 — Memory Engine
             # =========================================================
@@ -148,7 +148,7 @@ class PromptManager:
             },
         }
 
-    def resolve(self, prompt_id: str, version: str, context: Dict[str, Any]) -> str:
+    def resolve(self, prompt_id: str, version: str, context: dict[str, Any]) -> str:
         """Resolve a prompt template by interpolating context variables."""
         if prompt_id not in self._prompts:
             raise ValueError(f"Prompt ID '{prompt_id}' not found.")
@@ -165,6 +165,6 @@ class PromptManager:
                 f"Missing context variable {e} for prompt '{prompt_id}:{version}'"
             ) from e
 
-    def list_prompts(self) -> Dict[str, list]:
+    def list_prompts(self) -> dict[str, list]:
         """Return all registered prompt IDs and their available versions."""
         return {pid: list(versions.keys()) for pid, versions in self._prompts.items()}

@@ -1,6 +1,8 @@
 from enum import Enum
-from pydantic import BaseModel, Field
 from typing import List, Optional
+
+from pydantic import BaseModel, Field
+
 
 class IntentClassification(str, Enum):
     STRATEGIC_OBJECTIVE = "STRATEGIC_OBJECTIVE"
@@ -19,7 +21,7 @@ class ExecutiveIntent(BaseModel):
     """Structured executive intent produced by the Intent Engine."""
     raw_request: str
     classification: IntentClassification = IntentClassification.UNKNOWN
-    entities: List[IntentEntity] = Field(default_factory=list)
-    requested_outcomes: List[str] = Field(default_factory=list)
+    entities: list[IntentEntity] = Field(default_factory=list)
+    requested_outcomes: list[str] = Field(default_factory=list)
     is_ambiguous: bool = False
-    ambiguity_reason: Optional[str] = None
+    ambiguity_reason: str | None = None

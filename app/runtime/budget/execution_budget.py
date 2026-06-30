@@ -1,5 +1,7 @@
 from pydantic import BaseModel, Field
+
 from app.runtime.interfaces.budget import IExecutionBudget
+
 
 class ExecutionBudget(BaseModel, IExecutionBudget):
     """

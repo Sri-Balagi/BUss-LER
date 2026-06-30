@@ -1,4 +1,9 @@
-from app.intelligence.decision.uncertainty.models import UncertaintyAssessment, UncertaintySource, Assumption
+from app.intelligence.decision.uncertainty.models import (
+    Assumption,
+    UncertaintyAssessment,
+    UncertaintySource,
+)
+
 
 class UncertaintyEngine:
     """

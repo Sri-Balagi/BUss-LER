@@ -9,8 +9,8 @@ The base Entity and EntityCreate models remain in app.interfaces.http.schemas.ba
 
 from pydantic import Field
 
-from app.shared.enums import EntityType
 from app.interfaces.http.schemas.base import DomainBaseModel
+from app.shared.enums import EntityType
 
 
 class EntityUpdate(DomainBaseModel):

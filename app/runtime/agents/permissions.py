@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class AgentPermission(str, Enum):
     """
     Declarative permissions for an agent.

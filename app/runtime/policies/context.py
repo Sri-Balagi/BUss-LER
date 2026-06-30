@@ -1,11 +1,13 @@
-from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional
 
-from app.runtime.tasks.models import ITask
-from app.runtime.queues.interfaces import IQueueManager
-from app.runtime.tasks.dag import TaskDAG
-from app.runtime.session.execution_session import ExecutionSession
+from pydantic import BaseModel, ConfigDict, Field
+
 from app.runtime.budget.budget_manager import BudgetManager
+from app.runtime.queues.interfaces import IQueueManager
+from app.runtime.session.execution_session import ExecutionSession
+from app.runtime.tasks.dag import TaskDAG
+from app.runtime.tasks.models import ITask
+
 
 class ExecutionPolicyContext(BaseModel):
     """
@@ -15,7 +17,7 @@ class ExecutionPolicyContext(BaseModel):
     queue_manager: IQueueManager
     task_dag: TaskDAG
     budget_manager: BudgetManager
-    
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def has_sufficient_budget(self, estimated_cost: float) -> bool:
@@ -40,9 +42,9 @@ class ExecutionDecision(BaseModel):
     tasks_to_execute: list[ITask] = Field(default_factory=list)
     tasks_to_skip: list[ITask] = Field(default_factory=list)
     parallel_execution: bool = False
-    
+
     # Observability metadata
     policy_latency_ms: float = 0.0
-    reason: Optional[DecisionReason] = None
+    reason: DecisionReason | None = None
 
     model_config = ConfigDict(arbitrary_types_allowed=True)

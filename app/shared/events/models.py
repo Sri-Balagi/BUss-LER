@@ -1,8 +1,10 @@
 import uuid
-from typing import Optional
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
+from typing import Optional
+
 from pydantic import Field
+
 from app.interfaces.http.schemas.base import DomainBaseModel
 
 
@@ -24,11 +26,11 @@ class DomainEvent(DomainBaseModel):
     """Base class for all BizOS events."""
 
     event_id: uuid.UUID = Field(default_factory=uuid.uuid4)
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
     correlation_id: str = Field(
         ..., description="Trace ID linking operations together."
     )
-    causation_id: Optional[str] = Field(
+    causation_id: str | None = Field(
         default=None, description="The ID of the event that caused this event."
     )
     source: str = Field(
@@ -112,8 +114,8 @@ class PlanGeneratedEvent(DomainEvent):
 
     plan_id: uuid.UUID
     twin_id: uuid.UUID
-    goal_id: Optional[uuid.UUID] = None
-    intent_id: Optional[uuid.UUID] = None
+    goal_id: uuid.UUID | None = None
+    intent_id: uuid.UUID | None = None
     step_count: int
 
 
@@ -220,7 +222,7 @@ class ContextInvalidatedEvent(DomainEvent):
 class ContextProviderFailedEvent(DomainEvent):
     """Emitted when a provider exhausts all retries during context assembly."""
 
-    context_id: Optional[uuid.UUID]
+    context_id: uuid.UUID | None
     twin_id: uuid.UUID
     provider: str
     attempts: int

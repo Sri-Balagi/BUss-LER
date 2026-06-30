@@ -1,6 +1,8 @@
 from enum import Enum
-from pydantic import BaseModel, Field
 from typing import List, Optional
+
+from pydantic import BaseModel, Field
+
 
 class GoalStatus(str, Enum):
     PENDING = "PENDING"
@@ -14,10 +16,10 @@ class Goal(BaseModel):
     objective_id: str
     description: str
     status: GoalStatus = GoalStatus.PENDING
-    parent_goal_id: Optional[str] = None
-    subgoal_ids: List[str] = Field(default_factory=list)
+    parent_goal_id: str | None = None
+    subgoal_ids: list[str] = Field(default_factory=list)
 
 class GoalCollection(BaseModel):
     """A managed hierarchy of active and pending goals."""
     objective_id: str
-    goals: List[Goal] = Field(default_factory=list)
+    goals: list[Goal] = Field(default_factory=list)

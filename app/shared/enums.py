@@ -6,7 +6,6 @@ These are the categorical values that constrain the domain objects.
 
 from enum import Enum
 
-
 # =============================================================================
 # Entity Enums
 # =============================================================================

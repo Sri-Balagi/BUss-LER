@@ -1,12 +1,14 @@
 from typing import Type
-from app.runtime.agents.interfaces import IAgentFactory, BaseAgent
+
+from app.runtime.agents.interfaces import BaseAgent, IAgentFactory
 from app.runtime.agents.specification import AgentSpecification
+
 
 class TransientFactory(IAgentFactory):
     """
     Creates a new instance of an agent for every execution.
     """
-    def __init__(self, agent_class: Type[BaseAgent]):
+    def __init__(self, agent_class: type[BaseAgent]):
         self._agent_class = agent_class
 
     def create_agent(self, specification: AgentSpecification) -> BaseAgent:
@@ -21,7 +23,7 @@ class SingletonFactory(IAgentFactory):
     Reuses the same agent instance for all executions.
     Useful for stateless workers or workers that manage their own internal connection pools.
     """
-    def __init__(self, agent_class: Type[BaseAgent]):
+    def __init__(self, agent_class: type[BaseAgent]):
         self._agent_class = agent_class
         self._instance: BaseAgent | None = None
 

@@ -1,10 +1,10 @@
 import uuid
 from typing import Dict, List
+
 import structlog
 
 from app.shared.enums import EmbeddingStatus
 from app.shared.exceptions.errors import BizOSError
-
 
 logger = structlog.get_logger(__name__)
 
@@ -26,7 +26,7 @@ class MemoryStateMachine:
     """
 
     # Define valid transitions from a given state to a list of allowed states
-    VALID_TRANSITIONS: Dict[EmbeddingStatus, List[EmbeddingStatus]] = {
+    VALID_TRANSITIONS: dict[EmbeddingStatus, list[EmbeddingStatus]] = {
         EmbeddingStatus.PENDING: [EmbeddingStatus.PROCESSING, EmbeddingStatus.FAILED],
         EmbeddingStatus.PROCESSING: [EmbeddingStatus.COMPLETED, EmbeddingStatus.FAILED],
         EmbeddingStatus.COMPLETED: [],  # Terminal state

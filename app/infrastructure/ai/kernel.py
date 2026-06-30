@@ -1,16 +1,16 @@
-from abc import ABC, abstractmethod
-from typing import Dict, Any
 import json
+from abc import ABC, abstractmethod
+from typing import Any, Dict
 
 import structlog
 
 from app.infrastructure.ai.models import (
     AIRequest,
     AIResponse,
-    EmbeddingRequest,
-    EmbeddingResponse,
     ClassifyRequest,
     ClassifyResponse,
+    EmbeddingRequest,
+    EmbeddingResponse,
 )
 from app.infrastructure.ai.prompts import PromptManager
 from app.infrastructure.ai.router import ProviderRouter
@@ -39,7 +39,7 @@ class AbstractAIKernel(ABC):
         pass
 
     @abstractmethod
-    async def health_check(self) -> Dict[str, Any]:
+    async def health_check(self) -> dict[str, Any]:
         """Check the health of the active provider."""
         pass
 
@@ -181,7 +181,7 @@ class AIKernel(AbstractAIKernel):
 
         return ClassifyResponse(raw_json=raw_json, metadata=response.metadata)
 
-    async def health_check(self) -> Dict[str, Any]:
+    async def health_check(self) -> dict[str, Any]:
         provider = self._router.get_active_provider()
         status = await provider.health_check()
         return status

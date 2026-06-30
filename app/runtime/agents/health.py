@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 
+
 class AgentHealth(BaseModel):
     """
     Passive health metrics tracked by the AgentHealthMonitor.

@@ -1,6 +1,8 @@
-from pydantic import BaseModel, Field
-from typing import List
 from enum import Enum
+from typing import List
+
+from pydantic import BaseModel, Field
+
 
 class UncertaintySource(str, Enum):
     MISSING_DATA = "MISSING_DATA"
@@ -16,6 +18,6 @@ class Assumption(BaseModel):
 class UncertaintyAssessment(BaseModel):
     """Estimation of missing or unproven information."""
     overall_uncertainty_score: float
-    sources: List[UncertaintySource] = Field(default_factory=list)
-    assumptions: List[Assumption] = Field(default_factory=list)
-    missing_evidence_ids: List[str] = Field(default_factory=list)
+    sources: list[UncertaintySource] = Field(default_factory=list)
+    assumptions: list[Assumption] = Field(default_factory=list)
+    missing_evidence_ids: list[str] = Field(default_factory=list)

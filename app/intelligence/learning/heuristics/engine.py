@@ -1,7 +1,14 @@
 import uuid
 from typing import List
-from app.intelligence.learning.heuristics.models import Heuristic, HeuristicConfidence, HeuristicStatus, HeuristicCatalog
+
+from app.intelligence.learning.heuristics.models import (
+    Heuristic,
+    HeuristicCatalog,
+    HeuristicConfidence,
+    HeuristicStatus,
+)
 from app.intelligence.learning.synthesis.models import KnowledgeArtifact
+
 
 class ExecutiveHeuristicsEngine:
     """
@@ -9,8 +16,8 @@ class ExecutiveHeuristicsEngine:
     """
     def __init__(self):
         self._catalog = HeuristicCatalog(catalog_id=str(uuid.uuid4()))
-        
-    def derive_heuristics(self, artifact: KnowledgeArtifact) -> List[Heuristic]:
+
+    def derive_heuristics(self, artifact: KnowledgeArtifact) -> list[Heuristic]:
         heuristics = []
         if artifact.category.value == "CAUTIONARY":
             h = Heuristic(
@@ -21,8 +28,8 @@ class ExecutiveHeuristicsEngine:
             )
             heuristics.append(h)
             self._catalog.heuristics.append(h)
-            
+
         return heuristics
-        
+
     def get_catalog(self) -> HeuristicCatalog:
         return self._catalog

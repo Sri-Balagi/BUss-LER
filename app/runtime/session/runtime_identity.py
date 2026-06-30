@@ -1,5 +1,6 @@
 from app.runtime.interfaces.identity import IRuntimeIdentity
 
+
 class RuntimeIdentity(IRuntimeIdentity):
     """
     Concrete implementation of runtime execution identity.

@@ -1,8 +1,10 @@
-from typing import Any
-from pydantic import BaseModel, Field, UUID4
-from uuid import uuid4
-from enum import Enum
 from abc import ABC, abstractmethod
+from enum import Enum
+from typing import Any
+from uuid import uuid4
+
+from pydantic import UUID4, BaseModel, Field
+
 
 class ExecutionType(str, Enum):
     AGENT = "AGENT"
@@ -37,17 +39,17 @@ class ITask(ABC):
     @abstractmethod
     def task_id(self) -> UUID4:
         pass
-        
+
     @property
     @abstractmethod
     def descriptor(self) -> ExecutionDescriptor:
         pass
-        
+
     @property
     @abstractmethod
     def dependencies(self) -> set[UUID4]:
         pass
-        
+
     @property
     @abstractmethod
     def priority(self) -> TaskPriority:

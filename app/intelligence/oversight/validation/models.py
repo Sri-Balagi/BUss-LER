@@ -1,6 +1,8 @@
 from enum import Enum
-from pydantic import BaseModel, Field
 from typing import List
+
+from pydantic import BaseModel, Field
+
 
 class ValidationSeverity(str, Enum):
     INFO = "INFO"
@@ -16,4 +18,4 @@ class ValidationAssessment(BaseModel):
     """Result of consistency validation on an ExecutiveDecision or ExecutivePlan."""
     assessment_id: str
     is_valid: bool
-    issues: List[ValidationIssue] = Field(default_factory=list)
+    issues: list[ValidationIssue] = Field(default_factory=list)

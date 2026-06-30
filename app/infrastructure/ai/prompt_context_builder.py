@@ -5,11 +5,15 @@ Responsibilities:
   - Removes formatting duplication from AI-powered engines.
 """
 
-from typing import TYPE_CHECKING, Dict, Any
+from typing import TYPE_CHECKING, Any, Dict
+
 from app.intelligence.intake.situation.context import CognitiveContext
 
 if TYPE_CHECKING:
-    from app.intelligence.intake.situation.enterprise_context import EnterpriseContext, ContextSection
+    from app.intelligence.intake.situation.enterprise_context import (
+        ContextSection,
+        EnterpriseContext,
+    )
 
 
 
@@ -17,7 +21,7 @@ class PromptContextBuilder:
     """Formats CognitiveContext for ingestion by the AI Kernel."""
 
     @staticmethod
-    def build_context_dict(cognitive_context: CognitiveContext) -> Dict[str, Any]:
+    def build_context_dict(cognitive_context: CognitiveContext) -> dict[str, Any]:
         """Convert CognitiveContext into a dictionary for ClassifyRequest."""
         return {
             "intent_summary": str(
@@ -56,7 +60,7 @@ class PromptContextBuilder:
         return "\n".join(lines)
 
     @staticmethod
-    def build_from_enterprise_context(context: "EnterpriseContext") -> Dict[str, Any]:
+    def build_from_enterprise_context(context: "EnterpriseContext") -> dict[str, Any]:
         """Convert an assembled M4 EnterpriseContext into a dictionary for the AI Kernel."""
         from app.shared.enums import ContextSource
 

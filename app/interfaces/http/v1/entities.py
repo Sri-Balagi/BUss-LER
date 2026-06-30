@@ -4,10 +4,10 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, status
 
-from app.interfaces.http.v1.dependencies import get_current_user, get_entity_service
+from app.interfaces.http.schemas.base import Entity, EntityCreate
 from app.interfaces.http.schemas.entity import EntityUpdate
 from app.interfaces.http.schemas.pagination import PaginatedResponse
-from app.interfaces.http.schemas.base import Entity, EntityCreate
+from app.interfaces.http.v1.dependencies import get_current_user, get_entity_service
 from app.services.entity_service import EntityService
 
 router = APIRouter(prefix="/entities", tags=["Entities"])

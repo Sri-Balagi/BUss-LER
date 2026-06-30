@@ -9,9 +9,9 @@ from uuid import UUID
 import structlog
 from supabase import AsyncClient
 
+from app.interfaces.http.schemas.base import Entity, EntityCreate
 from app.interfaces.http.schemas.entity import EntityUpdate
 from app.shared.exceptions.errors import EntityNotFoundError, RepositoryError
-from app.interfaces.http.schemas.base import Entity, EntityCreate
 
 logger = structlog.get_logger()
 

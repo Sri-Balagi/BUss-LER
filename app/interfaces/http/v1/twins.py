@@ -4,7 +4,6 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, status
 
-from app.interfaces.http.v1.dependencies import get_twin_service
 from app.interfaces.http.schemas.pagination import PaginatedResponse
 from app.interfaces.http.schemas.twin import (
     DigitalTwin,
@@ -13,6 +12,7 @@ from app.interfaces.http.schemas.twin import (
     TwinHistory,
     TwinSnapshot,
 )
+from app.interfaces.http.v1.dependencies import get_twin_service
 from app.services.twin_service import TwinService
 
 router = APIRouter(prefix="/twins", tags=["Digital Twins"])

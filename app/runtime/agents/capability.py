@@ -1,5 +1,7 @@
 from pydantic import BaseModel, Field
+
 from app.runtime.agents.permissions import AgentPermission
+
 
 class Capability(BaseModel):
     """

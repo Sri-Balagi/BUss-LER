@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
+
 class IWorkingMemory(ABC):
     """
     Execution-scoped scratchpad memory.

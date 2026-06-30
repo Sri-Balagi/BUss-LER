@@ -2,8 +2,9 @@ import heapq
 from typing import Optional
 from uuid import UUID
 
-from app.runtime.tasks.models import ITask
 from app.runtime.queues.interfaces import IQueue
+from app.runtime.tasks.models import ITask
+
 
 class FIFOMemoryQueue(IQueue):
     """Simple in-memory FIFO queue."""
@@ -13,12 +14,12 @@ class FIFOMemoryQueue(IQueue):
     def enqueue(self, task: ITask) -> None:
         self._queue.append(task)
 
-    def dequeue(self) -> Optional[ITask]:
+    def dequeue(self) -> ITask | None:
         if not self._queue:
             return None
         return self._queue.pop(0)
 
-    def peek(self) -> Optional[ITask]:
+    def peek(self) -> ITask | None:
         if not self._queue:
             return None
         return self._queue[0]
@@ -32,7 +33,7 @@ class FIFOMemoryQueue(IQueue):
 
     def size(self) -> int:
         return len(self._queue)
-        
+
     def get_all(self) -> list[ITask]:
         return list(self._queue)
 
@@ -51,13 +52,13 @@ class PriorityMemoryQueue(IQueue):
         heapq.heappush(self._queue, (task.priority.value, self._counter, task))
         self._counter += 1
 
-    def dequeue(self) -> Optional[ITask]:
+    def dequeue(self) -> ITask | None:
         if not self._queue:
             return None
         _, _, task = heapq.heappop(self._queue)
         return task
 
-    def peek(self) -> Optional[ITask]:
+    def peek(self) -> ITask | None:
         if not self._queue:
             return None
         return self._queue[0][2]
@@ -72,6 +73,6 @@ class PriorityMemoryQueue(IQueue):
 
     def size(self) -> int:
         return len(self._queue)
-        
+
     def get_all(self) -> list[ITask]:
         return [task for _, _, task in sorted(self._queue)]

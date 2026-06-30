@@ -13,8 +13,8 @@ from uuid import UUID
 import structlog
 from supabase import AsyncClient
 
-from app.shared.exceptions.errors import RepositoryError
 from app.interfaces.http.schemas.twin import TwinSnapshot
+from app.shared.exceptions.errors import RepositoryError
 
 logger = structlog.get_logger()
 

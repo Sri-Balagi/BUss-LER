@@ -1,18 +1,23 @@
 import time
 from abc import ABC, abstractmethod
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID
 
 import structlog
 from supabase import AsyncClient
 
+from app.intelligence.learning.repository.memory import (
+    Memory,
+    MemoryCreate,
+    MemoryUpdate,
+    PaginatedMemories,
+)
 from app.shared.enums import EmbeddingStatus
 from app.shared.exceptions.errors import (
     DuplicateMemoryError,
     MemoryNotFoundError,
     RepositoryError,
 )
-from app.intelligence.learning.repository.memory import Memory, MemoryCreate, MemoryUpdate, PaginatedMemories
 
 logger = structlog.get_logger()
 
@@ -234,7 +239,7 @@ class MemoryMetadataRepository(AbstractMemoryRepository):
         try:
             response = (
                 await self._client.table(self._table_name)
-                .update({"deleted_at": datetime.now(timezone.utc).isoformat()})
+                .update({"deleted_at": datetime.now(UTC).isoformat()})
                 .eq("id", str(memory_id))
                 .is_("deleted_at", "null")
                 .execute()

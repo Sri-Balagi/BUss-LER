@@ -1,6 +1,13 @@
 import uuid
+
 from app.intelligence.decision.decision.models import ExecutiveDecision
-from app.intelligence.decision.planning.models import ExecutivePlan, PlanningStep, PlanningDependency, ExecutiveDirective
+from app.intelligence.decision.planning.models import (
+    ExecutiveDirective,
+    ExecutivePlan,
+    PlanningDependency,
+    PlanningStep,
+)
+
 
 class PlanningEngine:
     """
@@ -19,13 +26,13 @@ class PlanningEngine:
             action_description="Execution phase",
             estimated_effort_hours=80.0
         )
-        
+
         directive = ExecutiveDirective(
             directive_id=str(uuid.uuid4()),
             intent=f"Execute decision {decision.decision_id}",
             success_conditions=["Plan executed fully"]
         )
-        
+
         return ExecutivePlan(
             plan_id=str(uuid.uuid4()),
             decision_id=decision.decision_id,

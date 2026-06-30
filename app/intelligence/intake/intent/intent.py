@@ -17,9 +17,8 @@ from uuid import UUID
 
 from pydantic import Field
 
-from app.shared.enums import IntentConfidence, IntentStatus, IntentType
 from app.interfaces.http.schemas.base import DomainBaseModel
-
+from app.shared.enums import IntentConfidence, IntentStatus, IntentType
 
 # =============================================================================
 # IntentAnalysis — Canonical Cognitive Output of AIKernel.classify()
@@ -53,14 +52,14 @@ class IntentAnalysis(DomainBaseModel):
             "(e.g., 'Supply Chain', 'Human Resources', 'Financial Operations')."
         ),
     )
-    entities: List[Dict[str, Any]] = Field(
+    entities: list[dict[str, Any]] = Field(
         default_factory=list,
         description=(
             "Named entities extracted from the raw text. "
             "Each entry: {'type': str, 'value': str, 'normalized': str}."
         ),
     )
-    related_goals: List[str] = Field(
+    related_goals: list[str] = Field(
         default_factory=list,
         description="Goal titles or categories this intent likely contributes to.",
     )
@@ -74,7 +73,7 @@ class IntentAnalysis(DomainBaseModel):
         le=10,
         description="Inferred priority score 1 (lowest) to 10 (highest).",
     )
-    timeframe: Optional[str] = Field(
+    timeframe: str | None = Field(
         default=None,
         description="Inferred timeframe (e.g., 'today', 'this week', 'Q4 2026', 'ASAP').",
     )
@@ -82,15 +81,15 @@ class IntentAnalysis(DomainBaseModel):
         ...,
         description="AI classification confidence band.",
     )
-    ambiguities: List[str] = Field(
+    ambiguities: list[str] = Field(
         default_factory=list,
         description="Aspects of the intent that were unclear or underspecified.",
     )
-    follow_up_questions: List[str] = Field(
+    follow_up_questions: list[str] = Field(
         default_factory=list,
         description="Clarifying questions the system could ask to resolve ambiguities.",
     )
-    reasoning_metadata: Dict[str, Any] = Field(
+    reasoning_metadata: dict[str, Any] = Field(
         default_factory=dict,
         description=(
             "AI reasoning trace and classification diagnostics "
@@ -111,7 +110,7 @@ class IntentBase(DomainBaseModel):
         ...,
         description="The original natural language input from the user.",
     )
-    title: Optional[str] = Field(
+    title: str | None = Field(
         None,
         max_length=255,
         description="AI-generated human-readable title (populated after classification).",
@@ -124,14 +123,14 @@ class IntentBase(DomainBaseModel):
         default=IntentStatus.PENDING,
         description="Lifecycle status governed by IntentStateMachine.",
     )
-    analysis: Optional[IntentAnalysis] = Field(
+    analysis: IntentAnalysis | None = Field(
         default=None,
         description=(
             "Full cognitive analysis produced by AIKernel.classify(). "
             "Stored as JSONB in Supabase. Null until classification completes."
         ),
     )
-    metadata: Dict[str, Any] = Field(
+    metadata: dict[str, Any] = Field(
         default_factory=dict,
         description="Schemaless structured metadata.",
     )
@@ -146,13 +145,13 @@ class IntentCreate(IntentBase):
 class IntentUpdate(DomainBaseModel):
     """Schema for partially updating an intent."""
 
-    title: Optional[str] = Field(None, max_length=255)
-    intent_type: Optional[IntentType] = None
-    status: Optional[IntentStatus] = None
-    analysis: Optional[IntentAnalysis] = None
-    metadata: Optional[Dict[str, Any]] = None
-    classified_at: Optional[datetime] = None
-    fulfilled_at: Optional[datetime] = None
+    title: str | None = Field(None, max_length=255)
+    intent_type: IntentType | None = None
+    status: IntentStatus | None = None
+    analysis: IntentAnalysis | None = None
+    metadata: dict[str, Any] | None = None
+    classified_at: datetime | None = None
+    fulfilled_at: datetime | None = None
 
 
 class Intent(IntentBase):
@@ -160,17 +159,17 @@ class Intent(IntentBase):
 
     id: UUID
     twin_id: UUID
-    classified_at: Optional[datetime] = None
-    fulfilled_at: Optional[datetime] = None
+    classified_at: datetime | None = None
+    fulfilled_at: datetime | None = None
     created_at: datetime
     updated_at: datetime
-    deleted_at: Optional[datetime] = None
+    deleted_at: datetime | None = None
 
 
 class PaginatedIntents(DomainBaseModel):
     """Pagination wrapper for Intent listings."""
 
-    items: List[Intent]
+    items: list[Intent]
     total_count: int
     limit: int
     offset: int

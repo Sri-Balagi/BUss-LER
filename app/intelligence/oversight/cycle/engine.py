@@ -1,5 +1,7 @@
 import uuid
+
 from app.intelligence.oversight.cycle.models import CognitiveCycleState, CycleStatus
+
 
 class CognitiveCycleController:
     """
@@ -18,12 +20,12 @@ class CognitiveCycleController:
             return state
 
         state.current_iteration += 1
-        
+
         if state.current_iteration >= state.max_iterations:
             state.status = CycleStatus.MAX_ITERATIONS_REACHED
         else:
             state.status = CycleStatus.IN_PROGRESS
-            
+
         return state
 
     def mark_converged(self, state: CognitiveCycleState) -> CognitiveCycleState:

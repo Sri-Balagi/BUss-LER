@@ -15,13 +15,13 @@ def get_supabase_client():
 
 def get_twin_service():
     pass
-    
+
 def get_qdrant_client():
     pass
-    
+
 def get_memory_service():
     pass
-    
+
 def get_operation_context():
     pass
 

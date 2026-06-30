@@ -1,5 +1,7 @@
 from typing import Any
+
 from app.runtime.interfaces.memory import IWorkingMemory
+
 
 class WorkingMemory(IWorkingMemory):
     """

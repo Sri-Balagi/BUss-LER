@@ -10,8 +10,8 @@ from uuid import UUID
 
 from pydantic import Field
 
-from app.shared.enums import GoalStatus, GoalType
 from app.interfaces.http.schemas.base import DomainBaseModel
+from app.shared.enums import GoalStatus, GoalType
 
 
 class GoalBase(DomainBaseModel):
@@ -20,7 +20,7 @@ class GoalBase(DomainBaseModel):
     title: str = Field(
         ..., min_length=1, max_length=500, description="Short goal title."
     )
-    description: Optional[str] = Field(
+    description: str | None = Field(
         None, max_length=5000, description="Detailed goal description."
     )
     goal_type: GoalType = Field(
@@ -33,18 +33,18 @@ class GoalBase(DomainBaseModel):
         le=10,
         description="Priority score 1 (lowest) to 10 (highest).",
     )
-    target_date: Optional[datetime] = Field(
+    target_date: datetime | None = Field(
         None, description="Optional deadline for the goal."
     )
-    success_criteria: List[str] = Field(
+    success_criteria: list[str] = Field(
         default_factory=list,
         description="List of measurable success conditions.",
     )
-    parent_goal_id: Optional[UUID] = Field(
+    parent_goal_id: UUID | None = Field(
         None,
         description="Parent goal for hierarchical decomposition.",
     )
-    metadata: Dict[str, Any] = Field(
+    metadata: dict[str, Any] = Field(
         default_factory=dict, description="Schemaless structured metadata."
     )
 
@@ -58,15 +58,15 @@ class GoalCreate(GoalBase):
 class GoalUpdate(DomainBaseModel):
     """Schema for partially updating a goal."""
 
-    title: Optional[str] = Field(None, min_length=1, max_length=500)
-    description: Optional[str] = Field(None, max_length=5000)
-    goal_type: Optional[GoalType] = None
-    status: Optional[GoalStatus] = None
-    priority: Optional[int] = Field(None, ge=1, le=10)
-    progress: Optional[float] = Field(None, ge=0.0, le=100.0)
-    target_date: Optional[datetime] = None
-    success_criteria: Optional[List[str]] = None
-    metadata: Optional[Dict[str, Any]] = None
+    title: str | None = Field(None, min_length=1, max_length=500)
+    description: str | None = Field(None, max_length=5000)
+    goal_type: GoalType | None = None
+    status: GoalStatus | None = None
+    priority: int | None = Field(None, ge=1, le=10)
+    progress: float | None = Field(None, ge=0.0, le=100.0)
+    target_date: datetime | None = None
+    success_criteria: list[str] | None = None
+    metadata: dict[str, Any] | None = None
 
 
 class Goal(GoalBase):
@@ -78,16 +78,16 @@ class Goal(GoalBase):
     progress: float = Field(
         default=0.0, ge=0.0, le=100.0, description="Completion percentage 0-100."
     )
-    completed_at: Optional[datetime] = None
+    completed_at: datetime | None = None
     created_at: datetime
     updated_at: datetime
-    deleted_at: Optional[datetime] = None
+    deleted_at: datetime | None = None
 
 
 class PaginatedGoals(DomainBaseModel):
     """Pagination wrapper for Goal listings."""
 
-    items: List[Goal]
+    items: list[Goal]
     total_count: int
     limit: int
     offset: int

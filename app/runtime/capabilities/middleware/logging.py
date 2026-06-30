@@ -1,10 +1,11 @@
 import logging
-from app.runtime.capabilities.models.request import CapabilityRequest
-from app.runtime.capabilities.models.result import CapabilityResult
+
 from app.runtime.capabilities.context import CapabilityContext
 from app.runtime.capabilities.middleware.context import MiddlewareContext
-from app.runtime.capabilities.middleware.interfaces import IMiddleware
 from app.runtime.capabilities.middleware.decision import MiddlewareDecision
+from app.runtime.capabilities.middleware.interfaces import IMiddleware
+from app.runtime.capabilities.models.request import CapabilityRequest
+from app.runtime.capabilities.models.result import CapabilityResult
 
 logger = logging.getLogger(__name__)
 

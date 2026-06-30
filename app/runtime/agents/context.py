@@ -1,8 +1,9 @@
-from app.runtime.session.execution_session import ExecutionSession
-from app.runtime.tasks.models import ITask
 from app.runtime.agents.permissions import AgentPermission
 from app.runtime.agents.scope import AgentExecutionScope
 from app.runtime.capabilities.executor import ICapabilityExecutor
+from app.runtime.session.execution_session import ExecutionSession
+from app.runtime.tasks.models import ITask
+
 
 class AgentContext:
     """
@@ -10,9 +11,9 @@ class AgentContext:
     Exposes an immutable AgentExecutionScope to the agent.
     """
     def __init__(
-        self, 
-        session: ExecutionSession, 
-        task: ITask, 
+        self,
+        session: ExecutionSession,
+        task: ITask,
         permissions: set[AgentPermission],
         capability_executor: ICapabilityExecutor | None = None
     ):

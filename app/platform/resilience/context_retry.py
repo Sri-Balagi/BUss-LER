@@ -6,15 +6,18 @@ and exponential backoff retry. No single provider can block assembly indefinitel
 
 import asyncio
 import random
-from typing import Optional, Union, Tuple, Type
+from typing import Optional, Tuple, Type
 from uuid import UUID
 
-from pydantic import ConfigDict
 import structlog
+from pydantic import ConfigDict
 
-from app.intelligence.intake.situation.enterprise_context import ContextSection, ProviderFailureRecord
-from app.shared.enums import ContextSource
+from app.intelligence.intake.situation.enterprise_context import (
+    ContextSection,
+    ProviderFailureRecord,
+)
 from app.interfaces.http.schemas.base import DomainBaseModel
+from app.shared.enums import ContextSource
 
 logger = structlog.get_logger(__name__)
 
@@ -38,7 +41,7 @@ class ProviderRetryConfig(DomainBaseModel):
     backoff_base: float = 1.0
     max_delay: float = 10.0
     jitter: bool = True
-    retry_on: Tuple[Type[Exception], ...] = (Exception,)
+    retry_on: tuple[type[Exception], ...] = (Exception,)
 
 
 async def provide_with_retry(
@@ -48,9 +51,9 @@ async def provide_with_retry(
     twin_id: UUID,
     policy,
     source: ContextSource,
-    context_id: Optional[UUID] = None,
+    context_id: UUID | None = None,
     event_bus=None,
-) -> Union[ContextSection, ProviderFailureRecord]:
+) -> ContextSection | ProviderFailureRecord:
     """Execute a provider with timeout and exponential backoff retry.
 
     On success: returns ContextSection.
@@ -83,7 +86,7 @@ async def provide_with_retry(
                 )
             return result
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             last_error = f"TimeoutError after {retry_config.timeout_seconds}s"
             logger.warning(
                 "Provider timed out",

@@ -1,5 +1,7 @@
 from enum import Enum
+
 from app.runtime.core.state_machine import BaseStateMachine
+
 
 class TaskState(Enum):
     PENDING = "PENDING"
@@ -17,8 +19,8 @@ TASK_STATE_TRANSITIONS: dict[TaskState, set[TaskState]] = {
     TaskState.PENDING: {TaskState.READY, TaskState.CANCELLED},
     TaskState.READY: {TaskState.RUNNING, TaskState.CANCELLED},
     TaskState.RUNNING: {
-        TaskState.WAITING, 
-        TaskState.BLOCKED, 
+        TaskState.WAITING,
+        TaskState.BLOCKED,
         TaskState.SUSPENDED_FOR_APPROVAL,
         TaskState.COMPLETED,
         TaskState.FAILED,

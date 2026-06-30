@@ -1,6 +1,8 @@
 from enum import Enum
-from pydantic import BaseModel, Field
 from typing import List
+
+from pydantic import BaseModel, Field
+
 
 class ConflictType(str, Enum):
     RESOURCE_CONTENTION = "RESOURCE_CONTENTION"
@@ -13,5 +15,5 @@ class ConflictAssessment(BaseModel):
     conflict_id: str
     conflict_type: ConflictType
     description: str
-    involved_objective_ids: List[str] = Field(default_factory=list)
-    involved_goal_ids: List[str] = Field(default_factory=list)
+    involved_objective_ids: list[str] = Field(default_factory=list)
+    involved_goal_ids: list[str] = Field(default_factory=list)

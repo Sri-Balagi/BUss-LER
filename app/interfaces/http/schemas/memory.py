@@ -1,9 +1,10 @@
 import uuid
-from typing import Dict, Any, Optional, List
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel, Field
 
-from app.shared.enums import MemoryCategory, EmbeddingStatus, MemorySource
+from app.shared.enums import EmbeddingStatus, MemoryCategory, MemorySource
 
 
 class CreateMemoryRequest(BaseModel):
@@ -15,17 +16,17 @@ class CreateMemoryRequest(BaseModel):
         default=MemorySource.USER_INPUT, description="The origin of the memory."
     )
     memory_category: MemoryCategory = Field(default=MemoryCategory.OBSERVATION)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
     importance: float = Field(default=0.5, ge=0.0, le=1.0)
 
 
 class UpdateMemoryRequest(BaseModel):
     """Client request to update an existing memory."""
 
-    content: Optional[str] = None
-    memory_category: Optional[MemoryCategory] = None
-    metadata: Optional[Dict[str, Any]] = None
-    importance: Optional[float] = Field(default=None, ge=0.0, le=1.0)
+    content: str | None = None
+    memory_category: MemoryCategory | None = None
+    metadata: dict[str, Any] | None = None
+    importance: float | None = Field(default=None, ge=0.0, le=1.0)
 
 
 class MemoryResponse(BaseModel):
@@ -37,10 +38,10 @@ class MemoryResponse(BaseModel):
     content: str
     source: MemorySource
     memory_category: MemoryCategory
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
     importance: float
     embedding_status: EmbeddingStatus
-    summary: Optional[str]
+    summary: str | None
     created_at: datetime
     updated_at: datetime
 
@@ -58,8 +59,8 @@ class MemorySearchRequest(BaseModel):
     query_text: str = Field(..., description="The search string.")
     limit: int = Field(default=10, ge=1, le=100)
     threshold: float = Field(default=0.7, ge=0.0, le=1.0)
-    category: Optional[MemoryCategory] = None
-    min_importance: Optional[float] = Field(default=None, ge=0.0, le=1.0)
+    category: MemoryCategory | None = None
+    min_importance: float | None = Field(default=None, ge=0.0, le=1.0)
 
 
 class MemorySearchResponseItem(BaseModel):
@@ -72,14 +73,14 @@ class MemorySearchResponseItem(BaseModel):
 class MemorySearchResponse(BaseModel):
     """Standard search response payload."""
 
-    items: List[MemorySearchResponseItem]
+    items: list[MemorySearchResponseItem]
     total_count: int
 
 
 class PaginatedMemoryResponse(BaseModel):
     """Paginated list of memories."""
 
-    items: List[MemoryResponse]
+    items: list[MemoryResponse]
     total_count: int
     limit: int
     offset: int

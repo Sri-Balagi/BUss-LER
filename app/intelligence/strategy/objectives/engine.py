@@ -1,8 +1,13 @@
 import uuid
+
 from app.intelligence.intake.intent.models import ExecutiveIntent
 from app.intelligence.strategy.objectives.models import (
-    ExecutiveObjective, ObjectiveStatus, ObjectivePriority, BusinessHorizon
+    BusinessHorizon,
+    ExecutiveObjective,
+    ObjectivePriority,
+    ObjectiveStatus,
 )
+
 
 class ExecutiveObjectivesEngine:
     """
@@ -12,16 +17,16 @@ class ExecutiveObjectivesEngine:
         # Determine priority and horizon based on classification (mock logic)
         priority = ObjectivePriority.MEDIUM
         horizon = BusinessHorizon.MEDIUM_TERM
-        
+
         if intent.classification.value == "STRATEGIC_OBJECTIVE":
             priority = ObjectivePriority.HIGH
             horizon = BusinessHorizon.LONG_TERM
         elif intent.classification.value == "ESCALATION":
             priority = ObjectivePriority.CRITICAL
             horizon = BusinessHorizon.IMMEDIATE
-            
+
         description = f"Objective derived from: {intent.raw_request}"
-        
+
         return ExecutiveObjective(
             objective_id=str(uuid.uuid4()),
             description=description,

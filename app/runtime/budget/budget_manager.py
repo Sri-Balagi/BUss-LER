@@ -1,5 +1,6 @@
-from app.runtime.interfaces.budget import IExecutionBudget
 from app.runtime.core.exceptions import BudgetExceededError
+from app.runtime.interfaces.budget import IExecutionBudget
+
 
 class BudgetManager:
     """
@@ -15,8 +16,8 @@ class BudgetManager:
     def consume_tokens(self, amount: int) -> None:
         if self._tokens_consumed + amount > self._budget.max_tokens:
             raise BudgetExceededError(
-                resource_type="tokens", 
-                limit=self._budget.max_tokens, 
+                resource_type="tokens",
+                limit=self._budget.max_tokens,
                 actual=self._tokens_consumed + amount
             )
         self._tokens_consumed += amount
@@ -24,12 +25,12 @@ class BudgetManager:
     def consume_time(self, ms: int) -> None:
         if self._time_elapsed_ms + ms > self._budget.max_time_ms:
             raise BudgetExceededError(
-                resource_type="time_ms", 
-                limit=self._budget.max_time_ms, 
+                resource_type="time_ms",
+                limit=self._budget.max_time_ms,
                 actual=self._time_elapsed_ms + ms
             )
         self._time_elapsed_ms += ms
-        
+
     def consume_retry(self) -> None:
         if self._retries_used + 1 > self._budget.max_retries:
             raise BudgetExceededError(

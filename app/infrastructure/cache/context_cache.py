@@ -9,7 +9,7 @@ Implementations:
 """
 
 from abc import ABC, abstractmethod
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Dict, Optional, Tuple
 
 import structlog
@@ -24,7 +24,7 @@ class AbstractContextCache(ABC):
     """Abstract interface for context caching."""
 
     @abstractmethod
-    async def get(self, cache_key: str) -> Optional[EnterpriseContext]:
+    async def get(self, cache_key: str) -> EnterpriseContext | None:
         """Retrieve a cached EnterpriseContext by key, or None if missing/expired."""
         pass
 
@@ -68,14 +68,14 @@ class MemoryContextCache(AbstractContextCache):
 
     def __init__(self) -> None:
         # {cache_key: (context, retrieved_at, expires_at)}
-        self._store: Dict[str, Tuple[EnterpriseContext, datetime, datetime]] = {}
+        self._store: dict[str, tuple[EnterpriseContext, datetime, datetime]] = {}
 
-    async def get(self, cache_key: str) -> Optional[EnterpriseContext]:
+    async def get(self, cache_key: str) -> EnterpriseContext | None:
         entry = self._store.get(cache_key)
         if entry is None:
             return None
         context, retrieved_at, expires_at = entry
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         if now > expires_at:
             del self._store[cache_key]
             logger.debug("Cache entry expired", cache_key=cache_key)
@@ -90,7 +90,7 @@ class MemoryContextCache(AbstractContextCache):
     ) -> None:
         from datetime import timedelta
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         expires_at = now + timedelta(seconds=ttl_seconds)
         self._store[cache_key] = (context, now, expires_at)
         logger.debug(
@@ -149,7 +149,7 @@ class RedisContextCache(AbstractContextCache):
     Designed for distributed deployment scenarios.
     """
 
-    async def get(self, cache_key: str) -> Optional[EnterpriseContext]:
+    async def get(self, cache_key: str) -> EnterpriseContext | None:
         raise NotImplementedError(
             "RedisContextCache is not implemented in Milestone 4."
         )

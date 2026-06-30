@@ -1,4 +1,5 @@
-from typing import Dict, Any
+from typing import Any, Dict
+
 
 class Belief:
     def __init__(self, key: str, value: Any, confidence: float):
@@ -8,11 +9,11 @@ class Belief:
 
 class BusinessWorldModel:
     """
-    Differentiates beliefs from facts. Derives high-level states 
+    Differentiates beliefs from facts. Derives high-level states
     (e.g., "customer sentiment declining") from the factual EnterpriseContext.
     """
     def __init__(self):
-        self.beliefs: Dict[str, Belief] = {}
+        self.beliefs: dict[str, Belief] = {}
 
     def update_belief(self, belief: Belief):
         self.beliefs[belief.key] = belief

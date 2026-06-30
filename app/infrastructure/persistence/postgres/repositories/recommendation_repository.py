@@ -14,13 +14,13 @@ from uuid import UUID
 import structlog
 from supabase import AsyncClient
 
-from app.shared.enums import RecommendationStatus
-from app.shared.exceptions.errors import RecommendationNotFoundError, RepositoryError
 from app.intelligence.decision.recommendation.recommendation import (
+    PaginatedRecommendations,
     Recommendation,
     RecommendationCreate,
-    PaginatedRecommendations,
 )
+from app.shared.enums import RecommendationStatus
+from app.shared.exceptions.errors import RecommendationNotFoundError, RepositoryError
 
 logger = structlog.get_logger(__name__)
 
@@ -38,7 +38,7 @@ class AbstractRecommendationRepository(ABC):
     async def list_by_twin(
         self,
         twin_id: UUID,
-        status: Optional[RecommendationStatus] = None,
+        status: RecommendationStatus | None = None,
         limit: int = 20,
         offset: int = 0,
     ) -> PaginatedRecommendations:
@@ -49,7 +49,7 @@ class AbstractRecommendationRepository(ABC):
         self,
         recommendation_id: UUID,
         status: RecommendationStatus,
-        acknowledged_at: Optional[str] = None,
+        acknowledged_at: str | None = None,
     ) -> Recommendation:
         pass
 
@@ -113,7 +113,7 @@ class RecommendationRepository(AbstractRecommendationRepository):
     async def list_by_twin(
         self,
         twin_id: UUID,
-        status: Optional[RecommendationStatus] = None,
+        status: RecommendationStatus | None = None,
         limit: int = 20,
         offset: int = 0,
     ) -> PaginatedRecommendations:
@@ -143,7 +143,7 @@ class RecommendationRepository(AbstractRecommendationRepository):
         self,
         recommendation_id: UUID,
         status: RecommendationStatus,
-        acknowledged_at: Optional[str] = None,
+        acknowledged_at: str | None = None,
     ) -> Recommendation:
         update_data: dict = {"status": status.value}
         if acknowledged_at:

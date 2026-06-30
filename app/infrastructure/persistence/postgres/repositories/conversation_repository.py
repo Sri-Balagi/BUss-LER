@@ -4,7 +4,7 @@ Tables: conversation_threads, conversation_turns
 """
 
 from abc import ABC, abstractmethod
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Optional
 from uuid import UUID
 
@@ -50,7 +50,7 @@ class AbstractConversationRepository(ABC):
     async def list_threads(
         self,
         twin_id: UUID,
-        status: Optional[ConversationStatus] = None,
+        status: ConversationStatus | None = None,
         limit: int = 20,
         offset: int = 0,
     ) -> PaginatedConversationThreads:
@@ -72,7 +72,7 @@ class ConversationRepository(AbstractConversationRepository):
         self._client = client
 
     async def create_thread(self, data: ConversationThreadCreate) -> ConversationThread:
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         payload = {
             "twin_id": str(data.twin_id),
             "title": data.title,
@@ -111,7 +111,7 @@ class ConversationRepository(AbstractConversationRepository):
             ) from exc
 
     async def add_turn(self, data: ConversationTurnCreate) -> ConversationTurn:
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         # Determine turn_index
         try:
             count_result = (
@@ -171,7 +171,7 @@ class ConversationRepository(AbstractConversationRepository):
     async def list_threads(
         self,
         twin_id: UUID,
-        status: Optional[ConversationStatus] = None,
+        status: ConversationStatus | None = None,
         limit: int = 20,
         offset: int = 0,
     ) -> PaginatedConversationThreads:
@@ -200,7 +200,7 @@ class ConversationRepository(AbstractConversationRepository):
             ) from exc
 
     async def archive_thread(self, thread_id: UUID) -> ConversationThread:
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         try:
             result = (
                 await self._client.table(_THREADS_TABLE)

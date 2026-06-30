@@ -1,13 +1,15 @@
 import uuid
+
+from app.intelligence.strategy.goals.models import Goal, GoalCollection, GoalStatus
 from app.intelligence.strategy.objectives.models import ExecutiveObjective
-from app.intelligence.strategy.goals.models import Goal, GoalStatus, GoalCollection
+
 
 class GoalManagementEngine:
     """
     Derives tactical goals from strategic objectives and maintains their hierarchy.
     Does not execute goals.
     """
-    
+
     def derive_goals(self, objective: ExecutiveObjective) -> GoalCollection:
         goals = []
         for criteria in objective.success_criteria:
@@ -18,16 +20,16 @@ class GoalManagementEngine:
                 status=GoalStatus.PENDING
             )
             goals.append(goal)
-            
+
         return GoalCollection(
             objective_id=objective.objective_id,
             goals=goals
         )
-        
+
     def activate_goal(self, goal: Goal) -> Goal:
         goal.status = GoalStatus.ACTIVE
         return goal
-        
+
     def complete_goal(self, goal: Goal) -> Goal:
         goal.status = GoalStatus.COMPLETED
         return goal

@@ -1,6 +1,8 @@
 from enum import Enum
+from typing import Any, List, Optional
+
 from pydantic import BaseModel, Field
-from typing import List, Optional, Any
+
 
 class RuntimeExecutionStatus(str, Enum):
     PENDING = "PENDING"
@@ -23,13 +25,13 @@ class ExecutionSummary(BaseModel):
     """Summarizes the final state of execution from the Runtime."""
     summary_id: str
     overall_status: RuntimeExecutionStatus
-    directive_mappings: List[DirectiveExecutionMapping] = Field(default_factory=list)
+    directive_mappings: list[DirectiveExecutionMapping] = Field(default_factory=list)
     metrics: RuntimeMetrics
-    error_message: Optional[str] = None
+    error_message: str | None = None
 
 class RuntimeIntegrationRequest(BaseModel):
     request_id: str
-    directives: List[Any]  # Will hold ExecutiveDirective at runtime
+    directives: list[Any]  # Will hold ExecutiveDirective at runtime
 
 class RuntimeIntegrationResult(BaseModel):
     result_id: str

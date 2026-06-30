@@ -1,9 +1,16 @@
-"""BizOS API entry point.
+﻿"""BizOS v6.0.0 — API Entry Point.
 
-Initializes the FastAPI application, configures middleware, sets up the
-lifespan context manager for external service initialization, and
-registers all API routers.
+Initializes the FastAPI application with:
+- Middleware: Request IDs, Security Headers, Prometheus Metrics, CORS, Logging
+- Lifecycle: Startup validation, graceful shutdown
+- Routers: v1 API, /metrics endpoint
+- Observability: Structlog, optional OpenTelemetry
+
+Architecture note: This file is in the interfaces layer.
+It must not import from app.runtime or app.intelligence directly.
+All kernel access is via app.bootstrap or app.interfaces.http.v1.dependencies.
 """
+from __future__ import annotations
 
 import time
 from contextlib import asynccontextmanager
@@ -11,94 +18,142 @@ from contextlib import asynccontextmanager
 import structlog
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 
-from app.interfaces.http.errors import register_exception_handlers
-from app.interfaces.http.v1.router import api_router
 from app.config import get_settings
-from app.infrastructure.vectorstore.qdrant import QdrantService
 from app.infrastructure.persistence.postgres.supabase import SupabaseService
+from app.infrastructure.vectorstore.qdrant import QdrantService
+from app.interfaces.http.errors import register_exception_handlers
+from app.interfaces.http.metrics import MetricsMiddleware, metrics_endpoint
+from app.interfaces.http.middleware.request_id import RequestIDMiddleware
+from app.interfaces.http.middleware.security_headers import SecurityHeadersMiddleware
+from app.interfaces.http.v1.router import api_router
+from app.platform.resilience.graceful_shutdown import register_shutdown_handlers
+from app.platform.telemetry.otel import instrument_fastapi, setup_tracing
 
 logger = structlog.get_logger()
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Lifecycle manager for the FastAPI application.
+# ── Lifespan ──────────────────────────────────────────────────────────────────
 
-    Handles startup and shutdown events for external service connections.
+@asynccontextmanager
+async def lifespan(app: FastAPI):  # type: ignore[type-arg]
+    """Application lifecycle manager.
+
+    Handles startup validation and graceful shutdown.
+    Fails fast if mandatory configuration or infrastructure is invalid.
     """
     settings = get_settings()
-    logger.info("Starting BizOS API", env=settings.app_env)
+
+    logger.info(
+        "Starting BizOS API",
+        version="6.0.0",
+        env=settings.app_env,
+        debug=settings.app_debug,
+    )
 
     try:
-        # Initialize Supabase client
+        # Register OS-level signal handlers for graceful shutdown
+        register_shutdown_handlers()
+
+        # Validate mandatory infrastructure on startup
         logger.info("Initializing Supabase client")
         await SupabaseService.get_client(settings)
 
-        # Initialize Qdrant client and collections
         logger.info("Initializing Qdrant client and collections")
         await QdrantService.initialize_collections(settings)
 
-        logger.info("Startup complete")
+        logger.info("Startup complete — BizOS is ready to serve requests")
         yield
 
+    except Exception as exc:
+        # Fail fast: do not start serving if infrastructure is unavailable
+        logger.error("Startup failed — aborting", error=str(exc))
+        raise
     finally:
-        # Graceful shutdown
         logger.info("Shutting down BizOS API")
         await QdrantService.close()
 
+
+# ── Application Factory ───────────────────────────────────────────────────────
 
 def create_app() -> FastAPI:
     """Factory function to create the FastAPI application instance."""
     settings = get_settings()
 
+    # Initialize optional OpenTelemetry tracing (no-op if OTEL_ENABLED=false)
+    setup_tracing(service_name="bizos", version="6.0.0")
+
     app = FastAPI(
         title="BizOS API",
-        description="AI Operating System for Entities",
-        version="0.1.0",
+        description="AI Operating System for Entities — v6.0.0",
+        version="6.0.0",
         lifespan=lifespan,
         docs_url="/docs" if settings.app_debug else None,
         redoc_url="/redoc" if settings.app_debug else None,
+        openapi_url="/openapi.json" if settings.app_debug else None,
     )
 
-    # Request Logging Middleware
-    @app.middleware("http")
-    async def log_requests(request: Request, call_next):
-        start_time = time.time()
-        response = await call_next(request)
-        duration = time.time() - start_time
-        # Attach request_id if available from OperationContext
-        request_id = getattr(request.state, "request_id", None)
-        if request_id:
-            response.headers["X-Request-ID"] = request_id
+    # ── Middleware (applied in reverse registration order) ────────────────────
+    # 1. Security headers (outermost — always applied last in response chain)
+    app.add_middleware(SecurityHeadersMiddleware)
 
-        logger.info(
-            "Request processed",
-            method=request.method,
-            path=request.url.path,
-            status=response.status_code,
-            duration=round(duration, 4),
-            request_id=request_id,
-        )
-        return response
+    # 2. Prometheus metrics collection
+    app.add_middleware(MetricsMiddleware)
 
-    # Configure CORS
+    # 3. Request ID / Correlation ID injection
+    app.add_middleware(RequestIDMiddleware)
+
+    # 4. CORS (innermost middleware)
+    cors_origins = (
+        ["*"] if not settings.is_production
+        else settings.model_fields.get("cors_origins", ["*"])  # type: ignore[arg-type]
+    )
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],  # TODO: Restrict in production
+        allow_origins=cors_origins,
         allow_credentials=True,
-        allow_methods=["*"],
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["*"],
     )
 
-    # Register exception handlers
+    # ── Request Logging ───────────────────────────────────────────────────────
+    @app.middleware("http")
+    async def log_requests(request: Request, call_next):  # type: ignore[type-arg]
+        start = time.perf_counter()
+        response = await call_next(request)
+        duration = time.perf_counter() - start
+
+        # Exclude noisy health probes from access logs
+        if request.url.path not in {"/api/v1/health", "/api/v1/live"}:
+            logger.info(
+                "http.request",
+                method=request.method,
+                path=request.url.path,
+                status=response.status_code,
+                duration_ms=round(duration * 1000, 2),
+                request_id=getattr(request.state, "request_id", None),
+                correlation_id=getattr(request.state, "correlation_id", None),
+            )
+
+        return response
+
+    # ── Prometheus /metrics endpoint ──────────────────────────────────────────
+    @app.get("/metrics", include_in_schema=False)
+    async def _metrics(request: Request) -> Response:
+        return metrics_endpoint(request)
+
+    # ── Exception Handlers ────────────────────────────────────────────────────
     register_exception_handlers(app)
 
-    # Register routers
+    # ── API Routers ───────────────────────────────────────────────────────────
     app.include_router(api_router, prefix="/api/v1")
+
+    # ── Instrument with OTEL (if enabled) ────────────────────────────────────
+    instrument_fastapi(app)
 
     return app
 
 
-# The default application instance
+# ── Default Application Instance ─────────────────────────────────────────────
 app = create_app()

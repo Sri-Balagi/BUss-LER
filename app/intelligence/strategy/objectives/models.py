@@ -1,6 +1,8 @@
 from enum import Enum
+from typing import Dict, List
+
 from pydantic import BaseModel, Field
-from typing import List, Dict
+
 
 class ObjectiveStatus(str, Enum):
     PROPOSED = "PROPOSED"
@@ -28,5 +30,5 @@ class ExecutiveObjective(BaseModel):
     status: ObjectiveStatus = ObjectiveStatus.PROPOSED
     priority: ObjectivePriority = ObjectivePriority.MEDIUM
     horizon: BusinessHorizon = BusinessHorizon.MEDIUM_TERM
-    success_criteria: List[str] = Field(default_factory=list)
-    measurable_outcomes: Dict[str, str] = Field(default_factory=dict)
+    success_criteria: list[str] = Field(default_factory=list)
+    measurable_outcomes: dict[str, str] = Field(default_factory=dict)

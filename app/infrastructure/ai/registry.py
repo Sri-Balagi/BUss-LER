@@ -1,7 +1,7 @@
 from typing import Dict
 
-from app.shared.exceptions.errors import ProviderConfigurationError
 from app.infrastructure.ai.providers.base import AbstractAIProvider
+from app.shared.exceptions.errors import ProviderConfigurationError
 
 
 class ProviderRegistry:
@@ -10,7 +10,7 @@ class ProviderRegistry:
     """
 
     def __init__(self):
-        self._providers: Dict[str, AbstractAIProvider] = {}
+        self._providers: dict[str, AbstractAIProvider] = {}
 
     def register(self, provider: AbstractAIProvider) -> None:
         """Register a provider instance."""

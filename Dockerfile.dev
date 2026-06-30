@@ -1,0 +1,33 @@
+﻿# =============================================================================
+# BizOS v6.0.0 — Development Dockerfile
+# Hot-reload enabled, all dev tools included
+# =============================================================================
+FROM python:3.12-slim AS development
+
+WORKDIR /app
+
+# Install uv
+RUN pip install --no-cache-dir uv==0.5.26
+
+# Copy dependency files
+COPY pyproject.toml uv.lock ./
+
+# Install all dependencies including dev extras
+RUN uv sync --frozen --all-extras --dev
+
+# Copy application source (will be overridden by volume mount in compose)
+COPY app/ ./app/
+
+ENV PATH="/app/.venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    APP_ENV=development \
+    APP_DEBUG=true \
+    LOG_LEVEL=DEBUG
+
+EXPOSE 8000
+
+CMD ["uvicorn", "app.main:app", \
+     "--host", "0.0.0.0", \
+     "--port", "8000", \
+     "--reload"]

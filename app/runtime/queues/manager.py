@@ -1,7 +1,8 @@
-from app.runtime.tasks.models import ITask
-from app.runtime.tasks.state import TaskState
 from app.runtime.queues.interfaces import IQueue, IQueueManager
 from app.runtime.queues.memory_queue import FIFOMemoryQueue, PriorityMemoryQueue
+from app.runtime.tasks.models import ITask
+from app.runtime.tasks.state import TaskState
+
 
 class QueueManager(IQueueManager):
     """
@@ -32,10 +33,10 @@ class QueueManager(IQueueManager):
         """
         source_q = self._queues[from_state]
         dest_q = self._queues[to_state]
-        
-        # Remove from source if present (it's safe if not perfectly synchronized in tests, 
+
+        # Remove from source if present (it's safe if not perfectly synchronized in tests,
         # but logically it should be there)
         source_q.remove(task.task_id)
-        
+
         # Add to destination
         dest_q.enqueue(task)

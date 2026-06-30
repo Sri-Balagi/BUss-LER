@@ -13,9 +13,9 @@ from uuid import UUID
 import structlog
 from supabase import AsyncClient
 
-from app.shared.exceptions.errors import PlanNotFoundError, RepositoryError
-from app.intelligence.decision.planning.plan import Plan, PlanCreate, PaginatedPlans
+from app.intelligence.decision.planning.plan import PaginatedPlans, Plan, PlanCreate
 from app.shared.enums import PlanStatus
+from app.shared.exceptions.errors import PlanNotFoundError, RepositoryError
 
 logger = structlog.get_logger(__name__)
 
@@ -25,8 +25,8 @@ class AbstractPlanRepository(ABC):
     async def create(
         self,
         twin_id: UUID,
-        goal_id: Optional[UUID],
-        intent_id: Optional[UUID],
+        goal_id: UUID | None,
+        intent_id: UUID | None,
         data: PlanCreate,
     ) -> Plan:
         pass
@@ -39,8 +39,8 @@ class AbstractPlanRepository(ABC):
     async def list_by_twin(
         self,
         twin_id: UUID,
-        goal_id: Optional[UUID] = None,
-        intent_id: Optional[UUID] = None,
+        goal_id: UUID | None = None,
+        intent_id: UUID | None = None,
         limit: int = 20,
         offset: int = 0,
     ) -> PaginatedPlans:
@@ -64,8 +64,8 @@ class PlanRepository(AbstractPlanRepository):
     async def create(
         self,
         twin_id: UUID,
-        goal_id: Optional[UUID],
-        intent_id: Optional[UUID],
+        goal_id: UUID | None,
+        intent_id: UUID | None,
         data: PlanCreate,
     ) -> Plan:
         start = time.time()
@@ -118,8 +118,8 @@ class PlanRepository(AbstractPlanRepository):
     async def list_by_twin(
         self,
         twin_id: UUID,
-        goal_id: Optional[UUID] = None,
-        intent_id: Optional[UUID] = None,
+        goal_id: UUID | None = None,
+        intent_id: UUID | None = None,
         limit: int = 20,
         offset: int = 0,
     ) -> PaginatedPlans:

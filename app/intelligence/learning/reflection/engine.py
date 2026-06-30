@@ -1,6 +1,12 @@
 import uuid
-from app.intelligence.learning.reflection.models import ReflectionReport, ReflectionFinding, ReflectionSeverity
+
+from app.intelligence.learning.reflection.models import (
+    ReflectionFinding,
+    ReflectionReport,
+    ReflectionSeverity,
+)
 from app.intelligence.oversight.cycle.models import CognitiveCycleState
+
 
 class ReflectionEngine:
     """
@@ -8,7 +14,7 @@ class ReflectionEngine:
     """
     def generate_reflection(self, cycle_state: CognitiveCycleState) -> ReflectionReport:
         findings = []
-        
+
         # Mock logic
         if cycle_state.status.value == "MAX_ITERATIONS_REACHED":
             findings.append(ReflectionFinding(
@@ -24,7 +30,7 @@ class ReflectionEngine:
                 severity=ReflectionSeverity.MINOR,
                 is_weakness=False
             ))
-            
+
         return ReflectionReport(
             report_id=str(uuid.uuid4()),
             cycle_id=cycle_state.cycle_id,

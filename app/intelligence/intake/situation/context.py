@@ -13,9 +13,9 @@ from uuid import UUID
 
 from pydantic import Field
 
-from app.interfaces.http.schemas.base import DomainBaseModel
 from app.intelligence.intake.intent.intent import Intent
 from app.intelligence.strategy.goals.goal import Goal
+from app.interfaces.http.schemas.base import DomainBaseModel
 
 
 class ContextMemory(DomainBaseModel):
@@ -24,7 +24,7 @@ class ContextMemory(DomainBaseModel):
     memory_id: UUID
     content: str
     similarity_score: float
-    category: Optional[str] = None
+    category: str | None = None
 
 
 class CognitiveContext(DomainBaseModel):
@@ -41,19 +41,19 @@ class CognitiveContext(DomainBaseModel):
     assembled_at: datetime
 
     # --- Current cognitive state ---
-    current_intent: Optional[Intent] = Field(
+    current_intent: Intent | None = Field(
         default=None,
         description="Intent that triggered this context assembly.",
     )
 
     # --- Active goals (from GoalService) ---
-    active_goals: List[Goal] = Field(
+    active_goals: list[Goal] = Field(
         default_factory=list,
         description="Active Goal records for this twin, ordered by priority descending.",
     )
 
     # --- Relevant memories (from MemoryService semantic search) ---
-    relevant_memories: List[ContextMemory] = Field(
+    relevant_memories: list[ContextMemory] = Field(
         default_factory=list,
         description=(
             "Memory records retrieved via semantic search using the intent's raw_text. "
@@ -62,7 +62,7 @@ class CognitiveContext(DomainBaseModel):
     )
 
     # --- Conversation placeholder (Milestone 4 will replace this) ---
-    recent_conversation: List[Dict[str, Any]] = Field(
+    recent_conversation: list[dict[str, Any]] = Field(
         default_factory=list,
         description=(
             "Recent conversation turns (placeholder). "
@@ -71,7 +71,7 @@ class CognitiveContext(DomainBaseModel):
     )
 
     # --- Business state snapshot ---
-    business_state: Dict[str, Any] = Field(
+    business_state: dict[str, Any] = Field(
         default_factory=dict,
         description=(
             "Lightweight business state snapshot derived from the Digital Twin. "
@@ -80,11 +80,11 @@ class CognitiveContext(DomainBaseModel):
     )
 
     # --- Trace IDs for observability ---
-    memory_ids_used: List[UUID] = Field(
+    memory_ids_used: list[UUID] = Field(
         default_factory=list,
         description="IDs of Memory records included in relevant_memories.",
     )
-    goal_ids_used: List[UUID] = Field(
+    goal_ids_used: list[UUID] = Field(
         default_factory=list,
         description="IDs of Goal records included in active_goals.",
     )
@@ -96,4 +96,4 @@ class CognitiveContext(DomainBaseModel):
         description="Estimated token count of this context window for AI Kernel budget management.",
     )
 
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)

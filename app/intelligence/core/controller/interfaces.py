@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 
 from app.intelligence.core.session.session import CognitiveSession, ConvergenceStatus
 
+
 class IConvergenceEvaluator(ABC):
     @abstractmethod
     def evaluate(self, session: CognitiveSession) -> ConvergenceStatus:

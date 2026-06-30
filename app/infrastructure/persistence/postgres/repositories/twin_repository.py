@@ -13,13 +13,13 @@ from uuid import UUID
 import structlog
 from supabase import AsyncClient
 
+from app.interfaces.http.schemas.twin import DigitalTwin, DigitalTwinCreate, DigitalTwinUpdate
 from app.shared.exceptions.errors import (
     DuplicateTwinError,
     RepositoryError,
     TwinNotFoundError,
     VersionConflictError,
 )
-from app.interfaces.http.schemas.twin import DigitalTwin, DigitalTwinCreate, DigitalTwinUpdate
 
 logger = structlog.get_logger()
 
