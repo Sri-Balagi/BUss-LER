@@ -56,7 +56,7 @@ AI Kernel · PostgreSQL · Qdrant · Cache
 
 ## Project Structure
 
-`
+```text
 bizos/
 ├── app/
 │   ├── bootstrap/          # Dependency composition and wiring
@@ -99,7 +99,7 @@ bizos/
 ├── SECURITY.md
 ├── pyproject.toml
 └── README.md
-`
+```
 
 ---
 
