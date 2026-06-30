@@ -1,183 +1,267 @@
-﻿# BizOS — AI Operating System for Entities
+# BizOS
+
+> **An AI Operating System for Businesses, Organizations, and Digital Entities**
 
 [![Version](https://img.shields.io/badge/version-v6.0.0-blue.svg)](https://github.com/your-org/bizos/releases)
 [![Python](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/)
 [![Tests](https://img.shields.io/badge/tests-367%20passed-brightgreen.svg)](tests/)
-[![Coverage](https://img.shields.io/badge/coverage-78%25-yellow.svg)](htmlcov/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-
-> **BizOS is not a chatbot, a dashboard, or a workflow tool.** It is a foundational AI Operating System — a platform that understands an entity, builds a persistent digital model of it, and autonomously orchestrates AI agents to help it achieve its goals through planning, reasoning, memory, and execution.
+[![Coverage](https://img.shields.io/badge/coverage-78.5%25-yellow.svg)](htmlcov/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ---
 
-## Architecture
+## What is BizOS?
 
-BizOS v6.0.0 is organized around two frozen, production-grade kernels that communicate only through a strictly-typed bridge interface.
+BizOS is **not** a chatbot, dashboard, workflow engine, or AI wrapper.
 
-`
-Executive Intelligence Kernel (M6)
-Intake → Strategy → Decision → Oversight → Learning → Workspaces
-                          |
-                   Runtime Bridge  (one-way boundary)
-                          |
-Runtime OS Kernel (M5)
-Agents → Capabilities → Tasks → Scheduler → Budget → Session
-                          |
-Infrastructure Layer
-AI Kernel · PostgreSQL · Qdrant · Cache
-`
+It is an **AI Operating System** that enables businesses and digital entities to **reason, plan, remember, learn, and execute work autonomously** through a dual-kernel architecture.
 
-### Boundary Contracts
-
-| Boundary | Rule |
-|----------|------|
-| Intelligence → Runtime | Allowed **only** through runtime_bridge/ |
-| Runtime → Intelligence | Forbidden |
-| Interfaces → Kernels | Inward only |
-| Infrastructure → Kernels | Never |
+Unlike traditional AI applications that simply respond to prompts, BizOS maintains persistent business context, strategic objectives, executive reasoning, and execution state across interactions.
 
 ---
 
-## Technology Stack
+## Core Philosophy
 
-| Component | Technology |
-|-----------|-----------|
-| Runtime | Python 3.12+, asyncio |
-| API Framework | FastAPI 0.115+ |
-| Domain Modeling | Pydantic v2 |
-| AI Provider | Google Gemini (primary, extensible) |
-| Persistence | PostgreSQL via Supabase |
-| Vector Store | Qdrant |
-| Logging | Structlog |
-| Testing | Pytest + Hypothesis + Syrupy |
-| Package Manager | uv |
+BizOS separates **thinking** from **execution**.
+
+```
+Think
+   ↓
+Plan
+   ↓
+Decide
+   ↓
+Execute
+   ↓
+Learn
+```
+
+Executive reasoning never performs execution directly.
+
+Execution never performs reasoning.
+
+This separation is enforced through a strictly typed Runtime Bridge.
 
 ---
 
-## Project Structure
+# Architecture
 
-```text
-bizos/
-├── app/
-│   ├── bootstrap/          # Dependency composition and wiring
-│   ├── core/               # OperationContext (cross-cutting concerns)
-│   ├── infrastructure/     # AI, persistence, vectorstore, cache
-│   ├── intelligence/       # M6 Executive Intelligence Kernel [FROZEN]
-│   │   ├── core/
-│   │   ├── decision/       # Planning and recommendation engines
-│   │   ├── intake/         # Intent classification and context assembly
-│   │   ├── learning/       # Memory, cognitive trace, outcome tracking
-│   │   ├── oversight/      # Governance and compliance
-│   │   ├── runtime_bridge/ # Only approved Runtime integration channel
-│   │   ├── strategy/       # Goal management and strategy formation
-│   │   └── workspaces/
-│   ├── interfaces/         # HTTP API, CLI (planned), SDK (planned)
-│   ├── platform/           # Config, DI, telemetry, resilience
-│   ├── runtime/            # M5 Runtime OS Kernel [FROZEN]
-│   │   ├── agents/
-│   │   ├── budget/
-│   │   ├── capabilities/
-│   │   ├── policies/
-│   │   ├── queues/
-│   │   ├── retry/
-│   │   ├── scheduler/
-│   │   ├── session/
-│   │   └── tasks/
-│   └── shared/             # Universal primitives (enums, events, exceptions)
-├── docs/
-│   ├── adr/                # Architecture Decision Records
-│   ├── architecture/       # System architecture documentation
-│   ├── developer/          # Developer guides and API references
-│   ├── milestones/         # Milestone completion summaries
-│   └── operations/         # Deployment and operations guides
-├── migrations/             # SQL schema migration scripts
-├── scripts/                # Developer utilities
-├── tests/                  # Test suite (mirrors app/ exactly)
-├── .env.example
-├── CHANGELOG.md
-├── CONTRIBUTING.md
-├── SECURITY.md
-├── pyproject.toml
-└── README.md
+```
+                           User
+                             │
+                             ▼
+              Interfaces (HTTP / CLI / SDK)
+                             │
+                             ▼
+        ┌────────────────────────────────────┐
+        │ Executive Intelligence Kernel (M6) │
+        │                                    │
+        │  • Intake                          │
+        │  • Strategy                        │
+        │  • Decision                        │
+        │  • Oversight                       │
+        │  • Learning                        │
+        │  • Workspaces                      │
+        └──────────────┬─────────────────────┘
+                       │
+              Runtime Bridge
+        (Only Approved Integration Point)
+                       │
+        ┌──────────────▼─────────────────────┐
+        │      Runtime Kernel (M5)           │
+        │                                    │
+        │  • Scheduler                       │
+        │  • Tasks                           │
+        │  • Agents                          │
+        │  • Capabilities                    │
+        │  • Budget                          │
+        │  • Session                         │
+        └──────────────┬─────────────────────┘
+                       │
+                       ▼
+              Infrastructure Layer
+
+      AI Providers • PostgreSQL • Qdrant • Cache
 ```
 
 ---
 
-## Getting Started
+## Architectural Contracts
 
-### Prerequisites
+| Rule | Status |
+|------|--------|
+| Intelligence never executes tasks directly | ✅ |
+| Runtime never performs reasoning | ✅ |
+| Runtime Bridge is the only integration point | ✅ |
+| Infrastructure never depends on Intelligence | ✅ |
+| Interfaces depend inward only | ✅ |
+| Runtime and Intelligence remain independently testable | ✅ |
+
+---
+
+# Technology Stack
+
+| Component | Technology |
+|-----------|------------|
+| Language | Python 3.12+ |
+| Runtime | asyncio |
+| API | FastAPI |
+| Validation | Pydantic v2 |
+| AI Providers | Google Gemini (primary), extensible |
+| Database | PostgreSQL (Supabase) |
+| Vector Store | Qdrant |
+| Logging | Structlog |
+| Testing | Pytest, Hypothesis, Syrupy |
+| Package Manager | uv |
+
+---
+
+# Project Structure
+
+```text
+bizos/
+├── app/
+│   ├── bootstrap/
+│   ├── core/
+│   ├── infrastructure/
+│   ├── intelligence/
+│   ├── interfaces/
+│   ├── platform/
+│   ├── runtime/
+│   └── shared/
+├── docs/
+├── migrations/
+├── scripts/
+├── tests/
+├── README.md
+└── pyproject.toml
+```
+
+### Directory Overview
+
+| Directory | Purpose |
+|-----------|---------|
+| `app/intelligence` | Executive Intelligence Kernel (M6) |
+| `app/runtime` | Runtime Execution Kernel (M5) |
+| `app/infrastructure` | AI providers, persistence, cache, vector store |
+| `app/interfaces` | HTTP API, CLI, SDK |
+| `app/platform` | Configuration, telemetry, resilience |
+| `app/shared` | Shared primitives |
+| `tests` | Mirrors the application structure |
+| `docs` | Architecture, ADRs, developer guides |
+
+---
+
+# Getting Started
+
+## Prerequisites
+
 - Python 3.12+
-- [uv](https://github.com/astral-sh/uv) package manager
-- Supabase project (PostgreSQL)
-- Qdrant instance (local Docker or cloud)
+- uv
+- Supabase
+- Qdrant
 
-### Installation
+## Installation
 
-`ash
+```bash
 git clone https://github.com/your-org/bizos.git
+
 cd bizos
+
 uv sync
+
 cp .env.example .env
-# Edit .env with your Supabase URL, API key, and Gemini API key
-`
+```
 
-### Running the API
+Configure your environment variables.
 
-`ash
-docker-compose up -d
+## Run
+
+```bash
+docker compose up -d
+
 uv run uvicorn app.main:app --reload
+```
+
+Health check:
+
+```bash
 curl http://localhost:8000/health
-`
-
-### Running Tests
-
-`ash
-uv run pytest                                    # Full suite
-uv run pytest --cov=app --cov-report=html        # With coverage
-uv run pytest tests/runtime/                     # Runtime layer only
-uv run pytest tests/intelligence/               # Intelligence layer only
-uv run pytest tests/certification/              # E2E certification
-`
+```
 
 ---
 
-## Milestone History
+# Testing
 
-| Milestone | Description | Status |
-|-----------|-------------|--------|
-| M0 | Project Foundation | ✅ Complete |
-| M1 | Digital Twin Foundation | ✅ Complete |
-| M2 | Memory Engine | ✅ Complete |
-| M3 | AI Kernel & Provider Abstraction | ✅ Complete |
-| M4 | Context Engine | ✅ Complete |
-| M5 | Runtime OS Kernel | ✅ **Frozen** |
-| M6 | Executive Intelligence Kernel | ✅ **Frozen** |
+Run all tests:
+
+```bash
+uv run pytest
+```
+
+Coverage:
+
+```bash
+uv run pytest --cov=app --cov-report=html
+```
+
+Runtime only:
+
+```bash
+uv run pytest tests/runtime/
+```
+
+Intelligence only:
+
+```bash
+uv run pytest tests/intelligence/
+```
+
+Certification:
+
+```bash
+uv run pytest tests/certification/
+```
 
 ---
 
-## Documentation
+# Milestones
 
-| Document | Description |
-|----------|-------------|
-| [Architecture Overview](docs/architecture/index.md) | System-wide architecture reference |
-| [AI Kernel](docs/architecture/Ai_Kernel.md) | AI provider abstraction and kernel design |
-| [Memory Engine](docs/architecture/Memory_Engine.md) | Semantic memory architecture |
-| [Developer Guide](docs/developer/API_Reference.md) | API reference and integration |
-| [Configuration](docs/developer/Configuration_Reference.md) | Environment variables and settings |
-| [Testing Strategy](docs/developer/Testing_Strategy.md) | Test architecture and conventions |
-| [Operations Runbook](docs/operations/RUNBOOK.md) | Deployment and operational procedures |
-| [ADR Catalog](docs/adr/) | Architecture Decision Records |
+| Milestone | Status |
+|-----------|--------|
+| M0 | ✅ Complete |
+| M1 | ✅ Complete |
+| M2 | ✅ Complete |
+| M3 | ✅ Complete |
+| M4 | ✅ Complete |
+| M5 | ✅ Frozen |
+| M6 | ✅ Frozen |
 
 ---
 
-## Contributing
+# Documentation
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting pull requests.
+- 📘 Architecture
+- 📗 Developer Guide
+- 📙 Operations
+- 📕 ADR Catalog
+- 📓 Configuration
+- 📔 Testing Strategy
 
-## Security
+---
 
-Please read [SECURITY.md](SECURITY.md) for our vulnerability disclosure policy.
+# Contributing
 
-## License
+Please read **CONTRIBUTING.md** before opening a pull request.
 
-MIT License — see [LICENSE](LICENSE) for details.
+---
+
+# Security
+
+Please read **SECURITY.md** before reporting vulnerabilities.
+
+---
+
+# License
+
+Released under the MIT License.
