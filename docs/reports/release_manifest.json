@@ -1,0 +1,18 @@
+{
+  "version": "4.0.0",
+  "milestone": "4 (Enterprise Context Engine)",
+  "architecture_version": "v4",
+  "schema_version": "1.2.0",
+  "migration_version": "004_context_engine",
+  "release_date": "2026-06-28",
+  "commit_hash": "PLACEHOLDER",
+  "supported_python_versions": [
+    ">=3.12"
+  ],
+  "compatibility": {
+    "supabase": ">=2.31.0",
+    "qdrant": ">=1.18.0",
+    "fastapi": ">=0.138.1",
+    "pydantic": ">=2.13.4"
+  }
+}
