@@ -303,16 +303,16 @@ uv run pytest tests/certification/
 
 # Contributing
 
-Please read **CONTRIBUTING.md** before opening a pull request.
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 
 ---
 
 # Security
 
-Please read **SECURITY.md** before reporting vulnerabilities.
+Please read [SECURITY.md](SECURITY.md) before reporting vulnerabilities.
 
 ---
 
 # License
 
-Released under the MIT License.
+MIT License — see [LICENSE](LICENSE) for details.
