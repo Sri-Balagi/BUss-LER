@@ -133,7 +133,6 @@ This separation is enforced through a strictly typed Runtime Bridge.
                                  │                                                                             │
                                  │   Gemini • Future LLMs • APIs • Databases • Integrations • Plugins          │
                                  └─────────────────────────────────────────────────────────────────────────────┘
-                                       AI Providers • PostgreSQL • Qdrant • Cache
 ```
 
 ---
