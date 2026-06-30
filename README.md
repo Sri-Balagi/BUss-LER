@@ -49,41 +49,91 @@ This separation is enforced through a strictly typed Runtime Bridge.
 # Architecture
 
 ```
-                           User
-                             │
-                             ▼
-              Interfaces (HTTP / CLI / SDK)
-                             │
-                             ▼
-        ┌────────────────────────────────────┐
-        │ Executive Intelligence Kernel (M6) │
-        │                                    │
-        │  • Intake                          │
-        │  • Strategy                        │
-        │  • Decision                        │
-        │  • Oversight                       │
-        │  • Learning                        │
-        │  • Workspaces                      │
-        └──────────────┬─────────────────────┘
-                       │
-              Runtime Bridge
-        (Only Approved Integration Point)
-                       │
-        ┌──────────────▼─────────────────────┐
-        │      Runtime Kernel (M5)           │
-        │                                    │
-        │  • Scheduler                       │
-        │  • Tasks                           │
-        │  • Agents                          │
-        │  • Capabilities                    │
-        │  • Budget                          │
-        │  • Session                         │
-        └──────────────┬─────────────────────┘
-                       │
-                       ▼
-              Infrastructure Layer
-
-      AI Providers • PostgreSQL • Qdrant • Cache
+                                 ┌─────────────────────────────────────────────────────────────────────────────┐
+                                 │                                ENTITY                                       │
+                                 │                  Business • Organization • Individual                       │
+                                 └─────────────────────────────────────────────────────────────────────────────┘
+                                                                       │
+                                                                       ▼
+                                 ┌─────────────────────────────────────────────────────────────────────────────┐
+                                 │                     DIGITAL REPRESENTATION LAYER                            │
+                                 │                                                                             │
+                                 │  • Digital Twin               • Business State                              │
+                                 │  • Identity                   • Snapshot History                            │
+                                 │  • Organizational Profile      • Persistent Entity Model                    │
+                                 └─────────────────────────────────────────────────────────────────────────────┘
+                                                                       │
+                                                                       ▼
+                                 ┌─────────────────────────────────────────────────────────────────────────────┐
+                                 │                      KNOWLEDGE & MEMORY LAYER                               │
+                                 │                                                                             │
+                                 │  • Long-Term Memory          • Semantic Memory                              │
+                                 │  • Conversation History      • Business History                             │
+                                 │  • Cognitive Trace           • Knowledge Repository                         │
+                                 └─────────────────────────────────────────────────────────────────────────────┘
+                                                                       │
+                                                                       ▼
+                                 ┌─────────────────────────────────────────────────────────────────────────────┐
+                                 │                    CONTEXT & UNDERSTANDING LAYER                            │
+                                 │                                                                             │
+                                 │  • Intent Understanding      • Enterprise Context                           │
+                                 │  • Situation Analysis        • Context Prioritization                       │
+                                 │  • Constraints               • Context Compression                          │
+                                 └─────────────────────────────────────────────────────────────────────────────┘
+                                                                       │
+                                                                       ▼
+                                 ┌─────────────────────────────────────────────────────────────────────────────┐
+                                 │                    EXECUTIVE REASONING LAYER                                │
+                                 │                                                                             │
+                                 │  • Goal Formation           • Strategic Planning                            │
+                                 │  • Decision Making          • Recommendation Engine                         │
+                                 │  • Simulation               • Risk Analysis                                 │
+                                 └─────────────────────────────────────────────────────────────────────────────┘
+                                                                       │
+                                                                       ▼
+                                 ┌─────────────────────────────────────────────────────────────────────────────┐
+                                 │                   GOVERNANCE & OVERSIGHT LAYER                              │
+                                 │                                                                             │
+                                 │  • Validation               • Safety Checks                                 │
+                                 │  • Arbitration              • Convergence                                   │
+                                 │  • Assumption Management    • Policy Compliance                             │
+                                 └─────────────────────────────────────────────────────────────────────────────┘
+                                                                       │
+                                                                       ▼
+                                 ┌─────────────────────────────────────────────────────────────────────────────┐
+                                 │                    EXECUTION COORDINATION LAYER                             │
+                                 │                                                                             │
+                                 │                         Runtime Bridge                                      │
+                                 │             (The Only Authorized Execution Gateway)                         │
+                                 └─────────────────────────────────────────────────────────────────────────────┘
+                                                                       │
+                                                                       ▼
+                                 ┌─────────────────────────────────────────────────────────────────────────────┐
+                                 │                    RUNTIME OPERATING SYSTEM                                 │
+                                 │                                                                             │
+                                 │  • Scheduler                • Task Engine                                   │
+                                 │  • Execution Queues         • Capability Manager                            │
+                                 │  • Agent Runtime            • Budget Manager                                │
+                                 │  • Session Manager          • Runtime Policies                              │
+                                 └─────────────────────────────────────────────────────────────────────────────┘
+                                                                       │
+                                                                       ▼
+                                 ┌─────────────────────────────────────────────────────────────────────────────┐
+                                 │                      INFRASTRUCTURE SERVICES                                │
+                                 │                                                                             │
+                                 │  • AI Providers             • PostgreSQL                                    │
+                                 │  • Vector Database          • Cache                                         │
+                                 │  • Messaging                • Storage                                       │
+                                 │  • Telemetry                • Configuration                                 │
+                                 └─────────────────────────────────────────────────────────────────────────────┘
+                                                                       │
+                                                                       ▼
+                                 ┌─────────────────────────────────────────────────────────────────────────────┐
+                                 │                           EXTERNAL ECOSYSTEM                                │
+                                 │                                                                             │
+                                 │   Gemini • Future LLMs • APIs • Databases • Integrations • Plugins          │
+                                 └─────────────────────────────────────────────────────────────────────────────┘
+                                       AI Providers • PostgreSQL • Qdrant • Cache
 ```
 
 ---
