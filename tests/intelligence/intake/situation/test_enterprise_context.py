@@ -1,25 +1,24 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
+
 import pytest
 from pydantic import ValidationError
 
 from app.intelligence.intake.situation.enterprise_context import (
     ContextItem,
-    ContextSection,
     ContextMetadata,
-    ContextSchemaVersion,
     ContextProvenance,
-    ProviderFailureRecord,
+    ContextSchemaVersion,
+    ContextSection,
     EnterpriseContext,
+    ProviderFailureRecord,
 )
 from app.shared.enums import ContextPriority, ContextSource, ContextStatus
 
 
 def test_context_item_validation():
     """Test ContextItem valid creation and immutability."""
-    prov = ContextProvenance(
-        provider=ContextSource.MEMORY, service_name="MemoryProvider"
-    )
+    prov = ContextProvenance(provider=ContextSource.MEMORY, service_name="MemoryProvider")
 
     item = ContextItem(
         item_id=uuid.uuid4(),
@@ -66,7 +65,7 @@ def test_enterprise_context_lifecycle():
     context_id = uuid.uuid4()
 
     metadata = ContextMetadata(
-        policy_id="default", generated_at=datetime.now(timezone.utc), total_tokens=100
+        policy_id="default", generated_at=datetime.now(UTC), total_tokens=100
     )
 
     ctx = EnterpriseContext(

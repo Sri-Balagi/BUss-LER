@@ -1,18 +1,19 @@
-import pytest
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
-from app.services.intent_service import IntentService
+import pytest
 from app.models.commands import (
-    CreateIntentCommand,
     ClassifyIntentCommand,
-    UpdateIntentStatusCommand,
+    CreateIntentCommand,
     DeleteIntentCommand,
+    UpdateIntentStatusCommand,
 )
-from app.models.enums import IntentStatus, IntentType, IntentConfidence
-from app.models.intent import Intent, IntentUpdate, PaginatedIntents, IntentAnalysis
+from app.models.enums import IntentConfidence, IntentStatus, IntentType
+from app.models.events import IntentClassifiedEvent, IntentCreatedEvent
+from app.models.intent import Intent, IntentAnalysis, IntentUpdate, PaginatedIntents
 from app.models.queries import IntentListQuery
-from app.models.events import IntentCreatedEvent, IntentClassifiedEvent
+from app.services.intent_service import IntentService
+
 from app.core.context import OperationContext
 
 
@@ -38,9 +39,7 @@ def op_ctx():
 
 @pytest.fixture
 def service(mock_repo, mock_event_bus, mock_classifier):
-    return IntentService(
-        repository=mock_repo, event_bus=mock_event_bus, classifier=mock_classifier
-    )
+    return IntentService(repository=mock_repo, event_bus=mock_event_bus, classifier=mock_classifier)
 
 
 @pytest.fixture
@@ -123,9 +122,7 @@ async def test_classify_intent_success(
 
 
 @pytest.mark.asyncio
-async def test_classify_intent_missing_classifier(
-    mock_repo, mock_event_bus, op_ctx, mock_intent
-):
+async def test_classify_intent_missing_classifier(mock_repo, mock_event_bus, op_ctx, mock_intent):
     service_no_classifier = IntentService(
         repository=mock_repo, event_bus=mock_event_bus, classifier=None
     )
@@ -168,9 +165,7 @@ async def test_update_intent_status(service, mock_repo, op_ctx, mock_intent):
     active_intent.id = mock_intent.id
     mock_repo.update.return_value = active_intent
 
-    cmd = UpdateIntentStatusCommand(
-        intent_id=mock_intent.id, target_status=IntentStatus.CONFIRMED
-    )
+    cmd = UpdateIntentStatusCommand(intent_id=mock_intent.id, target_status=IntentStatus.CONFIRMED)
     result = await service.update_intent_status(op_ctx, cmd)
 
     assert result == active_intent

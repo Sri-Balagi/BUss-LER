@@ -1,6 +1,7 @@
 """Tests for FastAPI middleware."""
 
 from unittest.mock import patch
+
 import pytest
 
 

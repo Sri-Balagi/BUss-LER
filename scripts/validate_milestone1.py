@@ -1,13 +1,14 @@
-import asyncio
-import httpx
-import subprocess
-import time
-import sys
-import json
 import ast
+import asyncio
+import json
 import os
+import subprocess
+import sys
+import time
 from datetime import datetime
 from pathlib import Path
+
+import httpx
 
 # =====================================================================
 # Configuration
@@ -76,7 +77,7 @@ def verify_architecture():
             path = Path(root) / file
             rel_path = str(path.relative_to(app_dir)).replace("\\", "/")
 
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 content = f.read()
 
             try:
@@ -88,10 +89,7 @@ def verify_architecture():
                 if isinstance(node, ast.ImportFrom):
                     module = node.module or ""
                     # Rule: Routers must not import Repositories
-                    if (
-                        rel_path.startswith("api/")
-                        and "dependencies.py" not in rel_path
-                    ):
+                    if rel_path.startswith("api/") and "dependencies.py" not in rel_path:
                         if "app.repositories" in module:
                             record_fail(
                                 f"Architecture violation: Router {rel_path} imports repository ({module})"
@@ -253,9 +251,7 @@ async def execute_e2e_workflow(client: httpx.AsyncClient):
 
     # 4. Update Entity
     t0 = time.time()
-    r = await client.put(
-        f"{API_URL}/entities/{entity_id}", json={"name": "E2E Test Corp Updated"}
-    )
+    r = await client.put(f"{API_URL}/entities/{entity_id}", json={"name": "E2E Test Corp Updated"})
     if r.status_code != 200:
         record_fail(f"Update Entity failed: {r.text}")
     metrics["entity_update"] = f"{(time.time() - t0) * 1000:.2f}ms"
@@ -366,9 +362,7 @@ def generate_reports():
         cov_out = subprocess.run(
             [sys.executable, "-m", "coverage", "report"], capture_output=True, text=True
         )
-        cov_total = (
-            cov_out.stdout.splitlines()[-1].split()[-1] if cov_out.stdout else "N/A"
-        )
+        cov_total = cov_out.stdout.splitlines()[-1].split()[-1] if cov_out.stdout else "N/A"
     except Exception:
         cov_total = "N/A"
 

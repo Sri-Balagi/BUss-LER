@@ -1,7 +1,7 @@
-import pytest
+from datetime import UTC, datetime
 from uuid import uuid4
-from datetime import datetime, timezone
 
+import pytest
 from app.models.cognitive_trace import CognitiveTraceCreate, CognitiveTraceTokenUsage
 from app.models.exceptions import CognitiveTraceNotFoundError, RepositoryError
 from app.repositories.cognitive_trace_repository import CognitiveTraceRepository
@@ -43,7 +43,7 @@ async def test_create_success(repo, mock_supabase, mocker):
             "memory_ids_used": [],
             "goal_ids_used": [],
             "metadata": {},
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
         }
     ]
     mock_supabase.table.return_value.insert.return_value.execute = mock_execute
@@ -121,12 +121,10 @@ async def test_get_by_id_success(repo, mock_supabase, mocker):
             "memory_ids_used": [str(uuid4())],
             "goal_ids_used": [str(uuid4())],
             "metadata": {},
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
         }
     ]
-    mock_supabase.table.return_value.select.return_value.eq.return_value.execute = (
-        mock_execute
-    )
+    mock_supabase.table.return_value.select.return_value.eq.return_value.execute = mock_execute
 
     result = await repo.get_by_id(trace_id)
     assert result.id == trace_id
@@ -139,9 +137,7 @@ async def test_get_by_id_not_found(repo, mock_supabase, mocker):
     trace_id = uuid4()
     mock_execute = mocker.AsyncMock()
     mock_execute.return_value.data = []
-    mock_supabase.table.return_value.select.return_value.eq.return_value.execute = (
-        mock_execute
-    )
+    mock_supabase.table.return_value.select.return_value.eq.return_value.execute = mock_execute
 
     with pytest.raises(CognitiveTraceNotFoundError):
         await repo.get_by_id(trace_id)
@@ -151,9 +147,7 @@ async def test_get_by_id_not_found(repo, mock_supabase, mocker):
 async def test_get_by_id_exception(repo, mock_supabase, mocker):
     trace_id = uuid4()
     mock_execute = mocker.AsyncMock(side_effect=Exception("DB Error"))
-    mock_supabase.table.return_value.select.return_value.eq.return_value.execute = (
-        mock_execute
-    )
+    mock_supabase.table.return_value.select.return_value.eq.return_value.execute = mock_execute
 
     with pytest.raises(RepositoryError):
         await repo.get_by_id(trace_id)
@@ -238,9 +232,7 @@ async def test_list_by_context_exception(repo, mock_supabase, mocker):
 @pytest.mark.asyncio
 async def test_health_check_healthy(repo, mock_supabase, mocker):
     mock_execute = mocker.AsyncMock(return_value=True)
-    mock_supabase.table.return_value.select.return_value.limit.return_value.execute = (
-        mock_execute
-    )
+    mock_supabase.table.return_value.select.return_value.limit.return_value.execute = mock_execute
     result = await repo.health_check()
     assert result["status"] == "healthy"
     assert result["database"] is True
@@ -249,9 +241,7 @@ async def test_health_check_healthy(repo, mock_supabase, mocker):
 @pytest.mark.asyncio
 async def test_health_check_unhealthy(repo, mock_supabase, mocker):
     mock_execute = mocker.AsyncMock(side_effect=Exception("DB Error"))
-    mock_supabase.table.return_value.select.return_value.limit.return_value.execute = (
-        mock_execute
-    )
+    mock_supabase.table.return_value.select.return_value.limit.return_value.execute = mock_execute
     result = await repo.health_check()
     assert result["status"] == "unhealthy"
     assert result["database"] is False

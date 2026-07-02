@@ -14,7 +14,6 @@ Table: goals, intent_goal_links
 import time
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
-from typing import List, Optional
 from uuid import UUID
 
 import structlog
@@ -106,27 +105,20 @@ class GoalRepository(AbstractGoalRepository):
             insert_data["parent_goal_id"] = str(data.parent_goal_id)
 
         try:
-            response = (
-                await self._client.table(self._table).insert(insert_data).execute()
-            )
+            response = await self._client.table(self._table).insert(insert_data).execute()
         except Exception as exc:
             logger.error("Failed to create goal", error=str(exc))
             raise RepositoryError("goal.create", str(exc)) from exc
 
         duration_ms = (time.time() - start) * 1000
-        logger.info(
-            "Created goal", goal_id=response.data[0]["id"], latency_ms=duration_ms
-        )
+        logger.info("Created goal", goal_id=response.data[0]["id"], latency_ms=duration_ms)
         return Goal.model_validate(response.data[0])
 
     async def get_by_id(self, goal_id: UUID) -> Goal:
         start = time.time()
         try:
             response = (
-                await self._client.table(self._table)
-                .select("*")
-                .eq("id", str(goal_id))
-                .execute()
+                await self._client.table(self._table).select("*").eq("id", str(goal_id)).execute()
             )
         except Exception as exc:
             raise RepositoryError("goal.get_by_id", str(exc)) from exc
@@ -165,9 +157,7 @@ class GoalRepository(AbstractGoalRepository):
                 query = query.eq("goal_type", goal_type.value)
 
             response = (
-                await query.order("priority", desc=True)
-                .range(offset, offset + limit - 1)
-                .execute()
+                await query.order("priority", desc=True).range(offset, offset + limit - 1).execute()
             )
         except Exception as exc:
             raise RepositoryError("goal.list_by_twin", str(exc)) from exc
@@ -180,9 +170,7 @@ class GoalRepository(AbstractGoalRepository):
             count=len(items),
             latency_ms=(time.time() - start) * 1000,
         )
-        return PaginatedGoals(
-            items=items, total_count=total, limit=limit, offset=offset
-        )
+        return PaginatedGoals(items=items, total_count=total, limit=limit, offset=offset)
 
     async def get_active_goals(self, twin_id: UUID) -> list[Goal]:
         """Retrieve ACTIVE and IN_PROGRESS goals ordered by priority."""
@@ -259,9 +247,7 @@ class GoalRepository(AbstractGoalRepository):
         except Exception as exc:
             raise RepositoryError("goal.link_intent", str(exc)) from exc
 
-        logger.info(
-            "Linked intent to goal", intent_id=str(intent_id), goal_id=str(goal_id)
-        )
+        logger.info("Linked intent to goal", intent_id=str(intent_id), goal_id=str(goal_id))
         return GoalIntentLink.model_validate(response.data[0])
 
     async def health_check(self) -> dict:

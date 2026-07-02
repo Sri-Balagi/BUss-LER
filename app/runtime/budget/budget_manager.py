@@ -6,6 +6,7 @@ class BudgetManager:
     """
     Tracks and enforces budget limits independently of the ExecutionSession.
     """
+
     def __init__(self, budget: IExecutionBudget):
         self._budget = budget
         self._tokens_consumed = 0
@@ -18,7 +19,7 @@ class BudgetManager:
             raise BudgetExceededError(
                 resource_type="tokens",
                 limit=self._budget.max_tokens,
-                actual=self._tokens_consumed + amount
+                actual=self._tokens_consumed + amount,
             )
         self._tokens_consumed += amount
 
@@ -27,7 +28,7 @@ class BudgetManager:
             raise BudgetExceededError(
                 resource_type="time_ms",
                 limit=self._budget.max_time_ms,
-                actual=self._time_elapsed_ms + ms
+                actual=self._time_elapsed_ms + ms,
             )
         self._time_elapsed_ms += ms
 
@@ -36,7 +37,7 @@ class BudgetManager:
             raise BudgetExceededError(
                 resource_type="retries",
                 limit=self._budget.max_retries,
-                actual=self._retries_used + 1
+                actual=self._retries_used + 1,
             )
         self._retries_used += 1
 

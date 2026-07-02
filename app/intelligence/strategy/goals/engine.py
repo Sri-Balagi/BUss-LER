@@ -17,14 +17,11 @@ class GoalManagementEngine:
                 goal_id=str(uuid.uuid4()),
                 objective_id=objective.objective_id,
                 description=f"Achieve: {criteria}",
-                status=GoalStatus.PENDING
+                status=GoalStatus.PENDING,
             )
             goals.append(goal)
 
-        return GoalCollection(
-            objective_id=objective.objective_id,
-            goals=goals
-        )
+        return GoalCollection(objective_id=objective.objective_id, goals=goals)
 
     def activate_goal(self, goal: Goal) -> Goal:
         goal.status = GoalStatus.ACTIVE

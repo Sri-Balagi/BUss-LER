@@ -10,12 +10,13 @@ class AgentContext:
     Controlled wrapper around the ExecutionSession and Task.
     Exposes an immutable AgentExecutionScope to the agent.
     """
+
     def __init__(
         self,
         session: ExecutionSession,
         task: ITask,
         permissions: set[AgentPermission],
-        capability_executor: ICapabilityExecutor | None = None
+        capability_executor: ICapabilityExecutor | None = None,
     ):
         self._session = session
         self._task = task
@@ -25,7 +26,7 @@ class AgentContext:
             permissions=self._permissions,
             read_memory_func=self._session.memory.get,
             write_memory_func=self._session.memory.put,
-            capability_executor=capability_executor
+            capability_executor=capability_executor,
         )
 
     @property

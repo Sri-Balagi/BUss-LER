@@ -1,17 +1,20 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from unittest.mock import AsyncMock, MagicMock
+
 import pytest
 
-from app.interfaces.http.schemas.conversation import (
-    ConversationThreadCreate,
-    ConversationTurnCreate,
-    ConversationThread,
-    ConversationTurn,
+from app.infrastructure.persistence.postgres.repositories.conversation_repository import (
+    ConversationRepository,
 )
-from app.shared.enums import ConversationStatus, ConversationRole
+from app.interfaces.http.schemas.conversation import (
+    ConversationThread,
+    ConversationThreadCreate,
+    ConversationTurn,
+    ConversationTurnCreate,
+)
+from app.shared.enums import ConversationRole, ConversationStatus
 from app.shared.exceptions.errors import ConversationNotFoundError, RepositoryError
-from app.infrastructure.persistence.postgres.repositories.conversation_repository import ConversationRepository
 
 
 @pytest.fixture
@@ -40,8 +43,8 @@ async def test_create_thread_success(repository, mock_supabase_client):
                 "status": ConversationStatus.ACTIVE.value,
                 "turn_count": 0,
                 "metadata": {},
-                "created_at": datetime.now(timezone.utc).isoformat(),
-                "updated_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
+                "updated_at": datetime.now(UTC).isoformat(),
             }
         ]
     )
@@ -70,8 +73,8 @@ async def test_get_thread_success(repository, mock_supabase_client):
             "status": ConversationStatus.ACTIVE.value,
             "turn_count": 5,
             "metadata": {},
-            "created_at": datetime.now(timezone.utc).isoformat(),
-            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
+            "updated_at": datetime.now(UTC).isoformat(),
         }
     )
 
@@ -113,7 +116,7 @@ async def test_add_turn_success(repository, mock_supabase_client):
                 "role": ConversationRole.USER.value,
                 "content": "Hello",
                 "turn_index": 2,
-                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
             }
         ]
     )
@@ -139,9 +142,7 @@ async def test_add_turn_success(repository, mock_supabase_client):
 
     mock_supabase_client.table.side_effect = table_side_effect
 
-    data = ConversationTurnCreate(
-        thread_id=thread_id, role=ConversationRole.USER, content="Hello"
-    )
+    data = ConversationTurnCreate(thread_id=thread_id, role=ConversationRole.USER, content="Hello")
 
     result = await repository.add_turn(data)
     assert isinstance(result, ConversationTurn)
@@ -154,9 +155,7 @@ async def test_create_thread_failure(repository, mock_supabase_client):
     mock_execute = AsyncMock(side_effect=Exception("DB Error"))
     mock_supabase_client.table().insert().execute = mock_execute
     with pytest.raises(RepositoryError) as exc_info:
-        await repository.create_thread(
-            ConversationThreadCreate(twin_id=uuid.uuid4(), title="fail")
-        )
+        await repository.create_thread(ConversationThreadCreate(twin_id=uuid.uuid4(), title="fail"))
     assert "conversation.create_thread" in str(exc_info.value.operation)
 
 
@@ -184,7 +183,7 @@ async def test_add_turn_count_failure(repository, mock_supabase_client):
                 "role": ConversationRole.USER.value,
                 "content": "Hello",
                 "turn_index": 0,
-                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
             }
         ]
     )
@@ -201,9 +200,7 @@ async def test_add_turn_count_failure(repository, mock_supabase_client):
 
     mock_supabase_client.table.side_effect = table_side_effect
 
-    data = ConversationTurnCreate(
-        thread_id=thread_id, role=ConversationRole.USER, content="Hello"
-    )
+    data = ConversationTurnCreate(thread_id=thread_id, role=ConversationRole.USER, content="Hello")
     result = await repository.add_turn(data)
     assert result.turn_index == 0
 
@@ -243,7 +240,7 @@ async def test_get_recent_turns_success(repository, mock_supabase_client):
                 "role": ConversationRole.USER.value,
                 "content": "Hi",
                 "turn_index": 0,
-                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
             }
         ]
     )
@@ -275,8 +272,8 @@ async def test_list_threads_success(repository, mock_supabase_client):
                 "status": ConversationStatus.ACTIVE.value,
                 "turn_count": 1,
                 "metadata": {},
-                "created_at": datetime.now(timezone.utc).isoformat(),
-                "updated_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
+                "updated_at": datetime.now(UTC).isoformat(),
             }
         ],
         count=1,
@@ -286,13 +283,9 @@ async def test_list_threads_success(repository, mock_supabase_client):
     mock_query.execute = mock_execute
     mock_query.eq.return_value = mock_query
 
-    mock_supabase_client.table().select().eq().is_().order().range.return_value = (
-        mock_query
-    )
+    mock_supabase_client.table().select().eq().is_().order().range.return_value = mock_query
 
-    result = await repository.list_threads(
-        uuid.uuid4(), status=ConversationStatus.ACTIVE
-    )
+    result = await repository.list_threads(uuid.uuid4(), status=ConversationStatus.ACTIVE)
     assert result.total_count == 1
     assert len(result.items) == 1
 
@@ -301,9 +294,7 @@ async def test_list_threads_success(repository, mock_supabase_client):
 async def test_list_threads_failure(repository, mock_supabase_client):
     mock_query = MagicMock()
     mock_query.execute = AsyncMock(side_effect=Exception("DB Error"))
-    mock_supabase_client.table().select().eq().is_().order().range.return_value = (
-        mock_query
-    )
+    mock_supabase_client.table().select().eq().is_().order().range.return_value = mock_query
 
     with pytest.raises(RepositoryError):
         await repository.list_threads(uuid.uuid4())
@@ -322,8 +313,8 @@ async def test_archive_thread_success(repository, mock_supabase_client):
                 "status": ConversationStatus.ARCHIVED.value,
                 "turn_count": 1,
                 "metadata": {},
-                "created_at": datetime.now(timezone.utc).isoformat(),
-                "updated_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
+                "updated_at": datetime.now(UTC).isoformat(),
             }
         ]
     )

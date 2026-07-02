@@ -6,7 +6,6 @@ and exponential backoff retry. No single provider can block assembly indefinitel
 
 import asyncio
 import random
-from typing import Optional, Tuple, Type
 from uuid import UUID
 
 import structlog
@@ -149,9 +148,7 @@ async def provide_with_retry(
             )
             event_bus.publish(event)
         except Exception as evt_exc:
-            logger.warning(
-                "Failed to publish ContextProviderFailedEvent", error=str(evt_exc)
-            )
+            logger.warning("Failed to publish ContextProviderFailedEvent", error=str(evt_exc))
 
     return ProviderFailureRecord(
         provider=source,

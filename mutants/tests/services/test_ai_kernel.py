@@ -1,15 +1,15 @@
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import pytest
 from app.models.ai import EmbeddingRequest
 from app.services.ai.kernel import AIKernel
 from app.services.ai.prompts import PromptManager
 from app.services.ai.providers.base import AbstractAIProvider
+from app.services.ai.providers.gemini_provider import GeminiProvider
 from app.services.ai.registry import ProviderRegistry
 from app.services.ai.router import ProviderRouter
-from app.services.ai.providers.gemini_provider import GeminiProvider
-from app.config import get_settings
 
+from app.config import get_settings
 
 # --- Unit Tests ---
 

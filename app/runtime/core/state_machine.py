@@ -3,12 +3,14 @@ from typing import Generic, TypeVar
 
 from app.runtime.core.exceptions import InvalidStateTransitionError
 
-T = TypeVar('T', bound=Enum)
+T = TypeVar("T", bound=Enum)
+
 
 class BaseStateMachine(Generic[T]):
     """
     Reusable state machine for runtime components (Tasks, Agents, Sessions).
     """
+
     def __init__(self, initial_state: T, allowed_transitions: dict[T, set[T]]):
         self._state = initial_state
         self._allowed_transitions = allowed_transitions

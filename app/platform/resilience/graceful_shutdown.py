@@ -1,8 +1,9 @@
-﻿"""Graceful shutdown handler for BizOS.
+"""Graceful shutdown handler for BizOS.
 
 Registers SIGTERM and SIGINT handlers to allow the application to
 finish in-flight requests before exiting.
 """
+
 from __future__ import annotations
 
 import asyncio

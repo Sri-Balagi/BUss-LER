@@ -82,9 +82,7 @@ class HistoryRepository:
         )
 
         try:
-            response = (
-                await self._client.table(self._table_name).insert(insert_data).execute()
-            )
+            response = await self._client.table(self._table_name).insert(insert_data).execute()
         except Exception as exc:
             logger.error("Failed to create history entry", error=str(exc))
             raise RepositoryError("history.create", str(exc)) from exc

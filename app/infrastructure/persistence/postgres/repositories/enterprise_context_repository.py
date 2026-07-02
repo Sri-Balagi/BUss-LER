@@ -8,7 +8,6 @@ Table: enterprise_contexts
 
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
-from typing import Optional
 from uuid import UUID
 
 import structlog
@@ -110,9 +109,7 @@ class EnterpriseContextRepository(AbstractEnterpriseContextRepository):
         except NotFoundError:
             raise
         except Exception as exc:
-            raise RepositoryError(
-                operation="context.get_by_id", detail=str(exc)
-            ) from exc
+            raise RepositoryError(operation="context.get_by_id", detail=str(exc)) from exc
 
     async def update_status(
         self,
@@ -133,19 +130,14 @@ class EnterpriseContextRepository(AbstractEnterpriseContextRepository):
             payload["is_partial"] = update.is_partial
         try:
             result = (
-                await self._client.table(_TABLE)
-                .update(payload)
-                .eq("id", str(context_id))
-                .execute()
+                await self._client.table(_TABLE).update(payload).eq("id", str(context_id)).execute()
             )
             row = result.data[0]
             if "id" in row:
                 row["context_id"] = row.pop("id")
             return ContextLifecycleMetadata(**row)
         except Exception as exc:
-            raise RepositoryError(
-                operation="context.update_status", detail=str(exc)
-            ) from exc
+            raise RepositoryError(operation="context.update_status", detail=str(exc)) from exc
 
     async def list_by_twin(
         self,
@@ -180,9 +172,7 @@ class EnterpriseContextRepository(AbstractEnterpriseContextRepository):
                 offset=offset,
             )
         except Exception as exc:
-            raise RepositoryError(
-                operation="context.list_by_twin", detail=str(exc)
-            ) from exc
+            raise RepositoryError(operation="context.list_by_twin", detail=str(exc)) from exc
 
     async def health_check(self) -> dict:
         try:

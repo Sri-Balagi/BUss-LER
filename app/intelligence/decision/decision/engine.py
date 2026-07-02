@@ -1,5 +1,4 @@
 import uuid
-from typing import List, Optional
 
 from app.intelligence.decision.decision.models import (
     DecisionAlternative,
@@ -17,15 +16,20 @@ class DecisionEngine:
     Ranks alternatives and makes executive decisions based on strategic limits.
     Does not execute decisions.
     """
-    def evaluate(self,
-                 objective: ExecutiveObjective,
-                 situation: SituationAssessment,
-                 constraints: StrategicConstraintSet,
-                 policy: PolicyAssessment,
-                 alternatives: list[DecisionAlternative]) -> ExecutiveDecision | None:
+
+    def evaluate(
+        self,
+        objective: ExecutiveObjective,
+        situation: SituationAssessment,
+        constraints: StrategicConstraintSet,
+        policy: PolicyAssessment,
+        alternatives: list[DecisionAlternative],
+    ) -> ExecutiveDecision | None:
 
         # Filter out alternatives that violate constraints or policies
-        valid_alternatives = [a for a in alternatives if a.constraint_compliance and a.policy_compliance]
+        valid_alternatives = [
+            a for a in alternatives if a.constraint_compliance and a.policy_compliance
+        ]
 
         if not valid_alternatives:
             return None
@@ -39,6 +43,8 @@ class DecisionEngine:
             objective_id=objective.objective_id,
             selected_alternative_id=selected.alternative_id,
             rationale=f"Selected {selected.description} for highest value ({selected.estimated_value}) under current constraints.",
-            priority=DecisionPriority.IMPORTANT if objective.priority.value in ["HIGH", "CRITICAL"] else DecisionPriority.ROUTINE,
-            alternatives_considered=alternatives
+            priority=DecisionPriority.IMPORTANT
+            if objective.priority.value in ["HIGH", "CRITICAL"]
+            else DecisionPriority.ROUTINE,
+            alternatives_considered=alternatives,
         )

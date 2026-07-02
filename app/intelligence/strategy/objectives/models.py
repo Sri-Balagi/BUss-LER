@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import Dict, List
 
 from pydantic import BaseModel, Field
 
@@ -11,20 +10,24 @@ class ObjectiveStatus(str, Enum):
     COMPLETED = "COMPLETED"
     ABANDONED = "ABANDONED"
 
+
 class ObjectivePriority(str, Enum):
     LOW = "LOW"
     MEDIUM = "MEDIUM"
     HIGH = "HIGH"
     CRITICAL = "CRITICAL"
 
+
 class BusinessHorizon(str, Enum):
     IMMEDIATE = "IMMEDIATE"  # Days/Weeks
-    SHORT_TERM = "SHORT_TERM" # Months (Q1)
-    MEDIUM_TERM = "MEDIUM_TERM" # Quarters (H1/H2)
-    LONG_TERM = "LONG_TERM" # Years (Y1+)
+    SHORT_TERM = "SHORT_TERM"  # Months (Q1)
+    MEDIUM_TERM = "MEDIUM_TERM"  # Quarters (H1/H2)
+    LONG_TERM = "LONG_TERM"  # Years (Y1+)
+
 
 class ExecutiveObjective(BaseModel):
     """A long-lived strategic outcome driven by intent."""
+
     objective_id: str
     description: str
     status: ObjectiveStatus = ObjectiveStatus.PROPOSED

@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -20,8 +20,9 @@ class CapabilityResolutionContext(BaseModel):
     tenant_id: str | None = None
     policy_overrides: dict[str, Any] = Field(default_factory=dict)
 
+
 class CapabilityResolutionDecision(BaseModel):
-    selected_factory: Any # ICapabilityFactory
+    selected_factory: Any  # ICapabilityFactory
     selected_specification: CapabilitySpecification
     compatibility_score: float = 1.0
     version_resolution: str

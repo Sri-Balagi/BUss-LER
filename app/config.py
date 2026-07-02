@@ -1,4 +1,4 @@
-﻿"""BizOS v6.0.0 — Application Settings.
+"""BizOS v6.0.0 — Application Settings.
 
 Uses pydantic-settings to load configuration from environment variables and .env files.
 All mandatory settings are validated at startup — the application will not start if
@@ -6,6 +6,7 @@ required values are missing or invalid.
 
 Settings reference: configs/settings_reference.md
 """
+
 from __future__ import annotations
 
 from functools import lru_cache
@@ -48,7 +49,9 @@ class Settings(BaseSettings):
     )
 
     # ── Application ───────────────────────────────────────────────────────────
-    app_env: str = Field("development", description="Runtime environment: development|test|production")
+    app_env: str = Field(
+        "development", description="Runtime environment: development|test|production"
+    )
     app_debug: bool = Field(False, description="Enable debug mode (never true in production)")
     log_level: str = Field("INFO", description="Log level: DEBUG|INFO|WARNING|ERROR")
     app_version: str = Field("6.0.0", description="Application version")
@@ -66,12 +69,16 @@ class Settings(BaseSettings):
     )
 
     # ── Feature Flags ─────────────────────────────────────────────────────────
-    enable_background_processing: bool = Field(True, description="Enable background task processing")
+    enable_background_processing: bool = Field(
+        True, description="Enable background task processing"
+    )
     enable_ai_summarization: bool = Field(True, description="Enable AI-powered summarization")
     enable_vector_storage: bool = Field(True, description="Enable Qdrant vector storage")
 
     # ── Operational ───────────────────────────────────────────────────────────
-    request_timeout_seconds: float = Field(30.0, gt=0, description="Default request timeout in seconds")
+    request_timeout_seconds: float = Field(
+        30.0, gt=0, description="Default request timeout in seconds"
+    )
 
     # ── Validators ────────────────────────────────────────────────────────────
 

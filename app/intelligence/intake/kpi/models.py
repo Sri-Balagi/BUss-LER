@@ -9,8 +9,10 @@ class KPIStatus(str, Enum):
     CRITICAL = "CRITICAL"
     MISSING = "MISSING"
 
+
 class KPIAssessment(BaseModel):
     """Structured assessment of a specific business KPI."""
+
     kpi_id: str
     current_value: float
     target_value: float

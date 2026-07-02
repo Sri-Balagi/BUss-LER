@@ -8,6 +8,7 @@ class IExecutionPolicy(ABC):
     Base interface for Execution Policies.
     Reads context and decides which tasks to run.
     """
+
     @abstractmethod
     def evaluate(self, context: ExecutionPolicyContext) -> ExecutionDecision:
         """

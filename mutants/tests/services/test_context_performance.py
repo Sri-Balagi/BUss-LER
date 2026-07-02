@@ -1,11 +1,12 @@
-import pytest
 import asyncio
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
-from app.services.context_engine import ContextEngine
-from app.core.context import OperationContext
+import pytest
 from app.models.enterprise_context import EnterpriseContextCreate
+from app.services.context_engine import ContextEngine
+
+from app.core.context import OperationContext
 
 
 @pytest.fixture
@@ -50,8 +51,8 @@ def engine():
         )
     )
 
-    from app.services.context_policies import ContextPolicy
     import app.services.context_engine as ce
+    from app.services.context_policies import ContextPolicy
 
     ce.BUILT_IN_POLICIES["perf_policy"] = ContextPolicy(
         policy_id="perf_policy",

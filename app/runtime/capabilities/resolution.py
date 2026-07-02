@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import List, Tuple
 
 from app.runtime.capabilities.interfaces import ICapabilityFactory
 from app.runtime.capabilities.models.resolution import (
@@ -14,15 +13,16 @@ class ICapabilityResolutionStrategy(ABC):
     def resolve(
         self,
         context: CapabilityResolutionContext,
-        candidates: list[tuple[CapabilitySpecification, ICapabilityFactory]]
+        candidates: list[tuple[CapabilitySpecification, ICapabilityFactory]],
     ) -> CapabilityResolutionDecision:
         pass
+
 
 class ExactMatchStrategy(ICapabilityResolutionStrategy):
     def resolve(
         self,
         context: CapabilityResolutionContext,
-        candidates: list[tuple[CapabilitySpecification, ICapabilityFactory]]
+        candidates: list[tuple[CapabilitySpecification, ICapabilityFactory]],
     ) -> CapabilityResolutionDecision:
         for spec, factory in candidates:
             if spec.capability_id == context.capability_id and (
@@ -32,18 +32,22 @@ class ExactMatchStrategy(ICapabilityResolutionStrategy):
                     selected_factory=factory,
                     selected_specification=spec,
                     version_resolution=spec.version,
-                    selection_reason="Exact match strategy success"
+                    selection_reason="Exact match strategy success",
                 )
-        raise ValueError(f"No exact match found for {context.capability_id} v{context.requested_version}")
+        raise ValueError(
+            f"No exact match found for {context.capability_id} v{context.requested_version}"
+        )
+
 
 class NewestCompatibleStrategy(ICapabilityResolutionStrategy):
     def resolve(
         self,
         context: CapabilityResolutionContext,
-        candidates: list[tuple[CapabilitySpecification, ICapabilityFactory]]
+        candidates: list[tuple[CapabilitySpecification, ICapabilityFactory]],
     ) -> CapabilityResolutionDecision:
         valid_candidates = [
-            (spec, factory) for spec, factory in candidates
+            (spec, factory)
+            for spec, factory in candidates
             if spec.capability_id == context.capability_id
         ]
 
@@ -58,5 +62,5 @@ class NewestCompatibleStrategy(ICapabilityResolutionStrategy):
             selected_factory=best_factory,
             selected_specification=best_spec,
             version_resolution=best_spec.version,
-            selection_reason="Newest compatible version selected"
+            selection_reason="Newest compatible version selected",
         )

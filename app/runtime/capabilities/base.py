@@ -1,5 +1,4 @@
 import time
-from typing import Optional
 
 from app.runtime.capabilities.adapters.base import IResourceAdapter
 from app.runtime.capabilities.context import CapabilityContext
@@ -14,6 +13,7 @@ class BaseCapability(ICapability):
     Abstract base capability.
     Manages adapter delegation and response transformation.
     """
+
     def __init__(self, spec: CapabilitySpecification, adapter: IResourceAdapter):
         self.spec = spec
         self.adapter = adapter
@@ -27,9 +27,13 @@ class BaseCapability(ICapability):
     async def validate(self, request: CapabilityRequest) -> None:
         # Basic validation that request matches capability
         if request.capability_id != self.spec.capability_id:
-            raise ValueError(f"Request capability_id {request.capability_id} does not match spec {self.spec.capability_id}")
+            raise ValueError(
+                f"Request capability_id {request.capability_id} does not match spec {self.spec.capability_id}"
+            )
         if request.operation not in self.spec.supported_operations:
-            raise ValueError(f"Operation {request.operation} not supported by capability {self.spec.capability_id}")
+            raise ValueError(
+                f"Operation {request.operation} not supported by capability {self.spec.capability_id}"
+            )
 
     async def execute(self, request: CapabilityRequest) -> CapabilityResult:
         start_time = time.time()
@@ -42,7 +46,7 @@ class BaseCapability(ICapability):
                 status=ExecutionStatus.SUCCESS,
                 outputs=raw_result,
                 execution_time_ms=execution_time_ms,
-                execution_trace_id=request.trace_id
+                execution_trace_id=request.trace_id,
             )
         except Exception as e:
             execution_time_ms = int((time.time() - start_time) * 1000)
@@ -51,7 +55,7 @@ class BaseCapability(ICapability):
                 outputs={},
                 errors=[str(e)],
                 execution_time_ms=execution_time_ms,
-                execution_trace_id=request.trace_id
+                execution_trace_id=request.trace_id,
             )
 
     async def cleanup(self) -> None:

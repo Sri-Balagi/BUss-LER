@@ -1,19 +1,20 @@
 import uuid
-import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from app.services.context_engine import (
-    ContextEngine,
-    ContextAssemblyError,
-    ContextValidationError,
-)
+import pytest
 from app.models.enterprise_context import (
-    EnterpriseContextCreate,
-    ExecutionPlan,
     ContextSection,
     ContextWindow,
+    EnterpriseContextCreate,
+    ExecutionPlan,
 )
 from app.models.enums import ContextSource, ContextStatus
+from app.services.context_engine import (
+    ContextAssemblyError,
+    ContextEngine,
+    ContextValidationError,
+)
+
 from app.core.context import OperationContext
 
 
@@ -97,9 +98,7 @@ async def test_build_success(
     mock_compressor,
     mock_window_builder,
 ):
-    ctx = OperationContext(
-        request_id="req1", correlation_id="cor1", user_id=uuid.uuid4()
-    )
+    ctx = OperationContext(request_id="req1", correlation_id="cor1", user_id=uuid.uuid4())
     command = EnterpriseContextCreate(twin_id=uuid.uuid4(), policy_id="full")
 
     mock_graph.resolve.return_value = ExecutionPlan(
@@ -120,9 +119,7 @@ async def test_build_success(
 
     from app.services.context_retry import ProviderRetryConfig
 
-    mock_provider_entry.retry_config = ProviderRetryConfig(
-        max_retries=1, base_delay_ms=10
-    )
+    mock_provider_entry.retry_config = ProviderRetryConfig(max_retries=1, base_delay_ms=10)
     mock_registry.get_entry.return_value = mock_provider_entry
 
     validation_result = MagicMock()
@@ -132,9 +129,7 @@ async def test_build_success(
     mock_ranker.rank.return_value = [section]
     mock_compressor.compress.return_value = [section]
 
-    window = ContextWindow(
-        budget=1000, sections=[section], window_id=uuid.uuid4(), metadata={}
-    )
+    window = ContextWindow(budget=1000, sections=[section], window_id=uuid.uuid4(), metadata={})
     mock_window_builder.build_window.return_value = window
 
     result = await engine.build(ctx, command)
@@ -146,9 +141,7 @@ async def test_build_success(
 
 @pytest.mark.asyncio
 async def test_build_unknown_policy(engine):
-    ctx = OperationContext(
-        request_id="req1", correlation_id="cor1", user_id=uuid.uuid4()
-    )
+    ctx = OperationContext(request_id="req1", correlation_id="cor1", user_id=uuid.uuid4())
     command = EnterpriseContextCreate(twin_id=uuid.uuid4(), policy_id="invalid_policy")
     with pytest.raises(ContextAssemblyError):
         await engine.build(ctx, command)
@@ -156,9 +149,7 @@ async def test_build_unknown_policy(engine):
 
 @pytest.mark.asyncio
 async def test_build_required_provider_failure(engine, mock_graph, mock_registry):
-    ctx = OperationContext(
-        request_id="req1", correlation_id="cor1", user_id=uuid.uuid4()
-    )
+    ctx = OperationContext(request_id="req1", correlation_id="cor1", user_id=uuid.uuid4())
     command = EnterpriseContextCreate(twin_id=uuid.uuid4(), policy_id="planning")
 
     mock_graph.resolve.return_value = ExecutionPlan(
@@ -171,9 +162,7 @@ async def test_build_required_provider_failure(engine, mock_graph, mock_registry
     mock_provider_entry.provider = mock_provider
     from app.services.context_retry import ProviderRetryConfig
 
-    mock_provider_entry.retry_config = ProviderRetryConfig(
-        max_retries=1, base_delay_ms=10
-    )
+    mock_provider_entry.retry_config = ProviderRetryConfig(max_retries=1, base_delay_ms=10)
     mock_registry.get_entry.return_value = mock_provider_entry
 
     with pytest.raises(ContextAssemblyError) as exc_info:
@@ -182,12 +171,8 @@ async def test_build_required_provider_failure(engine, mock_graph, mock_registry
 
 
 @pytest.mark.asyncio
-async def test_build_validation_failure(
-    engine, mock_graph, mock_registry, mock_validator
-):
-    ctx = OperationContext(
-        request_id="req1", correlation_id="cor1", user_id=uuid.uuid4()
-    )
+async def test_build_validation_failure(engine, mock_graph, mock_registry, mock_validator):
+    ctx = OperationContext(request_id="req1", correlation_id="cor1", user_id=uuid.uuid4())
     command = EnterpriseContextCreate(twin_id=uuid.uuid4(), policy_id="full")
 
     mock_graph.resolve.return_value = ExecutionPlan(
@@ -205,9 +190,7 @@ async def test_build_validation_failure(
     mock_provider_entry.provider = mock_provider
     from app.services.context_retry import ProviderRetryConfig
 
-    mock_provider_entry.retry_config = ProviderRetryConfig(
-        max_retries=1, base_delay_ms=10
-    )
+    mock_provider_entry.retry_config = ProviderRetryConfig(max_retries=1, base_delay_ms=10)
     mock_registry.get_entry.return_value = mock_provider_entry
 
     validation_result = MagicMock()

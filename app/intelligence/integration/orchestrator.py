@@ -8,6 +8,7 @@ class ExecutiveIntelligenceOrchestrator(IExecutiveIntelligenceOrchestrator):
     """
     Orchestrates the cognitive pipeline for a given raw request.
     """
+
     def __init__(self):
         self.pipeline = CognitivePipeline()
 

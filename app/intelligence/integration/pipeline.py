@@ -36,6 +36,7 @@ class CognitivePipeline(ICognitivePipeline):
     """
     Wires together D1-D6 into a single deterministic executive pipeline.
     """
+
     def __init__(self):
         self.intent_engine = IntentEngine()
         self.situation_engine = SituationAnalysisEngine()
@@ -61,7 +62,9 @@ class CognitivePipeline(ICognitivePipeline):
         # Mocking world model for pipeline testing
         self.world_model = BusinessWorldModel()
 
-    def run_pipeline(self, raw_request: str, session: CognitiveSession) -> ExecutiveIntelligenceResult:
+    def run_pipeline(
+        self, raw_request: str, session: CognitiveSession
+    ) -> ExecutiveIntelligenceResult:
         start_time = time.perf_counter()
         state = CognitivePipelineState.INITIALIZED
         warnings = []
@@ -93,17 +96,30 @@ class CognitivePipeline(ICognitivePipeline):
             convergence = None
 
             # Mocking the loop integration
-            while cycle_state.status == CycleStatus.IN_PROGRESS or cycle_state.status == CycleStatus.INITIALIZED:
+            while (
+                cycle_state.status == CycleStatus.IN_PROGRESS
+                or cycle_state.status == CycleStatus.INITIALIZED
+            ):
                 cycle_state = self.cycle_controller.advance_iteration(cycle_state)
 
                 from app.intelligence.strategy.policy.models import PolicyStatus
+
                 # Propose decision
                 decision = self.decision_engine.evaluate(
                     objective,
                     situation,
                     StrategicConstraintSet(set_id="cs1", constraints=[]),
                     PolicyAssessment(status=PolicyStatus.COMPLIANT, violations=[]),
-                    [DecisionAlternative(alternative_id="alt1", description="Mock Alternative", estimated_value=1.0, required_capabilities=[], constraint_compliance=True, policy_compliance=True)]
+                    [
+                        DecisionAlternative(
+                            alternative_id="alt1",
+                            description="Mock Alternative",
+                            estimated_value=1.0,
+                            required_capabilities=[],
+                            constraint_compliance=True,
+                            policy_compliance=True,
+                        )
+                    ],
                 )
 
                 # Check convergence
@@ -157,27 +173,23 @@ class CognitivePipeline(ICognitivePipeline):
 
         metrics = PipelineMetrics(
             duration_ms=duration,
-            iterations=cycle_state.current_iteration if 'cycle_state' in locals() else 0,
-            artifacts_produced=artifacts_produced
+            iterations=cycle_state.current_iteration if "cycle_state" in locals() else 0,
+            artifacts_produced=artifacts_produced,
         )
 
-        summary = IntegrationSummary(
-            state=state,
-            metrics=metrics,
-            warnings=warnings
-        )
+        summary = IntegrationSummary(state=state, metrics=metrics, warnings=warnings)
 
         return ExecutiveIntelligenceResult(
             session_id=session.session_id,
             summary=summary,
-            intent=intent if 'intent' in locals() else None,
-            situation=situation if 'situation' in locals() else None,
-            objectives=[objective] if 'objective' in locals() else [],
-            decision=decision if 'decision' in locals() else None,
-            plan=plan if 'plan' in locals() else None,
-            convergence=convergence if 'convergence' in locals() else None,
-            validation=validation if 'validation' in locals() else None,
-            reflection=reflection if 'reflection' in locals() else None,
-            knowledge_artifacts=knowledge_artifacts if 'knowledge_artifacts' in locals() else [],
-            heuristics=heuristics if 'heuristics' in locals() else []
+            intent=intent if "intent" in locals() else None,
+            situation=situation if "situation" in locals() else None,
+            objectives=[objective] if "objective" in locals() else [],
+            decision=decision if "decision" in locals() else None,
+            plan=plan if "plan" in locals() else None,
+            convergence=convergence if "convergence" in locals() else None,
+            validation=validation if "validation" in locals() else None,
+            reflection=reflection if "reflection" in locals() else None,
+            knowledge_artifacts=knowledge_artifacts if "knowledge_artifacts" in locals() else [],
+            heuristics=heuristics if "heuristics" in locals() else [],
         )

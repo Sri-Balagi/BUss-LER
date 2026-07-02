@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -25,18 +24,22 @@ class CognitivePipelineState(str, Enum):
     COMPLETED = "COMPLETED"
     FAILED = "FAILED"
 
+
 class PipelineMetrics(BaseModel):
     duration_ms: float = 0.0
     iterations: int = 0
     artifacts_produced: int = 0
+
 
 class IntegrationSummary(BaseModel):
     state: CognitivePipelineState
     metrics: PipelineMetrics
     warnings: list[str] = Field(default_factory=list)
 
+
 class ExecutiveIntelligenceResult(BaseModel):
     """The unified output of an entire intelligence cycle."""
+
     session_id: str
     summary: IntegrationSummary
 

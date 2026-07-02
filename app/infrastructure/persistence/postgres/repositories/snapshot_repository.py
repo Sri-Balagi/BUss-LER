@@ -70,9 +70,7 @@ class SnapshotRepository:
         )
 
         try:
-            response = (
-                await self._client.table(self._table_name).insert(insert_data).execute()
-            )
+            response = await self._client.table(self._table_name).insert(insert_data).execute()
         except Exception as exc:
             logger.error("Failed to create snapshot", error=str(exc))
             raise RepositoryError("snapshot.create", str(exc)) from exc
@@ -99,9 +97,7 @@ class SnapshotRepository:
                 .execute()
             )
         except Exception as exc:
-            logger.error(
-                "Failed to get snapshot", snapshot_id=str(snapshot_id), error=str(exc)
-            )
+            logger.error("Failed to get snapshot", snapshot_id=str(snapshot_id), error=str(exc))
             raise RepositoryError("snapshot.get_by_id", str(exc)) from exc
 
         if not response.data:
@@ -139,9 +135,7 @@ class SnapshotRepository:
                 .execute()
             )
         except Exception as exc:
-            logger.error(
-                "Failed to list snapshots", twin_id=str(twin_id), error=str(exc)
-            )
+            logger.error("Failed to list snapshots", twin_id=str(twin_id), error=str(exc))
             raise RepositoryError("snapshot.list_by_twin_id", str(exc)) from exc
 
         items = [TwinSnapshot.model_validate(row) for row in response.data]

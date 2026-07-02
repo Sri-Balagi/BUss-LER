@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import List
 
 from pydantic import BaseModel, Field
 
@@ -10,8 +9,10 @@ class ConflictType(str, Enum):
     TIMELINE_OVERLAP = "TIMELINE_OVERLAP"
     POLICY_VIOLATION = "POLICY_VIOLATION"
 
+
 class ConflictAssessment(BaseModel):
     """Identified conflict between objectives or goals."""
+
     conflict_id: str
     conflict_type: ConflictType
     description: str

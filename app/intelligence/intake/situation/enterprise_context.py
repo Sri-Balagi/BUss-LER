@@ -19,7 +19,7 @@ Lifecycle:
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import ConfigDict, Field
@@ -72,12 +72,8 @@ class ContextProvenance(DomainBaseModel):
     """
 
     provider: ContextSource
-    service_name: str = Field(
-        ..., description="The service class that produced this item."
-    )
-    retrieval_timestamp: datetime = Field(
-        default_factory=lambda: datetime.now(UTC)
-    )
+    service_name: str = Field(..., description="The service class that produced this item.")
+    retrieval_timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
     confidence: float = Field(default=1.0, ge=0.0, le=1.0)
     ranking_score: float = Field(
         default=0.0,
@@ -117,9 +113,7 @@ class ContextItem(DomainBaseModel):
     item_id: UUID = Field(default_factory=uuid4)
     source: ContextSource
     priority: ContextPriority = ContextPriority.MEDIUM
-    content: str = Field(
-        ..., description="Textual representation of this context item."
-    )
+    content: str = Field(..., description="Textual representation of this context item.")
     content_type: str = Field(
         default="text",
         description="Format of content: 'text', 'json', 'summary'.",
@@ -171,9 +165,7 @@ class ContextWindow(DomainBaseModel):
     window_id: UUID = Field(default_factory=uuid4)
     sections: list[ContextSection] = Field(default_factory=list)
     token_estimate: int = Field(default=0, ge=0)
-    budget: int = Field(
-        ..., ge=0, description="Configured token budget for this window."
-    )
+    budget: int = Field(..., ge=0, description="Configured token budget for this window.")
     items_included: int = Field(default=0, ge=0)
     items_excluded: int = Field(default=0, ge=0)
     overflow: bool = Field(
@@ -199,9 +191,7 @@ class ContextSummary(DomainBaseModel):
     summary_id: UUID = Field(default_factory=uuid4)
     context_id: UUID
     twin_id: UUID
-    narrative: str = Field(
-        ..., description="Human-readable summary of assembled context."
-    )
+    narrative: str = Field(..., description="Human-readable summary of assembled context.")
     source_count: int = Field(default=0)
     token_estimate: int = Field(default=0)
     compression_ratio: float | None = Field(default=None, ge=0.0, le=1.0)

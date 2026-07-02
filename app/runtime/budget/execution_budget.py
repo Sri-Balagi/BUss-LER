@@ -7,6 +7,7 @@ class ExecutionBudget(BaseModel, IExecutionBudget):
     """
     Concrete implementation of execution limits.
     """
+
     token_limit: int = Field(default=128000)
     time_limit_ms: int = Field(default=300000)
     recursion_depth_limit: int = Field(default=5)

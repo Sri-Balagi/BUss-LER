@@ -1,14 +1,15 @@
-import pytest
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
-from app.services.recommendation_engine import RecommendationEngine
+import pytest
+from app.models.ai import AIResponseMetadata, ClassifyResponse
 from app.models.commands import GenerateRecommendationsCommand
-from app.models.ai import ClassifyResponse, AIResponseMetadata
-from app.models.exceptions import RecommendationGenerationError, AIOutputValidationError
-from app.models.results import GenerateRecommendationsResult
-from app.core.context import OperationContext
+from app.models.exceptions import AIOutputValidationError, RecommendationGenerationError
 from app.models.recommendation import Recommendation
+from app.models.results import GenerateRecommendationsResult
+from app.services.recommendation_engine import RecommendationEngine
+
+from app.core.context import OperationContext
 
 
 @pytest.fixture

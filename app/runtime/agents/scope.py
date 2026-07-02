@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from app.runtime.agents.permissions import AgentPermission
 from app.runtime.capabilities.executor import ICapabilityExecutor
@@ -10,6 +10,7 @@ class AgentExecutionScope:
     Exposes a safe, restricted view of the execution context to the agent,
     without leaking underlying runtime internals (like WorkingMemory or ExecutionSession).
     """
+
     def __init__(
         self,
         task_input: dict[str, Any],

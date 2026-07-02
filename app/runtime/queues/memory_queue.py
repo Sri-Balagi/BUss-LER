@@ -1,5 +1,4 @@
 import heapq
-from typing import Optional
 from uuid import UUID
 
 from app.runtime.queues.interfaces import IQueue
@@ -8,6 +7,7 @@ from app.runtime.tasks.models import ITask
 
 class FIFOMemoryQueue(IQueue):
     """Simple in-memory FIFO queue."""
+
     def __init__(self):
         self._queue: list[ITask] = []
 
@@ -43,6 +43,7 @@ class PriorityMemoryQueue(IQueue):
     In-memory Priority Queue using heapq.
     Lower priority value (e.g. CRITICAL=0) comes first.
     """
+
     def __init__(self):
         # Elements are (priority, insertion_order, task)
         self._queue: list[tuple[int, int, ITask]] = []

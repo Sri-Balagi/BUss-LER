@@ -1,6 +1,5 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import Optional
 from uuid import UUID
 
 from pydantic import Field
@@ -37,13 +36,7 @@ class MemoryVectorPayload(DomainBaseModel):
 class MemoryVectorPoint(DomainBaseModel):
     """Represents a fully resolved Qdrant Point for ingestion or retrieval."""
 
-    id: UUID = Field(
-        ..., description="The Qdrant Point ID, which matches the memory_id."
-    )
+    id: UUID = Field(..., description="The Qdrant Point ID, which matches the memory_id.")
     vector: list[float] = Field(..., description="The raw embedding vector.")
-    payload: MemoryVectorPayload = Field(
-        ..., description="The structured metadata payload."
-    )
-    score: float | None = Field(
-        None, description="Similarity score returned during search."
-    )
+    payload: MemoryVectorPayload = Field(..., description="The structured metadata payload.")
+    score: float | None = Field(None, description="Similarity score returned during search.")

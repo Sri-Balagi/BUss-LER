@@ -1,13 +1,14 @@
-import pytest
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 from uuid import uuid4
 
-from app.config import Settings
+import pytest
 from app.models.enums import MemoryCategory, MemorySource
 from app.models.memory_vector import MemoryVectorPayload, MemoryVectorPoint
 from app.repositories.vector_repository import MemoryVectorRepository
 from app.services.qdrant import QdrantService
+
+from app.config import Settings
 
 # Define settings that point to a test collection
 test_settings = Settings(
@@ -49,8 +50,8 @@ async def test_upsert_and_retrieve(vector_repo):
         memory_category=MemoryCategory.EVENT,
         source=MemorySource.OBSERVATION,
         importance=Decimal("0.50"),
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
     )
 
     vector = [0.1, 0.2, 0.3, 0.4]
@@ -87,12 +88,10 @@ async def test_search_vectors(vector_repo):
             memory_category=MemoryCategory.TASK,
             source=MemorySource.EXECUTION,
             importance=Decimal("0.80"),
-            created_at=datetime.now(timezone.utc),
-            updated_at=datetime.now(timezone.utc),
+            created_at=datetime.now(UTC),
+            updated_at=datetime.now(UTC),
         )
-        point = MemoryVectorPoint(
-            id=point_id, vector=[1.0, 0.0, 0.0, 0.0], payload=payload
-        )
+        point = MemoryVectorPoint(id=point_id, vector=[1.0, 0.0, 0.0, 0.0], payload=payload)
         await vector_repo.upsert(point)
 
     # Create one point for twin 2
@@ -103,12 +102,10 @@ async def test_search_vectors(vector_repo):
         memory_category=MemoryCategory.TASK,
         source=MemorySource.EXECUTION,
         importance=Decimal("0.80"),
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
     )
-    point_2 = MemoryVectorPoint(
-        id=point_id_2, vector=[1.0, 0.0, 0.0, 0.0], payload=payload_2
-    )
+    point_2 = MemoryVectorPoint(id=point_id_2, vector=[1.0, 0.0, 0.0, 0.0], payload=payload_2)
     await vector_repo.upsert(point_2)
 
     # Search for twin 1
@@ -132,8 +129,8 @@ async def test_delete_vector(vector_repo):
         memory_category=MemoryCategory.EVENT,
         source=MemorySource.OBSERVATION,
         importance=Decimal("0.50"),
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
     )
     point = MemoryVectorPoint(id=point_id, vector=[0.0, 1.0, 0.0, 0.0], payload=payload)
 

@@ -1,16 +1,15 @@
-import pytest
-
 from unittest.mock import MagicMock
 
+import pytest
 from app.models.enterprise_context import ProviderMetadata
 from app.models.enums import ContextSource
 from app.models.exceptions import ProviderNotRegisteredError
 from app.services.context_freshness import ContextFreshnessPolicy
-from app.services.context_retry import ProviderRetryConfig
 from app.services.context_provider_registry import (
     ContextProviderRegistry,
     RegistrationEntry,
 )
+from app.services.context_retry import ProviderRetryConfig
 
 
 @pytest.fixture
@@ -24,9 +23,7 @@ def mock_provider():
 
 
 def test_register_and_get(registry, mock_provider):
-    metadata = ProviderMetadata(
-        source=ContextSource.GOAL, name="Goal Provider", version="1.0"
-    )
+    metadata = ProviderMetadata(source=ContextSource.GOAL, name="Goal Provider", version="1.0")
     registry.register(mock_provider, metadata)
 
     assert registry.is_registered(ContextSource.GOAL) is True
@@ -35,15 +32,11 @@ def test_register_and_get(registry, mock_provider):
 
 
 def test_register_overwrite(registry, mock_provider):
-    metadata = ProviderMetadata(
-        source=ContextSource.GOAL, name="Goal Provider", version="1.0"
-    )
+    metadata = ProviderMetadata(source=ContextSource.GOAL, name="Goal Provider", version="1.0")
     registry.register(mock_provider, metadata)
 
     mock_provider2 = MagicMock()
-    metadata2 = ProviderMetadata(
-        source=ContextSource.GOAL, name="Goal Provider v2", version="2.0"
-    )
+    metadata2 = ProviderMetadata(source=ContextSource.GOAL, name="Goal Provider v2", version="2.0")
     registry.register(mock_provider2, metadata2)
 
     assert registry.get(ContextSource.GOAL) == mock_provider2
@@ -61,15 +54,11 @@ def test_get_entry_not_registered(registry):
 
 
 def test_get_all_configs(registry, mock_provider):
-    metadata = ProviderMetadata(
-        source=ContextSource.TWIN, name="Twin Provider", version="1.0"
-    )
+    metadata = ProviderMetadata(source=ContextSource.TWIN, name="Twin Provider", version="1.0")
     freshness = ContextFreshnessPolicy(provider=ContextSource.TWIN, ttl_seconds=60)
     retry = ProviderRetryConfig(max_retries=5)
 
-    registry.register(
-        mock_provider, metadata, freshness_policy=freshness, retry_config=retry
-    )
+    registry.register(mock_provider, metadata, freshness_policy=freshness, retry_config=retry)
 
     assert registry.get_metadata(ContextSource.TWIN) == metadata
     assert registry.get_freshness_policy(ContextSource.TWIN) == freshness

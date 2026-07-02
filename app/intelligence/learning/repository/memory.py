@@ -1,6 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import Any, Dict, Optional
+from typing import Any
 from uuid import UUID
 
 from pydantic import Field
@@ -12,16 +12,10 @@ from app.shared.enums import EmbeddingStatus, MemoryCategory, MemorySource
 class MemoryBase(DomainBaseModel):
     """Base Memory schema with common attributes."""
 
-    title: str = Field(
-        ..., max_length=255, description="Human-readable title for UI & debugging."
-    )
+    title: str = Field(..., max_length=255, description="Human-readable title for UI & debugging.")
     content: str = Field(..., description="The actual memory text.")
-    summary: str | None = Field(
-        None, description="AI-generated summary, populated asynchronously."
-    )
-    memory_category: MemoryCategory = Field(
-        ..., description="Business-oriented classification."
-    )
+    summary: str | None = Field(None, description="AI-generated summary, populated asynchronously.")
+    memory_category: MemoryCategory = Field(..., description="Business-oriented classification.")
     source: MemorySource = Field(..., description="The origin of the memory.")
     importance: Decimal = Field(
         default=Decimal("0.50"),
@@ -65,15 +59,11 @@ class MemoryUpdate(DomainBaseModel):
         decimal_places=2,
         description="Updated importance score.",
     )
-    embedding_status: EmbeddingStatus | None = Field(
-        None, description="Updated embedding status."
-    )
+    embedding_status: EmbeddingStatus | None = Field(None, description="Updated embedding status.")
     embedding_model: str | None = Field(
         None, max_length=255, description="Updated embedding model."
     )
-    metadata: dict[str, Any] | None = Field(
-        None, description="Updated structured metadata."
-    )
+    metadata: dict[str, Any] | None = Field(None, description="Updated structured metadata.")
 
 
 class Memory(MemoryBase):
@@ -90,9 +80,7 @@ class MemorySearchResult(DomainBaseModel):
     """A memory result decorated with semantic similarity."""
 
     memory: Memory
-    similarity_score: float = Field(
-        ..., description="Cosine similarity score (0.0 to 1.0)"
-    )
+    similarity_score: float = Field(..., description="Cosine similarity score (0.0 to 1.0)")
 
 
 class MemorySearchResults(DomainBaseModel):

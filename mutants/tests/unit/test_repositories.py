@@ -1,20 +1,20 @@
 """Unit tests for repositories including all edge cases."""
 
-from uuid import uuid4
-import pytest
 from unittest.mock import AsyncMock
+from uuid import uuid4
 
-from app.models.enums import EntityType
-from app.models.schemas import EntityCreate
+import pytest
 from app.models.entity import EntityUpdate
-from app.models.twin import DigitalTwinCreate, DigitalTwinUpdate
+from app.models.enums import EntityType
 from app.models.exceptions import (
-    VersionConflictError,
-    EntityNotFoundError,
-    TwinNotFoundError,
-    RepositoryError,
     DuplicateTwinError,
+    EntityNotFoundError,
+    RepositoryError,
+    TwinNotFoundError,
+    VersionConflictError,
 )
+from app.models.schemas import EntityCreate
+from app.models.twin import DigitalTwinCreate, DigitalTwinUpdate
 from app.repositories.entity_repository import EntityRepository
 from app.repositories.twin_repository import TwinRepository
 
@@ -48,9 +48,7 @@ async def test_entity_repository_create_success(entity_repo, mock_supabase_clien
         "created_at": "2026-06-25T00:00:00Z",
         "updated_at": "2026-06-25T00:00:00Z",
     }
-    mock_supabase_client.table.return_value.execute.return_value = AsyncMock(
-        data=[mock_data]
-    )
+    mock_supabase_client.table.return_value.execute.return_value = AsyncMock(data=[mock_data])
 
     data = EntityCreate(name="Test", entity_type=EntityType.STARTUP)
     entity = await entity_repo.create(user_id, data)
@@ -95,9 +93,7 @@ async def test_entity_repository_get_by_id_success(entity_repo, mock_supabase_cl
         "created_at": "2026-06-25T00:00:00Z",
         "updated_at": "2026-06-25T00:00:00Z",
     }
-    mock_supabase_client.table.return_value.execute.return_value = AsyncMock(
-        data=[mock_data]
-    )
+    mock_supabase_client.table.return_value.execute.return_value = AsyncMock(data=[mock_data])
     entity = await entity_repo.get_by_id(entity_id)
     assert entity.id == entity_id
 
@@ -113,9 +109,7 @@ async def test_entity_repository_get_by_id_not_found_empty_results(
 
 
 @pytest.mark.asyncio
-async def test_entity_repository_get_by_id_invalid_uuid(
-    entity_repo, mock_supabase_client
-):
+async def test_entity_repository_get_by_id_invalid_uuid(entity_repo, mock_supabase_client):
     # Pass an invalid UUID type to trigger DB exception (mocked)
     mock_supabase_client.table.return_value.execute.side_effect = Exception(
         "invalid input syntax for type uuid"
@@ -139,9 +133,7 @@ async def test_entity_repository_update_success(entity_repo, mock_supabase_clien
         "created_at": "2026-06-25T00:00:00Z",
         "updated_at": "2026-06-25T00:00:00Z",
     }
-    mock_supabase_client.table.return_value.execute.return_value = AsyncMock(
-        data=[mock_data]
-    )
+    mock_supabase_client.table.return_value.execute.return_value = AsyncMock(data=[mock_data])
     update_data = EntityUpdate(name="Updated")
     entity = await entity_repo.update(entity_id, update_data)
     assert entity.name == "Updated"
@@ -170,9 +162,7 @@ async def test_entity_repository_delete_success(entity_repo, mock_supabase_clien
         "created_at": "2026-06-25T00:00:00Z",
         "updated_at": "2026-06-25T00:00:00Z",
     }
-    mock_supabase_client.table.return_value.execute.return_value = AsyncMock(
-        data=[mock_data]
-    )
+    mock_supabase_client.table.return_value.execute.return_value = AsyncMock(data=[mock_data])
     await entity_repo.soft_delete(entity_id)
     # Check that soft delete logic (is_active=False) was executed via the mock calls.
     # The actual behavior is inside the mock, but the lack of error indicates success.
@@ -213,9 +203,7 @@ async def test_entity_repository_list_success(entity_repo, mock_supabase_client)
 
 
 @pytest.mark.asyncio
-async def test_entity_repository_list_pagination_boundaries(
-    entity_repo, mock_supabase_client
-):
+async def test_entity_repository_list_pagination_boundaries(entity_repo, mock_supabase_client):
     user_id = uuid4()
     # Mocking a response where we request limit=5 but get back 6 items, indicating has_more=True
     mock_data = [
@@ -244,13 +232,9 @@ async def test_entity_repository_list_pagination_boundaries(
 
 
 @pytest.mark.asyncio
-async def test_entity_repository_list_generic_exception(
-    entity_repo, mock_supabase_client
-):
+async def test_entity_repository_list_generic_exception(entity_repo, mock_supabase_client):
     user_id = uuid4()
-    mock_supabase_client.table.return_value.execute.side_effect = Exception(
-        "Unknown error"
-    )
+    mock_supabase_client.table.return_value.execute.side_effect = Exception("Unknown error")
     with pytest.raises(RepositoryError):
         await entity_repo.list(user_id=user_id)
 
@@ -280,9 +264,7 @@ async def test_twin_repository_create_success(twin_repo, mock_supabase_client):
         "created_at": "2026-06-25T00:00:00Z",
         "updated_at": "2026-06-25T00:00:00Z",
     }
-    mock_supabase_client.table.return_value.execute.return_value = AsyncMock(
-        data=[mock_data]
-    )
+    mock_supabase_client.table.return_value.execute.return_value = AsyncMock(data=[mock_data])
 
     data = DigitalTwinCreate(entity_id=entity_id, state={"key": "val"})
     twin = await twin_repo.create(data)
@@ -321,9 +303,7 @@ async def test_twin_repository_get_by_id_success(twin_repo, mock_supabase_client
         "created_at": "2026-06-25T00:00:00Z",
         "updated_at": "2026-06-25T00:00:00Z",
     }
-    mock_supabase_client.table.return_value.execute.return_value = AsyncMock(
-        data=[mock_data]
-    )
+    mock_supabase_client.table.return_value.execute.return_value = AsyncMock(data=[mock_data])
 
     twin = await twin_repo.get_by_id(twin_id)
     assert twin.id == twin_id
@@ -337,9 +317,7 @@ async def test_twin_repository_get_by_id_not_found(twin_repo, mock_supabase_clie
 
 
 @pytest.mark.asyncio
-async def test_twin_repository_get_by_entity_id_success(
-    twin_repo, mock_supabase_client
-):
+async def test_twin_repository_get_by_entity_id_success(twin_repo, mock_supabase_client):
     entity_id = uuid4()
     mock_data = {
         "id": str(uuid4()),
@@ -358,27 +336,21 @@ async def test_twin_repository_get_by_entity_id_success(
         "created_at": "2026-06-25T00:00:00Z",
         "updated_at": "2026-06-25T00:00:00Z",
     }
-    mock_supabase_client.table.return_value.execute.return_value = AsyncMock(
-        data=[mock_data]
-    )
+    mock_supabase_client.table.return_value.execute.return_value = AsyncMock(data=[mock_data])
 
     twin = await twin_repo.get_by_entity_id(entity_id)
     assert twin.entity_id == entity_id
 
 
 @pytest.mark.asyncio
-async def test_twin_repository_get_by_entity_id_not_found(
-    twin_repo, mock_supabase_client
-):
+async def test_twin_repository_get_by_entity_id_not_found(twin_repo, mock_supabase_client):
     mock_supabase_client.table.return_value.execute.return_value = AsyncMock(data=[])
     with pytest.raises(TwinNotFoundError):
         await twin_repo.get_by_entity_id(uuid4())
 
 
 @pytest.mark.asyncio
-async def test_twin_repository_update_with_snapshot_success(
-    twin_repo, mock_supabase_client
-):
+async def test_twin_repository_update_with_snapshot_success(twin_repo, mock_supabase_client):
     twin_id = uuid4()
     mock_data = {
         "id": str(twin_id),
@@ -397,9 +369,7 @@ async def test_twin_repository_update_with_snapshot_success(
         "created_at": "2026-06-25T00:00:00Z",
         "updated_at": "2026-06-25T00:00:00Z",
     }
-    mock_supabase_client.rpc.return_value.execute.return_value = AsyncMock(
-        data=mock_data
-    )
+    mock_supabase_client.rpc.return_value.execute.return_value = AsyncMock(data=mock_data)
 
     data = DigitalTwinUpdate(state={"key": "new_val"}, expected_version=1)
     twin = await twin_repo.update_with_snapshot(twin_id, data)
@@ -432,9 +402,7 @@ async def test_twin_repository_update_twin_not_found(twin_repo, mock_supabase_cl
 
 
 @pytest.mark.asyncio
-async def test_twin_repository_update_invalid_rpc_response(
-    twin_repo, mock_supabase_client
-):
+async def test_twin_repository_update_invalid_rpc_response(twin_repo, mock_supabase_client):
     twin_id = uuid4()
     # Mocking empty response which should raise TwinNotFoundError
     mock_supabase_client.rpc.return_value.execute.return_value = AsyncMock(data=None)
@@ -445,9 +413,7 @@ async def test_twin_repository_update_invalid_rpc_response(
 
 
 @pytest.mark.asyncio
-async def test_twin_repository_update_unknown_rpc_error(
-    twin_repo, mock_supabase_client
-):
+async def test_twin_repository_update_unknown_rpc_error(twin_repo, mock_supabase_client):
     twin_id = uuid4()
     error = Exception("Some weird postgres exception")
     mock_supabase_client.rpc.return_value.execute.side_effect = error
@@ -477,9 +443,7 @@ async def test_twin_repository_delete_success(twin_repo, mock_supabase_client):
         "created_at": "2026-06-25T00:00:00Z",
         "updated_at": "2026-06-25T00:00:00Z",
     }
-    mock_supabase_client.table.return_value.execute.return_value = AsyncMock(
-        data=[mock_data]
-    )
+    mock_supabase_client.table.return_value.execute.return_value = AsyncMock(data=[mock_data])
     await twin_repo.delete(twin_id)
 
 
@@ -524,9 +488,7 @@ async def test_twin_repository_list_pagination(twin_repo, mock_supabase_client):
 
 @pytest.mark.asyncio
 async def test_twin_repository_list_db_timeout(twin_repo, mock_supabase_client):
-    mock_supabase_client.table.return_value.execute.side_effect = TimeoutError(
-        "Timeout"
-    )
+    mock_supabase_client.table.return_value.execute.side_effect = TimeoutError("Timeout")
     with pytest.raises(RepositoryError):
         await twin_repo.list(limit=10)
 

@@ -8,20 +8,25 @@ from app.runtime.tasks.models import ITask
 
 class DAGValidationError(ExecutionError):
     """Raised when the DAG is invalid (cycles, missing dependencies)."""
+
     pass
+
 
 class GraphMetadata(BaseModel):
     """Metadata characteristics of the Task DAG."""
+
     node_count: int
     edge_count: int
     depth: int
     max_parallelism: int
+
 
 class TaskDAG(BaseModel):
     """
     Directed Acyclic Graph of Tasks.
     Validates dependencies and provides topological layers for execution.
     """
+
     tasks: dict[UUID, ITask] = Field(default_factory=dict)
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -114,5 +119,5 @@ class TaskDAG(BaseModel):
             node_count=node_count,
             edge_count=edge_count,
             depth=depth,
-            max_parallelism=max_parallelism
+            max_parallelism=max_parallelism,
         )

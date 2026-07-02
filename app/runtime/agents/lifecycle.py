@@ -16,6 +16,7 @@ from app.runtime.agents.results import AgentResult, AgentStatus
 
 logger = logging.getLogger(__name__)
 
+
 class AgentState(str, Enum):
     CREATED = "CREATED"
     INITIALIZED = "INITIALIZED"
@@ -27,21 +28,24 @@ class AgentState(str, Enum):
     COMPLETED = "COMPLETED"
     TERMINATED = "TERMINATED"
 
+
 class InvalidStateTransitionError(Exception):
     pass
+
 
 class AgentLifecycleManager:
     """
     Manages the state transitions for an agent.
     Responsible for broadcasting internal events and triggering hooks.
     """
+
     def __init__(self, agent: BaseAgent, hooks: list[IAgentHooks], agent_id: str, task_id: str):
         self._agent = agent
         self._hooks = hooks
         self._state = AgentState.CREATED
         self._agent_id = agent_id
         self._task_id = task_id
-        self._events_emitted = [] # For testing/telemetry
+        self._events_emitted = []  # For testing/telemetry
 
     @property
     def state(self) -> AgentState:
@@ -84,10 +88,21 @@ class AgentLifecycleManager:
 
             if result.status == AgentStatus.SUCCESS:
                 self._transition(AgentState.COMPLETED, {AgentState.RUNNING})
-                self._emit(AgentCompleted(agent_id=self._agent_id, task_id=self._task_id, metrics=result.metrics))
+                self._emit(
+                    AgentCompleted(
+                        agent_id=self._agent_id, task_id=self._task_id, metrics=result.metrics
+                    )
+                )
             else:
                 self._transition(AgentState.FAILED, {AgentState.RUNNING})
-                self._emit(AgentFailed(agent_id=self._agent_id, task_id=self._task_id, error="Execution failed", metrics=result.metrics))
+                self._emit(
+                    AgentFailed(
+                        agent_id=self._agent_id,
+                        task_id=self._task_id,
+                        error="Execution failed",
+                        metrics=result.metrics,
+                    )
+                )
 
             for hook in self._hooks:
                 hook.after_execute(self._agent, result)
@@ -115,10 +130,18 @@ class AgentLifecycleManager:
             hook.after_resume(self._agent)
 
     def shutdown(self):
-        self._transition(AgentState.TERMINATED, {
-            AgentState.CREATED, AgentState.INITIALIZED, AgentState.READY,
-            AgentState.COMPLETED, AgentState.FAILED, AgentState.SUSPENDED, AgentState.WAITING
-        })
+        self._transition(
+            AgentState.TERMINATED,
+            {
+                AgentState.CREATED,
+                AgentState.INITIALIZED,
+                AgentState.READY,
+                AgentState.COMPLETED,
+                AgentState.FAILED,
+                AgentState.SUSPENDED,
+                AgentState.WAITING,
+            },
+        )
         for hook in self._hooks:
             hook.before_shutdown(self._agent)
 

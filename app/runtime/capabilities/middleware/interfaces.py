@@ -17,7 +17,7 @@ class IMiddleware(ABC):
         self,
         request: CapabilityRequest,
         cap_context: CapabilityContext,
-        mw_context: MiddlewareContext
+        mw_context: MiddlewareContext,
     ) -> MiddlewareDecision:
         """
         Invoked before the capability executes.
@@ -31,7 +31,7 @@ class IMiddleware(ABC):
         request: CapabilityRequest,
         cap_context: CapabilityContext,
         mw_context: MiddlewareContext,
-        result: CapabilityResult
+        result: CapabilityResult,
     ) -> CapabilityResult:
         """
         Invoked after the capability executes.
@@ -45,7 +45,7 @@ class IMiddleware(ABC):
         request: CapabilityRequest,
         cap_context: CapabilityContext,
         mw_context: MiddlewareContext,
-        exception: Exception
+        exception: Exception,
     ) -> MiddlewareDecision:
         """
         Invoked if an exception bubbles up.

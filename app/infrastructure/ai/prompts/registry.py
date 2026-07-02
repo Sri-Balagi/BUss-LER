@@ -11,11 +11,13 @@ logger = structlog.get_logger(__name__)
 
 class PromptNotFoundError(Exception):
     """Raised when a requested prompt ID or version is not found in the registry."""
+
     pass
 
 
 class MissingContextVariableError(Exception):
     """Raised when a required context variable is not provided during resolution."""
+
     pass
 
 
@@ -35,11 +37,7 @@ class PromptRegistry:
             self._prompts[template.prompt_id] = {}
 
         self._prompts[template.prompt_id][template.version] = template
-        logger.debug(
-            "prompt_registered",
-            prompt_id=template.prompt_id,
-            version=template.version
-        )
+        logger.debug("prompt_registered", prompt_id=template.prompt_id, version=template.version)
 
     def get(self, prompt_id: str, version: str) -> PromptTemplate:
         """Retrieve a specific prompt template by ID and version."""
@@ -57,7 +55,7 @@ class PromptRegistry:
         prompt_id: str,
         version: str,
         context: dict[str, Any],
-        provider_name: str | None = None
+        provider_name: str | None = None,
     ) -> str:
         """Resolve a prompt template by interpolating context variables.
 

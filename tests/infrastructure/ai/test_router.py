@@ -56,7 +56,7 @@ def router(mock_registry):
         registry=mock_registry,
         default_provider="gemini",
         fallback_provider="openai",
-        routing_policy=RoutingPolicy.PRIMARY_WITH_FALLBACK
+        routing_policy=RoutingPolicy.PRIMARY_WITH_FALLBACK,
     )
 
 
@@ -80,18 +80,14 @@ def test_capability_filter_excludes_providers_without_supports_streaming(router)
 
 def test_min_json_reliability_excludes_providers(router):
     provider = router.get_provider_for_capability(
-        "supports_structured_output",
-        min_json_reliability=0.9
+        "supports_structured_output", min_json_reliability=0.9
     )
     # openai has 0.5 json_reliability, anthropic doesn't support structured output
     assert provider.provider_name == "gemini"
 
     # If we request JSON reliability > 0.99, no one satisfies
     with pytest.raises(CapabilityNotAvailableError):
-        router.get_provider_for_capability(
-            "supports_structured_output",
-            min_json_reliability=0.99
-        )
+        router.get_provider_for_capability("supports_structured_output", min_json_reliability=0.99)
 
 
 def test_capability_not_available_error(router):
@@ -105,10 +101,9 @@ async def test_fallback_routing(router, mock_registry):
     mock_registry.get_provider("openai")
 
     # Configure primary to fail
-    primary.configure_scenario(MockScenarioConfig(
-        mode=MockScenarioMode.FAILURE_SIMULATION,
-        fail_on_call=1
-    ))
+    primary.configure_scenario(
+        MockScenarioConfig(mode=MockScenarioMode.FAILURE_SIMULATION, fail_on_call=1)
+    )
 
     async def mock_operation(p, *args, **kwargs):
         if p.provider_name == "gemini":
@@ -140,8 +135,7 @@ async def test_llm_fallback_activations_increments(router, mock_registry):
     mock_registry.get_provider("openai")
 
     initial_count = LLM_FALLBACK_ACTIVATIONS.labels(
-        primary_provider="gemini",
-        fallback_provider="openai"
+        primary_provider="gemini", fallback_provider="openai"
     )._value.get()
 
     async def mock_operation(p, *args, **kwargs):
@@ -152,8 +146,7 @@ async def test_llm_fallback_activations_increments(router, mock_registry):
     await router.route_with_fallback(primary, mock_operation)
 
     final_count = LLM_FALLBACK_ACTIVATIONS.labels(
-        primary_provider="gemini",
-        fallback_provider="openai"
+        primary_provider="gemini", fallback_provider="openai"
     )._value.get()
 
     assert final_count == initial_count + 1

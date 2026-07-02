@@ -1,16 +1,16 @@
-import pytest
 import uuid
 from datetime import datetime
-from unittest.mock import AsyncMock, Mock, patch, ANY
+from unittest.mock import ANY, AsyncMock, Mock, patch
 
-from app.workers.memory_worker import MemoryProcessingWorker
-from app.models.events import MemoryLifecycleEvent, EventType
+import pytest
+from app.models.ai import AIResponseMetadata, EmbeddingResponse
 from app.models.enums import EmbeddingStatus, MemoryCategory, MemorySource
-from app.models.ai import EmbeddingResponse, AIResponseMetadata
-from app.services.memory_service import AbstractMemoryService
-from app.services.ai.kernel import AbstractAIKernel
+from app.models.events import EventType, MemoryLifecycleEvent
 from app.repositories.memory_repository import AbstractMemoryRepository
 from app.repositories.vector_repository import AbstractVectorRepository
+from app.services.ai.kernel import AbstractAIKernel
+from app.services.memory_service import AbstractMemoryService
+from app.workers.memory_worker import MemoryProcessingWorker
 
 
 @pytest.fixture
@@ -53,9 +53,7 @@ async def test_worker_skips_unhandled_events(worker):
 
 
 @pytest.mark.asyncio
-async def test_worker_pipeline_success_no_summary(
-    worker, memory_service, ai_kernel, vector_repo
-):
+async def test_worker_pipeline_success_no_summary(worker, memory_service, ai_kernel, vector_repo):
     memory_id = uuid.uuid4()
     twin_id = uuid.uuid4()
 
@@ -102,9 +100,7 @@ async def test_worker_pipeline_success_no_summary(
 
     # Assert summarization
     ai_kernel.summarize.assert_called_once_with("Some memory content")
-    memory_service.update_summary.assert_called_once_with(
-        ANY, memory_id, "Generated summary"
-    )
+    memory_service.update_summary.assert_called_once_with(ANY, memory_id, "Generated summary")
 
     # Assert embedding storage
     vector_repo.upsert.assert_called_once()
@@ -155,9 +151,7 @@ async def test_worker_retries_and_fails(worker, memory_service, ai_kernel):
     # Make summarize always fail
     ai_kernel.summarize.side_effect = Exception("AI Error")
 
-    with patch.object(
-        worker, "_process_memory_pipeline", side_effect=Exception("Hard fail")
-    ):
+    with patch.object(worker, "_process_memory_pipeline", side_effect=Exception("Hard fail")):
         await worker.handle_event(event)
 
     memory_service.update_embedding_status.assert_called_once_with(

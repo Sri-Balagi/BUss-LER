@@ -1,10 +1,10 @@
-import pytest
+from decimal import Decimal
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
-from decimal import Decimal
 
+import pytest
 from app.models.enums import EmbeddingStatus, MemoryCategory, MemorySource
-from app.models.exceptions import MemoryNotFoundError, DuplicateMemoryError
+from app.models.exceptions import DuplicateMemoryError, MemoryNotFoundError
 from app.models.memory import MemoryCreate, MemoryUpdate
 from app.repositories.memory_repository import MemoryMetadataRepository
 

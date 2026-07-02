@@ -5,6 +5,7 @@ class CapabilityPermission(Enum):
     """
     Declarative permissions for capability execution.
     """
+
     MEMORY_READ = auto()
     MEMORY_WRITE = auto()
 

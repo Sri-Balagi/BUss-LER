@@ -96,9 +96,7 @@ def test_create_twin_success(client, mock_twin_service):
     )
     mock_twin_service.create_twin.return_value = mock_twin
 
-    response = client.post(
-        "/api/v1/twins", json={"entity_id": str(entity_id), "state": {"k": "v"}}
-    )
+    response = client.post("/api/v1/twins", json={"entity_id": str(entity_id), "state": {"k": "v"}})
     assert response.status_code == 201
     assert response.json()["id"] == str(twin_id)
 

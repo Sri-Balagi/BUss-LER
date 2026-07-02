@@ -1,6 +1,6 @@
 import uuid
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 from app.intelligence.core.session.models import (
     CognitiveMetrics,
@@ -16,16 +16,18 @@ class ConvergenceStatus(str, Enum):
     REQUEST_MORE_INFORMATION = "REQUEST_MORE_INFORMATION"
     REQUIRE_HUMAN_INPUT = "REQUIRE_HUMAN_INPUT"
 
+
 class CognitiveSession:
     """
     The complete execution context for the Intelligence Layer.
     Isolated entirely from the M5 Runtime ExecutionSession.
     """
+
     def __init__(
         self,
         mode: ReasoningMode = ReasoningMode.ANALYTICAL,
         budget: SessionBudget | None = None,
-        termination_policy: TerminationPolicy | None = None
+        termination_policy: TerminationPolicy | None = None,
     ):
         self.session_id: str = str(uuid.uuid4())
         self.mode: ReasoningMode = mode

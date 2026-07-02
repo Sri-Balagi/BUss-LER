@@ -63,9 +63,7 @@ class QdrantService:
                         distance=distance_metric,
                         on_disk=False,  # Keep in memory for speed in MVP
                     ),
-                    optimizers_config=models.OptimizersConfigDiff(
-                        indexing_threshold=100
-                    ),
+                    optimizers_config=models.OptimizersConfigDiff(indexing_threshold=100),
                 )
 
                 # Apply initialization metadata (collection versioning)
@@ -90,9 +88,7 @@ class QdrantService:
                         field_schema=schema_type,
                     )
             else:
-                logger.info(
-                    "Qdrant collection already exists", collection=collection_name
-                )
+                logger.info("Qdrant collection already exists", collection=collection_name)
 
         except Exception as e:
             logger.error("Failed to initialize Qdrant collections", error=str(e))

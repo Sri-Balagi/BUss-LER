@@ -1,10 +1,11 @@
-﻿"""Prometheus metrics for BizOS.
+"""Prometheus metrics for BizOS.
 
 Exposes HTTP request metrics, runtime execution counters, and exception counts.
 Metrics are collected passively and exposed at /metrics for Prometheus scraping.
 
 NOTE: In production, /metrics should only be accessible on internal networks.
 """
+
 from __future__ import annotations
 
 import time

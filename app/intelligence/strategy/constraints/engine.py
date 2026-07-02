@@ -5,6 +5,7 @@ class StrategicConstraintsEngine:
     """
     Maintains and evaluates dynamic business limits.
     """
+
     def __init__(self):
         self._set = StrategicConstraintSet()
 

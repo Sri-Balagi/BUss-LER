@@ -13,6 +13,7 @@ class ExecutiveObjectivesEngine:
     """
     Creates and maintains the lifecycle of long-term executive objectives.
     """
+
     def create_objective_from_intent(self, intent: ExecutiveIntent) -> ExecutiveObjective:
         # Determine priority and horizon based on classification (mock logic)
         priority = ObjectivePriority.MEDIUM
@@ -34,7 +35,7 @@ class ExecutiveObjectivesEngine:
             priority=priority,
             horizon=horizon,
             success_criteria=intent.requested_outcomes,
-            measurable_outcomes={}
+            measurable_outcomes={},
         )
 
     def activate_objective(self, objective: ExecutiveObjective) -> ExecutiveObjective:

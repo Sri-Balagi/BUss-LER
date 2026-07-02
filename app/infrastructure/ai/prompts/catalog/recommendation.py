@@ -41,5 +41,5 @@ recommendation_generation_v1 = PromptTemplate(
         "business_state",
         "twin_context",
     ],
-    metadata={"capability": "recommendation", "author": "BizOS Core"}
+    metadata={"capability": "recommendation", "author": "BizOS Core"},
 )

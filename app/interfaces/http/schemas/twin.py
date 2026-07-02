@@ -88,8 +88,7 @@ class TwinMetadata(BaseModel):
         default=CURRENT_SCHEMA_VERSION,
         ge=1,
         description=(
-            "Schema version for this twin's data format. "
-            "Used for forward-compatible migrations."
+            "Schema version for this twin's data format. Used for forward-compatible migrations."
         ),
     )
     created_by: str | None = Field(
@@ -113,10 +112,7 @@ class TwinMetadata(BaseModel):
     )
     external_ids: dict = Field(
         default_factory=dict,
-        description=(
-            "External system identifiers. "
-            "Example: {'crm_id': '...', 'stripe_id': '...'}"
-        ),
+        description=("External system identifiers. Example: {'crm_id': '...', 'stripe_id': '...'}"),
     )
 
 

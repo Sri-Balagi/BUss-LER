@@ -2,15 +2,15 @@ import uuid
 from unittest.mock import AsyncMock
 
 import pytest
-
-from app.models.memory import Memory, MemoryCategory, MemorySource, PaginatedMemories
 from app.models.enums import EmbeddingStatus
+from app.models.memory import Memory, MemoryCategory, MemorySource, PaginatedMemories
 
 
 @pytest.mark.asyncio
 async def test_memory_e2e_flow(client):
-    from app.main import app
     from app.api.v1.dependencies import get_memory_service
+
+    from app.main import app
 
     mock_memory_service = AsyncMock()
     app.dependency_overrides[get_memory_service] = lambda: mock_memory_service
@@ -83,7 +83,7 @@ async def test_memory_e2e_flow(client):
     assert data["embedding_status"] == "completed"
 
     # 4. Search Memories
-    from app.models.results import SearchMemoryResult, MemorySearchResultItem
+    from app.models.results import MemorySearchResultItem, SearchMemoryResult
 
     mock_memory_service.search_memories.return_value = SearchMemoryResult(
         items=[MemorySearchResultItem(memory=mock_memory, similarity_score=0.95)],

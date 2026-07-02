@@ -1,12 +1,15 @@
-import pytest
+from decimal import Decimal
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
-from decimal import Decimal
 
-from app.shared.enums import EmbeddingStatus, MemoryCategory, MemorySource
-from app.shared.exceptions.errors import MemoryNotFoundError, DuplicateMemoryError
+import pytest
+
+from app.infrastructure.persistence.postgres.repositories.memory_repository import (
+    MemoryMetadataRepository,
+)
 from app.intelligence.learning.repository.memory import MemoryCreate, MemoryUpdate
-from app.infrastructure.persistence.postgres.repositories.memory_repository import MemoryMetadataRepository
+from app.shared.enums import EmbeddingStatus, MemoryCategory, MemorySource
+from app.shared.exceptions.errors import DuplicateMemoryError, MemoryNotFoundError
 
 
 @pytest.fixture

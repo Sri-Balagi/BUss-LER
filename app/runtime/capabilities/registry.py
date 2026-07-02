@@ -1,5 +1,3 @@
-from typing import List, Optional, Tuple
-
 from app.runtime.capabilities.interfaces import ICapabilityFactory
 from app.runtime.capabilities.models.resolution import (
     CapabilityResolutionContext,
@@ -19,14 +17,13 @@ class CapabilityRegistry:
 
     def unregister(self, capability_id: str, version: str | None = None) -> None:
         self._capabilities = [
-            (s, f) for s, f in self._capabilities
+            (s, f)
+            for s, f in self._capabilities
             if not (s.capability_id == capability_id and (not version or s.version == version))
         ]
 
     def resolve(
-        self,
-        context: CapabilityResolutionContext,
-        strategy: ICapabilityResolutionStrategy = None
+        self, context: CapabilityResolutionContext, strategy: ICapabilityResolutionStrategy = None
     ) -> CapabilityResolutionDecision:
         active_strategy = strategy or self.default_strategy
         return active_strategy.resolve(context, self._capabilities)

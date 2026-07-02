@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Optional
 
 from app.runtime.policies.context import ExecutionPolicyContext
 from app.runtime.retry.backoff import FixedDelay, IBackoffStrategy
@@ -11,6 +10,7 @@ class IRetryStrategy(ABC):
     Evaluates if a failed task should be retried, based on task metadata
     and runtime budget constraints.
     """
+
     @abstractmethod
     def should_retry(self, task: ITask, context: ExecutionPolicyContext, error: Exception) -> bool:
         pass
@@ -19,12 +19,14 @@ class IRetryStrategy(ABC):
     def get_backoff(self, task: ITask) -> IBackoffStrategy:
         pass
 
+
 class DefaultRetryStrategy(IRetryStrategy):
     """
     Standard retry implementation. Retries if the task hasn't exceeded
     its max_retries limit, and if the global budget allows.
     Uses a default exponential backoff if none is specified (we mock a fixed delay here for simplicity unless specified in task).
     """
+
     def __init__(self, default_backoff: IBackoffStrategy | None = None):
         self.default_backoff = default_backoff or FixedDelay(1000.0)
 

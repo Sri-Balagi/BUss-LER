@@ -1,11 +1,13 @@
-import pytest
-from hypothesis import given, settings, HealthCheck, strategies as st
-from app.services.context_validators import DefaultContextValidator
-from app.services.context_policies import ContextPolicy
-from app.models.enterprise_context import ContextSection, ContextItem, ContextProvenance
-from app.models.enums import ContextSource, ContextPriority
+from datetime import UTC, datetime
 from uuid import uuid4
-from datetime import datetime, timezone
+
+import pytest
+from app.models.enterprise_context import ContextItem, ContextProvenance, ContextSection
+from app.models.enums import ContextPriority, ContextSource
+from app.services.context_policies import ContextPolicy
+from app.services.context_validators import DefaultContextValidator
+from hypothesis import HealthCheck, given, settings
+from hypothesis import strategies as st
 
 
 @pytest.fixture
@@ -26,9 +28,7 @@ def policy():
     ranking_score=st.floats(min_value=0.0, max_value=1.0),
     token_estimate=st.integers(min_value=0, max_value=10000),
 )
-def test_validator_properties(
-    validator, policy, confidence, ranking_score, token_estimate
-):
+def test_validator_properties(validator, policy, confidence, ranking_score, token_estimate):
     # Context Validator should never crash on these inputs, just return valid or invalid
     prov = ContextProvenance(
         provider=ContextSource.MEMORY,
@@ -45,9 +45,7 @@ def test_validator_properties(
         priority=ContextPriority.MEDIUM,
         content="data",
         content_type="memory",
-        token_estimate=max(
-            0, token_estimate
-        ),  # Item token estimate usually >= 0 natively
+        token_estimate=max(0, token_estimate),  # Item token estimate usually >= 0 natively
         provenance=prov,
     )
 
@@ -55,7 +53,7 @@ def test_validator_properties(
         source=ContextSource.MEMORY,
         items=[item],
         token_estimate=token_estimate,
-        retrieved_at=datetime.now(timezone.utc),
+        retrieved_at=datetime.now(UTC),
     )
 
     result = validator.validate([section], policy)

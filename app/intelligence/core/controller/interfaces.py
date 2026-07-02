@@ -13,6 +13,7 @@ class IConvergenceEvaluator(ABC):
         """
         pass
 
+
 class ICognitiveCycleController(ABC):
     @abstractmethod
     async def execute_cognitive_loop(self, session: CognitiveSession) -> None:

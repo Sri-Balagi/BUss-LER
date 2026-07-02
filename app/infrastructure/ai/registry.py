@@ -1,5 +1,3 @@
-from typing import Dict
-
 from app.infrastructure.ai.providers.base import ILLMProvider
 from app.shared.exceptions.errors import ProviderConfigurationError
 
@@ -19,9 +17,7 @@ class ProviderRegistry:
     def get_provider(self, name: str) -> ILLMProvider:
         """Retrieve a registered provider by name."""
         if name not in self._providers:
-            raise ProviderConfigurationError(
-                name, f"Provider '{name}' is not registered."
-            )
+            raise ProviderConfigurationError(name, f"Provider '{name}' is not registered.")
         return self._providers[name]
 
     def list_providers(self) -> list[ILLMProvider]:

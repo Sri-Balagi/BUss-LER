@@ -1,7 +1,6 @@
 import logging
 import time
 from collections.abc import Awaitable, Callable
-from typing import List
 
 from app.runtime.capabilities.context import CapabilityContext
 from app.runtime.capabilities.middleware.context import MiddlewareContext
@@ -12,10 +11,12 @@ from app.runtime.capabilities.models.result import CapabilityResult, ExecutionSt
 
 logger = logging.getLogger(__name__)
 
+
 class CapabilityPipeline:
     """
     Manages the sequential execution of middlewares wrapping the capability execution.
     """
+
     def __init__(self, middlewares: list[IMiddleware] = None):
         self.middlewares = middlewares or []
 
@@ -26,7 +27,9 @@ class CapabilityPipeline:
         self,
         request: CapabilityRequest,
         cap_context: CapabilityContext,
-        capability_executor: Callable[[CapabilityRequest, CapabilityContext], Awaitable[CapabilityResult]]
+        capability_executor: Callable[
+            [CapabilityRequest, CapabilityContext], Awaitable[CapabilityResult]
+        ],
     ) -> CapabilityResult:
 
         mw_context = MiddlewareContext()
@@ -41,7 +44,7 @@ class CapabilityPipeline:
                     errors=["Execution denied by middleware: " + mw.__class__.__name__],
                     execution_time_ms=int(time.time() * 1000) - mw_context.start_time_ms,
                     execution_trace_id=request.trace_id,
-                    validation_results=mw_context.metrics
+                    validation_results=mw_context.metrics,
                 )
             elif decision == MiddlewareDecision.SHORT_CIRCUIT:
                 # Assume middleware set some specific result in context
@@ -52,7 +55,7 @@ class CapabilityPipeline:
                     outputs={},
                     warnings=["Execution short-circuited by middleware: " + mw.__class__.__name__],
                     execution_time_ms=int(time.time() * 1000) - mw_context.start_time_ms,
-                    execution_trace_id=request.trace_id
+                    execution_trace_id=request.trace_id,
                 )
             elif decision == MiddlewareDecision.RETRY:
                 pass
@@ -70,7 +73,7 @@ class CapabilityPipeline:
                 outputs={},
                 errors=[str(e)],
                 execution_time_ms=int(time.time() * 1000) - mw_context.start_time_ms,
-                execution_trace_id=request.trace_id
+                execution_trace_id=request.trace_id,
             )
 
         # 4. After Execution

@@ -6,8 +6,11 @@ from app.intelligence.integration.models import ExecutiveIntelligenceResult
 
 class ICognitivePipeline(ABC):
     @abstractmethod
-    def run_pipeline(self, raw_request: str, session: CognitiveSession) -> ExecutiveIntelligenceResult:
+    def run_pipeline(
+        self, raw_request: str, session: CognitiveSession
+    ) -> ExecutiveIntelligenceResult:
         pass
+
 
 class IExecutiveIntelligenceOrchestrator(ABC):
     @abstractmethod

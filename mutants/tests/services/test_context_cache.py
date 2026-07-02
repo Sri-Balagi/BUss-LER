@@ -1,17 +1,17 @@
-import pytest
+import asyncio
 from unittest.mock import MagicMock
 from uuid import uuid4
-import asyncio
 
+import pytest
+from app.models.enterprise_context import EnterpriseContext
+from app.models.enums import ContextStatus
+from app.models.events import ContextInvalidatedEvent
 from app.services.context_cache import (
     MemoryContextCache,
     RedisContextCache,
     build_cache_key,
 )
-from app.models.enterprise_context import EnterpriseContext
-from app.models.enums import ContextStatus
 from app.services.context_freshness import ContextFreshnessPolicy
-from app.models.events import ContextInvalidatedEvent
 
 
 @pytest.fixture

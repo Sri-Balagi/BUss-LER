@@ -4,7 +4,8 @@ Defines the abstract contract for AI providers and capabilities.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, AsyncIterator, TypeVar
+from collections.abc import AsyncIterator
+from typing import Any, TypeVar
 
 from pydantic import BaseModel
 
@@ -22,6 +23,7 @@ T = TypeVar("T", bound=BaseModel)
 
 class ProviderCapabilities(BaseModel):
     """Complete capability declaration for an LLM provider."""
+
     # Identity
     provider_name: str
     default_generation_model: str
@@ -48,7 +50,7 @@ class ProviderCapabilities(BaseModel):
     json_reliability: float = 0.5
     context_faithfulness: float = 0.5
     multilingual_quality: float = 0.5
-    
+
     cost_tier: str = "medium"
     latency_tier: str = "medium"
 
@@ -95,6 +97,7 @@ class ILLMProvider(ABC):
     async def health_check(self) -> dict[str, Any]:
         """Verify provider connectivity and configuration."""
         pass
+
 
 # Backward compatibility alias
 AbstractAIProvider = ILLMProvider

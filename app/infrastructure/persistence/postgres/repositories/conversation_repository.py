@@ -5,7 +5,6 @@ Tables: conversation_threads, conversation_turns
 
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
-from typing import Optional
 from uuid import UUID
 
 import structlog
@@ -41,9 +40,7 @@ class AbstractConversationRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_recent_turns(
-        self, thread_id: UUID, limit: int = 20
-    ) -> list[ConversationTurn]:
+    async def get_recent_turns(self, thread_id: UUID, limit: int = 20) -> list[ConversationTurn]:
         pass
 
     @abstractmethod
@@ -86,9 +83,7 @@ class ConversationRepository(AbstractConversationRepository):
             result = await self._client.table(_THREADS_TABLE).insert(payload).execute()
             return ConversationThread(**result.data[0])
         except Exception as exc:
-            raise RepositoryError(
-                operation="conversation.create_thread", detail=str(exc)
-            ) from exc
+            raise RepositoryError(operation="conversation.create_thread", detail=str(exc)) from exc
 
     async def get_thread(self, thread_id: UUID) -> ConversationThread:
         try:
@@ -106,9 +101,7 @@ class ConversationRepository(AbstractConversationRepository):
         except ConversationNotFoundError:
             raise
         except Exception as exc:
-            raise RepositoryError(
-                operation="conversation.get_thread", detail=str(exc)
-            ) from exc
+            raise RepositoryError(operation="conversation.get_thread", detail=str(exc)) from exc
 
     async def add_turn(self, data: ConversationTurnCreate) -> ConversationTurn:
         now = datetime.now(UTC).isoformat()
@@ -146,13 +139,9 @@ class ConversationRepository(AbstractConversationRepository):
             )
             return ConversationTurn(**result.data[0])
         except Exception as exc:
-            raise RepositoryError(
-                operation="conversation.add_turn", detail=str(exc)
-            ) from exc
+            raise RepositoryError(operation="conversation.add_turn", detail=str(exc)) from exc
 
-    async def get_recent_turns(
-        self, thread_id: UUID, limit: int = 20
-    ) -> list[ConversationTurn]:
+    async def get_recent_turns(self, thread_id: UUID, limit: int = 20) -> list[ConversationTurn]:
         try:
             result = (
                 await self._client.table(_TURNS_TABLE)
@@ -195,9 +184,7 @@ class ConversationRepository(AbstractConversationRepository):
                 offset=offset,
             )
         except Exception as exc:
-            raise RepositoryError(
-                operation="conversation.list_threads", detail=str(exc)
-            ) from exc
+            raise RepositoryError(operation="conversation.list_threads", detail=str(exc)) from exc
 
     async def archive_thread(self, thread_id: UUID) -> ConversationThread:
         now = datetime.now(UTC).isoformat()
@@ -220,9 +207,7 @@ class ConversationRepository(AbstractConversationRepository):
         except ConversationNotFoundError:
             raise
         except Exception as exc:
-            raise RepositoryError(
-                operation="conversation.archive_thread", detail=str(exc)
-            ) from exc
+            raise RepositoryError(operation="conversation.archive_thread", detail=str(exc)) from exc
 
     async def health_check(self) -> dict:
         try:

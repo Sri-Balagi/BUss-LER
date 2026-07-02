@@ -1,7 +1,6 @@
 import uuid
 from datetime import UTC, datetime
 from enum import Enum
-from typing import Optional
 
 from pydantic import Field
 
@@ -27,15 +26,11 @@ class DomainEvent(DomainBaseModel):
 
     event_id: uuid.UUID = Field(default_factory=uuid.uuid4)
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
-    correlation_id: str = Field(
-        ..., description="Trace ID linking operations together."
-    )
+    correlation_id: str = Field(..., description="Trace ID linking operations together.")
     causation_id: str | None = Field(
         default=None, description="The ID of the event that caused this event."
     )
-    source: str = Field(
-        default="bizos-core", description="The system that emitted the event."
-    )
+    source: str = Field(default="bizos-core", description="The system that emitted the event.")
     version: str = Field(default="1.0", description="Event schema version.")
 
 

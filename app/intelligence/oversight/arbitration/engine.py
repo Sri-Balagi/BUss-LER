@@ -1,5 +1,4 @@
 import uuid
-from typing import List
 
 from app.intelligence.decision.decision.models import ExecutiveDecision
 from app.intelligence.oversight.arbitration.models import ArbitrationDecision, ArbitrationReason
@@ -9,6 +8,7 @@ class ExecutiveArbitrationEngine:
     """
     Selects between competing candidates; does not create new plans or decisions.
     """
+
     def arbitrate_decisions(self, decisions: list[ExecutiveDecision]) -> ArbitrationDecision:
         if not decisions:
             raise ValueError("No decisions provided for arbitration.")
@@ -22,5 +22,5 @@ class ExecutiveArbitrationEngine:
             selected_decision=selected,
             reason=ArbitrationReason.HIGHER_CONFIDENCE,
             rationale="Deterministic selection of first candidate in mock arbitration.",
-            discarded_decision_ids=discarded
+            discarded_decision_ids=discarded,
         )

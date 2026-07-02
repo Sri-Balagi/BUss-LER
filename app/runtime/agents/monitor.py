@@ -6,6 +6,7 @@ class AgentHealthMonitor:
     Passive advisory telemetry for agent health.
     Does not make routing decisions.
     """
+
     def __init__(self):
         self._health_store: dict[str, AgentHealth] = {}
         # We also might track running counts, total durations etc.
@@ -60,5 +61,5 @@ class AgentHealthMonitor:
     def get_health(self, agent_id: str) -> AgentHealth:
         """Retrieves advisory health."""
         if agent_id not in self._health_store:
-            return AgentHealth() # Default healthy state
+            return AgentHealth()  # Default healthy state
         return self._health_store[agent_id]

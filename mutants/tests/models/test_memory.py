@@ -1,12 +1,11 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 from uuid import uuid4
 
 import pytest
-from pydantic import ValidationError
-
 from app.models.enums import EmbeddingStatus, MemoryCategory, MemorySource
 from app.models.memory import Memory, MemoryCreate, MemoryUpdate
+from pydantic import ValidationError
 
 
 def test_memory_create_valid():
@@ -23,9 +22,7 @@ def test_memory_create_valid():
     assert model.title == "Vendor contract signed"
     assert model.memory_category == MemoryCategory.EVENT
     assert model.source == MemorySource.EXECUTION
-    assert (
-        model.content == "The entity successfully signed the contract with Acme Corp."
-    )
+    assert model.content == "The entity successfully signed the contract with Acme Corp."
     assert model.importance == Decimal("0.85")
     assert model.embedding_status == EmbeddingStatus.PENDING
     assert model.metadata == {"vendor_id": "acme-123"}
@@ -83,8 +80,8 @@ def test_memory_valid():
         "importance": Decimal("0.50"),
         "embedding_status": EmbeddingStatus.FAILED,
         "metadata": {},
-        "created_at": datetime.now(timezone.utc),
-        "updated_at": datetime.now(timezone.utc),
+        "created_at": datetime.now(UTC),
+        "updated_at": datetime.now(UTC),
         "deleted_at": None,
     }
     model = Memory(**data)

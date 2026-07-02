@@ -5,7 +5,6 @@ implements the specific MemoryVectorRepository for Qdrant persistence.
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Optional
 from uuid import UUID
 
 from qdrant_client import AsyncQdrantClient

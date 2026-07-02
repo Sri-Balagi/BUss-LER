@@ -1,5 +1,4 @@
 import uuid
-from typing import List
 
 from app.intelligence.decision.planning.models import ExecutiveDirective
 from app.intelligence.runtime_bridge.errors import RuntimeIntegrationError
@@ -21,6 +20,7 @@ class IntelligenceRuntimeBridge(IIntelligenceRuntimeBridge):
     """
     Acts as the exclusive translation boundary between M6 Intelligence and M5 Runtime.
     """
+
     def __init__(self, adapter: ISupervisorAdapter = None):
         self.adapter = adapter or SupervisorAdapter()
 
@@ -32,8 +32,8 @@ class IntelligenceRuntimeBridge(IIntelligenceRuntimeBridge):
                     summary_id=str(uuid.uuid4()),
                     overall_status=RuntimeExecutionStatus.COMPLETED,
                     directive_mappings=[],
-                    metrics=RuntimeMetrics()
-                )
+                    metrics=RuntimeMetrics(),
+                ),
             )
 
         mappings = []
@@ -45,11 +45,13 @@ class IntelligenceRuntimeBridge(IIntelligenceRuntimeBridge):
                 handle = self.adapter.dispatch_directive(directive)
                 summary = self.adapter.get_execution_summary(handle)
 
-                mappings.append(DirectiveExecutionMapping(
-                    directive_id=directive.directive_id,
-                    runtime_task_id=handle,
-                    status=summary.overall_status
-                ))
+                mappings.append(
+                    DirectiveExecutionMapping(
+                        directive_id=directive.directive_id,
+                        runtime_task_id=handle,
+                        status=summary.overall_status,
+                    )
+                )
 
                 if summary.overall_status != RuntimeExecutionStatus.COMPLETED:
                     overall_status = summary.overall_status
@@ -64,10 +66,12 @@ class IntelligenceRuntimeBridge(IIntelligenceRuntimeBridge):
                     summary_id=str(uuid.uuid4()),
                     overall_status=overall_status,
                     directive_mappings=mappings,
-                    metrics=metrics
-                )
+                    metrics=metrics,
+                ),
             )
         except RuntimeIntegrationError:
             raise
         except Exception as e:
-            raise RuntimeIntegrationError(f"Unexpected error in bridge: {str(e)}", "IntelligenceRuntimeBridge")
+            raise RuntimeIntegrationError(
+                f"Unexpected error in bridge: {str(e)}", "IntelligenceRuntimeBridge"
+            )

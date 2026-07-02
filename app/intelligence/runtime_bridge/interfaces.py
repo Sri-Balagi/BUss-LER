@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import List
 
 from app.intelligence.decision.planning.models import ExecutiveDirective
 from app.intelligence.runtime_bridge.models import ExecutionSummary, RuntimeIntegrationResult
@@ -15,6 +14,7 @@ class ISupervisorAdapter(ABC):
     def get_execution_summary(self, handle: str) -> ExecutionSummary:
         """Retrieves execution state for a given handle."""
         pass
+
 
 class IIntelligenceRuntimeBridge(ABC):
     @abstractmethod

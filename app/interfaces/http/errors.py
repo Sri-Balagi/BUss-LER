@@ -22,9 +22,7 @@ from app.shared.exceptions.errors import (
 logger = structlog.get_logger()
 
 
-async def entity_not_found_handler(
-    request: Request, exc: EntityNotFoundError
-) -> JSONResponse:
+async def entity_not_found_handler(request: Request, exc: EntityNotFoundError) -> JSONResponse:
     logger.warning("Entity not found", url=str(request.url), detail=exc.detail)
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
@@ -32,9 +30,7 @@ async def entity_not_found_handler(
     )
 
 
-async def generic_not_found_handler(
-    request: Request, exc: NotFoundError
-) -> JSONResponse:
+async def generic_not_found_handler(request: Request, exc: NotFoundError) -> JSONResponse:
     logger.warning("Resource not found", url=str(request.url), detail=exc.detail)
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
@@ -42,9 +38,7 @@ async def generic_not_found_handler(
     )
 
 
-async def generic_bizos_error_handler(
-    request: Request, exc: BizOSError
-) -> JSONResponse:
+async def generic_bizos_error_handler(request: Request, exc: BizOSError) -> JSONResponse:
     logger.warning("BizOS domain error", url=str(request.url), detail=exc.detail)
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
@@ -52,9 +46,7 @@ async def generic_bizos_error_handler(
     )
 
 
-async def memory_not_found_handler(
-    request: Request, exc: MemoryNotFoundError
-) -> JSONResponse:
+async def memory_not_found_handler(request: Request, exc: MemoryNotFoundError) -> JSONResponse:
     logger.warning("Memory not found", url=str(request.url), detail=exc.detail)
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
@@ -62,9 +54,7 @@ async def memory_not_found_handler(
     )
 
 
-async def twin_not_found_handler(
-    request: Request, exc: TwinNotFoundError
-) -> JSONResponse:
+async def twin_not_found_handler(request: Request, exc: TwinNotFoundError) -> JSONResponse:
     logger.warning("Twin not found", url=str(request.url), detail=exc.detail)
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
@@ -72,9 +62,7 @@ async def twin_not_found_handler(
     )
 
 
-async def version_conflict_handler(
-    request: Request, exc: VersionConflictError
-) -> JSONResponse:
+async def version_conflict_handler(request: Request, exc: VersionConflictError) -> JSONResponse:
     logger.warning("Version conflict", url=str(request.url), detail=exc.detail)
     return JSONResponse(
         status_code=status.HTTP_409_CONFLICT,
@@ -82,9 +70,7 @@ async def version_conflict_handler(
     )
 
 
-async def duplicate_twin_handler(
-    request: Request, exc: DuplicateTwinError
-) -> JSONResponse:
+async def duplicate_twin_handler(request: Request, exc: DuplicateTwinError) -> JSONResponse:
     logger.warning("Duplicate twin", url=str(request.url), detail=exc.detail)
     return JSONResponse(
         status_code=status.HTTP_409_CONFLICT,
@@ -92,9 +78,7 @@ async def duplicate_twin_handler(
     )
 
 
-async def duplicate_memory_handler(
-    request: Request, exc: DuplicateMemoryError
-) -> JSONResponse:
+async def duplicate_memory_handler(request: Request, exc: DuplicateMemoryError) -> JSONResponse:
     logger.warning("Duplicate memory", url=str(request.url), detail=exc.detail)
     return JSONResponse(
         status_code=status.HTTP_409_CONFLICT,
@@ -102,9 +86,7 @@ async def duplicate_memory_handler(
     )
 
 
-async def domain_validation_handler(
-    request: Request, exc: DomainValidationError
-) -> JSONResponse:
+async def domain_validation_handler(request: Request, exc: DomainValidationError) -> JSONResponse:
     logger.warning("Domain validation failed", url=str(request.url), detail=exc.detail)
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -112,9 +94,7 @@ async def domain_validation_handler(
     )
 
 
-async def repository_error_handler(
-    request: Request, exc: RepositoryError
-) -> JSONResponse:
+async def repository_error_handler(request: Request, exc: RepositoryError) -> JSONResponse:
     logger.error("Repository error", url=str(request.url), detail=exc.detail)
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

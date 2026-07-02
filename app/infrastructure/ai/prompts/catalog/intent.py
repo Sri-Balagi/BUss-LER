@@ -34,5 +34,5 @@ intent_classification_v1 = PromptTemplate(
         "}}"
     ),
     context_variables=["content", "business_context"],
-    metadata={"capability": "intent", "author": "BizOS Core"}
+    metadata={"capability": "intent", "author": "BizOS Core"},
 )

@@ -14,7 +14,6 @@ Table: intents
 import time
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
-from typing import Optional
 from uuid import UUID
 
 import structlog
@@ -98,17 +97,13 @@ class IntentRepository(AbstractIntentRepository):
             insert_data["metadata"] = data.metadata
 
         try:
-            response = (
-                await self._client.table(self._table_name).insert(insert_data).execute()
-            )
+            response = await self._client.table(self._table_name).insert(insert_data).execute()
         except Exception as exc:
             logger.error("Failed to create intent", error=str(exc))
             raise RepositoryError("intent.create", str(exc)) from exc
 
         duration_ms = (time.time() - start) * 1000
-        logger.info(
-            "Created intent", intent_id=response.data[0]["id"], latency_ms=duration_ms
-        )
+        logger.info("Created intent", intent_id=response.data[0]["id"], latency_ms=duration_ms)
         return self._deserialize(response.data[0])
 
     async def get_by_id(self, intent_id: UUID) -> Intent:
@@ -121,9 +116,7 @@ class IntentRepository(AbstractIntentRepository):
                 .execute()
             )
         except Exception as exc:
-            logger.error(
-                "Failed to fetch intent", intent_id=str(intent_id), error=str(exc)
-            )
+            logger.error("Failed to fetch intent", intent_id=str(intent_id), error=str(exc))
             raise RepositoryError("intent.get_by_id", str(exc)) from exc
 
         if not response.data:
@@ -174,9 +167,7 @@ class IntentRepository(AbstractIntentRepository):
             count=len(items),
             latency_ms=duration_ms,
         )
-        return PaginatedIntents(
-            items=items, total_count=total, limit=limit, offset=offset
-        )
+        return PaginatedIntents(items=items, total_count=total, limit=limit, offset=offset)
 
     async def update(self, intent_id: UUID, data: IntentUpdate) -> Intent:
         start = time.time()
@@ -190,17 +181,11 @@ class IntentRepository(AbstractIntentRepository):
         # IntentAnalysis serialization
         if "analysis" in update_data and update_data["analysis"] is not None:
             analysis_obj = data.analysis
-            update_data["analysis"] = (
-                analysis_obj.model_dump() if analysis_obj else None
-            )
+            update_data["analysis"] = analysis_obj.model_dump() if analysis_obj else None
         # Datetime serialization
-        if "classified_at" in update_data and isinstance(
-            update_data["classified_at"], datetime
-        ):
+        if "classified_at" in update_data and isinstance(update_data["classified_at"], datetime):
             update_data["classified_at"] = update_data["classified_at"].isoformat()
-        if "fulfilled_at" in update_data and isinstance(
-            update_data["fulfilled_at"], datetime
-        ):
+        if "fulfilled_at" in update_data and isinstance(update_data["fulfilled_at"], datetime):
             update_data["fulfilled_at"] = update_data["fulfilled_at"].isoformat()
 
         if not update_data:
@@ -214,9 +199,7 @@ class IntentRepository(AbstractIntentRepository):
                 .execute()
             )
         except Exception as exc:
-            logger.error(
-                "Failed to update intent", intent_id=str(intent_id), error=str(exc)
-            )
+            logger.error("Failed to update intent", intent_id=str(intent_id), error=str(exc))
             raise RepositoryError("intent.update", str(exc)) from exc
 
         if not response.data:
@@ -237,18 +220,14 @@ class IntentRepository(AbstractIntentRepository):
                 .execute()
             )
         except Exception as exc:
-            logger.error(
-                "Failed to soft delete intent", intent_id=str(intent_id), error=str(exc)
-            )
+            logger.error("Failed to soft delete intent", intent_id=str(intent_id), error=str(exc))
             raise RepositoryError("intent.soft_delete", str(exc)) from exc
 
         if not response.data:
             raise IntentNotFoundError(str(intent_id))
 
         duration_ms = (time.time() - start) * 1000
-        logger.info(
-            "Soft deleted intent", intent_id=str(intent_id), latency_ms=duration_ms
-        )
+        logger.info("Soft deleted intent", intent_id=str(intent_id), latency_ms=duration_ms)
 
     async def health_check(self) -> dict:
         status = {"status": "unhealthy", "database": False, "table": False}

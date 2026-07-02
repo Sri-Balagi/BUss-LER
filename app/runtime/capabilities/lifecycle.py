@@ -9,17 +9,23 @@ from app.runtime.capabilities.models.result import CapabilityResult, ExecutionSt
 
 logger = logging.getLogger(__name__)
 
+
 class CapabilityLifecycleManager:
     """
     Manages lifecycle transitions for a capability.
     """
+
     def __init__(self, capability: ICapability, middlewares: list[IMiddleware] = None):
         self.capability = capability
         self.pipeline = CapabilityPipeline(middlewares)
 
-    async def execute_request(self, request: CapabilityRequest, context: CapabilityContext) -> CapabilityResult:
+    async def execute_request(
+        self, request: CapabilityRequest, context: CapabilityContext
+    ) -> CapabilityResult:
 
-        async def capability_executor(req: CapabilityRequest, ctx: CapabilityContext) -> CapabilityResult:
+        async def capability_executor(
+            req: CapabilityRequest, ctx: CapabilityContext
+        ) -> CapabilityResult:
             try:
                 # Initialize
                 await self.capability.initialize(ctx)
@@ -45,5 +51,5 @@ class CapabilityLifecycleManager:
                 outputs={},
                 errors=[str(e)],
                 execution_time_ms=0,
-                execution_trace_id=request.trace_id
+                execution_trace_id=request.trace_id,
             )

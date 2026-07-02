@@ -57,16 +57,10 @@ class TwinRepository:
         )
 
         try:
-            response = (
-                await self._client.table(self._table_name).insert(insert_data).execute()
-            )
+            response = await self._client.table(self._table_name).insert(insert_data).execute()
         except Exception as exc:
             error_str = str(exc).lower()
-            if (
-                "duplicate" in error_str
-                or "23505" in error_str
-                or "unique" in error_str
-            ):
+            if "duplicate" in error_str or "23505" in error_str or "unique" in error_str:
                 raise DuplicateTwinError(str(data.entity_id)) from exc
             logger.error("Failed to create twin", error=str(exc))
             raise RepositoryError("twin.create", str(exc)) from exc
@@ -123,9 +117,7 @@ class TwinRepository:
                 .execute()
             )
         except Exception as exc:
-            logger.error(
-                "Failed to get twin by entity", entity_id=str(entity_id), error=str(exc)
-            )
+            logger.error("Failed to get twin by entity", entity_id=str(entity_id), error=str(exc))
             raise RepositoryError("twin.get_by_entity_id", str(exc)) from exc
 
         if not response.data:
@@ -167,9 +159,7 @@ class TwinRepository:
         total = response.count if response.count is not None else len(items)
         return items, total
 
-    async def update_with_snapshot(
-        self, twin_id: UUID, data: DigitalTwinUpdate
-    ) -> DigitalTwin:
+    async def update_with_snapshot(self, twin_id: UUID, data: DigitalTwinUpdate) -> DigitalTwin:
         """Atomically update a twin via the database RPC function.
 
         The ``update_twin_with_snapshot`` RPC executes in a single
@@ -210,9 +200,7 @@ class TwinRepository:
         )
 
         try:
-            response = await self._client.rpc(
-                "update_twin_with_snapshot", params
-            ).execute()
+            response = await self._client.rpc("update_twin_with_snapshot", params).execute()
         except Exception as exc:
             error_msg = str(exc)
             self._handle_rpc_error(error_msg, twin_id, data.expected_version, exc)
@@ -240,10 +228,7 @@ class TwinRepository:
 
         try:
             response = (
-                await self._client.table(self._table_name)
-                .delete()
-                .eq("id", str(twin_id))
-                .execute()
+                await self._client.table(self._table_name).delete().eq("id", str(twin_id)).execute()
             )
         except Exception as exc:
             logger.error("Failed to delete twin", twin_id=str(twin_id), error=str(exc))

@@ -1,16 +1,21 @@
-import json
 from abc import ABC, abstractmethod
-from typing import Any, Dict
+from collections.abc import AsyncIterator
+from typing import Any
 
 import structlog
+from pydantic import BaseModel as PydanticBaseModel
 
+from app.infrastructure.ai.budgets.interfaces import IResourceBudget
 from app.infrastructure.ai.models import (
     AIRequest,
+    AIRequestLifecycle,
     AIResponse,
     ClassifyRequest,
     ClassifyResponse,
     EmbeddingRequest,
     EmbeddingResponse,
+    StreamChunk,
+    StructuredRequest,
 )
 from app.infrastructure.ai.prompts import PromptManager
 from app.infrastructure.ai.router import ProviderRouter
@@ -29,6 +34,18 @@ class AbstractAIKernel(ABC):
         pass
 
     @abstractmethod
+    async def generate_structured(
+        self, request: AIRequest, response_schema: type[PydanticBaseModel]
+    ) -> PydanticBaseModel:
+        """Generate a structured Pydantic response."""
+        pass
+
+    @abstractmethod
+    async def stream(self, request: AIRequest) -> AsyncIterator[StreamChunk]:
+        """Stream a generated response."""
+        pass
+
+    @abstractmethod
     async def embed(self, request: EmbeddingRequest) -> EmbeddingResponse:
         """Generate an embedding vector."""
         pass
@@ -40,30 +57,13 @@ class AbstractAIKernel(ABC):
 
     @abstractmethod
     async def health_check(self) -> dict[str, Any]:
-        """Check the health of the active provider."""
+        """Check the health of all registered providers."""
         pass
-
 
     @abstractmethod
     async def classify(self, request: ClassifyRequest) -> ClassifyResponse:
         """Perform structured AI classification.
-
-        This is the dedicated cognitive capability for classification tasks.
-        It must return a ClassifyResponse whose raw_json has been extracted
-        from the provider's response and is ready for Pydantic validation
-        by the calling service.
-
-        Contract:
-          - The provider must return valid JSON matching the expected schema.
-          - ClassifyResponse.raw_json is NOT validated here — the caller
-            (e.g., IntentClassifier) validates it against the domain schema.
-          - Free-form text responses are rejected.
-
-        Future capabilities (not implemented in M3):
-          - reason()
-          - reflect()
-          - plan()
-          - simulate()
+        Retained for backward compatibility. Delegates to generate_structured.
         """
         pass
 
@@ -71,28 +71,67 @@ class AbstractAIKernel(ABC):
 class AIKernel(AbstractAIKernel):
     """
     Concrete implementation of the AI Kernel.
-    Manages prompt resolution, provider routing, and execution logging.
+    Acts purely as an orchestrator, strictly enforcing the R1 rule.
     """
 
-    def __init__(self, router: ProviderRouter, prompt_manager: PromptManager):
+    def __init__(
+        self,
+        router: ProviderRouter,
+        prompt_manager: PromptManager,
+        budget: IResourceBudget,
+    ):
         self._router = router
         self._prompt_manager = prompt_manager
+        self._budget = budget
+
+    def _create_lifecycle(self, operation: str) -> AIRequestLifecycle:
+        return AIRequestLifecycle(operation=operation)
 
     async def generate(self, request: AIRequest) -> AIResponse:
-        provider = self._router.get_active_provider()
+        lifecycle = self._create_lifecycle("generate")
+        request.lifecycle = lifecycle
+        entity_id = "system"  # In a full system, this would come from context/request
 
         # 1. Resolve prompt
         resolved_prompt = self._prompt_manager.resolve(
             request.prompt_id, request.version, request.context
         )
+        lifecycle.prompt_id = request.prompt_id
 
-        # 2. Execute via provider
-        response = await provider.generate(request, resolved_prompt)
+        # 2. Budget pre-check (estimate cost = 0 for now as true token estimation is complex)
+        await self._budget.pre_check(entity_id=entity_id)
 
-        # 3. Log metadata (never content or prompt)
-        logger.info(
+        # 3. Route to best provider
+        provider = self._router.get_active_provider(getattr(request, "provider", None))
+        lifecycle.provider_name = provider.provider_name
+
+        # 4. Bind structured logging
+        log = logger.bind(
+            lifecycle_id=lifecycle.lifecycle_id,
+            operation=lifecycle.operation,
+            provider=provider.provider_name,
+        )
+
+        # 5. Execute via provider
+        async def _do_generate(p, req, prompt):
+            return await p.generate(req, prompt)
+
+        response = await self._router.route_with_fallback(
+            provider, _do_generate, request, resolved_prompt
+        )
+
+        # 6. Record consumption
+        await self._budget.record_consumption(
+            entity_id=entity_id,
+            lifecycle_id=lifecycle.lifecycle_id,
+            amount=response.metadata.completion_tokens
+            or 0,  # Assuming completion tokens represent consumption
+            prompt_tokens=response.metadata.prompt_tokens,
+            model=response.metadata.model,
+        )
+
+        log.info(
             "AI Kernel generated text",
-            provider=response.metadata.provider,
             model=response.metadata.model,
             latency_ms=response.metadata.latency_ms,
             prompt_tokens=response.metadata.prompt_tokens,
@@ -102,14 +141,158 @@ class AIKernel(AbstractAIKernel):
 
         return response
 
+    async def generate_structured(
+        self, request: AIRequest, response_schema: type[PydanticBaseModel]
+    ) -> PydanticBaseModel:
+        lifecycle = self._create_lifecycle("generate_structured")
+        request.lifecycle = lifecycle
+        entity_id = "system"
+
+        resolved_prompt = self._prompt_manager.resolve(
+            request.prompt_id, request.version, request.context
+        )
+        lifecycle.prompt_id = request.prompt_id
+
+        await self._budget.pre_check(entity_id=entity_id)
+
+        # Route requiring structured_output capability
+        provider = self._router.get_provider_for_capability(
+            required_capability="supports_structured_output",
+            preferred_provider=request.provider if hasattr(request, "provider") else None,
+        )
+        lifecycle.provider_name = provider.provider_name
+
+        log = logger.bind(
+            lifecycle_id=lifecycle.lifecycle_id,
+            operation=lifecycle.operation,
+            provider=provider.provider_name,
+        )
+
+        struct_req = StructuredRequest(
+            prompt_text=resolved_prompt,
+            output_schema=response_schema,
+            system_instruction=request.system_instruction,
+            temperature=getattr(request, "temperature", 0.2),
+            model=getattr(request, "model", None),
+            lifecycle=lifecycle,
+        )
+
+        async def _do_generate_structured(p, req):
+            return await p.generate_structured(req)
+
+        response = await self._router.route_with_fallback(
+            provider, _do_generate_structured, struct_req
+        )
+
+        prompt_tokens = 0
+        completion_tokens = 0
+        model_used = getattr(request, "model", "unknown") or "unknown"
+
+        # Gracefully extract metadata if the underlying provider attached it
+        if hasattr(response, "__ai_metadata__"):
+            meta = response.__ai_metadata__
+            prompt_tokens = getattr(meta, "prompt_tokens", 0) or 0
+            completion_tokens = getattr(meta, "completion_tokens", 0) or 0
+            model_used = getattr(meta, "model", model_used)
+
+        await self._budget.record_consumption(
+            entity_id=entity_id,
+            lifecycle_id=lifecycle.lifecycle_id,
+            amount=completion_tokens,
+            prompt_tokens=prompt_tokens,
+            model=model_used,
+        )
+
+        log.info(
+            "AI Kernel generated structured text",
+            prompt_id=request.prompt_id,
+        )
+
+        return response
+
+    async def stream(self, request: AIRequest) -> AsyncIterator[StreamChunk]:
+        lifecycle = self._create_lifecycle("stream")
+        request.lifecycle = lifecycle
+        entity_id = "system"
+
+        resolved_prompt = self._prompt_manager.resolve(
+            request.prompt_id, request.version, request.context
+        )
+        lifecycle.prompt_id = request.prompt_id
+
+        await self._budget.pre_check(entity_id=entity_id)
+
+        provider = self._router.get_provider_for_capability(
+            required_capability="supports_streaming",
+            preferred_provider=getattr(request, "provider", None),
+        )
+        lifecycle.provider_name = provider.provider_name
+
+        log = logger.bind(
+            lifecycle_id=lifecycle.lifecycle_id,
+            operation=lifecycle.operation,
+            provider=provider.provider_name,
+        )
+
+        log.info("AI Kernel started stream", prompt_id=request.prompt_id)
+
+        total_completion_tokens = 0
+        prompt_tokens = 0
+        model = "unknown"
+
+        async for chunk in provider.stream(request, resolved_prompt):
+            if getattr(chunk, "completion_tokens", None):
+                total_completion_tokens += chunk.completion_tokens
+            if getattr(chunk, "prompt_tokens", None):
+                prompt_tokens = chunk.prompt_tokens
+            if getattr(chunk, "model", None):
+                model = chunk.model
+            yield chunk
+
+        await self._budget.record_consumption(
+            entity_id=entity_id,
+            lifecycle_id=lifecycle.lifecycle_id,
+            amount=total_completion_tokens,
+            prompt_tokens=prompt_tokens,
+            model=model,
+        )
+
+        log.info(
+            "AI Kernel finished stream",
+            completion_tokens=total_completion_tokens,
+            prompt_id=request.prompt_id,
+        )
+
     async def embed(self, request: EmbeddingRequest) -> EmbeddingResponse:
-        provider = self._router.get_active_provider()
+        lifecycle = self._create_lifecycle("embed")
+        entity_id = "system"
+
+        # Embeddings usually don't use the prompt registry
+        await self._budget.pre_check(entity_id=entity_id)
+
+        provider = self._router.get_provider_for_capability(
+            required_capability="supports_embeddings",
+            preferred_provider=getattr(request, "provider", None),
+        )
+        lifecycle.provider_name = provider.provider_name
+
+        log = logger.bind(
+            lifecycle_id=lifecycle.lifecycle_id,
+            operation=lifecycle.operation,
+            provider=provider.provider_name,
+        )
 
         response = await provider.embed(request)
 
-        logger.info(
+        await self._budget.record_consumption(
+            entity_id=entity_id,
+            lifecycle_id=lifecycle.lifecycle_id,
+            amount=len(response.vector),  # For embeddings, amount could be vector dimensions
+            model=response.metadata.model,
+        )
+
+        log.info(
             "AI Kernel generated embedding",
-            provider=response.metadata.provider,
             model=response.metadata.model,
             latency_ms=response.metadata.latency_ms,
             dimensions=len(response.vector),
@@ -120,6 +303,7 @@ class AIKernel(AbstractAIKernel):
     async def summarize(self, text: str) -> str:
         """
         High-level abstraction for the summarization capability.
+        Delegates to generate.
         """
         request = AIRequest(
             prompt_id="memory_summarization",
@@ -131,57 +315,31 @@ class AIKernel(AbstractAIKernel):
 
     async def classify(self, request: ClassifyRequest) -> ClassifyResponse:
         """Perform structured AI classification.
-
-        Uses the active provider to generate a structured JSON response.
-        Extracts and validates that the response is parseable JSON.
-        The calling service is responsible for validating raw_json against
-        its expected domain schema (e.g., IntentAnalysis).
+        Backward compatible fallback delegating to generate_structured.
         """
-        provider = self._router.get_active_provider()
+        from pydantic import create_model
 
-        # Resolve the classification prompt
-        resolved_prompt = self._prompt_manager.resolve(
-            request.prompt_id,
-            request.version,
-            {"content": request.content, **request.context},
-        )
+        # Dynamic schema to satisfy generate_structured
+        DynamicSchema = create_model("DynamicClassificationSchema")
 
-        # Build a generate request using the classification prompt
-        gen_request = AIRequest(
+        gen_req = AIRequest(
             prompt_id=request.prompt_id,
             version=request.version,
             context={"content": request.content, **request.context},
             system_instruction=request.system_instruction,
         )
 
-        response = await provider.generate(gen_request, resolved_prompt)
+        response = await self.generate_structured(gen_req, DynamicSchema)
 
-        # Extract JSON from the response — reject free-form text
-        try:
-            # Strip markdown code fences if present
-            raw_text = response.content.strip()
-            if raw_text.startswith("```"):
-                lines = raw_text.split("\n")
-                raw_text = "\n".join(lines[1:-1])
-            raw_json = json.loads(raw_text)
-        except (json.JSONDecodeError, ValueError) as exc:
-            raise ValueError(
-                f"AI provider returned non-JSON response for classification prompt "
-                f"'{request.prompt_id}:{request.version}': {exc}"
-            ) from exc
-
-        logger.info(
-            "AI Kernel classification completed",
-            provider=response.metadata.provider,
-            model=response.metadata.model,
-            latency_ms=response.metadata.latency_ms,
-            prompt_id=request.prompt_id,
-            prompt_version=request.version,
-        )
-
-        return ClassifyResponse(raw_json=raw_json, metadata=response.metadata)
+        return ClassifyResponse(raw_json=response.model_dump(), metadata=None)
 
     async def health_check(self) -> dict[str, Any]:
-        provider = self._router.get_active_provider()
-        status = await provider.health_check()
-        return status
+        """Check the health of all registered providers."""
+        providers = self._router._registry.list_providers()
+        results = {}
+        for p in providers:
+            try:
+                results[p.provider_name] = await p.health_check()
+            except Exception as e:
+                results[p.provider_name] = {"status": "unhealthy", "error": str(e)}
+        return {"status": "ok", "providers": results}

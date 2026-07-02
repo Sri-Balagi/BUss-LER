@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
 from collections.abc import Callable
-from typing import List
 
 
 class Hypothesis:
     def __init__(self, description: str):
         self.description = description
+
 
 class IExecutiveBlackboard(ABC):
     @abstractmethod
@@ -16,11 +16,13 @@ class IExecutiveBlackboard(ABC):
     def subscribe(self, topic: str, handler: Callable) -> None:
         pass
 
+
 class ExecutiveBlackboard(IExecutiveBlackboard):
     """
     The ephemeral shared cognitive workspace.
     Subsystems post hypotheses, observations, recommendations, and simulations here.
     """
+
     def __init__(self):
         self._hypotheses: list[Hypothesis] = []
         self._subscribers: dict = {}

@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 
 from app.interfaces.http.schemas.conversation import ConversationThread, ConversationTurn
 from app.shared.enums import ConversationRole, ConversationStatus
@@ -8,7 +8,7 @@ from app.shared.enums import ConversationRole, ConversationStatus
 def test_conversation_thread_validation():
     twin_id = uuid.uuid4()
     thread_id = uuid.uuid4()
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     thread = ConversationThread(
         id=thread_id,
         twin_id=twin_id,
@@ -25,7 +25,7 @@ def test_conversation_thread_validation():
 def test_conversation_turn_validation():
     thread_id = uuid.uuid4()
     turn_id = uuid.uuid4()
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     turn = ConversationTurn(
         id=turn_id,
         thread_id=thread_id,

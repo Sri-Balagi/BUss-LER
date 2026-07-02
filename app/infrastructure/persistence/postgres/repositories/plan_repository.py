@@ -7,7 +7,6 @@ Plans are created once; only their lifecycle status can be updated.
 
 import time
 from abc import ABC, abstractmethod
-from typing import Optional
 from uuid import UUID
 
 import structlog
@@ -87,9 +86,7 @@ class PlanRepository(AbstractPlanRepository):
             insert_data["estimated_effort"] = data.estimated_effort
 
         try:
-            response = (
-                await self._client.table(self._table).insert(insert_data).execute()
-            )
+            response = await self._client.table(self._table).insert(insert_data).execute()
         except Exception as exc:
             raise RepositoryError("plan.create", str(exc)) from exc
 
@@ -103,10 +100,7 @@ class PlanRepository(AbstractPlanRepository):
     async def get_by_id(self, plan_id: UUID) -> Plan:
         try:
             response = (
-                await self._client.table(self._table)
-                .select("*")
-                .eq("id", str(plan_id))
-                .execute()
+                await self._client.table(self._table).select("*").eq("id", str(plan_id)).execute()
             )
         except Exception as exc:
             raise RepositoryError("plan.get_by_id", str(exc)) from exc
@@ -143,9 +137,7 @@ class PlanRepository(AbstractPlanRepository):
 
         items = [self._deserialize(row) for row in response.data]
         total = response.count if response.count is not None else len(items)
-        return PaginatedPlans(
-            items=items, total_count=total, limit=limit, offset=offset
-        )
+        return PaginatedPlans(items=items, total_count=total, limit=limit, offset=offset)
 
     async def update_status(self, plan_id: UUID, status: PlanStatus) -> Plan:
         try:

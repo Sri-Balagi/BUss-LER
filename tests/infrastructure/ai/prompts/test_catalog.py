@@ -34,9 +34,7 @@ def test_resolve_legacy_prompts() -> None:
 
     # 1. Memory
     mem_result = manager.resolve(
-        "memory_summarization",
-        "v1",
-        {"memory_content": "User likes blue"}
+        "memory_summarization", "v1", {"memory_content": "User likes blue"}
     )
     assert "User likes blue" in mem_result
 
@@ -44,7 +42,7 @@ def test_resolve_legacy_prompts() -> None:
     intent_result = manager.resolve(
         "intent_classification",
         "v1",
-        {"content": "Order supplies", "business_context": "We need pens"}
+        {"content": "Order supplies", "business_context": "We need pens"},
     )
     assert "Order supplies" in intent_result
 
@@ -60,8 +58,8 @@ def test_resolve_legacy_prompts() -> None:
             "memory_context": "[]",
             "conversation_context": "[]",
             "business_state": "{}",
-            "twin_context": "{}"
-        }
+            "twin_context": "{}",
+        },
     )
     assert "Fix the UI bug" in plan_result
 
@@ -75,7 +73,7 @@ def test_resolve_legacy_prompts() -> None:
             "memory_context": "[]",
             "conversation_context": "[]",
             "business_state": "{}",
-            "twin_context": "{}"
-        }
+            "twin_context": "{}",
+        },
     )
     assert "JSON array" in rec_result

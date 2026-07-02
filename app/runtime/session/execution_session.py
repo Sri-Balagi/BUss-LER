@@ -10,13 +10,14 @@ class ExecutionSession(IExecutionSession):
     The Process Control Block (PCB) for an execution.
     Acts purely as an immutable container of its core subsystems.
     """
+
     def __init__(
         self,
         identity: IRuntimeIdentity,
         memory: IWorkingMemory,
         budget: IExecutionBudget,
         cancellation_token: ICancellationToken,
-        enterprise_context_version: str = "v1"
+        enterprise_context_version: str = "v1",
     ):
         self._identity = identity
         self._memory = memory

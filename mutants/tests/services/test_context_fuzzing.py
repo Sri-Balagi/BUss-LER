@@ -1,11 +1,12 @@
-import pytest
 import asyncio
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
-from app.services.context_engine import ContextEngine
-from app.core.context import OperationContext
+import pytest
 from app.models.enterprise_context import EnterpriseContextCreate
+from app.services.context_engine import ContextEngine
+
+from app.core.context import OperationContext
 
 
 @pytest.fixture
@@ -80,9 +81,7 @@ def engine():
 @pytest.mark.asyncio
 async def test_concurrent_context_building(engine, op_ctx):
     twin_id = uuid4()
-    command = EnterpriseContextCreate(
-        twin_id=twin_id, policy_id="test_policy", intent_id=uuid4()
-    )
+    command = EnterpriseContextCreate(twin_id=twin_id, policy_id="test_policy", intent_id=uuid4())
 
     # Fire 50 requests concurrently
     tasks = [engine.build(ctx=op_ctx, command=command) for _ in range(50)]

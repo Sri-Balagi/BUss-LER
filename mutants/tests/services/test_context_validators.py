@@ -1,7 +1,7 @@
-import pytest
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
+import pytest
 from app.models.enterprise_context import ContextItem, ContextProvenance, ContextSection
 from app.models.enums import ContextPriority, ContextSource
 from app.services.context_policies import BUILT_IN_POLICIES
@@ -24,7 +24,7 @@ def create_valid_section(source: ContextSource, item_count: int = 1) -> ContextS
         prov = ContextProvenance(
             provider=source,
             service_name="TestService",
-            retrieval_timestamp=datetime.now(timezone.utc),
+            retrieval_timestamp=datetime.now(UTC),
             confidence=0.8,
             ranking_score=0.5,
             citations=["doc1"],
@@ -46,7 +46,7 @@ def create_valid_section(source: ContextSource, item_count: int = 1) -> ContextS
         priority=ContextPriority.HIGH,
         items=items,
         token_estimate=item_count * 10,
-        retrieved_at=datetime.now(timezone.utc),
+        retrieved_at=datetime.now(UTC),
     )
 
 
@@ -65,8 +65,7 @@ def test_missing_required_provider(validator, policy):
     assert result.is_valid is False
     assert any("has no section in assembled context" in err for err in result.errors)
     assert any(
-        "GOAL is required by policy but no active goals were found" in err
-        for err in result.errors
+        "GOAL is required by policy but no active goals were found" in err for err in result.errors
     )
 
 
@@ -102,7 +101,7 @@ def test_empty_citation(validator, policy):
 
 def test_future_retrieved_at(validator, policy):
     section = create_valid_section(ContextSource.GOAL)
-    section.retrieved_at = datetime.now(timezone.utc) + timedelta(days=1)
+    section.retrieved_at = datetime.now(UTC) + timedelta(days=1)
 
     result = validator.validate([section], policy)
     assert result.is_valid is False
@@ -145,6 +144,5 @@ def test_critical_section_empty(validator, policy):
     result = validator.validate([section], policy)
     assert result.is_valid is False
     assert any(
-        "GOAL is required by policy but no active goals were found" in err
-        for err in result.errors
+        "GOAL is required by policy but no active goals were found" in err for err in result.errors
     )

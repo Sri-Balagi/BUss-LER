@@ -15,6 +15,7 @@ class TaskState(Enum):
     CANCELLED = "CANCELLED"
     TIMEOUT = "TIMEOUT"
 
+
 TASK_STATE_TRANSITIONS: dict[TaskState, set[TaskState]] = {
     TaskState.PENDING: {TaskState.READY, TaskState.CANCELLED},
     TaskState.READY: {TaskState.RUNNING, TaskState.CANCELLED},
@@ -25,20 +26,22 @@ TASK_STATE_TRANSITIONS: dict[TaskState, set[TaskState]] = {
         TaskState.COMPLETED,
         TaskState.FAILED,
         TaskState.CANCELLED,
-        TaskState.TIMEOUT
+        TaskState.TIMEOUT,
     },
     TaskState.WAITING: {TaskState.RUNNING, TaskState.CANCELLED, TaskState.TIMEOUT},
     TaskState.BLOCKED: {TaskState.READY, TaskState.CANCELLED},
     TaskState.SUSPENDED_FOR_APPROVAL: {TaskState.RUNNING, TaskState.CANCELLED},
     TaskState.COMPLETED: set(),  # Terminal
-    TaskState.FAILED: set(),     # Terminal
+    TaskState.FAILED: set(),  # Terminal
     TaskState.CANCELLED: set(),  # Terminal
-    TaskState.TIMEOUT: set(),    # Terminal
+    TaskState.TIMEOUT: set(),  # Terminal
 }
+
 
 class TaskStateMachine(BaseStateMachine[TaskState]):
     """
     State machine managing Task lifecycle.
     """
+
     def __init__(self, initial_state: TaskState = TaskState.PENDING):
         super().__init__(initial_state=initial_state, allowed_transitions=TASK_STATE_TRANSITIONS)

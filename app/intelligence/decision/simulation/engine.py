@@ -1,5 +1,4 @@
 import uuid
-from typing import List
 
 from app.intelligence.decision.planning.models import ExecutivePlan
 from app.intelligence.decision.simulation.models import (
@@ -13,7 +12,10 @@ class SimulationEngine:
     """
     Simulates outcomes for candidate plans without executing them.
     """
-    def simulate(self, plan: ExecutivePlan, scenarios: list[SimulationScenario]) -> list[SimulationResult]:
+
+    def simulate(
+        self, plan: ExecutivePlan, scenarios: list[SimulationScenario]
+    ) -> list[SimulationResult]:
         results = []
         for scenario in scenarios:
             # Deterministic mock simulation
@@ -22,14 +24,16 @@ class SimulationEngine:
             outcome = SimulationOutcome(
                 metric_name="estimated_value_added",
                 estimated_change=impact_score,
-                confidence_interval=0.15
+                confidence_interval=0.15,
             )
 
-            results.append(SimulationResult(
-                result_id=str(uuid.uuid4()),
-                scenario_id=scenario.scenario_id,
-                outcomes=[outcome],
-                net_impact_score=impact_score
-            ))
+            results.append(
+                SimulationResult(
+                    result_id=str(uuid.uuid4()),
+                    scenario_id=scenario.scenario_id,
+                    outcomes=[outcome],
+                    net_impact_score=impact_score,
+                )
+            )
 
         return results

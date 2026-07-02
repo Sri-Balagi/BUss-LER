@@ -1,27 +1,30 @@
 import uuid
-from datetime import datetime, timezone
-import pytest
-from pydantic import ValidationError
+from datetime import UTC, datetime
 
+import pytest
+from app.models.conversation import ConversationThread, ConversationTurn
 from app.models.enterprise_context import (
     ContextItem,
-    ContextSection,
     ContextMetadata,
-    ContextSchemaVersion,
     ContextProvenance,
-    ProviderFailureRecord,
+    ContextSchemaVersion,
+    ContextSection,
     EnterpriseContext,
+    ProviderFailureRecord,
 )
-from app.models.enums import ContextPriority, ContextSource, ContextStatus
-from app.models.conversation import ConversationThread, ConversationTurn
-from app.models.enums import ConversationRole, ConversationStatus
+from app.models.enums import (
+    ContextPriority,
+    ContextSource,
+    ContextStatus,
+    ConversationRole,
+    ConversationStatus,
+)
+from pydantic import ValidationError
 
 
 def test_context_item_validation():
     """Test ContextItem valid creation and immutability."""
-    prov = ContextProvenance(
-        provider=ContextSource.MEMORY, service_name="MemoryProvider"
-    )
+    prov = ContextProvenance(provider=ContextSource.MEMORY, service_name="MemoryProvider")
 
     item = ContextItem(
         item_id=uuid.uuid4(),
@@ -68,7 +71,7 @@ def test_enterprise_context_lifecycle():
     context_id = uuid.uuid4()
 
     metadata = ContextMetadata(
-        policy_id="default", generated_at=datetime.now(timezone.utc), total_tokens=100
+        policy_id="default", generated_at=datetime.now(UTC), total_tokens=100
     )
 
     ctx = EnterpriseContext(
@@ -89,7 +92,7 @@ def test_enterprise_context_lifecycle():
 def test_conversation_thread_validation():
     twin_id = uuid.uuid4()
     thread_id = uuid.uuid4()
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     thread = ConversationThread(
         id=thread_id,
         twin_id=twin_id,
@@ -106,7 +109,7 @@ def test_conversation_thread_validation():
 def test_conversation_turn_validation():
     thread_id = uuid.uuid4()
     turn_id = uuid.uuid4()
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     turn = ConversationTurn(
         id=turn_id,
         thread_id=thread_id,

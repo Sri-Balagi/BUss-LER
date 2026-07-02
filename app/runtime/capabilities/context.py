@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 
 class CapabilityContext:
@@ -6,6 +6,7 @@ class CapabilityContext:
     Restricted execution context for a capability.
     Provides scoped access to memory and metadata without exposing raw runtime internals.
     """
+
     def __init__(self, tenant_id: str | None = None, execution_scope: str | None = None):
         self._tenant_id = tenant_id
         self._execution_scope = execution_scope

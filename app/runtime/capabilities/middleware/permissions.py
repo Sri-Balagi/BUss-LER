@@ -8,7 +8,10 @@ from app.runtime.capabilities.models.result import CapabilityResult
 
 class PermissionMiddleware(IMiddleware):
     async def before_execution(
-        self, request: CapabilityRequest, cap_context: CapabilityContext, mw_context: MiddlewareContext
+        self,
+        request: CapabilityRequest,
+        cap_context: CapabilityContext,
+        mw_context: MiddlewareContext,
     ) -> MiddlewareDecision:
         if "force_deny" in request.execution_metadata:
             mw_context.metrics["permission_error"] = "Forced deny"
@@ -17,11 +20,19 @@ class PermissionMiddleware(IMiddleware):
         return MiddlewareDecision.ALLOW
 
     async def after_execution(
-        self, request: CapabilityRequest, cap_context: CapabilityContext, mw_context: MiddlewareContext, result: CapabilityResult
+        self,
+        request: CapabilityRequest,
+        cap_context: CapabilityContext,
+        mw_context: MiddlewareContext,
+        result: CapabilityResult,
     ) -> CapabilityResult:
         return result
 
     async def on_exception(
-        self, request: CapabilityRequest, cap_context: CapabilityContext, mw_context: MiddlewareContext, exception: Exception
+        self,
+        request: CapabilityRequest,
+        cap_context: CapabilityContext,
+        mw_context: MiddlewareContext,
+        exception: Exception,
     ) -> MiddlewareDecision:
         return MiddlewareDecision.ALLOW

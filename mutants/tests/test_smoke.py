@@ -8,12 +8,12 @@ import os
 from unittest import mock
 
 import pytest
-from httpx import AsyncClient, ASGITransport
+from app.services.qdrant import QdrantService
+from app.services.supabase import SupabaseService
+from httpx import ASGITransport, AsyncClient
 
 from app.config import get_settings
 from app.main import app
-from app.services.qdrant import QdrantService
-from app.services.supabase import SupabaseService
 
 
 @pytest.fixture

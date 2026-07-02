@@ -1,10 +1,10 @@
-import pytest
-from uuid import uuid4, UUID
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+from uuid import UUID, uuid4
 
-from app.models.plan import PlanCreate, PlanStep
+import pytest
 from app.models.enums import PlanStatus
 from app.models.exceptions import PlanNotFoundError, RepositoryError
+from app.models.plan import PlanCreate, PlanStep
 from app.repositories.plan_repository import PlanRepository
 
 
@@ -43,8 +43,8 @@ def sample_plan_data():
         "confidence": 0.9,
         "estimated_effort": "low",
         "metadata": {},
-        "created_at": datetime.now(timezone.utc).isoformat(),
-        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
+        "updated_at": datetime.now(UTC).isoformat(),
     }
 
 
@@ -88,9 +88,7 @@ async def test_create_exception(repo, mock_supabase, mocker):
     )
 
     with pytest.raises(RepositoryError):
-        await repo.create(
-            twin_id=uuid4(), goal_id=None, intent_id=None, data=create_data
-        )
+        await repo.create(twin_id=uuid4(), goal_id=None, intent_id=None, data=create_data)
 
 
 @pytest.mark.asyncio
@@ -98,9 +96,7 @@ async def test_get_by_id_success(repo, mock_supabase, mocker, sample_plan_data):
     plan_id = uuid4()
     mock_execute = mocker.AsyncMock()
     mock_execute.return_value.data = [sample_plan_data]
-    mock_supabase.table.return_value.select.return_value.eq.return_value.execute = (
-        mock_execute
-    )
+    mock_supabase.table.return_value.select.return_value.eq.return_value.execute = mock_execute
 
     result = await repo.get_by_id(plan_id)
     assert result.id == UUID(sample_plan_data["id"])
@@ -111,9 +107,7 @@ async def test_get_by_id_not_found(repo, mock_supabase, mocker):
     plan_id = uuid4()
     mock_execute = mocker.AsyncMock()
     mock_execute.return_value.data = []
-    mock_supabase.table.return_value.select.return_value.eq.return_value.execute = (
-        mock_execute
-    )
+    mock_supabase.table.return_value.select.return_value.eq.return_value.execute = mock_execute
 
     with pytest.raises(PlanNotFoundError):
         await repo.get_by_id(plan_id)
@@ -123,9 +117,7 @@ async def test_get_by_id_not_found(repo, mock_supabase, mocker):
 async def test_get_by_id_exception(repo, mock_supabase, mocker):
     plan_id = uuid4()
     mock_execute = mocker.AsyncMock(side_effect=Exception("DB Error"))
-    mock_supabase.table.return_value.select.return_value.eq.return_value.execute = (
-        mock_execute
-    )
+    mock_supabase.table.return_value.select.return_value.eq.return_value.execute = mock_execute
 
     with pytest.raises(RepositoryError):
         await repo.get_by_id(plan_id)
@@ -154,9 +146,7 @@ async def test_list_by_twin_with_goal_and_intent(repo, mock_supabase, mocker):
     mock_execute.return_value.count = 0
     mock_supabase.table.return_value.select.return_value.eq.return_value.eq.return_value.eq.return_value.order.return_value.range.return_value.execute = mock_execute
 
-    result = await repo.list_by_twin(
-        twin_id=twin_id, goal_id=goal_id, intent_id=intent_id
-    )
+    result = await repo.list_by_twin(twin_id=twin_id, goal_id=goal_id, intent_id=intent_id)
     assert result.total_count == 0
 
 
@@ -176,9 +166,7 @@ async def test_update_status_success(repo, mock_supabase, mocker, sample_plan_da
     sample_plan_data["status"] = "executing"
     mock_execute = mocker.AsyncMock()
     mock_execute.return_value.data = [sample_plan_data]
-    mock_supabase.table.return_value.update.return_value.eq.return_value.execute = (
-        mock_execute
-    )
+    mock_supabase.table.return_value.update.return_value.eq.return_value.execute = mock_execute
 
     result = await repo.update_status(plan_id, PlanStatus.EXECUTING)
     assert result.status == PlanStatus.EXECUTING
@@ -189,9 +177,7 @@ async def test_update_status_not_found(repo, mock_supabase, mocker):
     plan_id = uuid4()
     mock_execute = mocker.AsyncMock()
     mock_execute.return_value.data = []
-    mock_supabase.table.return_value.update.return_value.eq.return_value.execute = (
-        mock_execute
-    )
+    mock_supabase.table.return_value.update.return_value.eq.return_value.execute = mock_execute
 
     with pytest.raises(PlanNotFoundError):
         await repo.update_status(plan_id, PlanStatus.EXECUTING)
@@ -201,9 +187,7 @@ async def test_update_status_not_found(repo, mock_supabase, mocker):
 async def test_update_status_exception(repo, mock_supabase, mocker):
     plan_id = uuid4()
     mock_execute = mocker.AsyncMock(side_effect=Exception("DB Error"))
-    mock_supabase.table.return_value.update.return_value.eq.return_value.execute = (
-        mock_execute
-    )
+    mock_supabase.table.return_value.update.return_value.eq.return_value.execute = mock_execute
 
     with pytest.raises(RepositoryError):
         await repo.update_status(plan_id, PlanStatus.EXECUTING)
@@ -212,9 +196,7 @@ async def test_update_status_exception(repo, mock_supabase, mocker):
 @pytest.mark.asyncio
 async def test_health_check_healthy(repo, mock_supabase, mocker):
     mock_execute = mocker.AsyncMock(return_value=True)
-    mock_supabase.table.return_value.select.return_value.limit.return_value.execute = (
-        mock_execute
-    )
+    mock_supabase.table.return_value.select.return_value.limit.return_value.execute = mock_execute
     result = await repo.health_check()
     assert result["status"] == "healthy"
     assert result["database"] is True
@@ -223,9 +205,7 @@ async def test_health_check_healthy(repo, mock_supabase, mocker):
 @pytest.mark.asyncio
 async def test_health_check_unhealthy(repo, mock_supabase, mocker):
     mock_execute = mocker.AsyncMock(side_effect=Exception("DB Error"))
-    mock_supabase.table.return_value.select.return_value.limit.return_value.execute = (
-        mock_execute
-    )
+    mock_supabase.table.return_value.select.return_value.limit.return_value.execute = mock_execute
     result = await repo.health_check()
     assert result["status"] == "unhealthy"
     assert result["database"] is False

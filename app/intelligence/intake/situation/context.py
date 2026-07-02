@@ -8,7 +8,7 @@ Milestone 4 will introduce a full ContextEngine that extends this foundation.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import UUID
 
 from pydantic import Field

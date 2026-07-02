@@ -1,13 +1,14 @@
-import pytest
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
-from datetime import datetime, timezone
 
-from app.services.intent_classifier import IntentClassifier
+import pytest
+from app.models.ai import AIResponseMetadata, ClassifyResponse
+from app.models.exceptions import AIOutputValidationError, IntentClassificationError
 from app.models.intent import Intent
-from app.models.ai import ClassifyResponse, AIResponseMetadata
 from app.models.results import ClassifyIntentResult
-from app.models.exceptions import IntentClassificationError, AIOutputValidationError
+from app.services.intent_classifier import IntentClassifier
+
 from app.core.context import OperationContext
 
 
@@ -32,15 +33,13 @@ def dummy_intent():
         id=uuid4(),
         twin_id=uuid4(),
         raw_text="Plan my next meeting",
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
     )
 
 
 @pytest.mark.asyncio
-async def test_classify_success(
-    mock_ai_kernel, mock_trace_service, op_ctx, dummy_intent
-):
+async def test_classify_success(mock_ai_kernel, mock_trace_service, op_ctx, dummy_intent):
     mock_ai_kernel.classify.return_value = ClassifyResponse(
         raw_json={
             "intent_type": "general",
@@ -61,9 +60,7 @@ async def test_classify_success(
     mock_trace_result.trace = None
     mock_trace_service.record_operation.return_value = mock_trace_result
 
-    classifier = IntentClassifier(
-        ai_kernel=mock_ai_kernel, trace_service=mock_trace_service
-    )
+    classifier = IntentClassifier(ai_kernel=mock_ai_kernel, trace_service=mock_trace_service)
     result = await classifier.classify(op_ctx, dummy_intent)
 
     assert isinstance(result, ClassifyIntentResult)
@@ -82,9 +79,7 @@ async def test_classify_ai_kernel_returns_non_json(
 ):
     mock_ai_kernel.classify.side_effect = ValueError("Not JSON")
 
-    classifier = IntentClassifier(
-        ai_kernel=mock_ai_kernel, trace_service=mock_trace_service
-    )
+    classifier = IntentClassifier(ai_kernel=mock_ai_kernel, trace_service=mock_trace_service)
 
     with pytest.raises(IntentClassificationError):
         await classifier.classify(op_ctx, dummy_intent)
@@ -96,9 +91,7 @@ async def test_classify_ai_kernel_unexpected_error(
 ):
     mock_ai_kernel.classify.side_effect = Exception("Unknown failure")
 
-    classifier = IntentClassifier(
-        ai_kernel=mock_ai_kernel, trace_service=mock_trace_service
-    )
+    classifier = IntentClassifier(ai_kernel=mock_ai_kernel, trace_service=mock_trace_service)
 
     with pytest.raises(IntentClassificationError):
         await classifier.classify(op_ctx, dummy_intent)
@@ -123,9 +116,7 @@ async def test_classify_pydantic_validation_error(
         ),
     )
 
-    classifier = IntentClassifier(
-        ai_kernel=mock_ai_kernel, trace_service=mock_trace_service
-    )
+    classifier = IntentClassifier(ai_kernel=mock_ai_kernel, trace_service=mock_trace_service)
 
     with pytest.raises(AIOutputValidationError):
         await classifier.classify(op_ctx, dummy_intent)
@@ -147,9 +138,7 @@ async def test_classify_trace_service_fails_passively(
 
     mock_trace_service.record_operation.side_effect = Exception("Trace DB offline")
 
-    classifier = IntentClassifier(
-        ai_kernel=mock_ai_kernel, trace_service=mock_trace_service
-    )
+    classifier = IntentClassifier(ai_kernel=mock_ai_kernel, trace_service=mock_trace_service)
     result = await classifier.classify(op_ctx, dummy_intent)
 
     assert isinstance(result, ClassifyIntentResult)

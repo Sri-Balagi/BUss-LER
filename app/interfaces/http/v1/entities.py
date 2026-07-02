@@ -40,9 +40,7 @@ async def list_entities(
     entity_service: EntityService = Depends(get_entity_service),
 ) -> PaginatedResponse[Entity]:
     """List all active entities with optional pagination and filtering."""
-    items, total = await entity_service.list_active(
-        user_id=user_id, limit=limit, offset=offset
-    )
+    items, total = await entity_service.list_active(user_id=user_id, limit=limit, offset=offset)
     return PaginatedResponse(
         items=items,
         total=total,

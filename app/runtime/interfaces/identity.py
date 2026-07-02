@@ -9,6 +9,7 @@ class IRuntimeIdentity(BaseModel, ABC):
     """
     Value object establishing execution lineage.
     """
+
     session_id: UUID4 = Field(default_factory=uuid4)
     execution_id: UUID4 = Field(default_factory=uuid4)
     correlation_id: UUID4 = Field(default_factory=uuid4)

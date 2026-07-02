@@ -2,17 +2,17 @@ import asyncio
 import os
 import sys
 from uuid import uuid4
+
+from app.models.enums import EntityType
+from app.models.exceptions import DuplicateTwinError, VersionConflictError
+from app.models.schemas import EntityCreate
+from app.models.twin import ChangeType, DigitalTwinCreate, DigitalTwinUpdate
+from app.repositories.entity_repository import EntityRepository
+from app.repositories.history_repository import HistoryRepository
+from app.repositories.snapshot_repository import SnapshotRepository
+from app.repositories.twin_repository import TwinRepository
 from dotenv import load_dotenv
 from supabase import create_async_client
-
-from app.models.schemas import EntityCreate
-from app.models.enums import EntityType
-from app.models.twin import DigitalTwinCreate, DigitalTwinUpdate, ChangeType
-from app.repositories.entity_repository import EntityRepository
-from app.repositories.twin_repository import TwinRepository
-from app.repositories.snapshot_repository import SnapshotRepository
-from app.repositories.history_repository import HistoryRepository
-from app.models.exceptions import DuplicateTwinError, VersionConflictError
 
 
 async def verify():
@@ -35,9 +35,7 @@ async def verify():
     try:
         # 1. Tables Exist & Primary Keys
         print("[TEST] 1. Tables Exist & Primary Keys")
-        entity_data = EntityCreate(
-            name="Validation Entity", entity_type=EntityType.STARTUP
-        )
+        entity_data = EntityCreate(name="Validation Entity", entity_type=EntityType.STARTUP)
         entity = await er.create(user_id, entity_data)
         print(f"  OK Entity table exists. Primary key generated: {entity.id}")
 
@@ -64,13 +62,9 @@ async def verify():
                 or "entities_entity_type_check" in str(e).lower()
                 or "pgrst" in str(e).lower()
             ):
-                print(
-                    f"  OK Database correctly rejected invalid entity_type: {type(e).__name__}"
-                )
+                print(f"  OK Database correctly rejected invalid entity_type: {type(e).__name__}")
             else:
-                print(
-                    f"  OK Database correctly rejected invalid entity_type (error: {e})"
-                )
+                print(f"  OK Database correctly rejected invalid entity_type (error: {e})")
 
         # 3. Twin Creation (Foreign Keys & Metadata Default)
         print("\n[TEST] 3. Twin Creation & Default Metadata")
@@ -108,9 +102,7 @@ async def verify():
         # 6. Optimistic Concurrency
         print("\n[TEST] 6. Optimistic Concurrency")
         try:
-            await tr.update_with_snapshot(
-                twin.id, DigitalTwinUpdate(expected_version=1, state={})
-            )
+            await tr.update_with_snapshot(twin.id, DigitalTwinUpdate(expected_version=1, state={}))
             print("  FAIL FAILED: RPC allowed update with stale version")
             sys.exit(1)
         except VersionConflictError as e:
@@ -138,14 +130,12 @@ async def verify():
         assert hist_count == 1, f"Expected 1 history record, got {hist_count}"
         history = history_records[0]
         assert history.change_type == ChangeType.UPDATE, "Change type mismatch"
-        assert (
-            "module" in history.changed_fields and "new_field" in history.changed_fields
-        ), "Changed fields not detected"
+        assert "module" in history.changed_fields and "new_field" in history.changed_fields, (
+            "Changed fields not detected"
+        )
         assert history.old_values["module"] == "test", "Old value incorrect"
         assert history.new_values["new_field"] == 42, "New value incorrect"
-        print(
-            "  OK History record successfully auto-created by RPC with precise field-level diffs"
-        )
+        print("  OK History record successfully auto-created by RPC with precise field-level diffs")
 
         # 9. JSONB State Queries
         print("\n[TEST] 9. JSONB State Queries & GIN Indexes")
@@ -170,26 +160,17 @@ async def verify():
         await client.table("entities").delete().eq("id", str(entity.id)).execute()
 
         twin_check = (
-            await client.table("digital_twins")
-            .select("id")
-            .eq("id", str(twin.id))
-            .execute()
+            await client.table("digital_twins").select("id").eq("id", str(twin.id)).execute()
         )
         assert len(twin_check.data) == 0, "Twin not cascaded"
 
         snap_check = (
-            await client.table("twin_snapshots")
-            .select("id")
-            .eq("twin_id", str(twin.id))
-            .execute()
+            await client.table("twin_snapshots").select("id").eq("twin_id", str(twin.id)).execute()
         )
         assert len(snap_check.data) == 0, "Snapshot not cascaded"
 
         hist_check = (
-            await client.table("twin_history")
-            .select("id")
-            .eq("twin_id", str(twin.id))
-            .execute()
+            await client.table("twin_history").select("id").eq("twin_id", str(twin.id)).execute()
         )
         assert len(hist_check.data) == 0, "History not cascaded"
         print(

@@ -18,6 +18,7 @@ class RoutingPolicy(StrEnum):
 
 class CapabilityNotAvailableError(Exception):
     """Raised when no provider can satisfy the requested capability constraints."""
+
     pass
 
 
@@ -31,16 +32,14 @@ class ProviderRouter:
         registry: ProviderRegistry,
         default_provider: str = "gemini",
         fallback_provider: str | None = None,
-        routing_policy: RoutingPolicy = RoutingPolicy.PRIMARY_WITH_FALLBACK
+        routing_policy: RoutingPolicy = RoutingPolicy.PRIMARY_WITH_FALLBACK,
     ):
         self._registry = registry
         self._default_provider = default_provider
         self._fallback_provider = fallback_provider
         self._routing_policy = routing_policy
 
-    def get_active_provider(
-        self, requested_provider: str | None = None
-    ) -> ILLMProvider:
+    def get_active_provider(self, requested_provider: str | None = None) -> ILLMProvider:
         """
         Backward-compatible method. Returns requested or default provider.
         """
@@ -52,7 +51,7 @@ class ProviderRouter:
         required_capability: str,
         preferred_provider: str | None = None,
         min_json_reliability: float | None = None,
-        min_reasoning_quality: float | None = None
+        min_reasoning_quality: float | None = None,
     ) -> ILLMProvider:
         """Return the best available provider for the required capability."""
 
@@ -64,20 +63,21 @@ class ProviderRouter:
 
         # 2. Filter by required technical capability
         eligible_providers = [
-            p for p in eligible_providers
-            if getattr(p.capabilities, required_capability, False)
+            p for p in eligible_providers if getattr(p.capabilities, required_capability, False)
         ]
 
         # 3. Filter by minimum semantic capability score (if specified)
         if min_json_reliability is not None:
             eligible_providers = [
-                p for p in eligible_providers
+                p
+                for p in eligible_providers
                 if getattr(p.capabilities, "json_reliability", 0.0) >= min_json_reliability
             ]
 
         if min_reasoning_quality is not None:
             eligible_providers = [
-                p for p in eligible_providers
+                p
+                for p in eligible_providers
                 if getattr(p.capabilities, "reasoning_quality", 0.0) >= min_reasoning_quality
             ]
 
@@ -92,36 +92,33 @@ class ProviderRouter:
             tier_weights = {"budget": 1, "medium": 2, "premium": 3, "ultra": 4}
             return min(
                 eligible_providers,
-                key=lambda p: tier_weights.get(getattr(p.capabilities, "cost_tier", "medium"), 2)
+                key=lambda p: tier_weights.get(getattr(p.capabilities, "cost_tier", "medium"), 2),
             )
 
         elif self._routing_policy == RoutingPolicy.LATENCY_FIRST:
             tier_weights = {"fast": 1, "medium": 2, "slow": 3}
             return min(
                 eligible_providers,
-                key=lambda p: tier_weights.get(getattr(p.capabilities, "latency_tier", "medium"), 2)
+                key=lambda p: tier_weights.get(
+                    getattr(p.capabilities, "latency_tier", "medium"), 2
+                ),
             )
 
         elif self._routing_policy == RoutingPolicy.QUALITY_FIRST:
             return max(
-                eligible_providers,
-                key=lambda p: getattr(p.capabilities, "reasoning_quality", 0.0)
+                eligible_providers, key=lambda p: getattr(p.capabilities, "reasoning_quality", 0.0)
             )
 
         elif self._routing_policy == RoutingPolicy.JSON_RELIABLE_FIRST:
             return max(
-                eligible_providers,
-                key=lambda p: getattr(p.capabilities, "json_reliability", 0.0)
+                eligible_providers, key=lambda p: getattr(p.capabilities, "json_reliability", 0.0)
             )
 
         # PRIMARY_WITH_FALLBACK or unhandled policy
         return self.get_active_provider()
 
     async def route_with_fallback(
-        self,
-        primary: ILLMProvider,
-        operation: Callable,
-        *args, **kwargs
+        self, primary: ILLMProvider, operation: Callable, *args, **kwargs
     ) -> Any:
         """
         Execute operation on primary; retry on fallback on ProviderError.
@@ -140,8 +137,7 @@ class ProviderRouter:
 
             # Record fallback activation metric
             LLM_FALLBACK_ACTIVATIONS.labels(
-                primary_provider=primary.provider_name,
-                fallback_provider=fallback.provider_name
+                primary_provider=primary.provider_name, fallback_provider=fallback.provider_name
             ).inc()
 
             # Execute on fallback. If this raises, it will bubble up.

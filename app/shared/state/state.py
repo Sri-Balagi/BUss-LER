@@ -1,5 +1,4 @@
 import uuid
-from typing import Dict, List
 
 import structlog
 
@@ -12,9 +11,7 @@ logger = structlog.get_logger(__name__)
 class InvalidStateTransitionError(BizOSError):
     """Raised when an invalid state transition is attempted."""
 
-    def __init__(
-        self, current: EmbeddingStatus, target: EmbeddingStatus, entity_id: uuid.UUID
-    ):
+    def __init__(self, current: EmbeddingStatus, target: EmbeddingStatus, entity_id: uuid.UUID):
         super().__init__(
             f"Invalid state transition for Memory {entity_id}: {current.value} -> {target.value}"
         )

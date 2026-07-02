@@ -1,8 +1,9 @@
-import pytest
-from app.models.enterprise_context import ContextSection, ContextItem, ContextProvenance
-from app.models.enums import ContextSource, ContextPriority
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID
+
+import pytest
+from app.models.enterprise_context import ContextItem, ContextProvenance, ContextSection
+from app.models.enums import ContextPriority, ContextSource
 
 
 @pytest.fixture
@@ -17,7 +18,7 @@ def stable_uuid2():
 
 def test_context_section_snapshot(snapshot, stable_uuid1, stable_uuid2):
     # Use a fixed datetime for the snapshot
-    fixed_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+    fixed_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
 
     # Create a stable, deterministic section
     prov = ContextProvenance(

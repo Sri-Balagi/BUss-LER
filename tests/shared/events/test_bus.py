@@ -1,10 +1,11 @@
+import uuid
+from unittest.mock import AsyncMock, MagicMock
+
 import pytest
-from unittest.mock import MagicMock, AsyncMock
 from fastapi import BackgroundTasks
 
 from app.shared.events.bus import BackgroundTasksEventBus
 from app.shared.events.models import DomainEvent
-import uuid
 
 
 class TestEvent(DomainEvent):

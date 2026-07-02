@@ -8,6 +8,7 @@ class QueueManager(IQueueManager):
     """
     Manages explicit runtime queues for each task state.
     """
+
     def __init__(self):
         # Ready queue is prioritized, all others are FIFO
         self._queues: dict[TaskState, IQueue] = {

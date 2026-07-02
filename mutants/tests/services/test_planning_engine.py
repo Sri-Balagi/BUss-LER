@@ -1,13 +1,14 @@
-import pytest
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
-from datetime import datetime, timezone
 
-from app.services.planning_engine import PlanningEngine
+import pytest
+from app.models.ai import AIResponseMetadata, ClassifyResponse
 from app.models.commands import GeneratePlanCommand
-from app.models.ai import ClassifyResponse, AIResponseMetadata
-from app.models.exceptions import PlanGenerationError, AIOutputValidationError
+from app.models.exceptions import AIOutputValidationError, PlanGenerationError
 from app.models.results import GeneratePlanResult
+from app.services.planning_engine import PlanningEngine
+
 from app.core.context import OperationContext
 
 
@@ -96,8 +97,8 @@ async def test_generate_plan_success(
         rationale="Because",
         steps=[PlanStep(step_number=1, action="Write tests", expected_outcome="Pass")],
         confidence=0.9,
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
     )
     mock_plan_repo.create.return_value = mock_plan
 
@@ -256,8 +257,8 @@ async def test_generate_plan_trace_failure(
         rationale="Because",
         steps=[PlanStep(step_number=1, action="Write tests", expected_outcome="Pass")],
         confidence=0.9,
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
     )
     mock_plan_repo.create.return_value = mock_plan
 

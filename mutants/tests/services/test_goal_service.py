@@ -1,21 +1,22 @@
-import pytest
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
-from datetime import datetime, timezone
 
-from app.services.goal_service import GoalService
+import pytest
 from app.models.commands import (
     CreateGoalCommand,
+    DeleteGoalCommand,
+    LinkIntentToGoalCommand,
     UpdateGoalCommand,
     UpdateGoalProgressCommand,
     UpdateGoalStatusCommand,
-    LinkIntentToGoalCommand,
-    DeleteGoalCommand,
 )
 from app.models.enums import GoalStatus, GoalType
+from app.models.events import GoalCreatedEvent, GoalStatusChangedEvent
 from app.models.goal import Goal, GoalUpdate, PaginatedGoals
 from app.models.queries import GoalListQuery
-from app.models.events import GoalCreatedEvent, GoalStatusChangedEvent
+from app.services.goal_service import GoalService
+
 from app.core.context import OperationContext
 
 
@@ -51,9 +52,7 @@ def mock_goal():
 
 
 @pytest.mark.asyncio
-async def test_create_goal_success(
-    service, mock_repo, mock_event_bus, op_ctx, mock_goal
-):
+async def test_create_goal_success(service, mock_repo, mock_event_bus, op_ctx, mock_goal):
     mock_repo.create.return_value = mock_goal
     cmd = CreateGoalCommand(
         twin_id=mock_goal.twin_id,
@@ -127,9 +126,7 @@ async def test_update_progress_below_100(service, mock_repo, op_ctx, mock_goal):
 
 
 @pytest.mark.asyncio
-async def test_update_progress_auto_complete(
-    service, mock_repo, mock_event_bus, op_ctx, mock_goal
-):
+async def test_update_progress_auto_complete(service, mock_repo, mock_event_bus, op_ctx, mock_goal):
     # Setup initial mock return to simulate progress update
     in_progress_goal = MagicMock(spec=Goal)
     in_progress_goal.id = mock_goal.id
@@ -159,9 +156,7 @@ async def test_update_progress_auto_complete(
 
 
 @pytest.mark.asyncio
-async def test_update_goal_status(
-    service, mock_repo, mock_event_bus, op_ctx, mock_goal
-):
+async def test_update_goal_status(service, mock_repo, mock_event_bus, op_ctx, mock_goal):
     mock_goal.status = GoalStatus.DRAFT
     mock_repo.get_by_id.return_value = mock_goal
 
@@ -191,7 +186,7 @@ async def test_link_intent_to_goal(service, mock_repo, op_ctx):
         id=uuid4(),
         goal_id=cmd.goal_id,
         intent_id=cmd.intent_id,
-        created_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
     )
     mock_repo.link_intent.return_value = mock_link
 

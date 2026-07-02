@@ -47,9 +47,7 @@ class EntityRepository:
         )
 
         try:
-            response = (
-                await self._client.table(self._table_name).insert(insert_data).execute()
-            )
+            response = await self._client.table(self._table_name).insert(insert_data).execute()
         except Exception as exc:
             logger.error("Failed to create entity", error=str(exc))
             raise RepositoryError("entity.create", str(exc)) from exc
@@ -77,9 +75,7 @@ class EntityRepository:
                 .execute()
             )
         except Exception as exc:
-            logger.error(
-                "Failed to get entity", entity_id=str(entity_id), error=str(exc)
-            )
+            logger.error("Failed to get entity", entity_id=str(entity_id), error=str(exc))
             raise RepositoryError("entity.get_by_id", str(exc)) from exc
 
         if not response.data:
@@ -164,9 +160,7 @@ class EntityRepository:
                 .execute()
             )
         except Exception as exc:
-            logger.error(
-                "Failed to update entity", entity_id=str(entity_id), error=str(exc)
-            )
+            logger.error("Failed to update entity", entity_id=str(entity_id), error=str(exc))
             raise RepositoryError("entity.update", str(exc)) from exc
 
         if not response.data:
@@ -194,9 +188,7 @@ class EntityRepository:
                 .execute()
             )
         except Exception as exc:
-            logger.error(
-                "Failed to soft-delete entity", entity_id=str(entity_id), error=str(exc)
-            )
+            logger.error("Failed to soft-delete entity", entity_id=str(entity_id), error=str(exc))
             raise RepositoryError("entity.soft_delete", str(exc)) from exc
 
         if not response.data:

@@ -1,12 +1,13 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from unittest.mock import AsyncMock, MagicMock
+
 import pytest
 
+from app.infrastructure.persistence.postgres.repositories.goal_repository import GoalRepository
 from app.intelligence.strategy.goals.goal import GoalCreate, GoalUpdate
 from app.shared.enums import GoalStatus, GoalType
 from app.shared.exceptions.errors import GoalNotFoundError, RepositoryError
-from app.infrastructure.persistence.postgres.repositories.goal_repository import GoalRepository
 
 
 @pytest.fixture
@@ -36,11 +37,11 @@ async def test_create_success(repository, mock_supabase_client):
                 "priority": 5,
                 "success_criteria": ["Do it well"],
                 "status": GoalStatus.DRAFT.value,
-                "target_date": datetime.now(timezone.utc).isoformat(),
+                "target_date": datetime.now(UTC).isoformat(),
                 "parent_goal_id": str(uuid.uuid4()),
                 "metadata": {"key": "value"},
-                "created_at": datetime.now(timezone.utc).isoformat(),
-                "updated_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
+                "updated_at": datetime.now(UTC).isoformat(),
             }
         ]
     )
@@ -52,7 +53,7 @@ async def test_create_success(repository, mock_supabase_client):
         goal_type=GoalType.STRATEGIC,
         priority=5,
         success_criteria=["Do it well"],
-        target_date=datetime.now(timezone.utc),
+        target_date=datetime.now(UTC),
         parent_goal_id=uuid.uuid4(),
         metadata={"key": "value"},
     )
@@ -90,8 +91,8 @@ async def test_get_by_id_success(repository, mock_supabase_client):
                 "priority": 5,
                 "success_criteria": [],
                 "status": GoalStatus.DRAFT.value,
-                "created_at": datetime.now(timezone.utc).isoformat(),
-                "updated_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
+                "updated_at": datetime.now(UTC).isoformat(),
             }
         ]
     )
@@ -132,8 +133,8 @@ async def test_list_by_twin_success(repository, mock_supabase_client):
                 "priority": 5,
                 "success_criteria": [],
                 "status": GoalStatus.ACTIVE.value,
-                "created_at": datetime.now(timezone.utc).isoformat(),
-                "updated_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
+                "updated_at": datetime.now(UTC).isoformat(),
             }
         ],
         count=1,
@@ -181,8 +182,8 @@ async def test_get_active_goals_success(repository, mock_supabase_client):
                 "priority": 5,
                 "success_criteria": [],
                 "status": GoalStatus.ACTIVE.value,
-                "created_at": datetime.now(timezone.utc).isoformat(),
-                "updated_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
+                "updated_at": datetime.now(UTC).isoformat(),
             }
         ]
     )
@@ -224,8 +225,8 @@ async def test_update_success(repository, mock_supabase_client):
                 "priority": 5,
                 "success_criteria": [],
                 "status": GoalStatus.ACTIVE.value,
-                "created_at": datetime.now(timezone.utc).isoformat(),
-                "updated_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
+                "updated_at": datetime.now(UTC).isoformat(),
             }
         ]
     )
@@ -251,8 +252,8 @@ async def test_update_empty(repository, mock_supabase_client):
                 "priority": 5,
                 "success_criteria": [],
                 "status": GoalStatus.DRAFT.value,
-                "created_at": datetime.now(timezone.utc).isoformat(),
-                "updated_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
+                "updated_at": datetime.now(UTC).isoformat(),
             }
         ]
     )
@@ -317,7 +318,7 @@ async def test_link_intent_success(repository, mock_supabase_client):
                 "id": str(uuid.uuid4()),
                 "intent_id": str(intent_id),
                 "goal_id": str(goal_id),
-                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
             }
         ]
     )

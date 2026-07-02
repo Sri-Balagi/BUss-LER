@@ -1,30 +1,31 @@
-import pytest
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
-from app.core.context import OperationContext
-from app.services.context_policies import BUILT_IN_POLICIES
+import pytest
 from app.models.enums import ContextSource
-
-# Import all providers
-from app.services.context_providers.memory_provider import MemoryContextProvider
-from app.services.context_providers.goal_provider import GoalContextProvider
-from app.services.context_providers.intent_provider import IntentContextProvider
-from app.services.context_providers.plan_provider import PlanContextProvider
-from app.services.context_providers.recommendation_provider import (
-    RecommendationContextProvider,
-)
-from app.services.context_providers.twin_provider import TwinContextProvider
+from app.services.context_policies import BUILT_IN_POLICIES
 from app.services.context_providers.business_state_provider import (
     BusinessStateContextProvider,
 )
 from app.services.context_providers.conversation_provider import (
     ConversationContextProvider,
 )
-from app.services.context_providers.trace_provider import TraceContextProvider
 from app.services.context_providers.external_provider import (
     ExternalIntegrationContextProvider,
 )
+from app.services.context_providers.goal_provider import GoalContextProvider
+from app.services.context_providers.intent_provider import IntentContextProvider
+
+# Import all providers
+from app.services.context_providers.memory_provider import MemoryContextProvider
+from app.services.context_providers.plan_provider import PlanContextProvider
+from app.services.context_providers.recommendation_provider import (
+    RecommendationContextProvider,
+)
+from app.services.context_providers.trace_provider import TraceContextProvider
+from app.services.context_providers.twin_provider import TwinContextProvider
+
+from app.core.context import OperationContext
 
 
 @pytest.fixture

@@ -32,10 +32,12 @@ class ICapability(ABC):
         """Clean up capability resources and underlying adapters."""
         pass
 
+
 class ICapabilityFactory(ABC):
     """
     Instantiates capabilities.
     """
+
     @abstractmethod
     def create(self, spec: CapabilitySpecification) -> ICapability:
         """Create a capability instance from a specification."""

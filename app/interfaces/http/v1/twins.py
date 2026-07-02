@@ -114,9 +114,7 @@ async def list_twin_snapshots(
     twin_service: TwinService = Depends(get_twin_service),
 ) -> PaginatedResponse[TwinSnapshot]:
     """Fetch the immutable snapshot history of a Twin."""
-    items, total = await twin_service.get_snapshots(
-        twin_id=twin_id, limit=limit, offset=offset
-    )
+    items, total = await twin_service.get_snapshots(twin_id=twin_id, limit=limit, offset=offset)
     return PaginatedResponse(
         items=items,
         total=total,
@@ -138,9 +136,7 @@ async def list_twin_history(
     twin_service: TwinService = Depends(get_twin_service),
 ) -> PaginatedResponse[TwinHistory]:
     """Fetch the detailed change history (diffs) of a Twin."""
-    items, total = await twin_service.get_history(
-        twin_id=twin_id, limit=limit, offset=offset
-    )
+    items, total = await twin_service.get_history(twin_id=twin_id, limit=limit, offset=offset)
     return PaginatedResponse(
         items=items,
         total=total,

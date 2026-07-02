@@ -38,7 +38,9 @@ def test_metric_labels() -> None:
     LLM_TOKENS_OUT.labels(provider="mock", model="test-model", operation="generate")
     LLM_REQUEST_DURATION.labels(provider="mock", model="test-model", operation="generate")
     LLM_ESTIMATED_COST.labels(provider="mock", model="test-model", operation="generate")
-    LLM_ERRORS.labels(provider="mock", model="test-model", operation="generate", error_type="ValueError")
+    LLM_ERRORS.labels(
+        provider="mock", model="test-model", operation="generate", error_type="ValueError"
+    )
     LLM_FALLBACK_ACTIVATIONS.labels(primary_provider="gemini", fallback_provider="openai")
     LLM_BUDGET_REJECTIONS.labels(provider="mock", budget_type="TOKEN")
     LLM_STRUCTURED_OUTPUT_FAILURES.labels(provider="mock", model="test-model")

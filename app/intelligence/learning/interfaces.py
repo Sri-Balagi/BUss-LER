@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Dict, List
 
 from app.intelligence.decision.planning.models import ExecutivePlan
 from app.intelligence.learning.evaluation.models import OutcomeEvaluation
@@ -15,15 +14,22 @@ class IReflectionEngine(ABC):
     def generate_reflection(self, cycle_state: CognitiveCycleState) -> ReflectionReport:
         pass
 
+
 class IOutcomeEvaluationEngine(ABC):
     @abstractmethod
-    def evaluate_plan(self, plan: ExecutivePlan, actual_results: dict[str, float]) -> OutcomeEvaluation:
+    def evaluate_plan(
+        self, plan: ExecutivePlan, actual_results: dict[str, float]
+    ) -> OutcomeEvaluation:
         pass
+
 
 class IKnowledgeSynthesisEngine(ABC):
     @abstractmethod
-    def synthesize(self, reflection: ReflectionReport, evaluation: OutcomeEvaluation) -> list[KnowledgeArtifact]:
+    def synthesize(
+        self, reflection: ReflectionReport, evaluation: OutcomeEvaluation
+    ) -> list[KnowledgeArtifact]:
         pass
+
 
 class IExecutiveKnowledgeRepository(ABC):
     @abstractmethod
@@ -37,6 +43,7 @@ class IExecutiveKnowledgeRepository(ABC):
     @abstractmethod
     def get_state(self) -> KnowledgeRepositoryState:
         pass
+
 
 class IExecutiveHeuristicsEngine(ABC):
     @abstractmethod

@@ -19,9 +19,11 @@ class PromptManager(PromptRegistry):
 
     Automatically loads the core prompt catalog on instantiation.
     """
+
     def __init__(self):
         super().__init__()
         load_catalog(self)
+
 
 __all__ = [
     "PromptRegistry",

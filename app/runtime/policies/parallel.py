@@ -10,6 +10,7 @@ class ParallelExecutionPolicy(IExecutionPolicy):
     Pops all independent tasks from the Ready queue (respecting DAG layers implicitly
     because the scheduler only pushes a layer to Ready).
     """
+
     def evaluate(self, context: ExecutionPolicyContext) -> ExecutionDecision:
         start_time = time.perf_counter()
 
@@ -29,13 +30,12 @@ class ParallelExecutionPolicy(IExecutionPolicy):
 
         if not all_ready:
             decision.reason = DecisionReason(
-                reason_code="NO_READY_TASKS",
-                description="Ready queue is empty."
+                reason_code="NO_READY_TASKS", description="Ready queue is empty."
             )
         else:
             decision.reason = DecisionReason(
                 reason_code="PARALLEL_LAYER_READY",
-                description=f"Selected {len(decision.tasks_to_execute)} tasks for parallel execution."
+                description=f"Selected {len(decision.tasks_to_execute)} tasks for parallel execution.",
             )
 
         decision.policy_latency_ms = (time.perf_counter() - start_time) * 1000.0

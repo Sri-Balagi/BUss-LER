@@ -1,5 +1,4 @@
 import uuid
-from typing import Dict
 
 from app.intelligence.decision.planning.models import ExecutivePlan
 from app.intelligence.learning.evaluation.models import (
@@ -13,7 +12,10 @@ class OutcomeEvaluationEngine:
     """
     Evaluates completed plans against their intended outcomes.
     """
-    def evaluate_plan(self, plan: ExecutivePlan, actual_results: dict[str, float]) -> OutcomeEvaluation:
+
+    def evaluate_plan(
+        self, plan: ExecutivePlan, actual_results: dict[str, float]
+    ) -> OutcomeEvaluation:
         # Mock evaluation logic
         metrics = []
         score = SuccessScore.FAILED
@@ -21,7 +23,9 @@ class OutcomeEvaluationEngine:
         target = 100.0
         actual = actual_results.get("impact", 0.0)
 
-        metrics.append(OutcomeMetric(metric_name="impact", target_value=target, actual_value=actual))
+        metrics.append(
+            OutcomeMetric(metric_name="impact", target_value=target, actual_value=actual)
+        )
 
         if actual >= target:
             score = SuccessScore.ACHIEVED
@@ -32,5 +36,5 @@ class OutcomeEvaluationEngine:
             evaluation_id=str(uuid.uuid4()),
             plan_id=plan.plan_id,
             overall_score=score,
-            metrics=metrics
+            metrics=metrics,
         )

@@ -3,9 +3,6 @@
 from unittest.mock import AsyncMock
 
 import pytest
-from fastapi.testclient import TestClient
-
-
 from app.api.v1.dependencies import (
     get_entity_repository,
     get_entity_service,
@@ -15,8 +12,10 @@ from app.api.v1.dependencies import (
     get_twin_repository,
     get_twin_service,
 )
-from app.main import app
 from app.services.supabase import SupabaseService
+from fastapi.testclient import TestClient
+
+from app.main import app
 
 
 @pytest.fixture(autouse=True)

@@ -1,28 +1,28 @@
-import pytest
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 from uuid import UUID
 
-from fastapi import Request, BackgroundTasks
-
+import pytest
 from app.api.v1.dependencies import (
-    get_supabase_client,
-    get_qdrant_client,
-    get_current_user,
-    get_operation_context,
-    check_rate_limit,
     audit_log_request,
+    check_rate_limit,
+    get_ai_kernel,
+    get_current_user,
     get_entity_repository,
-    get_twin_repository,
-    get_snapshot_repository,
+    get_entity_service,
+    get_event_bus,
     get_history_repository,
     get_memory_metadata_repository,
-    get_memory_vector_repository,
-    get_event_bus,
-    get_twin_service,
-    get_entity_service,
-    get_ai_kernel,
     get_memory_service,
+    get_memory_vector_repository,
+    get_operation_context,
+    get_qdrant_client,
+    get_snapshot_repository,
+    get_supabase_client,
+    get_twin_repository,
+    get_twin_service,
 )
+from fastapi import BackgroundTasks, Request
+
 from app.config import Settings
 from app.core.context import OperationContext
 

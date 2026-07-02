@@ -7,6 +7,7 @@ class WorkingMemory(IWorkingMemory):
     """
     Execution-scoped scratchpad implementing IWorkingMemory.
     """
+
     def __init__(self):
         self._store: dict[str, Any] = {}
 

@@ -1,7 +1,7 @@
 """Public API schemas for Context Engine and Conversations."""
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -21,9 +21,7 @@ from app.shared.enums import ContextStatus, ConversationRole, ConversationStatus
 class BuildContextRequest(BaseModel):
     """Request to force-build an EnterpriseContext."""
 
-    policy_id: str = Field(
-        default="full", description="ID of the ContextPolicy to apply."
-    )
+    policy_id: str = Field(default="full", description="ID of the ContextPolicy to apply.")
     intent_id: UUID | None = Field(
         default=None, description="Optional Intent ID that triggered this build."
     )

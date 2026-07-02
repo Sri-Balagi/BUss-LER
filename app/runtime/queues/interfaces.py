@@ -1,8 +1,8 @@
 """
 Queue Subsystem Interfaces
 """
+
 from abc import ABC, abstractmethod
-from typing import Optional
 from uuid import UUID
 
 from app.runtime.tasks.models import ITask
@@ -13,6 +13,7 @@ class IQueue(ABC):
     """
     Abstract interface for task queues.
     """
+
     @abstractmethod
     def enqueue(self, task: ITask) -> None:
         pass
@@ -37,10 +38,12 @@ class IQueue(ABC):
     def get_all(self) -> list[ITask]:
         pass
 
+
 class IQueueManager(ABC):
     """
     Abstract interface for managing state-based queues.
     """
+
     @abstractmethod
     def get_queue(self, state: TaskState) -> IQueue:
         pass

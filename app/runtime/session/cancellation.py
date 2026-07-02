@@ -8,6 +8,7 @@ class CancellationToken(ICancellationToken):
     """
     Async-safe cancellation token with a callback registry.
     """
+
     def __init__(self):
         self._cancelled = False
         self._reason: str | None = None

@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import List
 
 from app.intelligence.decision.decision.models import ExecutiveDecision
 from app.intelligence.decision.planning.models import ExecutivePlan
@@ -23,15 +22,20 @@ class ICognitiveCycleController(ABC):
     def mark_converged(self, state: CognitiveCycleState) -> CognitiveCycleState:
         pass
 
+
 class IConvergenceEngine(ABC):
     @abstractmethod
-    def evaluate_convergence(self, historical_decisions: list[ExecutiveDecision], current_decision: ExecutiveDecision) -> ConvergenceAssessment:
+    def evaluate_convergence(
+        self, historical_decisions: list[ExecutiveDecision], current_decision: ExecutiveDecision
+    ) -> ConvergenceAssessment:
         pass
+
 
 class IExecutiveArbitrationEngine(ABC):
     @abstractmethod
     def arbitrate_decisions(self, decisions: list[ExecutiveDecision]) -> ArbitrationDecision:
         pass
+
 
 class IAssumptionManager(ABC):
     @abstractmethod
@@ -45,6 +49,7 @@ class IAssumptionManager(ABC):
     @abstractmethod
     def get_registry(self) -> AssumptionRegistry:
         pass
+
 
 class IExecutiveValidationEngine(ABC):
     @abstractmethod

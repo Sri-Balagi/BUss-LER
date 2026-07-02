@@ -25,5 +25,5 @@ class KPIEngine:
             current_value=current,
             target_value=target,
             status=status,
-            deviation_percentage=deviation
+            deviation_percentage=deviation,
         )

@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -11,14 +10,18 @@ class IntentClassification(str, Enum):
     ESCALATION = "ESCALATION"
     UNKNOWN = "UNKNOWN"
 
+
 class IntentEntity(BaseModel):
     """An extracted entity from the user request."""
+
     entity_type: str
     value: str
     confidence: float = 1.0
 
+
 class ExecutiveIntent(BaseModel):
     """Structured executive intent produced by the Intent Engine."""
+
     raw_request: str
     classification: IntentClassification = IntentClassification.UNKNOWN
     entities: list[IntentEntity] = Field(default_factory=list)

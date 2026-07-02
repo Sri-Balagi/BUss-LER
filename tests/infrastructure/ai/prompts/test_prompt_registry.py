@@ -24,10 +24,9 @@ def sample_template() -> PromptTemplate:
         context_variables=["name", "place"],
         provider_variants=[
             ProviderVariant(
-                provider_name="anthropic",
-                template="Greetings {name}, you are now in {place}."
+                provider_name="anthropic", template="Greetings {name}, you are now in {place}."
             )
-        ]
+        ],
     )
 
 
@@ -43,60 +42,68 @@ def test_get_not_found(empty_registry: PromptRegistry) -> None:
         empty_registry.get("missing", "v1")
 
 
-def test_get_version_not_found(empty_registry: PromptRegistry, sample_template: PromptTemplate) -> None:
+def test_get_version_not_found(
+    empty_registry: PromptRegistry, sample_template: PromptTemplate
+) -> None:
     empty_registry.register(sample_template)
 
-    with pytest.raises(PromptNotFoundError, match="Version 'v2' for prompt 'test_prompt' not found."):
+    with pytest.raises(
+        PromptNotFoundError, match="Version 'v2' for prompt 'test_prompt' not found."
+    ):
         empty_registry.get("test_prompt", "v2")
 
 
-def test_resolve_base_template(empty_registry: PromptRegistry, sample_template: PromptTemplate) -> None:
+def test_resolve_base_template(
+    empty_registry: PromptRegistry, sample_template: PromptTemplate
+) -> None:
     empty_registry.register(sample_template)
 
     result = empty_registry.resolve(
-        prompt_id="test_prompt",
-        version="v1",
-        context={"name": "Alice", "place": "Wonderland"}
+        prompt_id="test_prompt", version="v1", context={"name": "Alice", "place": "Wonderland"}
     )
 
     assert result == "Hello Alice, welcome to Wonderland!"
 
 
-def test_resolve_provider_variant(empty_registry: PromptRegistry, sample_template: PromptTemplate) -> None:
+def test_resolve_provider_variant(
+    empty_registry: PromptRegistry, sample_template: PromptTemplate
+) -> None:
     empty_registry.register(sample_template)
 
     result = empty_registry.resolve(
         prompt_id="test_prompt",
         version="v1",
         context={"name": "Alice", "place": "Wonderland"},
-        provider_name="anthropic"
+        provider_name="anthropic",
     )
 
     assert result == "Greetings Alice, you are now in Wonderland."
 
 
-def test_resolve_provider_fallback(empty_registry: PromptRegistry, sample_template: PromptTemplate) -> None:
+def test_resolve_provider_fallback(
+    empty_registry: PromptRegistry, sample_template: PromptTemplate
+) -> None:
     empty_registry.register(sample_template)
 
     result = empty_registry.resolve(
         prompt_id="test_prompt",
         version="v1",
         context={"name": "Alice", "place": "Wonderland"},
-        provider_name="unknown_provider"
+        provider_name="unknown_provider",
     )
 
     assert result == "Hello Alice, welcome to Wonderland!"
 
 
-def test_resolve_missing_context(empty_registry: PromptRegistry, sample_template: PromptTemplate) -> None:
+def test_resolve_missing_context(
+    empty_registry: PromptRegistry, sample_template: PromptTemplate
+) -> None:
     empty_registry.register(sample_template)
 
-    with pytest.raises(MissingContextVariableError, match="Missing context variable.s. \\['place'\\]"):
-        empty_registry.resolve(
-            prompt_id="test_prompt",
-            version="v1",
-            context={"name": "Alice"}
-        )
+    with pytest.raises(
+        MissingContextVariableError, match="Missing context variable.s. \\['place'\\]"
+    ):
+        empty_registry.resolve(prompt_id="test_prompt", version="v1", context={"name": "Alice"})
 
 
 def test_resolve_implicit_missing_context(empty_registry: PromptRegistry) -> None:
@@ -105,7 +112,7 @@ def test_resolve_implicit_missing_context(empty_registry: PromptRegistry) -> Non
         prompt_id="sneaky",
         version="v1",
         base_template="The secret is {secret}.",
-        context_variables=[]
+        context_variables=[],
     )
     empty_registry.register(template)
 
@@ -117,10 +124,7 @@ def test_list_prompts(empty_registry: PromptRegistry, sample_template: PromptTem
     empty_registry.register(sample_template)
 
     v2_template = PromptTemplate(
-        prompt_id="test_prompt",
-        version="v2",
-        base_template="Hi {name}",
-        context_variables=["name"]
+        prompt_id="test_prompt", version="v2", base_template="Hi {name}", context_variables=["name"]
     )
     empty_registry.register(v2_template)
 

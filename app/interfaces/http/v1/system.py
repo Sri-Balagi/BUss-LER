@@ -1,10 +1,11 @@
-﻿"""System endpoints for health, liveness, and readiness.
+"""System endpoints for health, liveness, and readiness.
 
 These three endpoints follow Kubernetes probe conventions:
 - /health  — basic liveness check (is the process alive?)
 - /live    — alias for /health
 - /ready   — readiness check (can the process serve traffic?)
 """
+
 from __future__ import annotations
 
 import platform

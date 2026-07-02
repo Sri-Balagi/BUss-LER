@@ -1,4 +1,4 @@
-﻿"""BizOS v6.0.0 — API Entry Point.
+"""BizOS v6.0.0 — API Entry Point.
 
 Initializes the FastAPI application with:
 - Middleware: Request IDs, Security Headers, Prometheus Metrics, CORS, Logging
@@ -10,6 +10,7 @@ Architecture note: This file is in the interfaces layer.
 It must not import from app.runtime or app.intelligence directly.
 All kernel access is via app.bootstrap or app.interfaces.http.v1.dependencies.
 """
+
 from __future__ import annotations
 
 import time
@@ -19,7 +20,10 @@ import structlog
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
+from qdrant_client import AsyncQdrantClient
+from supabase import AsyncClient
 
+from app.bootstrap.container import build_container, reset_container_for_testing
 from app.config import get_settings
 from app.infrastructure.persistence.postgres.supabase import SupabaseService
 from app.infrastructure.vectorstore.qdrant import QdrantService
@@ -35,6 +39,7 @@ logger = structlog.get_logger()
 
 
 # ── Lifespan ──────────────────────────────────────────────────────────────────
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):  # type: ignore[type-arg]
@@ -56,12 +61,33 @@ async def lifespan(app: FastAPI):  # type: ignore[type-arg]
         # Register OS-level signal handlers for graceful shutdown
         register_shutdown_handlers()
 
+        # Build container
+        logger.info("Building DI container")
+        container = build_container()
+
         # Validate mandatory infrastructure on startup
         logger.info("Initializing Supabase client")
-        await SupabaseService.get_client(settings)
+        supabase_client = await SupabaseService.get_client(settings)
+        container.register_singleton(AsyncClient, supabase_client)
 
         logger.info("Initializing Qdrant client and collections")
         await QdrantService.initialize_collections(settings)
+        qdrant_client = QdrantService.get_client(settings)
+        container.register_singleton(AsyncQdrantClient, qdrant_client)
+
+        logger.info("Validating Dependency Graph")
+        from app.infrastructure.ai.budgets.interfaces import IResourceBudget
+        from app.infrastructure.ai.kernel import AbstractAIKernel
+        from app.infrastructure.ai.prompts.registry import PromptRegistry
+        from app.infrastructure.ai.registry import ProviderRegistry
+        from app.infrastructure.ai.router import ProviderRouter
+
+        # Resolve critical paths to ensure graph is acyclic and valid
+        container.resolve(AbstractAIKernel)
+        container.resolve(ProviderRouter)
+        container.resolve(ProviderRegistry)
+        container.resolve(PromptRegistry)
+        container.resolve(IResourceBudget)
 
         logger.info("Startup complete — BizOS is ready to serve requests")
         yield
@@ -73,9 +99,11 @@ async def lifespan(app: FastAPI):  # type: ignore[type-arg]
     finally:
         logger.info("Shutting down BizOS API")
         await QdrantService.close()
+        reset_container_for_testing()
 
 
 # ── Application Factory ───────────────────────────────────────────────────────
+
 
 def create_app() -> FastAPI:
     """Factory function to create the FastAPI application instance."""
@@ -106,8 +134,7 @@ def create_app() -> FastAPI:
 
     # 4. CORS (innermost middleware)
     cors_origins = (
-        ["*"] if not settings.is_production
-        else settings.model_fields.get("cors_origins", ["*"])  # type: ignore[arg-type]
+        ["*"] if not settings.is_production else settings.model_fields.get("cors_origins", ["*"])  # type: ignore[arg-type]
     )
     app.add_middleware(
         CORSMiddleware,

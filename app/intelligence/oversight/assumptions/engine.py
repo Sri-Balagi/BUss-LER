@@ -11,14 +11,13 @@ class AssumptionManager:
     """
     Manages and tracks reasoning assumptions.
     """
+
     def __init__(self):
         self._registry = AssumptionRegistry(registry_id=str(uuid.uuid4()))
 
     def add_assumption(self, description: str) -> Assumption:
         assumption = Assumption(
-            assumption_id=str(uuid.uuid4()),
-            description=description,
-            status=AssumptionStatus.ACTIVE
+            assumption_id=str(uuid.uuid4()), description=description, status=AssumptionStatus.ACTIVE
         )
         self._registry.assumptions.append(assumption)
         return assumption

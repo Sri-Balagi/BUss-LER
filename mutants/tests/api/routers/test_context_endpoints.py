@@ -1,6 +1,7 @@
-import pytest
-from uuid import uuid4
 from unittest.mock import MagicMock
+from uuid import uuid4
+
+import pytest
 
 
 class DummyContextEngine:
@@ -63,9 +64,7 @@ def test_build_context_success(client, mock_context_engine, mocker):
 
     mock_context_engine.build_result = mock_context
 
-    response = client.post(
-        f"/api/v1/twins/{twin_id}/context/build", json={"policy_id": "planning"}
-    )
+    response = client.post(f"/api/v1/twins/{twin_id}/context/build", json={"policy_id": "planning"})
     assert response.status_code == 201
     assert "context_id" in response.json()
     client.app.dependency_overrides.pop(get_context_engine, None)

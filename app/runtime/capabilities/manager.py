@@ -1,6 +1,5 @@
 import logging
 import time
-from typing import List, Optional
 
 from app.runtime.capabilities.context import CapabilityContext
 from app.runtime.capabilities.executor import ICapabilityExecutor
@@ -13,15 +12,14 @@ from app.runtime.capabilities.registry import CapabilityRegistry
 
 logger = logging.getLogger(__name__)
 
+
 class CapabilityManager(ICapabilityExecutor):
     def __init__(self, registry: CapabilityRegistry, middlewares: list[IMiddleware] = None):
         self.registry = registry
         self.middlewares = middlewares or []
 
     async def execute_capability(
-        self,
-        request: CapabilityRequest,
-        context: CapabilityContext | None = None
+        self, request: CapabilityRequest, context: CapabilityContext | None = None
     ) -> CapabilityResult:
 
         start_time = time.time()
@@ -34,7 +32,7 @@ class CapabilityManager(ICapabilityExecutor):
             requested_version=request.execution_metadata.get("version"),
             execution_trace_id=request.trace_id,
             permissions=request.permissions,
-            caller_agent_id=request.caller_id
+            caller_agent_id=request.caller_id,
         )
 
         # 2. Resolve via Registry
@@ -47,7 +45,7 @@ class CapabilityManager(ICapabilityExecutor):
                 outputs={},
                 errors=[f"Resolution failure: {e}"],
                 execution_time_ms=int((time.time() - start_time) * 1000),
-                execution_trace_id=request.trace_id
+                execution_trace_id=request.trace_id,
             )
 
         # 3. Instantiate Capability via Factory
@@ -60,7 +58,7 @@ class CapabilityManager(ICapabilityExecutor):
                 outputs={},
                 errors=[f"Factory failure: {e}"],
                 execution_time_ms=int((time.time() - start_time) * 1000),
-                execution_trace_id=request.trace_id
+                execution_trace_id=request.trace_id,
             )
 
         # 4. Execute via LifecycleManager (which invokes the Middleware Pipeline)

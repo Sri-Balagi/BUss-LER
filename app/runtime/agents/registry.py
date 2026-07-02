@@ -17,6 +17,7 @@ class ResolutionContext(BaseModel):
     Stable input context for Registry resolution.
     Encapsulates all dynamic parameters for capability routing.
     """
+
     requested_capability: Capability
     execution_scope: str = Field(default="default")
     preferred_version: str | None = Field(default=None)
@@ -24,18 +25,22 @@ class ResolutionContext(BaseModel):
     cost_constraints: dict[str, Any] = Field(default_factory=dict)
     runtime_metadata: dict[str, Any] = Field(default_factory=dict)
 
+
 @dataclass
 class ResolutionTrace:
     """Diagnostic trace of the resolution process. Not used for execution logic."""
+
     evaluated_candidates: int = 0
     rankings: dict[str, RankingScore] = field(default_factory=dict)
     rejected_candidates: list[str] = field(default_factory=list)
     rejection_reasons: dict[str, str] = field(default_factory=dict)
     total_resolution_time_ms: float = 0.0
 
+
 @dataclass
 class ResolutionDecision:
     """Robust outcome of capability resolution."""
+
     selected_factory: IAgentFactory | None
     selected_specification: AgentSpecification | None
     ranking_score: RankingScore | None
@@ -43,11 +48,13 @@ class ResolutionDecision:
     fallback_candidates: list[AgentSpecification] = field(default_factory=list)
     trace: ResolutionTrace = field(default_factory=ResolutionTrace)
 
+
 class AgentRegistry:
     """
     The production capability resolution engine.
     Orchestrates lookup and scoring without managing agent state.
     """
+
     def __init__(self, health_monitor: AgentHealthMonitor, ranking_strategy: IRankingStrategy):
         self._health_monitor = health_monitor
         self._ranking_strategy = ranking_strategy
@@ -62,7 +69,9 @@ class AgentRegistry:
         # we assume if the agent's spec declares a capability string matching the id, it's a candidate.
         return target.capability_id in spec.capabilities
 
-    def _has_required_permissions(self, spec: AgentSpecification, required: set[AgentPermission]) -> bool:
+    def _has_required_permissions(
+        self, spec: AgentSpecification, required: set[AgentPermission]
+    ) -> bool:
         return required.issubset(set(spec.permissions))
 
     def resolve(self, context: ResolutionContext) -> ResolutionDecision:
@@ -109,7 +118,7 @@ class AgentRegistry:
                 selected_specification=None,
                 ranking_score=None,
                 selection_reason="No valid candidates found",
-                trace=trace
+                trace=trace,
             )
 
         # Sort candidates descending by overall score
@@ -124,5 +133,5 @@ class AgentRegistry:
             ranking_score=selected_score,
             selection_reason="Highest ranking valid candidate",
             fallback_candidates=fallbacks,
-            trace=trace
+            trace=trace,
         )

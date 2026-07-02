@@ -7,7 +7,7 @@ Conversation threads are twin-scoped and persisted in Supabase.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import UUID
 
 from pydantic import Field

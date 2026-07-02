@@ -15,6 +15,7 @@ class SupervisorAdapter(ISupervisorAdapter):
     Translates ExecutiveDirectives into Supervisor requests.
     Mocks integration with the frozen M5 Runtime Supervisor.
     """
+
     def dispatch_directive(self, directive: ExecutiveDirective) -> str:
         # Translate to Supervisor request
         # Mocking Supervisor creation of TaskDAG and return of a handle
@@ -32,5 +33,7 @@ class SupervisorAdapter(ISupervisorAdapter):
             summary_id=str(uuid.uuid4()),
             overall_status=RuntimeExecutionStatus.COMPLETED,
             directive_mappings=[],
-            metrics=RuntimeMetrics(execution_time_ms=120.0, tasks_spawned=3, capabilities_invoked=1)
+            metrics=RuntimeMetrics(
+                execution_time_ms=120.0, tasks_spawned=3, capabilities_invoked=1
+            ),
         )

@@ -132,12 +132,12 @@ class MockLLMProvider(ILLMProvider):
             return request.output_schema.model_validate(data)
         except Exception as e:
             raise StructuredOutputError(
-                self.provider_name, "generate_structured", "Schema validation failed in mock provider"
+                self.provider_name,
+                "generate_structured",
+                "Schema validation failed in mock provider",
             ) from e
 
-    async def stream(
-        self, request: AIRequest, prompt_text: str
-    ) -> AsyncIterator[StreamChunk]:
+    async def stream(self, request: AIRequest, prompt_text: str) -> AsyncIterator[StreamChunk]:
         self._record_call("stream", request=request, prompt_text=prompt_text)
         await self._simulate_scenario_conditions()
 
@@ -149,7 +149,10 @@ class MockLLMProvider(ILLMProvider):
         for i, chunk_text in enumerate(chunks):
             is_final = i == len(chunks) - 1
 
-            if self._scenario.mode == MockScenarioMode.LATENCY_SIMULATION and self._scenario.latency_ms > 0:
+            if (
+                self._scenario.mode == MockScenarioMode.LATENCY_SIMULATION
+                and self._scenario.latency_ms > 0
+            ):
                 await asyncio.sleep(self._scenario.latency_ms / 1000.0)
 
             yield StreamChunk(
@@ -199,4 +202,6 @@ class MockLLMProvider(ILLMProvider):
         """Assert that every call had a lifecycle ID (except health checks)."""
         for call in self.call_log:
             if call.method_name not in ["health_check", "count_tokens"]:
-                assert call.lifecycle_id is not None, f"Call {call.method_name} missing lifecycle ID"
+                assert call.lifecycle_id is not None, (
+                    f"Call {call.method_name} missing lifecycle ID"
+                )

@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import List
 
 from pydantic import BaseModel, Field
 
@@ -10,13 +9,16 @@ class UncertaintySource(str, Enum):
     CONFLICTING_EVIDENCE = "CONFLICTING_EVIDENCE"
     UNPROVEN_ASSUMPTION = "UNPROVEN_ASSUMPTION"
 
+
 class Assumption(BaseModel):
     assumption_id: str
     description: str
     confidence_level: float
 
+
 class UncertaintyAssessment(BaseModel):
     """Estimation of missing or unproven information."""
+
     overall_uncertainty_score: float
     sources: list[UncertaintySource] = Field(default_factory=list)
     assumptions: list[Assumption] = Field(default_factory=list)

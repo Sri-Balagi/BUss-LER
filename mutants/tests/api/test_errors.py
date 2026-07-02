@@ -3,13 +3,13 @@
 from uuid import uuid4
 
 from app.models.exceptions import (
-    EntityNotFoundError,
-    TwinNotFoundError,
-    VersionConflictError,
-    DuplicateTwinError,
     DomainValidationError,
+    DuplicateTwinError,
+    EntityNotFoundError,
     RepositoryError,
     ServiceError,
+    TwinNotFoundError,
+    VersionConflictError,
 )
 
 
@@ -35,9 +35,7 @@ def test_version_conflict_handler(client, mock_twin_service):
     twin_id = uuid4()
     mock_twin_service.update_twin.side_effect = VersionConflictError(1, 2)
 
-    response = client.put(
-        f"/api/v1/twins/{twin_id}", json={"expected_version": 1, "state": {}}
-    )
+    response = client.put(f"/api/v1/twins/{twin_id}", json={"expected_version": 1, "state": {}})
     assert response.status_code == 409
     assert "conflict" in response.json()["detail"].lower()
 
@@ -45,44 +43,30 @@ def test_version_conflict_handler(client, mock_twin_service):
 def test_duplicate_twin_handler(client, mock_twin_service):
     mock_twin_service.create_twin.side_effect = DuplicateTwinError(str(uuid4()))
 
-    response = client.post(
-        "/api/v1/twins", json={"entity_id": str(uuid4()), "state": {}}
-    )
+    response = client.post("/api/v1/twins", json={"entity_id": str(uuid4()), "state": {}})
     assert response.status_code == 409
     assert "already has a digital twin" in response.json()["detail"].lower()
 
 
 def test_domain_validation_handler(client, mock_twin_service):
-    mock_twin_service.create_twin.side_effect = DomainValidationError(
-        "state", "Invalid state keys"
-    )
+    mock_twin_service.create_twin.side_effect = DomainValidationError("state", "Invalid state keys")
 
-    response = client.post(
-        "/api/v1/twins", json={"entity_id": str(uuid4()), "state": {}}
-    )
+    response = client.post("/api/v1/twins", json={"entity_id": str(uuid4()), "state": {}})
     assert response.status_code == 422
     assert "state" in response.json()["detail"].lower()
 
 
 def test_repository_error_handler(client, mock_twin_service):
-    mock_twin_service.create_twin.side_effect = RepositoryError(
-        "twin.create", "DB down"
-    )
+    mock_twin_service.create_twin.side_effect = RepositoryError("twin.create", "DB down")
 
-    response = client.post(
-        "/api/v1/twins", json={"entity_id": str(uuid4()), "state": {}}
-    )
+    response = client.post("/api/v1/twins", json={"entity_id": str(uuid4()), "state": {}})
     assert response.status_code == 500
     assert "internal database error" in response.json()["detail"].lower()
 
 
 def test_service_error_handler(client, mock_twin_service):
-    mock_twin_service.create_twin.side_effect = ServiceError(
-        "twin.create", "Logic failed"
-    )
+    mock_twin_service.create_twin.side_effect = ServiceError("twin.create", "Logic failed")
 
-    response = client.post(
-        "/api/v1/twins", json={"entity_id": str(uuid4()), "state": {}}
-    )
+    response = client.post("/api/v1/twins", json={"entity_id": str(uuid4()), "state": {}})
     assert response.status_code == 500
     assert "orchestration error" in response.json()["detail"].lower()

@@ -1,8 +1,9 @@
-﻿"""Request ID and Correlation ID middleware.
+"""Request ID and Correlation ID middleware.
 
 Injects X-Request-ID and X-Correlation-ID headers into every request/response.
 These IDs are propagated through all structured log entries.
 """
+
 from __future__ import annotations
 
 import uuid

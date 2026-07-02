@@ -1,5 +1,4 @@
 import pytest
-
 from app.models.enterprise_context import ProviderDependency
 from app.models.enums import ContextSource
 from app.models.exceptions import ContextDependencyCycleError
@@ -25,9 +24,7 @@ def test_graph_linear_dependencies():
     graph = ContextDependencyGraph()
     graph.register(ProviderDependency(provider=ContextSource.TWIN, depends_on=[]))
     graph.register(
-        ProviderDependency(
-            provider=ContextSource.CONVERSATION, depends_on=[ContextSource.TWIN]
-        )
+        ProviderDependency(provider=ContextSource.CONVERSATION, depends_on=[ContextSource.TWIN])
     )
     graph.register(
         ProviderDependency(
@@ -51,9 +48,7 @@ def test_graph_partial_resolution():
     # Register TWIN and CONVERSATION, but only resolve CONVERSATION
     graph.register(ProviderDependency(provider=ContextSource.TWIN, depends_on=[]))
     graph.register(
-        ProviderDependency(
-            provider=ContextSource.CONVERSATION, depends_on=[ContextSource.TWIN]
-        )
+        ProviderDependency(provider=ContextSource.CONVERSATION, depends_on=[ContextSource.TWIN])
     )
 
     # If we only request CONVERSATION, it shouldn't wait for TWIN in the active set
@@ -66,15 +61,11 @@ def test_graph_partial_resolution():
 def test_graph_cycle_detection_on_register():
     graph = ContextDependencyGraph()
     graph.register(
-        ProviderDependency(
-            provider=ContextSource.TWIN, depends_on=[ContextSource.CONVERSATION]
-        )
+        ProviderDependency(provider=ContextSource.TWIN, depends_on=[ContextSource.CONVERSATION])
     )
     with pytest.raises(ContextDependencyCycleError) as exc:
         graph.register(
-            ProviderDependency(
-                provider=ContextSource.CONVERSATION, depends_on=[ContextSource.TWIN]
-            )
+            ProviderDependency(provider=ContextSource.CONVERSATION, depends_on=[ContextSource.TWIN])
         )
 
     assert "twin" in str(exc.value)
@@ -83,19 +74,13 @@ def test_graph_cycle_detection_on_register():
 
 def test_graph_complex_cycle_detection_on_register():
     graph = ContextDependencyGraph()
+    graph.register(ProviderDependency(provider=ContextSource.GOAL, depends_on=[ContextSource.PLAN]))
     graph.register(
-        ProviderDependency(provider=ContextSource.GOAL, depends_on=[ContextSource.PLAN])
-    )
-    graph.register(
-        ProviderDependency(
-            provider=ContextSource.PLAN, depends_on=[ContextSource.INTENT]
-        )
+        ProviderDependency(provider=ContextSource.PLAN, depends_on=[ContextSource.INTENT])
     )
     with pytest.raises(ContextDependencyCycleError):
         graph.register(
-            ProviderDependency(
-                provider=ContextSource.INTENT, depends_on=[ContextSource.GOAL]
-            )
+            ProviderDependency(provider=ContextSource.INTENT, depends_on=[ContextSource.GOAL])
         )
 
 

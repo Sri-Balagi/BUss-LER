@@ -1,12 +1,13 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from unittest.mock import AsyncMock, MagicMock
+
 import pytest
 
-from app.intelligence.intake.intent.intent import Intent, IntentCreate, IntentUpdate, IntentAnalysis
-from app.shared.enums import IntentStatus, IntentType, IntentConfidence
-from app.shared.exceptions.errors import IntentNotFoundError, RepositoryError
 from app.infrastructure.persistence.postgres.repositories.intent_repository import IntentRepository
+from app.intelligence.intake.intent.intent import Intent, IntentAnalysis, IntentCreate, IntentUpdate
+from app.shared.enums import IntentConfidence, IntentStatus, IntentType
+from app.shared.exceptions.errors import IntentNotFoundError, RepositoryError
 
 
 @pytest.fixture
@@ -32,8 +33,8 @@ def test_deserialize():
             "confidence": "high",
             "entities": [],
         },
-        "created_at": datetime.now(timezone.utc).isoformat(),
-        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
+        "updated_at": datetime.now(UTC).isoformat(),
     }
     intent = IntentRepository._deserialize(row)
     assert isinstance(intent, Intent)
@@ -62,8 +63,8 @@ async def test_create_success(repository, mock_supabase_client):
                     "entities": [],
                 },
                 "metadata": {"test": True},
-                "created_at": datetime.now(timezone.utc).isoformat(),
-                "updated_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
+                "updated_at": datetime.now(UTC).isoformat(),
             }
         ]
     )
@@ -115,8 +116,8 @@ async def test_get_by_id_success(repository, mock_supabase_client):
                 "raw_text": "Test",
                 "intent_type": IntentType.GENERAL.value,
                 "status": IntentStatus.PENDING.value,
-                "created_at": datetime.now(timezone.utc).isoformat(),
-                "updated_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
+                "updated_at": datetime.now(UTC).isoformat(),
             }
         ]
     )
@@ -156,8 +157,8 @@ async def test_list_by_twin_success(repository, mock_supabase_client):
                 "raw_text": "Test",
                 "intent_type": IntentType.GENERAL.value,
                 "status": IntentStatus.FULFILLED.value,
-                "created_at": datetime.now(timezone.utc).isoformat(),
-                "updated_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
+                "updated_at": datetime.now(UTC).isoformat(),
             }
         ],
         count=1,
@@ -203,14 +204,14 @@ async def test_update_success(repository, mock_supabase_client):
                 "raw_text": "Updated",
                 "intent_type": IntentType.GENERAL.value,
                 "status": IntentStatus.FULFILLED.value,
-                "created_at": datetime.now(timezone.utc).isoformat(),
-                "updated_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
+                "updated_at": datetime.now(UTC).isoformat(),
             }
         ]
     )
     mock_supabase_client.table().update().eq().execute = mock_execute
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     update = IntentUpdate(
         status=IntentStatus.FULFILLED,
         intent_type=IntentType.GENERAL,
@@ -240,8 +241,8 @@ async def test_update_empty(repository, mock_supabase_client):
                 "raw_text": "Test",
                 "intent_type": IntentType.GENERAL.value,
                 "status": IntentStatus.PENDING.value,
-                "created_at": datetime.now(timezone.utc).isoformat(),
-                "updated_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
+                "updated_at": datetime.now(UTC).isoformat(),
             }
         ]
     )
@@ -257,9 +258,7 @@ async def test_update_not_found(repository, mock_supabase_client):
     mock_execute.return_value = MagicMock(data=[])
     mock_supabase_client.table().update().eq().execute = mock_execute
     with pytest.raises(IntentNotFoundError):
-        await repository.update(
-            uuid.uuid4(), IntentUpdate(status=IntentStatus.FULFILLED)
-        )
+        await repository.update(uuid.uuid4(), IntentUpdate(status=IntentStatus.FULFILLED))
 
 
 @pytest.mark.asyncio
@@ -267,9 +266,7 @@ async def test_update_failure(repository, mock_supabase_client):
     mock_execute = AsyncMock(side_effect=Exception("DB Error"))
     mock_supabase_client.table().update().eq().execute = mock_execute
     with pytest.raises(RepositoryError):
-        await repository.update(
-            uuid.uuid4(), IntentUpdate(status=IntentStatus.FULFILLED)
-        )
+        await repository.update(uuid.uuid4(), IntentUpdate(status=IntentStatus.FULFILLED))
 
 
 @pytest.mark.asyncio

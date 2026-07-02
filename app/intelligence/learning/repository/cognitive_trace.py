@@ -14,7 +14,7 @@ The AI Kernel exposes metadata; the service creates and persists the trace.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import UUID
 
 from pydantic import Field
@@ -51,14 +51,11 @@ class CognitiveTrace(DomainBaseModel):
         ),
     )
     provider: str = Field(..., description="AI provider used (e.g., 'gemini').")
-    model: str = Field(
-        ..., description="Exact model name used (e.g., 'gemini-2.5-flash')."
-    )
+    model: str = Field(..., description="Exact model name used (e.g., 'gemini-2.5-flash').")
     prompt_version: str = Field(
         ...,
         description=(
-            "Versioned prompt ID used. "
-            "Examples: 'intent_classification_v1', 'goal_planning_v1'."
+            "Versioned prompt ID used. Examples: 'intent_classification_v1', 'goal_planning_v1'."
         ),
     )
 
@@ -72,12 +69,8 @@ class CognitiveTrace(DomainBaseModel):
     intent_id: UUID | None = Field(
         default=None, description="Intent that was classified or consumed."
     )
-    goal_id: UUID | None = Field(
-        default=None, description="Goal that was planned for or consumed."
-    )
-    plan_id: UUID | None = Field(
-        default=None, description="Plan that was generated."
-    )
+    goal_id: UUID | None = Field(default=None, description="Goal that was planned for or consumed.")
+    plan_id: UUID | None = Field(default=None, description="Plan that was generated.")
     recommendation_id: UUID | None = Field(
         default=None,
         description="Recommendation that was generated.",
@@ -119,9 +112,7 @@ class CognitiveTrace(DomainBaseModel):
     )
 
     # --- M4 Context Observability ---
-    context_id: UUID | None = Field(
-        default=None, description="ID of the EnterpriseContext used."
-    )
+    context_id: UUID | None = Field(default=None, description="ID of the EnterpriseContext used.")
     context_sources_used: list[str] = Field(
         default_factory=list, description="List of ContextSource providers invoked."
     )
@@ -167,9 +158,7 @@ class CognitiveTraceCreate(DomainBaseModel):
     reasoning_summary: str
     confidence: float | None = Field(default=None, ge=0.0, le=1.0)
     latency_ms: float
-    token_usage: CognitiveTraceTokenUsage = Field(
-        default_factory=CognitiveTraceTokenUsage
-    )
+    token_usage: CognitiveTraceTokenUsage = Field(default_factory=CognitiveTraceTokenUsage)
 
     # --- M4 Context Observability ---
     context_id: UUID | None = None

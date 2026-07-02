@@ -99,15 +99,11 @@ async def get_context_registry(
     )
     registry.register(
         provider=GoalContextProvider(goal_service),
-        metadata=ProviderMetadata(
-            source=ContextSource.GOAL, name="GoalProvider", version="1.0"
-        ),
+        metadata=ProviderMetadata(source=ContextSource.GOAL, name="GoalProvider", version="1.0"),
     )
     registry.register(
         provider=PlanContextProvider(plan_service),
-        metadata=ProviderMetadata(
-            source=ContextSource.PLAN, name="PlanProvider", version="1.0"
-        ),
+        metadata=ProviderMetadata(source=ContextSource.PLAN, name="PlanProvider", version="1.0"),
     )
     registry.register(
         provider=RecommendationContextProvider(recommendation_service),
@@ -119,9 +115,7 @@ async def get_context_registry(
     )
     registry.register(
         provider=TwinContextProvider(twin_service),
-        metadata=ProviderMetadata(
-            source=ContextSource.TWIN, name="TwinProvider", version="1.0"
-        ),
+        metadata=ProviderMetadata(source=ContextSource.TWIN, name="TwinProvider", version="1.0"),
     )
     registry.register(
         provider=ConversationContextProvider(conversation_service),
@@ -133,9 +127,7 @@ async def get_context_registry(
     )
     registry.register(
         provider=TraceContextProvider(trace_service),
-        metadata=ProviderMetadata(
-            source=ContextSource.TRACE, name="TraceProvider", version="1.0"
-        ),
+        metadata=ProviderMetadata(source=ContextSource.TRACE, name="TraceProvider", version="1.0"),
     )
     registry.register(
         provider=BusinessStateContextProvider(twin_service),

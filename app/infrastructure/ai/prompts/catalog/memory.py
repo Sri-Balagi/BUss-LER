@@ -12,5 +12,5 @@ memory_summarization_v1 = PromptTemplate(
         "{memory_content}"
     ),
     context_variables=["memory_content"],
-    metadata={"capability": "memory", "author": "BizOS Core"}
+    metadata={"capability": "memory", "author": "BizOS Core"},
 )

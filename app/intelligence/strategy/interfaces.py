@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import List
 
 from app.intelligence.intake.intent.models import ExecutiveIntent
 from app.intelligence.strategy.conflict.models import ConflictAssessment
@@ -16,30 +15,38 @@ class IExecutiveObjectivesEngine(ABC):
     def create_objective_from_intent(self, intent: ExecutiveIntent) -> ExecutiveObjective:
         pass
 
+
 class IGoalManagementEngine(ABC):
     @abstractmethod
     def derive_goals(self, objective: ExecutiveObjective) -> GoalCollection:
         pass
 
+
 class IObjectiveConflictResolver(ABC):
     @abstractmethod
-    def detect_conflicts(self, objectives: list[ExecutiveObjective], goals: list[Goal]) -> list[ConflictAssessment]:
+    def detect_conflicts(
+        self, objectives: list[ExecutiveObjective], goals: list[Goal]
+    ) -> list[ConflictAssessment]:
         pass
+
 
 class IStrategicConstraintsEngine(ABC):
     @abstractmethod
     def evaluate_constraints(self) -> StrategicConstraintSet:
         pass
 
+
 class IBusinessPolicyEngine(ABC):
     @abstractmethod
     def evaluate_objective(self, objective: ExecutiveObjective) -> PolicyAssessment:
         pass
 
+
 class IStrategyLibrary(ABC):
     @abstractmethod
     def get_catalog(self) -> StrategyCatalog:
         pass
+
 
 class IStrategicTimelineEngine(ABC):
     @abstractmethod

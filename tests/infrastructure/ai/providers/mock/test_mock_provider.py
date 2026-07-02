@@ -94,9 +94,7 @@ async def test_streaming_simulation(mock_provider: MockLLMProvider) -> None:
 
 @pytest.mark.asyncio
 async def test_provider_unavailable(mock_provider: MockLLMProvider) -> None:
-    mock_provider.configure_scenario(
-        MockScenarioConfig(mode=MockScenarioMode.PROVIDER_UNAVAILABLE)
-    )
+    mock_provider.configure_scenario(MockScenarioConfig(mode=MockScenarioMode.PROVIDER_UNAVAILABLE))
     request = AIRequest(prompt_id="test_prompt")
 
     with pytest.raises(ProviderError) as exc:
@@ -111,7 +109,7 @@ async def test_failure_simulation_on_nth_call(mock_provider: MockLLMProvider) ->
         MockScenarioConfig(
             mode=MockScenarioMode.FAILURE_SIMULATION,
             fail_on_call_number=2,
-            error_message="Fail on call 2"
+            error_message="Fail on call 2",
         )
     )
     request = AIRequest(prompt_id="test_prompt")
@@ -131,10 +129,7 @@ async def test_failure_simulation_on_nth_call(mock_provider: MockLLMProvider) ->
 @pytest.mark.asyncio
 async def test_latency_simulation(mock_provider: MockLLMProvider) -> None:
     mock_provider.configure_scenario(
-        MockScenarioConfig(
-            mode=MockScenarioMode.LATENCY_SIMULATION,
-            latency_ms=100
-        )
+        MockScenarioConfig(mode=MockScenarioMode.LATENCY_SIMULATION, latency_ms=100)
     )
     request = AIRequest(prompt_id="test_prompt")
 
@@ -174,4 +169,3 @@ async def test_embed_and_tokens(mock_provider: MockLLMProvider) -> None:
 
     health = await mock_provider.health_check()
     assert health["status"] == "healthy"
-

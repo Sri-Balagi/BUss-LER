@@ -1,5 +1,4 @@
 import asyncio
-from typing import Optional
 
 from app.runtime.policies.base import IExecutionPolicy
 from app.runtime.policies.context import ExecutionDecision, ExecutionPolicyContext
@@ -14,13 +13,14 @@ class AsyncIOScheduler:
     Production-grade asynchronous task scheduler.
     Orchestrates policy evaluation, retry mechanics, budget enforcement, and queue transitioning.
     """
+
     def __init__(
         self,
         context: ExecutionPolicyContext,
         policy: IExecutionPolicy,
         retry_strategy: IRetryStrategy,
         hooks: ISchedulerHooks | None = None,
-        poll_interval: float = 0.1
+        poll_interval: float = 0.1,
     ):
         self.context = context
         self.policy = policy
@@ -49,16 +49,20 @@ class AsyncIOScheduler:
 
             if not decision.tasks_to_execute:
                 # Idle backoff if no tasks ready and nothing running
-                if self.context.queue_manager.get_queue(TaskState.RUNNING).size() == 0 and \
-                   self.context.queue_manager.get_queue(TaskState.READY).size() == 0 and \
-                   self.context.queue_manager.get_queue(TaskState.WAITING).size() == 0:
+                if (
+                    self.context.queue_manager.get_queue(TaskState.RUNNING).size() == 0
+                    and self.context.queue_manager.get_queue(TaskState.READY).size() == 0
+                    and self.context.queue_manager.get_queue(TaskState.WAITING).size() == 0
+                ):
                     break
                 await asyncio.sleep(self.poll_interval)
                 continue
 
             # 3. Dispatch Approved Tasks
             if decision.parallel_execution:
-                coroutines = [self._dispatch_task(task, decision) for task in decision.tasks_to_execute]
+                coroutines = [
+                    self._dispatch_task(task, decision) for task in decision.tasks_to_execute
+                ]
                 await asyncio.gather(*coroutines)
             else:
                 for task in decision.tasks_to_execute:
@@ -94,7 +98,9 @@ class AsyncIOScheduler:
 
                 self.hooks.before_retry(task, error, delay_ms)
 
-                self.context.queue_manager.transition_task(task, TaskState.RUNNING, TaskState.WAITING)
+                self.context.queue_manager.transition_task(
+                    task, TaskState.RUNNING, TaskState.WAITING
+                )
 
                 self.hooks.after_dispatch(task)
 
@@ -124,7 +130,9 @@ class AsyncIOScheduler:
         if task.descriptor.target == "mock_fail":
             raise RuntimeError("Simulated execution failure")
 
-    def _transition_to_failed(self, task: ITask, error: Exception, from_state: TaskState = TaskState.READY) -> None:
+    def _transition_to_failed(
+        self, task: ITask, error: Exception, from_state: TaskState = TaskState.READY
+    ) -> None:
         try:
             self.context.queue_manager.transition_task(task, from_state, TaskState.FAILED)
             task.descriptor.metadata["failure_reason"] = str(error)

@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional
 
 from app.intelligence.decision.confidence.models import ConfidenceAssessment
 from app.intelligence.decision.decision.models import DecisionAlternative, ExecutiveDecision
@@ -14,28 +13,36 @@ from app.intelligence.strategy.policy.models import PolicyAssessment
 
 class IDecisionEngine(ABC):
     @abstractmethod
-    def evaluate(self,
-                 objective: ExecutiveObjective,
-                 situation: SituationAssessment,
-                 constraints: StrategicConstraintSet,
-                 policy: PolicyAssessment,
-                 alternatives: list[DecisionAlternative]) -> ExecutiveDecision | None:
+    def evaluate(
+        self,
+        objective: ExecutiveObjective,
+        situation: SituationAssessment,
+        constraints: StrategicConstraintSet,
+        policy: PolicyAssessment,
+        alternatives: list[DecisionAlternative],
+    ) -> ExecutiveDecision | None:
         pass
+
 
 class IPlanningEngine(ABC):
     @abstractmethod
     def generate_plan(self, decision: ExecutiveDecision) -> ExecutivePlan:
         pass
 
+
 class ISimulationEngine(ABC):
     @abstractmethod
-    def simulate(self, plan: ExecutivePlan, scenarios: list[SimulationScenario]) -> list[SimulationResult]:
+    def simulate(
+        self, plan: ExecutivePlan, scenarios: list[SimulationScenario]
+    ) -> list[SimulationResult]:
         pass
+
 
 class IUncertaintyEngine(ABC):
     @abstractmethod
     def estimate_uncertainty(self) -> UncertaintyAssessment:
         pass
+
 
 class IConfidenceEngine(ABC):
     @abstractmethod

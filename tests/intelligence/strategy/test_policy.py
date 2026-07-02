@@ -1,6 +1,11 @@
+from app.intelligence.strategy.objectives.models import (
+    BusinessHorizon,
+    ExecutiveObjective,
+    ObjectivePriority,
+)
 from app.intelligence.strategy.policy.engine import BusinessPolicyEngine
 from app.intelligence.strategy.policy.models import PolicyStatus
-from app.intelligence.strategy.objectives.models import ExecutiveObjective, ObjectivePriority, BusinessHorizon
+
 
 def test_compliant_policy():
     engine = BusinessPolicyEngine()
@@ -8,12 +13,13 @@ def test_compliant_policy():
         objective_id="1",
         description="Normal objective",
         priority=ObjectivePriority.MEDIUM,
-        horizon=BusinessHorizon.MEDIUM_TERM
+        horizon=BusinessHorizon.MEDIUM_TERM,
     )
-    
+
     assessment = engine.evaluate_objective(objective)
     assert assessment.status == PolicyStatus.COMPLIANT
     assert len(assessment.violations) == 0
+
 
 def test_policy_violation():
     engine = BusinessPolicyEngine()
@@ -21,9 +27,9 @@ def test_policy_violation():
         objective_id="2",
         description="Critical but not immediate",
         priority=ObjectivePriority.CRITICAL,
-        horizon=BusinessHorizon.LONG_TERM
+        horizon=BusinessHorizon.LONG_TERM,
     )
-    
+
     assessment = engine.evaluate_objective(objective)
     assert assessment.status == PolicyStatus.VIOLATION
     assert len(assessment.violations) == 1

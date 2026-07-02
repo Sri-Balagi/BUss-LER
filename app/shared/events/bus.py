@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Coroutine
-from typing import Any, Dict, List, Type
+from typing import Any
 
 import structlog
 from fastapi import BackgroundTasks

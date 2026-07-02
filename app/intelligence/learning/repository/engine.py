@@ -1,5 +1,3 @@
-from typing import List
-
 from app.intelligence.learning.repository.models import KnowledgeRepositoryState
 from app.intelligence.learning.synthesis.models import KnowledgeArtifact
 
@@ -8,6 +6,7 @@ class ExecutiveKnowledgeRepository:
     """
     Stores and retrieves validated organizational intelligence.
     """
+
     def __init__(self):
         self._state = KnowledgeRepositoryState()
 

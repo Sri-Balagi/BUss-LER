@@ -1,8 +1,9 @@
-﻿"""Security headers middleware.
+"""Security headers middleware.
 
 Adds production-grade HTTP security headers to every response.
 Based on OWASP recommendations for API services.
 """
+
 from __future__ import annotations
 
 from fastapi import Request, Response
@@ -22,9 +23,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-Frame-Options"] = "DENY"
 
         # Force HTTPS in production
-        response.headers["Strict-Transport-Security"] = (
-            "max-age=31536000; includeSubDomains"
-        )
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
 
         # Referrer policy
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
@@ -33,6 +32,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
 
         # Remove server identification
-        response.headers.pop("Server", None)
+        if "server" in response.headers:
+            del response.headers["server"]
 
         return response

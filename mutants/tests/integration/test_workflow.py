@@ -2,7 +2,6 @@
 
 from uuid import uuid4
 
-
 # We use the real Supabase client provided by dependencies via the TestClient
 
 

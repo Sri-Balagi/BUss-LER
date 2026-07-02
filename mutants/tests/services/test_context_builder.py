@@ -1,11 +1,12 @@
-import pytest
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
-from app.services.context_builder import ContextBuilder
+import pytest
 from app.models.context import CognitiveContext
 from app.models.exceptions import ContextBuildError
 from app.models.intent import Intent
+from app.services.context_builder import ContextBuilder
+
 from app.core.context import OperationContext
 
 
@@ -29,16 +30,12 @@ def op_ctx():
 
 
 @pytest.mark.asyncio
-async def test_build_success_without_intent(
-    mock_goal_service, mock_memory_service, op_ctx
-):
+async def test_build_success_without_intent(mock_goal_service, mock_memory_service, op_ctx):
     twin_id = uuid4()
 
     mock_goal_service.get_active_goals.return_value = []
 
-    builder = ContextBuilder(
-        goal_service=mock_goal_service, memory_service=mock_memory_service
-    )
+    builder = ContextBuilder(goal_service=mock_goal_service, memory_service=mock_memory_service)
 
     context = await builder.build(ctx=op_ctx, twin_id=twin_id)
 
@@ -53,9 +50,7 @@ async def test_build_success_without_intent(
 
 
 @pytest.mark.asyncio
-async def test_build_success_with_intent(
-    mock_goal_service, mock_memory_service, op_ctx
-):
+async def test_build_success_with_intent(mock_goal_service, mock_memory_service, op_ctx):
     twin_id = uuid4()
     intent = MagicMock(spec=Intent)
     intent.raw_text = "Test intent"
@@ -71,9 +66,7 @@ async def test_build_success_with_intent(
     mock_search_result.items = [mock_item]
     mock_memory_service.search_memories.return_value = mock_search_result
 
-    builder = ContextBuilder(
-        goal_service=mock_goal_service, memory_service=mock_memory_service
-    )
+    builder = ContextBuilder(goal_service=mock_goal_service, memory_service=mock_memory_service)
 
     context = await builder.build(ctx=op_ctx, twin_id=twin_id, intent=intent)
 
@@ -91,9 +84,7 @@ async def test_build_success_with_intent(
 
 
 @pytest.mark.asyncio
-async def test_build_handles_memory_exception(
-    mock_goal_service, mock_memory_service, op_ctx
-):
+async def test_build_handles_memory_exception(mock_goal_service, mock_memory_service, op_ctx):
     twin_id = uuid4()
     intent = MagicMock(spec=Intent)
     intent.raw_text = "Test"
@@ -101,9 +92,7 @@ async def test_build_handles_memory_exception(
     mock_goal_service.get_active_goals.return_value = []
     mock_memory_service.search_memories.side_effect = Exception("Search failed")
 
-    builder = ContextBuilder(
-        goal_service=mock_goal_service, memory_service=mock_memory_service
-    )
+    builder = ContextBuilder(goal_service=mock_goal_service, memory_service=mock_memory_service)
 
     context = await builder.build(ctx=op_ctx, twin_id=twin_id, intent=intent)
 
@@ -113,16 +102,12 @@ async def test_build_handles_memory_exception(
 
 
 @pytest.mark.asyncio
-async def test_build_raises_exception_on_goal_error(
-    mock_goal_service, mock_memory_service, op_ctx
-):
+async def test_build_raises_exception_on_goal_error(mock_goal_service, mock_memory_service, op_ctx):
     twin_id = uuid4()
 
     mock_goal_service.get_active_goals.side_effect = Exception("DB failure")
 
-    builder = ContextBuilder(
-        goal_service=mock_goal_service, memory_service=mock_memory_service
-    )
+    builder = ContextBuilder(goal_service=mock_goal_service, memory_service=mock_memory_service)
 
     with pytest.raises(ContextBuildError):
         await builder.build(ctx=op_ctx, twin_id=twin_id)

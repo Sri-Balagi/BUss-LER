@@ -49,6 +49,4 @@ async def get_intent_service(
 ):
     from app.services.intent_service import IntentService
 
-    return IntentService(
-        repository=repository, event_bus=event_bus, classifier=classifier
-    )
+    return IntentService(repository=repository, event_bus=event_bus, classifier=classifier)

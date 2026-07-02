@@ -9,11 +9,13 @@ from app.runtime.agents.specification import AgentSpecification
 if TYPE_CHECKING:
     from app.runtime.agents.registry import ResolutionContext
 
+
 class RankingScore(BaseModel):
     """
     Structured outcome of a ranking evaluation.
     Used for Registry comparison and observational telemetry.
     """
+
     overall_score: float = Field(default=0.0)
     health_contribution: float = Field(default=0.0)
     cost_contribution: float = Field(default=0.0)
@@ -23,18 +25,26 @@ class RankingScore(BaseModel):
     def __lt__(self, other):
         return self.overall_score < other.overall_score
 
+
 class IRankingStrategy(ABC):
     """
     Abstract strategy for scoring capability candidates.
     Allows decoupling of resolution logic from heuristics.
     """
+
     @abstractmethod
-    def score(self, spec: AgentSpecification, health: AgentHealth, context: 'ResolutionContext') -> RankingScore:
+    def score(
+        self, spec: AgentSpecification, health: AgentHealth, context: "ResolutionContext"
+    ) -> RankingScore:
         pass
+
 
 class HealthRankingStrategy(IRankingStrategy):
     """Scores based on advisory health telemetry."""
-    def score(self, spec: AgentSpecification, health: AgentHealth, context: 'ResolutionContext') -> RankingScore:
+
+    def score(
+        self, spec: AgentSpecification, health: AgentHealth, context: "ResolutionContext"
+    ) -> RankingScore:
         if not health.is_available or health.in_cooldown:
             return RankingScore(overall_score=0.0, availability_contribution=0.0)
 
@@ -47,21 +57,29 @@ class HealthRankingStrategy(IRankingStrategy):
         return RankingScore(
             overall_score=final_score,
             health_contribution=final_score,
-            availability_contribution=1.0 if health.is_available else 0.0
+            availability_contribution=1.0 if health.is_available else 0.0,
         )
+
 
 class CostRankingStrategy(IRankingStrategy):
     """Placeholder strategy demonstrating extensibility."""
-    def score(self, spec: AgentSpecification, health: AgentHealth, context: 'ResolutionContext') -> RankingScore:
+
+    def score(
+        self, spec: AgentSpecification, health: AgentHealth, context: "ResolutionContext"
+    ) -> RankingScore:
         # In a real system, cost limits would be checked.
         return RankingScore(overall_score=1.0, cost_contribution=1.0)
 
+
 class CompositeRankingStrategy(IRankingStrategy):
     """Combines multiple strategies."""
+
     def __init__(self, strategies: list[IRankingStrategy]):
         self._strategies = strategies
 
-    def score(self, spec: AgentSpecification, health: AgentHealth, context: 'ResolutionContext') -> RankingScore:
+    def score(
+        self, spec: AgentSpecification, health: AgentHealth, context: "ResolutionContext"
+    ) -> RankingScore:
         composite = RankingScore()
         for strategy in self._strategies:
             s = strategy.score(spec, health, context)

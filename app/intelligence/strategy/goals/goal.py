@@ -5,7 +5,7 @@ Goals persist independently of conversations and are linked to intents.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import UUID
 
 from pydantic import Field
@@ -17,12 +17,8 @@ from app.shared.enums import GoalStatus, GoalType
 class GoalBase(DomainBaseModel):
     """Base Goal schema with common attributes."""
 
-    title: str = Field(
-        ..., min_length=1, max_length=500, description="Short goal title."
-    )
-    description: str | None = Field(
-        None, max_length=5000, description="Detailed goal description."
-    )
+    title: str = Field(..., min_length=1, max_length=500, description="Short goal title.")
+    description: str | None = Field(None, max_length=5000, description="Detailed goal description.")
     goal_type: GoalType = Field(
         default=GoalType.STRATEGIC,
         description="Hierarchical level of this goal.",
@@ -33,9 +29,7 @@ class GoalBase(DomainBaseModel):
         le=10,
         description="Priority score 1 (lowest) to 10 (highest).",
     )
-    target_date: datetime | None = Field(
-        None, description="Optional deadline for the goal."
-    )
+    target_date: datetime | None = Field(None, description="Optional deadline for the goal.")
     success_criteria: list[str] = Field(
         default_factory=list,
         description="List of measurable success conditions.",

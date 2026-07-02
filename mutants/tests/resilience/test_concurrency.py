@@ -3,9 +3,8 @@ import uuid
 from unittest.mock import AsyncMock, patch
 
 import pytest
-
 from app.models.enums import EmbeddingStatus, MemoryCategory, MemorySource
-from app.models.events import MemoryLifecycleEvent, EventType
+from app.models.events import EventType, MemoryLifecycleEvent
 from app.models.memory import Memory
 from app.services.memory_service import MemoryService
 from app.workers.memory_worker import MemoryProcessingWorker
@@ -62,7 +61,7 @@ async def test_concurrent_worker_execution(mock_memory):
     mock_ai_kernel = AsyncMock()
     mock_ai_kernel.summarize.return_value = "Summary"
 
-    from app.models.ai import EmbeddingResponse, AIResponseMetadata
+    from app.models.ai import AIResponseMetadata, EmbeddingResponse
 
     mock_ai_kernel.embed.return_value = EmbeddingResponse(
         vector=[0.0] * 768,

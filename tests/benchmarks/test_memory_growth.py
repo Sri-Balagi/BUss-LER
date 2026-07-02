@@ -1,15 +1,17 @@
-import pytest
-import uuid
 import time
+import uuid
 
-from app.infrastructure.vectorstore.models import MemoryVectorPoint, MemoryVectorPayload
-from app.shared.enums import MemoryCategory, MemorySource
-from app.infrastructure.persistence.postgres.repositories.vector_repository import MemoryVectorRepository
-from qdrant_client import AsyncQdrantClient
-from app.config import Settings
-
+import pytest
 import pytest_asyncio
-from qdrant_client.models import VectorParams, Distance
+from qdrant_client import AsyncQdrantClient
+from qdrant_client.models import Distance, VectorParams
+
+from app.config import Settings
+from app.infrastructure.persistence.postgres.repositories.vector_repository import (
+    MemoryVectorRepository,
+)
+from app.infrastructure.vectorstore.models import MemoryVectorPayload, MemoryVectorPoint
+from app.shared.enums import MemoryCategory, MemorySource
 
 
 @pytest_asyncio.fixture

@@ -2,10 +2,9 @@ import uuid
 from unittest.mock import AsyncMock
 
 import pytest
-
 from app.models.ai import EmbeddingResponse
 from app.models.enums import EmbeddingStatus, MemoryCategory, MemorySource
-from app.models.events import MemoryLifecycleEvent, EventType
+from app.models.events import EventType, MemoryLifecycleEvent
 from app.models.memory import Memory
 from app.services.memory_service import MemoryService
 from app.workers.memory_worker import MemoryProcessingWorker
@@ -99,9 +98,7 @@ async def test_memory_pipeline_integration():
 
     # Did it summarize?
     mock_ai_kernel.summarize.assert_called_once_with(mock_memory.content)
-    mock_metadata_repo.update_summary.assert_called_once_with(
-        memory_id, "This is a summary."
-    )
+    mock_metadata_repo.update_summary.assert_called_once_with(memory_id, "This is a summary.")
 
     # Did it embed the summary?
     mock_ai_kernel.embed.assert_called_once()
@@ -117,9 +114,7 @@ async def test_memory_pipeline_integration():
     assert upsert_arg.payload.twin_id == twin_id
 
     # Did it mark as completed?
-    mock_metadata_repo.update_embedding_status.assert_any_call(
-        memory_id, EmbeddingStatus.COMPLETED
-    )
+    mock_metadata_repo.update_embedding_status.assert_any_call(memory_id, EmbeddingStatus.COMPLETED)
 
 
 @pytest.mark.asyncio

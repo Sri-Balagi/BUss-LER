@@ -6,7 +6,6 @@ Handles business logic for the Entity lifecycle.
 from uuid import UUID
 
 import structlog
-
 from app.models.entity import EntityUpdate
 from app.models.exceptions import EntityNotFoundError
 from app.models.schemas import Entity, EntityCreate
@@ -15,7 +14,8 @@ from app.repositories.entity_repository import EntityRepository
 logger = structlog.get_logger()
 
 
-from mutmut.mutation.trampoline import wrap_in_trampoline as _mutmut_mutated, MutantDict
+from mutmut.mutation.trampoline import MutantDict
+from mutmut.mutation.trampoline import wrap_in_trampoline as _mutmut_mutated
 
 mutants_xǁEntityServiceǁ__init____mutmut: MutantDict = {}  # type: ignore
 mutants_xǁEntityServiceǁget_by_id__mutmut: MutantDict = {}  # type: ignore
@@ -533,9 +533,7 @@ class EntityService:
 
         return await self._entity_repo.update(entity_id, data)
 
-    async def xǁEntityServiceǁupdate__mutmut_1(
-        self, entity_id: UUID, data: EntityUpdate
-    ) -> Entity:
+    async def xǁEntityServiceǁupdate__mutmut_1(self, entity_id: UUID, data: EntityUpdate) -> Entity:
         """Update an entity.
 
         Ensures the entity exists and is active before updating.
@@ -545,9 +543,7 @@ class EntityService:
 
         return await self._entity_repo.update(entity_id, data)
 
-    async def xǁEntityServiceǁupdate__mutmut_2(
-        self, entity_id: UUID, data: EntityUpdate
-    ) -> Entity:
+    async def xǁEntityServiceǁupdate__mutmut_2(self, entity_id: UUID, data: EntityUpdate) -> Entity:
         """Update an entity.
 
         Ensures the entity exists and is active before updating.
@@ -557,9 +553,7 @@ class EntityService:
 
         return await self._entity_repo.update(None, data)
 
-    async def xǁEntityServiceǁupdate__mutmut_3(
-        self, entity_id: UUID, data: EntityUpdate
-    ) -> Entity:
+    async def xǁEntityServiceǁupdate__mutmut_3(self, entity_id: UUID, data: EntityUpdate) -> Entity:
         """Update an entity.
 
         Ensures the entity exists and is active before updating.
@@ -569,9 +563,7 @@ class EntityService:
 
         return await self._entity_repo.update(entity_id, None)
 
-    async def xǁEntityServiceǁupdate__mutmut_4(
-        self, entity_id: UUID, data: EntityUpdate
-    ) -> Entity:
+    async def xǁEntityServiceǁupdate__mutmut_4(self, entity_id: UUID, data: EntityUpdate) -> Entity:
         """Update an entity.
 
         Ensures the entity exists and is active before updating.
@@ -581,9 +573,7 @@ class EntityService:
 
         return await self._entity_repo.update(data)
 
-    async def xǁEntityServiceǁupdate__mutmut_5(
-        self, entity_id: UUID, data: EntityUpdate
-    ) -> Entity:
+    async def xǁEntityServiceǁupdate__mutmut_5(self, entity_id: UUID, data: EntityUpdate) -> Entity:
         """Update an entity.
 
         Ensures the entity exists and is active before updating.
@@ -681,52 +671,52 @@ mutants_xǁEntityServiceǁlist_active__mutmut["xǁEntityServiceǁlist_active__mu
 mutants_xǁEntityServiceǁlist_active__mutmut["xǁEntityServiceǁlist_active__mutmut_9"] = (
     EntityService.xǁEntityServiceǁlist_active__mutmut_9
 )  # type: ignore # mutmut generated
-mutants_xǁEntityServiceǁlist_active__mutmut[
-    "xǁEntityServiceǁlist_active__mutmut_10"
-] = EntityService.xǁEntityServiceǁlist_active__mutmut_10  # type: ignore # mutmut generated
-mutants_xǁEntityServiceǁlist_active__mutmut[
-    "xǁEntityServiceǁlist_active__mutmut_11"
-] = EntityService.xǁEntityServiceǁlist_active__mutmut_11  # type: ignore # mutmut generated
+mutants_xǁEntityServiceǁlist_active__mutmut["xǁEntityServiceǁlist_active__mutmut_10"] = (
+    EntityService.xǁEntityServiceǁlist_active__mutmut_10
+)  # type: ignore # mutmut generated
+mutants_xǁEntityServiceǁlist_active__mutmut["xǁEntityServiceǁlist_active__mutmut_11"] = (
+    EntityService.xǁEntityServiceǁlist_active__mutmut_11
+)  # type: ignore # mutmut generated
 
 mutants_xǁEntityServiceǁcreate_entity__mutmut["_mutmut_orig"] = (
     EntityService.xǁEntityServiceǁcreate_entity__mutmut_orig
 )  # type: ignore # mutmut generated
-mutants_xǁEntityServiceǁcreate_entity__mutmut[
-    "xǁEntityServiceǁcreate_entity__mutmut_1"
-] = EntityService.xǁEntityServiceǁcreate_entity__mutmut_1  # type: ignore # mutmut generated
-mutants_xǁEntityServiceǁcreate_entity__mutmut[
-    "xǁEntityServiceǁcreate_entity__mutmut_2"
-] = EntityService.xǁEntityServiceǁcreate_entity__mutmut_2  # type: ignore # mutmut generated
-mutants_xǁEntityServiceǁcreate_entity__mutmut[
-    "xǁEntityServiceǁcreate_entity__mutmut_3"
-] = EntityService.xǁEntityServiceǁcreate_entity__mutmut_3  # type: ignore # mutmut generated
-mutants_xǁEntityServiceǁcreate_entity__mutmut[
-    "xǁEntityServiceǁcreate_entity__mutmut_4"
-] = EntityService.xǁEntityServiceǁcreate_entity__mutmut_4  # type: ignore # mutmut generated
-mutants_xǁEntityServiceǁcreate_entity__mutmut[
-    "xǁEntityServiceǁcreate_entity__mutmut_5"
-] = EntityService.xǁEntityServiceǁcreate_entity__mutmut_5  # type: ignore # mutmut generated
-mutants_xǁEntityServiceǁcreate_entity__mutmut[
-    "xǁEntityServiceǁcreate_entity__mutmut_6"
-] = EntityService.xǁEntityServiceǁcreate_entity__mutmut_6  # type: ignore # mutmut generated
-mutants_xǁEntityServiceǁcreate_entity__mutmut[
-    "xǁEntityServiceǁcreate_entity__mutmut_7"
-] = EntityService.xǁEntityServiceǁcreate_entity__mutmut_7  # type: ignore # mutmut generated
-mutants_xǁEntityServiceǁcreate_entity__mutmut[
-    "xǁEntityServiceǁcreate_entity__mutmut_8"
-] = EntityService.xǁEntityServiceǁcreate_entity__mutmut_8  # type: ignore # mutmut generated
-mutants_xǁEntityServiceǁcreate_entity__mutmut[
-    "xǁEntityServiceǁcreate_entity__mutmut_9"
-] = EntityService.xǁEntityServiceǁcreate_entity__mutmut_9  # type: ignore # mutmut generated
-mutants_xǁEntityServiceǁcreate_entity__mutmut[
-    "xǁEntityServiceǁcreate_entity__mutmut_10"
-] = EntityService.xǁEntityServiceǁcreate_entity__mutmut_10  # type: ignore # mutmut generated
-mutants_xǁEntityServiceǁcreate_entity__mutmut[
-    "xǁEntityServiceǁcreate_entity__mutmut_11"
-] = EntityService.xǁEntityServiceǁcreate_entity__mutmut_11  # type: ignore # mutmut generated
-mutants_xǁEntityServiceǁcreate_entity__mutmut[
-    "xǁEntityServiceǁcreate_entity__mutmut_12"
-] = EntityService.xǁEntityServiceǁcreate_entity__mutmut_12  # type: ignore # mutmut generated
+mutants_xǁEntityServiceǁcreate_entity__mutmut["xǁEntityServiceǁcreate_entity__mutmut_1"] = (
+    EntityService.xǁEntityServiceǁcreate_entity__mutmut_1
+)  # type: ignore # mutmut generated
+mutants_xǁEntityServiceǁcreate_entity__mutmut["xǁEntityServiceǁcreate_entity__mutmut_2"] = (
+    EntityService.xǁEntityServiceǁcreate_entity__mutmut_2
+)  # type: ignore # mutmut generated
+mutants_xǁEntityServiceǁcreate_entity__mutmut["xǁEntityServiceǁcreate_entity__mutmut_3"] = (
+    EntityService.xǁEntityServiceǁcreate_entity__mutmut_3
+)  # type: ignore # mutmut generated
+mutants_xǁEntityServiceǁcreate_entity__mutmut["xǁEntityServiceǁcreate_entity__mutmut_4"] = (
+    EntityService.xǁEntityServiceǁcreate_entity__mutmut_4
+)  # type: ignore # mutmut generated
+mutants_xǁEntityServiceǁcreate_entity__mutmut["xǁEntityServiceǁcreate_entity__mutmut_5"] = (
+    EntityService.xǁEntityServiceǁcreate_entity__mutmut_5
+)  # type: ignore # mutmut generated
+mutants_xǁEntityServiceǁcreate_entity__mutmut["xǁEntityServiceǁcreate_entity__mutmut_6"] = (
+    EntityService.xǁEntityServiceǁcreate_entity__mutmut_6
+)  # type: ignore # mutmut generated
+mutants_xǁEntityServiceǁcreate_entity__mutmut["xǁEntityServiceǁcreate_entity__mutmut_7"] = (
+    EntityService.xǁEntityServiceǁcreate_entity__mutmut_7
+)  # type: ignore # mutmut generated
+mutants_xǁEntityServiceǁcreate_entity__mutmut["xǁEntityServiceǁcreate_entity__mutmut_8"] = (
+    EntityService.xǁEntityServiceǁcreate_entity__mutmut_8
+)  # type: ignore # mutmut generated
+mutants_xǁEntityServiceǁcreate_entity__mutmut["xǁEntityServiceǁcreate_entity__mutmut_9"] = (
+    EntityService.xǁEntityServiceǁcreate_entity__mutmut_9
+)  # type: ignore # mutmut generated
+mutants_xǁEntityServiceǁcreate_entity__mutmut["xǁEntityServiceǁcreate_entity__mutmut_10"] = (
+    EntityService.xǁEntityServiceǁcreate_entity__mutmut_10
+)  # type: ignore # mutmut generated
+mutants_xǁEntityServiceǁcreate_entity__mutmut["xǁEntityServiceǁcreate_entity__mutmut_11"] = (
+    EntityService.xǁEntityServiceǁcreate_entity__mutmut_11
+)  # type: ignore # mutmut generated
+mutants_xǁEntityServiceǁcreate_entity__mutmut["xǁEntityServiceǁcreate_entity__mutmut_12"] = (
+    EntityService.xǁEntityServiceǁcreate_entity__mutmut_12
+)  # type: ignore # mutmut generated
 
 mutants_xǁEntityServiceǁupdate__mutmut["_mutmut_orig"] = (
     EntityService.xǁEntityServiceǁupdate__mutmut_orig

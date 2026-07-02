@@ -1,11 +1,14 @@
-import pytest
-from uuid import uuid4, UUID
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
+from uuid import UUID, uuid4
 
+import pytest
+
+from app.infrastructure.persistence.postgres.repositories.recommendation_repository import (
+    RecommendationRepository,
+)
 from app.intelligence.decision.recommendation.recommendation import RecommendationCreate
-from app.shared.enums import RecommendationStatus, RecommendationConfidence
+from app.shared.enums import RecommendationConfidence, RecommendationStatus
 from app.shared.exceptions.errors import RecommendationNotFoundError, RepositoryError
-from app.infrastructure.persistence.postgres.repositories.recommendation_repository import RecommendationRepository
 
 
 @pytest.fixture
@@ -34,8 +37,8 @@ def sample_rec_data():
         "supporting_memory_ids": [str(uuid4())],
         "supporting_goal_ids": [str(uuid4())],
         "status": "new",
-        "created_at": datetime.now(timezone.utc).isoformat(),
-        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
+        "updated_at": datetime.now(UTC).isoformat(),
     }
 
 
@@ -90,9 +93,7 @@ async def test_get_by_id_success(repo, mock_supabase, mocker, sample_rec_data):
     rec_id = uuid4()
     mock_execute = mocker.AsyncMock()
     mock_execute.return_value.data = [sample_rec_data]
-    mock_supabase.table.return_value.select.return_value.eq.return_value.execute = (
-        mock_execute
-    )
+    mock_supabase.table.return_value.select.return_value.eq.return_value.execute = mock_execute
 
     result = await repo.get_by_id(rec_id)
     assert result.id == UUID(sample_rec_data["id"])
@@ -103,9 +104,7 @@ async def test_get_by_id_not_found(repo, mock_supabase, mocker):
     rec_id = uuid4()
     mock_execute = mocker.AsyncMock()
     mock_execute.return_value.data = []
-    mock_supabase.table.return_value.select.return_value.eq.return_value.execute = (
-        mock_execute
-    )
+    mock_supabase.table.return_value.select.return_value.eq.return_value.execute = mock_execute
 
     with pytest.raises(RecommendationNotFoundError):
         await repo.get_by_id(rec_id)
@@ -115,9 +114,7 @@ async def test_get_by_id_not_found(repo, mock_supabase, mocker):
 async def test_get_by_id_exception(repo, mock_supabase, mocker):
     rec_id = uuid4()
     mock_execute = mocker.AsyncMock(side_effect=Exception("DB Error"))
-    mock_supabase.table.return_value.select.return_value.eq.return_value.execute = (
-        mock_execute
-    )
+    mock_supabase.table.return_value.select.return_value.eq.return_value.execute = mock_execute
 
     with pytest.raises(RepositoryError):
         await repo.get_by_id(rec_id)
@@ -164,9 +161,7 @@ async def test_update_status_success(repo, mock_supabase, mocker, sample_rec_dat
     sample_rec_data["status"] = "acknowledged"
     mock_execute = mocker.AsyncMock()
     mock_execute.return_value.data = [sample_rec_data]
-    mock_supabase.table.return_value.update.return_value.eq.return_value.execute = (
-        mock_execute
-    )
+    mock_supabase.table.return_value.update.return_value.eq.return_value.execute = mock_execute
 
     result = await repo.update_status(rec_id, RecommendationStatus.ACKNOWLEDGED)
     assert result.status == RecommendationStatus.ACKNOWLEDGED
@@ -177,9 +172,7 @@ async def test_update_status_not_found(repo, mock_supabase, mocker):
     rec_id = uuid4()
     mock_execute = mocker.AsyncMock()
     mock_execute.return_value.data = []
-    mock_supabase.table.return_value.update.return_value.eq.return_value.execute = (
-        mock_execute
-    )
+    mock_supabase.table.return_value.update.return_value.eq.return_value.execute = mock_execute
 
     with pytest.raises(RecommendationNotFoundError):
         await repo.update_status(rec_id, RecommendationStatus.ACKNOWLEDGED)
@@ -189,9 +182,7 @@ async def test_update_status_not_found(repo, mock_supabase, mocker):
 async def test_update_status_exception(repo, mock_supabase, mocker):
     rec_id = uuid4()
     mock_execute = mocker.AsyncMock(side_effect=Exception("DB Error"))
-    mock_supabase.table.return_value.update.return_value.eq.return_value.execute = (
-        mock_execute
-    )
+    mock_supabase.table.return_value.update.return_value.eq.return_value.execute = mock_execute
 
     with pytest.raises(RepositoryError):
         await repo.update_status(rec_id, RecommendationStatus.ACKNOWLEDGED)
@@ -200,9 +191,7 @@ async def test_update_status_exception(repo, mock_supabase, mocker):
 @pytest.mark.asyncio
 async def test_health_check_healthy(repo, mock_supabase, mocker):
     mock_execute = mocker.AsyncMock(return_value=True)
-    mock_supabase.table.return_value.select.return_value.limit.return_value.execute = (
-        mock_execute
-    )
+    mock_supabase.table.return_value.select.return_value.limit.return_value.execute = mock_execute
     result = await repo.health_check()
     assert result["status"] == "healthy"
     assert result["database"] is True
@@ -211,9 +200,7 @@ async def test_health_check_healthy(repo, mock_supabase, mocker):
 @pytest.mark.asyncio
 async def test_health_check_unhealthy(repo, mock_supabase, mocker):
     mock_execute = mocker.AsyncMock(side_effect=Exception("DB Error"))
-    mock_supabase.table.return_value.select.return_value.limit.return_value.execute = (
-        mock_execute
-    )
+    mock_supabase.table.return_value.select.return_value.limit.return_value.execute = mock_execute
     result = await repo.health_check()
     assert result["status"] == "unhealthy"
     assert result["database"] is False

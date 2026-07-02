@@ -56,5 +56,5 @@ goal_planning_v1 = PromptTemplate(
         "business_state",
         "twin_context",
     ],
-    metadata={"capability": "planning", "author": "BizOS Core"}
+    metadata={"capability": "planning", "author": "BizOS Core"},
 )

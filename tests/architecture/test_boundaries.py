@@ -6,7 +6,7 @@ from pathlib import Path
 def get_imports_for_file(filepath: Path) -> set:
     imports = set()
     try:
-        with open(filepath, "r", encoding="utf-8") as f:
+        with open(filepath, encoding="utf-8") as f:
             tree = ast.parse(f.read(), filename=str(filepath))
     except Exception:
         return imports

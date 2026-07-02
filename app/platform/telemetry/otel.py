@@ -1,10 +1,11 @@
-﻿"""OpenTelemetry tracing setup for BizOS.
+"""OpenTelemetry tracing setup for BizOS.
 
 Tracing is DISABLED by default (OTEL_ENABLED=false).
 When enabled, it emits traces to a console exporter or OTLP endpoint.
 
 Zero behavior change when disabled — all functions are no-ops if tracing is off.
 """
+
 from __future__ import annotations
 
 import os
@@ -41,22 +42,28 @@ def setup_tracing(service_name: str = "bizos", version: str = "6.0.0") -> bool:
         from opentelemetry.sdk.trace import TracerProvider
         from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
-        resource = Resource.create({
-            SERVICE_NAME: service_name,
-            SERVICE_VERSION: version,
-        })
+        resource = Resource.create(
+            {
+                SERVICE_NAME: service_name,
+                SERVICE_VERSION: version,
+            }
+        )
 
         provider = TracerProvider(resource=resource)
 
         otlp_endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
         if otlp_endpoint:
             from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+
             exporter = OTLPSpanExporter(endpoint=otlp_endpoint)
             logger.info("OTLP trace exporter configured", endpoint=otlp_endpoint)
         else:
             from opentelemetry.sdk.trace.export import ConsoleSpanExporter
+
             exporter = ConsoleSpanExporter()
-            logger.info("Console trace exporter configured (set OTEL_EXPORTER_OTLP_ENDPOINT for OTLP)")
+            logger.info(
+                "Console trace exporter configured (set OTEL_EXPORTER_OTLP_ENDPOINT for OTLP)"
+            )
 
         provider.add_span_processor(BatchSpanProcessor(exporter))
         trace.set_tracer_provider(provider)
@@ -79,6 +86,7 @@ def instrument_fastapi(app: Any) -> None:
         return
     try:
         from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+
         FastAPIInstrumentor.instrument_app(app)
         logger.info("FastAPI instrumented with OpenTelemetry")
     except ImportError:

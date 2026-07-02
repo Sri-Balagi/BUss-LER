@@ -20,7 +20,7 @@ class IntentEngine:
                 raw_request=raw_request,
                 classification=IntentClassification.UNKNOWN,
                 is_ambiguous=True,
-                ambiguity_reason="Empty request"
+                ambiguity_reason="Empty request",
             )
 
         if "grow" in request_lower or "expand" in request_lower or "increase" in request_lower:
@@ -28,19 +28,19 @@ class IntentEngine:
                 raw_request=raw_request,
                 classification=IntentClassification.STRATEGIC_OBJECTIVE,
                 entities=[IntentEntity(entity_type="target", value="growth")],
-                requested_outcomes=["increase_revenue"]
+                requested_outcomes=["increase_revenue"],
             )
         elif "fix" in request_lower or "adjust" in request_lower:
             return ExecutiveIntent(
                 raw_request=raw_request,
                 classification=IntentClassification.OPERATIONAL_ADJUSTMENT,
                 entities=[],
-                requested_outcomes=["operational_fix"]
+                requested_outcomes=["operational_fix"],
             )
         else:
             return ExecutiveIntent(
                 raw_request=raw_request,
                 classification=IntentClassification.UNKNOWN,
                 is_ambiguous=True,
-                ambiguity_reason="Could not determine specific business intent."
+                ambiguity_reason="Could not determine specific business intent.",
             )

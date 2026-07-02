@@ -5,8 +5,6 @@ rather than raw domain models or dicts, enabling richer metadata (event counts,
 trace IDs, etc.) without polluting domain models.
 """
 
-from typing import List, Optional
-
 from pydantic import Field
 
 from app.intelligence.decision.planning.plan import Plan
@@ -26,9 +24,7 @@ class CreateMemoryResult(DomainBaseModel):
     """Result of a memory creation operation."""
 
     memory: Memory
-    dispatched_events: int = Field(
-        default=0, description="Number of background events dispatched."
-    )
+    dispatched_events: int = Field(default=0, description="Number of background events dispatched.")
 
 
 class MemorySearchResultItem(DomainBaseModel):

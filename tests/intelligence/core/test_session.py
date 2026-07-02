@@ -1,6 +1,7 @@
 from app.intelligence.core.session.models import ReasoningMode
 from app.intelligence.core.session.session import CognitiveSession, ConvergenceStatus
 
+
 def test_cognitive_session_initialization():
     session = CognitiveSession(mode=ReasoningMode.FAST)
     assert session.mode == ReasoningMode.FAST
@@ -8,6 +9,7 @@ def test_cognitive_session_initialization():
     assert session.metrics.iteration_count == 0
     assert session.budget.max_iterations == 10
     assert session.termination_policy.target_confidence == 0.85
+
 
 def test_session_increment_iteration():
     session = CognitiveSession()

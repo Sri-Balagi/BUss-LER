@@ -1,7 +1,7 @@
 """Plan and Recommendation API schemas — request/response DTOs."""
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import UUID
 
 from pydantic import Field
@@ -13,12 +13,8 @@ from app.shared.enums import PlanStatus, RecommendationConfidence, Recommendatio
 
 
 class GeneratePlanRequest(DomainBaseModel):
-    goal_id: UUID | None = Field(
-        default=None, description="Goal to generate a plan for."
-    )
-    intent_id: UUID | None = Field(
-        default=None, description="Intent that triggers the plan."
-    )
+    goal_id: UUID | None = Field(default=None, description="Goal to generate a plan for.")
+    intent_id: UUID | None = Field(default=None, description="Intent that triggers the plan.")
 
 
 class PlanStepResponse(DomainBaseModel):

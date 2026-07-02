@@ -8,7 +8,6 @@ however, their lifecycle status and acknowledgement timestamps can be updated.
 
 import time
 from abc import ABC, abstractmethod
-from typing import Optional
 from uuid import UUID
 
 import structlog
@@ -82,9 +81,7 @@ class RecommendationRepository(AbstractRecommendationRepository):
             insert_data["originating_plan_id"] = str(data.originating_plan_id)
 
         try:
-            response = (
-                await self._client.table(self._table).insert(insert_data).execute()
-            )
+            response = await self._client.table(self._table).insert(insert_data).execute()
         except Exception as exc:
             raise RepositoryError("recommendation.create", str(exc)) from exc
 
@@ -135,9 +132,7 @@ class RecommendationRepository(AbstractRecommendationRepository):
 
         items = [self._deserialize(row) for row in response.data]
         total = response.count if response.count is not None else len(items)
-        return PaginatedRecommendations(
-            items=items, total_count=total, limit=limit, offset=offset
-        )
+        return PaginatedRecommendations(items=items, total_count=total, limit=limit, offset=offset)
 
     async def update_status(
         self,
@@ -178,11 +173,7 @@ class RecommendationRepository(AbstractRecommendationRepository):
 
         # Deserialize UUID arrays
         if row.get("supporting_memory_ids"):
-            row["supporting_memory_ids"] = [
-                PUUID(mid) for mid in row["supporting_memory_ids"]
-            ]
+            row["supporting_memory_ids"] = [PUUID(mid) for mid in row["supporting_memory_ids"]]
         if row.get("supporting_goal_ids"):
-            row["supporting_goal_ids"] = [
-                PUUID(gid) for gid in row["supporting_goal_ids"]
-            ]
+            row["supporting_goal_ids"] = [PUUID(gid) for gid in row["supporting_goal_ids"]]
         return Recommendation.model_validate(row)

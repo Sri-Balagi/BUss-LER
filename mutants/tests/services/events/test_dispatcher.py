@@ -1,10 +1,10 @@
-import pytest
 import uuid
-from unittest.mock import Mock, AsyncMock
+from unittest.mock import AsyncMock, Mock
 
-from fastapi import BackgroundTasks
+import pytest
+from app.models.events import EventType, MemoryLifecycleEvent
 from app.services.events.dispatcher import BackgroundTasksEventDispatcher
-from app.models.events import MemoryLifecycleEvent, EventType
+from fastapi import BackgroundTasks
 
 
 @pytest.fixture

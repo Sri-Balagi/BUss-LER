@@ -6,23 +6,17 @@ from fastapi import BackgroundTasks, Depends, Request
 from qdrant_client import AsyncQdrantClient
 from supabase import AsyncClient
 
-from app.config import Settings, get_settings
+from app.bootstrap.container import get_container
 from app.core.context import OperationContext
-from app.infrastructure.persistence.postgres.supabase import SupabaseService
-from app.infrastructure.vectorstore.qdrant import QdrantService
 from app.shared.events.bus import BackgroundTasksEventBus, EventBus
 
 
-async def get_supabase_client(
-    settings: Settings = Depends(get_settings),
-) -> AsyncClient:
-    return await SupabaseService.get_client(settings)
+async def get_supabase_client() -> AsyncClient:
+    return get_container().resolve(AsyncClient)
 
 
-async def get_qdrant_client(
-    settings: Settings = Depends(get_settings),
-) -> AsyncQdrantClient:
-    return QdrantService.get_client(settings)
+async def get_qdrant_client() -> AsyncQdrantClient:
+    return get_container().resolve(AsyncQdrantClient)
 
 
 async def get_current_user() -> uuid.UUID:

@@ -1,13 +1,13 @@
-import pytest
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
+import pytest
 from app.models.enterprise_context import ContextItem, ContextProvenance, ContextSection
 from app.models.enums import ContextPriority, ContextSource
 from app.services.context_policies import BUILT_IN_POLICIES
 from app.services.context_strategies import (
-    DefaultContextRanker,
     DefaultContextCompressor,
+    DefaultContextRanker,
     DefaultContextWindowBuilder,
 )
 
@@ -42,13 +42,11 @@ def create_item(
     domain_object_id=None,
 ) -> ContextItem:
     item_id = uuid4()
-    domain_id = (
-        domain_object_id if domain_object_id else (uuid4() if has_domain_id else None)
-    )
+    domain_id = domain_object_id if domain_object_id else (uuid4() if has_domain_id else None)
     prov = ContextProvenance(
         provider=source,
         service_name="test",
-        retrieval_timestamp=datetime.now(timezone.utc) - timedelta(hours=age_hours),
+        retrieval_timestamp=datetime.now(UTC) - timedelta(hours=age_hours),
         confidence=confidence,
     )
     return ContextItem(
@@ -75,7 +73,7 @@ def test_ranker_ordering(ranker, policy):
         priority=ContextPriority.MEDIUM,
         items=[item1, item2, item3, item4],
         token_estimate=100,
-        retrieved_at=datetime.now(timezone.utc),
+        retrieved_at=datetime.now(UTC),
     )
 
     ranked_sections = ranker.rank([section], policy)
@@ -96,7 +94,7 @@ def test_ranker_section_ordering(ranker, policy):
         priority=ContextPriority.MEDIUM,
         items=[],
         token_estimate=0,
-        retrieved_at=datetime.now(timezone.utc),
+        retrieved_at=datetime.now(UTC),
     )
     section_intent = ContextSection(
         section_id=uuid4(),
@@ -104,7 +102,7 @@ def test_ranker_section_ordering(ranker, policy):
         priority=ContextPriority.MEDIUM,
         items=[],
         token_estimate=0,
-        retrieved_at=datetime.now(timezone.utc),
+        retrieved_at=datetime.now(UTC),
     )
 
     ranked_sections = ranker.rank([section_mem, section_intent], policy)
@@ -122,13 +120,9 @@ def test_ranker_invalid_source_ordering(ranker, policy):
 def test_compressor_deduplication(compressor):
     # Create two items with same content, provider, and domain id
     domain_id = uuid4()
-    item1 = create_item(
-        "same content", source=ContextSource.MEMORY, domain_object_id=domain_id
-    )
+    item1 = create_item("same content", source=ContextSource.MEMORY, domain_object_id=domain_id)
     item1.provenance.ranking_score = 0.5
-    item2 = create_item(
-        "  SAME content  ", source=ContextSource.MEMORY, domain_object_id=domain_id
-    )
+    item2 = create_item("  SAME content  ", source=ContextSource.MEMORY, domain_object_id=domain_id)
     item2.provenance.ranking_score = 0.9  # Should be kept
 
     section = ContextSection(
@@ -137,7 +131,7 @@ def test_compressor_deduplication(compressor):
         priority=ContextPriority.MEDIUM,
         items=[item1, item2],
         token_estimate=100,
-        retrieved_at=datetime.now(timezone.utc),
+        retrieved_at=datetime.now(UTC),
     )
 
     compressed = compressor.compress([section], budget=1000)
@@ -150,9 +144,7 @@ def test_compressor_deduplication(compressor):
 
 def test_compressor_collapse_background(compressor):
     # 4 background items
-    items = [
-        create_item(f"bg {i}", priority=ContextPriority.BACKGROUND) for i in range(4)
-    ]
+    items = [create_item(f"bg {i}", priority=ContextPriority.BACKGROUND) for i in range(4)]
     for i, it in enumerate(items):
         it.provenance.ranking_score = 0.1 * i
 
@@ -162,7 +154,7 @@ def test_compressor_collapse_background(compressor):
         priority=ContextPriority.MEDIUM,
         items=items,
         token_estimate=100,
-        retrieved_at=datetime.now(timezone.utc),
+        retrieved_at=datetime.now(UTC),
     )
 
     compressed = compressor.compress([section], budget=1000)
@@ -174,9 +166,7 @@ def test_compressor_collapse_background(compressor):
 
 def test_compressor_no_collapse_few_background(compressor):
     # 3 background items shouldn't collapse
-    items = [
-        create_item(f"bg {i}", priority=ContextPriority.BACKGROUND) for i in range(3)
-    ]
+    items = [create_item(f"bg {i}", priority=ContextPriority.BACKGROUND) for i in range(3)]
 
     section = ContextSection(
         section_id=uuid4(),
@@ -184,7 +174,7 @@ def test_compressor_no_collapse_few_background(compressor):
         priority=ContextPriority.MEDIUM,
         items=items,
         token_estimate=100,
-        retrieved_at=datetime.now(timezone.utc),
+        retrieved_at=datetime.now(UTC),
     )
 
     compressed = compressor.compress([section], budget=1000)
@@ -204,7 +194,7 @@ def test_window_builder(window_builder):
         priority=ContextPriority.MEDIUM,
         items=[item1, item2],
         token_estimate=10,
-        retrieved_at=datetime.now(timezone.utc),
+        retrieved_at=datetime.now(UTC),
     )
 
     # Budget 5: Only item1 fits
@@ -230,7 +220,7 @@ def test_window_builder_critical_first(window_builder):
         priority=ContextPriority.CRITICAL,
         items=[item1],
         token_estimate=10,
-        retrieved_at=datetime.now(timezone.utc),
+        retrieved_at=datetime.now(UTC),
     )
     mem_section = ContextSection(
         section_id=uuid4(),
@@ -238,7 +228,7 @@ def test_window_builder_critical_first(window_builder):
         priority=ContextPriority.MEDIUM,
         items=[item2],
         token_estimate=10,
-        retrieved_at=datetime.now(timezone.utc),
+        retrieved_at=datetime.now(UTC),
     )
 
     # Budget 15: both can't fit. Goal is packed first.
@@ -257,7 +247,7 @@ def test_window_builder_section_empty(window_builder):
         priority=ContextPriority.MEDIUM,
         items=[item],
         token_estimate=100,
-        retrieved_at=datetime.now(timezone.utc),
+        retrieved_at=datetime.now(UTC),
     )
     window = window_builder.build_window([section], budget=50)
     assert window.items_included == 0
@@ -275,7 +265,7 @@ def test_window_builder_zero_budget_skip(window_builder):
         priority=ContextPriority.CRITICAL,
         items=[item1],
         token_estimate=10,
-        retrieved_at=datetime.now(timezone.utc),
+        retrieved_at=datetime.now(UTC),
     )
 
     item2 = create_item("mem1", source=ContextSource.MEMORY)
@@ -286,7 +276,7 @@ def test_window_builder_zero_budget_skip(window_builder):
         priority=ContextPriority.MEDIUM,
         items=[item2],
         token_estimate=5,
-        retrieved_at=datetime.now(timezone.utc),
+        retrieved_at=datetime.now(UTC),
     )
 
     # Budget 10, goal takes 10, remaining_budget = 0

@@ -1,13 +1,14 @@
-import pytest
-from httpx import AsyncClient, ASGITransport
 from unittest.mock import AsyncMock
 
-from app.main import app
+import pytest
 from app.api.v1.dependencies import (
+    get_ai_kernel,
     get_memory_metadata_repository,
     get_memory_vector_repository,
-    get_ai_kernel,
 )
+from httpx import ASGITransport, AsyncClient
+
+from app.main import app
 
 
 @pytest.fixture
@@ -29,18 +30,12 @@ def mock_ai_kernel():
 
 
 @pytest.mark.asyncio
-async def test_health_memory_all_healthy(
-    mock_metadata_repo, mock_vector_repo, mock_ai_kernel
-):
-    app.dependency_overrides[get_memory_metadata_repository] = lambda: (
-        mock_metadata_repo
-    )
+async def test_health_memory_all_healthy(mock_metadata_repo, mock_vector_repo, mock_ai_kernel):
+    app.dependency_overrides[get_memory_metadata_repository] = lambda: mock_metadata_repo
     app.dependency_overrides[get_memory_vector_repository] = lambda: mock_vector_repo
     app.dependency_overrides[get_ai_kernel] = lambda: mock_ai_kernel
 
-    async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test"
-    ) as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         response = await client.get("/api/v1/health/memory")
 
     assert response.status_code == 200
@@ -54,21 +49,15 @@ async def test_health_memory_all_healthy(
 
 
 @pytest.mark.asyncio
-async def test_health_memory_degraded(
-    mock_metadata_repo, mock_vector_repo, mock_ai_kernel
-):
+async def test_health_memory_degraded(mock_metadata_repo, mock_vector_repo, mock_ai_kernel):
     # Simulate DB failure
     mock_metadata_repo.list_by_twin.side_effect = Exception("DB Connection Failed")
 
-    app.dependency_overrides[get_memory_metadata_repository] = lambda: (
-        mock_metadata_repo
-    )
+    app.dependency_overrides[get_memory_metadata_repository] = lambda: mock_metadata_repo
     app.dependency_overrides[get_memory_vector_repository] = lambda: mock_vector_repo
     app.dependency_overrides[get_ai_kernel] = lambda: mock_ai_kernel
 
-    async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test"
-    ) as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         response = await client.get("/api/v1/health/memory")
 
     assert response.status_code == 200

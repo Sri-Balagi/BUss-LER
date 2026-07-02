@@ -1,20 +1,21 @@
-import pytest
+from decimal import Decimal
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
-from decimal import Decimal
 
-from app.models.enums import EmbeddingStatus, MemoryCategory, MemorySource
-from app.models.exceptions import ServiceError, RepositoryError
-from app.models.memory import Memory, PaginatedMemories
-from app.services.memory_service import MemoryService
-from app.core.context import OperationContext
+import pytest
 from app.models.commands import (
     CreateMemoryCommand,
     DeleteMemoryCommand,
     RestoreMemoryCommand,
 )
+from app.models.enums import EmbeddingStatus, MemoryCategory, MemorySource
+from app.models.exceptions import RepositoryError, ServiceError
+from app.models.memory import Memory, PaginatedMemories
 from app.models.queries import MemorySearchQuery
 from app.models.results import SearchMemoryResult
+from app.services.memory_service import MemoryService
+
+from app.core.context import OperationContext
 
 
 @pytest.fixture
@@ -38,12 +39,8 @@ def mock_event_bus():
 
 
 @pytest.fixture
-def memory_service(
-    mock_metadata_repo, mock_vector_repo, mock_ai_kernel, mock_event_bus
-):
-    return MemoryService(
-        mock_metadata_repo, mock_vector_repo, mock_ai_kernel, mock_event_bus
-    )
+def memory_service(mock_metadata_repo, mock_vector_repo, mock_ai_kernel, mock_event_bus):
+    return MemoryService(mock_metadata_repo, mock_vector_repo, mock_ai_kernel, mock_event_bus)
 
 
 @pytest.fixture
@@ -52,9 +49,7 @@ def ctx():
 
 
 @pytest.mark.asyncio
-async def test_create_memory_success(
-    memory_service, mock_metadata_repo, mock_event_bus, ctx
-):
+async def test_create_memory_success(memory_service, mock_metadata_repo, mock_event_bus, ctx):
     twin_id = uuid4()
     mem_id = uuid4()
 
@@ -119,9 +114,7 @@ async def test_search_memories_orchestration(
     twin_id = uuid4()
     mem_id = uuid4()
 
-    query = MemorySearchQuery(
-        twin_id=twin_id, query_text="search this", limit=10, threshold=0.7
-    )
+    query = MemorySearchQuery(twin_id=twin_id, query_text="search this", limit=10, threshold=0.7)
 
     # Mock AI Kernel
     mock_embed_response = MagicMock()
@@ -213,9 +206,7 @@ async def test_list_memories_with_category(memory_service, mock_metadata_repo, c
         items=[mem1, mem2], total_count=2, limit=50, offset=0
     )
 
-    res = await memory_service.list_memories(
-        ctx, twin_id, category=MemoryCategory.EVENT
-    )
+    res = await memory_service.list_memories(ctx, twin_id, category=MemoryCategory.EVENT)
     assert res.total_count == 1
     assert res.items[0].id == mem1.id
 
@@ -245,9 +236,7 @@ async def test_restore_memory(memory_service, mock_metadata_repo, ctx):
 async def test_restore_memory_error(memory_service, mock_metadata_repo, ctx):
     mock_metadata_repo.restore.side_effect = RepositoryError("db", "failure")
     with pytest.raises(ServiceError):
-        await memory_service.restore_memory(
-            ctx, RestoreMemoryCommand(memory_id=uuid4())
-        )
+        await memory_service.restore_memory(ctx, RestoreMemoryCommand(memory_id=uuid4()))
 
 
 @pytest.mark.asyncio
@@ -272,21 +261,15 @@ async def test_update_embedding_status(memory_service, mock_metadata_repo, ctx):
     mem_id = uuid4()
     mock_mem = MagicMock()
     mock_metadata_repo.update_embedding_status.return_value = mock_mem
-    res = await memory_service.update_embedding_status(
-        ctx, mem_id, EmbeddingStatus.COMPLETED
-    )
+    res = await memory_service.update_embedding_status(ctx, mem_id, EmbeddingStatus.COMPLETED)
     assert res == mock_mem
 
 
 @pytest.mark.asyncio
 async def test_update_embedding_status_error(memory_service, mock_metadata_repo, ctx):
-    mock_metadata_repo.update_embedding_status.side_effect = RepositoryError(
-        "db", "failure"
-    )
+    mock_metadata_repo.update_embedding_status.side_effect = RepositoryError("db", "failure")
     with pytest.raises(ServiceError):
-        await memory_service.update_embedding_status(
-            ctx, uuid4(), EmbeddingStatus.FAILED
-        )
+        await memory_service.update_embedding_status(ctx, uuid4(), EmbeddingStatus.FAILED)
 
 
 @pytest.mark.asyncio
@@ -309,9 +292,7 @@ async def test_search_memories_no_ai_kernel(
 ):
     service = MemoryService(mock_metadata_repo, mock_vector_repo, None, mock_event_bus)
     with pytest.raises(ServiceError):
-        await service.search_memories(
-            ctx, MemorySearchQuery(twin_id=uuid4(), query_text="")
-        )
+        await service.search_memories(ctx, MemorySearchQuery(twin_id=uuid4(), query_text=""))
 
 
 @pytest.mark.asyncio
@@ -355,18 +336,14 @@ async def test_search_memories_filters(
         "metadata": {},
     }
 
-    mem1 = Memory(
-        id=res1.id, memory_category=MemoryCategory.EVENT, importance=0.5, **base_attrs
-    )
+    mem1 = Memory(id=res1.id, memory_category=MemoryCategory.EVENT, importance=0.5, **base_attrs)
     mem3 = Memory(
         id=res3.id,
         memory_category=MemoryCategory.OBSERVATION,
         importance=0.5,
         **base_attrs,
     )
-    mem4 = Memory(
-        id=res4.id, memory_category=MemoryCategory.EVENT, importance=0.1, **base_attrs
-    )
+    mem4 = Memory(id=res4.id, memory_category=MemoryCategory.EVENT, importance=0.1, **base_attrs)
     mem5 = Memory(
         id=res5.id,
         memory_category=MemoryCategory.EVENT,
@@ -408,6 +385,4 @@ async def test_search_memories_filters(
 async def test_search_memories_general_exception(memory_service, mock_ai_kernel, ctx):
     mock_ai_kernel.embed.side_effect = Exception("General error")
     with pytest.raises(ServiceError):
-        await memory_service.search_memories(
-            ctx, MemorySearchQuery(twin_id=uuid4(), query_text="")
-        )
+        await memory_service.search_memories(ctx, MemorySearchQuery(twin_id=uuid4(), query_text=""))

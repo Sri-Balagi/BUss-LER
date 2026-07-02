@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -13,8 +12,10 @@ class ArbitrationReason(str, Enum):
     LOWER_RISK = "LOWER_RISK"
     RESOURCE_EFFICIENCY = "RESOURCE_EFFICIENCY"
 
+
 class ArbitrationDecision(BaseModel):
     """Result of choosing between competing valid decisions or plans."""
+
     arbitration_id: str
     selected_decision: ExecutiveDecision | None = None
     selected_plan: ExecutivePlan | None = None

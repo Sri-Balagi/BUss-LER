@@ -1,19 +1,21 @@
-from typing import Any, Dict, List
+from typing import Any
 
 
 class ReasoningNode:
     def __init__(self, node_id: str, content: Any, node_type: str):
         self.node_id = node_id
         self.content = content
-        self.node_type = node_type # e.g. "Hypothesis", "Evidence", "Decision"
+        self.node_type = node_type  # e.g. "Hypothesis", "Evidence", "Decision"
+
 
 class ExecutiveReasoningGraph:
     """
     Stores a non-linear graph of hypotheses, evidence, alternative strategies, and confidence evolution.
     """
+
     def __init__(self):
         self.nodes: dict[str, ReasoningNode] = {}
-        self.edges: list[tuple[str, str, str]] = [] # from, to, relationship
+        self.edges: list[tuple[str, str, str]] = []  # from, to, relationship
 
     def add_node(self, node: ReasoningNode):
         self.nodes[node.node_id] = node

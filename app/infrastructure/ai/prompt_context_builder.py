@@ -5,7 +5,7 @@ Responsibilities:
   - Removes formatting duplication from AI-powered engines.
 """
 
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any
 
 from app.intelligence.intake.situation.context import CognitiveContext
 
@@ -14,7 +14,6 @@ if TYPE_CHECKING:
         ContextSection,
         EnterpriseContext,
     )
-
 
 
 class PromptContextBuilder:

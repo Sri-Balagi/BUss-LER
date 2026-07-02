@@ -6,7 +6,7 @@ No business logic lives here; commands are pure data containers.
 
 import uuid
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import Field
 

@@ -13,16 +13,21 @@ class ExecutionType(str, Enum):
     WORKFLOW = "WORKFLOW"
     SYSTEM = "SYSTEM"
 
+
 class ExecutionDescriptor(BaseModel):
     """
     Routable execution instructions. Keeps the Scheduler completely blind to Agent/Tool internals.
     """
+
     execution_type: ExecutionType
     target: str = Field(description="The capability, agent, or tool to resolve.")
-    parameters: dict[str, Any] = Field(default_factory=dict, description="Inputs for the execution.")
+    parameters: dict[str, Any] = Field(
+        default_factory=dict, description="Inputs for the execution."
+    )
     timeout_ms: int | None = None
     retries_allowed: int = 0
     metadata: dict[str, Any] = Field(default_factory=dict)
+
 
 class TaskPriority(int, Enum):
     CRITICAL = 0
@@ -31,10 +36,12 @@ class TaskPriority(int, Enum):
     LOW = 3
     BACKGROUND = 4
 
+
 class ITask(ABC):
     """
     Abstract interface for scheduling a unit of work.
     """
+
     @property
     @abstractmethod
     def task_id(self) -> UUID4:
@@ -55,10 +62,12 @@ class ITask(ABC):
     def priority(self) -> TaskPriority:
         pass
 
+
 class Task(BaseModel, ITask):
     """
     Concrete task primitive for the Scheduler.
     """
+
     id: UUID4 = Field(default_factory=uuid4)
     execution_descriptor: ExecutionDescriptor
     task_dependencies: set[UUID4] = Field(default_factory=set)
