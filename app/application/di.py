@@ -1,80 +1,98 @@
-from fastapi import Depends
-from qdrant_client import AsyncQdrantClient
-from supabase import AsyncClient
+"""Application Layer Dependency Injection Wiring."""
 
-from app.application.memory.create_memory import CreateMemoryUseCase
-from app.application.memory.delete_memory import DeleteMemoryUseCase
-from app.application.memory.get_memory import GetMemoryUseCase
-from app.application.memory.list_memories import ListMemoriesUseCase
-from app.application.memory.restore_memory import RestoreMemoryUseCase
-from app.application.memory.update_memory import UpdateMemoryUseCase
-from app.infrastructure.ai.kernel import AbstractAIKernel
-from app.interfaces.http.v1.dependencies_ai import get_ai_kernel
-from app.interfaces.http.v1.dependencies_core import (
-    get_event_bus,
-    get_qdrant_client,
-    get_supabase_client,
-)
-from app.shared.events.bus import EventBus
-from app.infrastructure.persistence.postgres.repositories.memory_repository import MemoryMetadataRepository
-from app.infrastructure.persistence.postgres.repositories.vector_repository import MemoryVectorRepository
-from app.config import Settings, get_settings
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.bootstrap.container import Container
 
 
-async def get_memory_metadata_repository(
-    client: AsyncClient = Depends(get_supabase_client),
-):
-    return MemoryMetadataRepository(client)
+def register_application_dependencies(container: "Container") -> None:
+    """Wire Application Layer Use Cases into the global DI container."""
+    from supabase import AsyncClient
 
+    # Entity Use Cases
+    from app.application.entity.create_entity import CreateEntityUseCase
+    from app.application.entity.delete_entity import DeleteEntityUseCase
+    from app.application.entity.get_entity import GetEntityUseCase
+    from app.application.entity.list_entities import ListEntitiesUseCase
+    from app.application.entity.update_entity import UpdateEntityUseCase
+    from app.infrastructure.persistence.postgres.repositories.entity_repository import (
+        EntityRepository,
+    )
 
-async def get_memory_vector_repository(
-    client: AsyncQdrantClient = Depends(get_qdrant_client),
-    settings: Settings = Depends(get_settings),
-):
-    return MemoryVectorRepository(client, settings)
+    def build_entity_repo(c: "Container") -> EntityRepository:
+        return EntityRepository(client=c.resolve(AsyncClient))
 
+    # Repositories (if not already registered elsewhere)
+    container.register_factory(EntityRepository, build_entity_repo)
 
-async def get_create_memory_use_case(
-    metadata_repo=Depends(get_memory_metadata_repository),
-    vector_repo=Depends(get_memory_vector_repository),
-    ai_kernel: AbstractAIKernel = Depends(get_ai_kernel),
-    event_bus: EventBus = Depends(get_event_bus),
-) -> CreateMemoryUseCase:
-    return CreateMemoryUseCase(metadata_repo, vector_repo, ai_kernel, event_bus)
+    # Use Cases
+    container.register_factory(
+        CreateEntityUseCase, lambda c: CreateEntityUseCase(c.resolve(EntityRepository))
+    )
+    container.register_factory(
+        GetEntityUseCase, lambda c: GetEntityUseCase(c.resolve(EntityRepository))
+    )
+    container.register_factory(
+        ListEntitiesUseCase, lambda c: ListEntitiesUseCase(c.resolve(EntityRepository))
+    )
+    container.register_factory(
+        UpdateEntityUseCase, lambda c: UpdateEntityUseCase(c.resolve(EntityRepository))
+    )
+    container.register_factory(
+        DeleteEntityUseCase, lambda c: DeleteEntityUseCase(c.resolve(EntityRepository))
+    )
 
+    # Twin Use Cases
+    from app.application.twin.create_twin import CreateTwinUseCase
+    from app.application.twin.delete_twin import DeleteTwinUseCase
+    from app.application.twin.get_twin import GetTwinUseCase
+    from app.application.twin.list_twins import ListTwinsUseCase
+    from app.application.twin.update_twin import UpdateTwinUseCase
+    from app.application.twin.get_snapshots import GetTwinSnapshotsUseCase
+    from app.application.twin.get_history import GetTwinHistoryUseCase
+    from app.infrastructure.persistence.postgres.repositories.twin_repository import (
+        TwinRepository,
+    )
+    from app.infrastructure.persistence.postgres.repositories.snapshot_repository import (
+        SnapshotRepository,
+    )
+    from app.infrastructure.persistence.postgres.repositories.history_repository import (
+        HistoryRepository,
+    )
 
-async def get_update_memory_use_case(
-    metadata_repo=Depends(get_memory_metadata_repository),
-    vector_repo=Depends(get_memory_vector_repository),
-    ai_kernel: AbstractAIKernel = Depends(get_ai_kernel),
-    event_bus: EventBus = Depends(get_event_bus),
-) -> UpdateMemoryUseCase:
-    return UpdateMemoryUseCase(metadata_repo, vector_repo, ai_kernel, event_bus)
+    def build_twin_repo(c: "Container") -> TwinRepository:
+        return TwinRepository(client=c.resolve(AsyncClient))
 
+    def build_snapshot_repo(c: "Container") -> SnapshotRepository:
+        return SnapshotRepository(client=c.resolve(AsyncClient))
 
-async def get_get_memory_use_case(
-    metadata_repo=Depends(get_memory_metadata_repository),
-) -> GetMemoryUseCase:
-    return GetMemoryUseCase(metadata_repo)
+    def build_history_repo(c: "Container") -> HistoryRepository:
+        return HistoryRepository(client=c.resolve(AsyncClient))
 
+    container.register_factory(TwinRepository, build_twin_repo)
+    container.register_factory(SnapshotRepository, build_snapshot_repo)
+    container.register_factory(HistoryRepository, build_history_repo)
 
-async def get_list_memories_use_case(
-    metadata_repo=Depends(get_memory_metadata_repository),
-) -> ListMemoriesUseCase:
-    return ListMemoriesUseCase(metadata_repo)
+    container.register_factory(
+        CreateTwinUseCase, lambda c: CreateTwinUseCase(c.resolve(TwinRepository), c.resolve(EntityRepository))
+    )
+    container.register_factory(
+        GetTwinUseCase, lambda c: GetTwinUseCase(c.resolve(TwinRepository))
+    )
+    container.register_factory(
+        ListTwinsUseCase, lambda c: ListTwinsUseCase(c.resolve(TwinRepository))
+    )
+    container.register_factory(
+        UpdateTwinUseCase, lambda c: UpdateTwinUseCase(c.resolve(TwinRepository))
+    )
+    container.register_factory(
+        DeleteTwinUseCase, lambda c: DeleteTwinUseCase(c.resolve(TwinRepository))
+    )
+    container.register_factory(
+        GetTwinSnapshotsUseCase, lambda c: GetTwinSnapshotsUseCase(c.resolve(SnapshotRepository))
+    )
+    container.register_factory(
+        GetTwinHistoryUseCase, lambda c: GetTwinHistoryUseCase(c.resolve(HistoryRepository))
+    )
 
-
-async def get_delete_memory_use_case(
-    metadata_repo=Depends(get_memory_metadata_repository),
-    vector_repo=Depends(get_memory_vector_repository),
-    event_bus: EventBus = Depends(get_event_bus),
-) -> DeleteMemoryUseCase:
-    return DeleteMemoryUseCase(metadata_repo, vector_repo, event_bus)
-
-
-async def get_restore_memory_use_case(
-    metadata_repo=Depends(get_memory_metadata_repository),
-    vector_repo=Depends(get_memory_vector_repository),
-    ai_kernel: AbstractAIKernel = Depends(get_ai_kernel),
-) -> RestoreMemoryUseCase:
-    return RestoreMemoryUseCase(metadata_repo, vector_repo, ai_kernel)

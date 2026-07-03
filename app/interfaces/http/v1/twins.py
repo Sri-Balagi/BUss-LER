@@ -12,8 +12,16 @@ from app.interfaces.http.schemas.twin import (
     TwinHistory,
     TwinSnapshot,
 )
-from app.interfaces.http.v1.dependencies import get_twin_service
-from app.services.twin_service import TwinService
+from app.interfaces.http.v1.dependencies_core import (
+    get_create_twin_use_case,
+    get_get_twin_use_case,
+    get_list_twins_use_case,
+    get_update_twin_use_case,
+    get_delete_twin_use_case,
+    get_get_twin_snapshots_use_case,
+    get_get_twin_history_use_case,
+)
+
 
 router = APIRouter(prefix="/twins", tags=["Digital Twins"])
 
@@ -26,10 +34,10 @@ router = APIRouter(prefix="/twins", tags=["Digital Twins"])
 )
 async def create_twin(
     data: DigitalTwinCreate,
-    twin_service: TwinService = Depends(get_twin_service),
+    use_case = Depends(get_create_twin_use_case),
 ) -> DigitalTwin:
     """Create a new Digital Twin for an existing Entity."""
-    return await twin_service.create_twin(data)
+    return await use_case.execute(data)
 
 
 @router.get(
@@ -40,10 +48,10 @@ async def create_twin(
 async def list_twins(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    twin_service: TwinService = Depends(get_twin_service),
+    use_case = Depends(get_list_twins_use_case),
 ) -> PaginatedResponse[DigitalTwin]:
     """List all Digital Twins with pagination."""
-    items, total = await twin_service.list(limit=limit, offset=offset)
+    items, total = await use_case.execute(limit=limit, offset=offset)
     return PaginatedResponse(
         items=items,
         total=total,
@@ -60,10 +68,10 @@ async def list_twins(
 )
 async def get_twin(
     twin_id: UUID,
-    twin_service: TwinService = Depends(get_twin_service),
+    use_case = Depends(get_get_twin_use_case),
 ) -> DigitalTwin:
     """Fetch a Digital Twin by its unique ID."""
-    return await twin_service.get_by_id(twin_id)
+    return await use_case.execute(twin_id)
 
 
 @router.put(
@@ -74,14 +82,14 @@ async def get_twin(
 async def update_twin(
     twin_id: UUID,
     data: DigitalTwinUpdate,
-    twin_service: TwinService = Depends(get_twin_service),
+    use_case = Depends(get_update_twin_use_case),
 ) -> DigitalTwin:
     """Update a Twin's state with optimistic concurrency.
 
     This endpoint guarantees atomic updates to the Twin, creating
     a new Snapshot and History audit log in a single transaction.
     """
-    return await twin_service.update_twin(twin_id, data)
+    return await use_case.execute(twin_id, data)
 
 
 @router.delete(
@@ -91,7 +99,7 @@ async def update_twin(
 )
 async def delete_twin(
     twin_id: UUID,
-    twin_service: TwinService = Depends(get_twin_service),
+    use_case = Depends(get_delete_twin_use_case),
 ) -> None:
     """Hard-delete a Digital Twin.
 
@@ -99,7 +107,7 @@ async def delete_twin(
     This action cascades and automatically wipes all associated Snapshots and History records.
     Future milestones may replace this with a soft-delete or archive mechanism.
     """
-    await twin_service.delete(twin_id)
+    await use_case.execute(twin_id)
 
 
 @router.get(
@@ -111,10 +119,10 @@ async def list_twin_snapshots(
     twin_id: UUID,
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    twin_service: TwinService = Depends(get_twin_service),
+    use_case = Depends(get_get_twin_snapshots_use_case),
 ) -> PaginatedResponse[TwinSnapshot]:
     """Fetch the immutable snapshot history of a Twin."""
-    items, total = await twin_service.get_snapshots(twin_id=twin_id, limit=limit, offset=offset)
+    items, total = await use_case.execute(twin_id=twin_id, limit=limit, offset=offset)
     return PaginatedResponse(
         items=items,
         total=total,
@@ -133,10 +141,10 @@ async def list_twin_history(
     twin_id: UUID,
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    twin_service: TwinService = Depends(get_twin_service),
+    use_case = Depends(get_get_twin_history_use_case),
 ) -> PaginatedResponse[TwinHistory]:
     """Fetch the detailed change history (diffs) of a Twin."""
-    items, total = await twin_service.get_history(twin_id=twin_id, limit=limit, offset=offset)
+    items, total = await use_case.execute(twin_id=twin_id, limit=limit, offset=offset)
     return PaginatedResponse(
         items=items,
         total=total,

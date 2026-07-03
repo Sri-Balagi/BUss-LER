@@ -7,8 +7,15 @@ from fastapi import APIRouter, Depends, Query, status
 from app.interfaces.http.schemas.base import Entity, EntityCreate
 from app.interfaces.http.schemas.entity import EntityUpdate
 from app.interfaces.http.schemas.pagination import PaginatedResponse
-from app.interfaces.http.v1.dependencies import get_current_user, get_entity_service
-from app.services.entity_service import EntityService
+from app.interfaces.http.v1.dependencies_core import (
+    get_current_user,
+    get_create_entity_use_case,
+    get_get_entity_use_case,
+    get_list_entities_use_case,
+    get_update_entity_use_case,
+    get_delete_entity_use_case,
+)
+
 
 router = APIRouter(prefix="/entities", tags=["Entities"])
 
@@ -22,10 +29,10 @@ router = APIRouter(prefix="/entities", tags=["Entities"])
 async def create_entity(
     data: EntityCreate,
     current_user: UUID = Depends(get_current_user),
-    entity_service: EntityService = Depends(get_entity_service),
+    use_case=Depends(get_create_entity_use_case),
 ) -> Entity:
     """Create a new root entity."""
-    return await entity_service.create_entity(user_id=current_user, data=data)
+    return await use_case.execute(user_id=current_user, data=data)
 
 
 @router.get(
@@ -37,10 +44,10 @@ async def list_entities(
     user_id: UUID | None = Query(None, description="Filter by user ID"),
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    entity_service: EntityService = Depends(get_entity_service),
+    use_case=Depends(get_list_entities_use_case),
 ) -> PaginatedResponse[Entity]:
     """List all active entities with optional pagination and filtering."""
-    items, total = await entity_service.list_active(user_id=user_id, limit=limit, offset=offset)
+    items, total = await use_case.execute(user_id=user_id, limit=limit, offset=offset)
     return PaginatedResponse(
         items=items,
         total=total,
@@ -57,10 +64,10 @@ async def list_entities(
 )
 async def get_entity(
     entity_id: UUID,
-    entity_service: EntityService = Depends(get_entity_service),
+    use_case=Depends(get_get_entity_use_case),
 ) -> Entity:
     """Fetch an active entity by its unique ID."""
-    return await entity_service.get_by_id(entity_id)
+    return await use_case.execute(entity_id)
 
 
 @router.put(
@@ -71,10 +78,10 @@ async def get_entity(
 async def update_entity(
     entity_id: UUID,
     data: EntityUpdate,
-    entity_service: EntityService = Depends(get_entity_service),
+    use_case=Depends(get_update_entity_use_case),
 ) -> Entity:
     """Update an active entity's fields."""
-    return await entity_service.update(entity_id, data)
+    return await use_case.execute(entity_id, data)
 
 
 @router.delete(
@@ -84,10 +91,10 @@ async def update_entity(
 )
 async def delete_entity(
     entity_id: UUID,
-    entity_service: EntityService = Depends(get_entity_service),
+    use_case=Depends(get_delete_entity_use_case),
 ) -> None:
     """Soft-delete an entity.
 
     This also logically deactivates its associated Digital Twin.
     """
-    await entity_service.delete(entity_id)
+    await use_case.execute(entity_id)

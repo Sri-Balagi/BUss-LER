@@ -3,8 +3,15 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.bootstrap.container import get_container
 from app.infrastructure.ai.kernel import AbstractAIKernel
 from app.interfaces.http.v1.dependencies_ai import get_ai_kernel
+from app.interfaces.http.v1.entities import router as entities_router
+from app.interfaces.http.v1.twins import router as twins_router
+from app.interfaces.http.v1.system import router as system_router
 
 api_router = APIRouter()
+
+api_router.include_router(entities_router)
+api_router.include_router(twins_router)
+api_router.include_router(system_router)
 
 
 @api_router.get("/health")

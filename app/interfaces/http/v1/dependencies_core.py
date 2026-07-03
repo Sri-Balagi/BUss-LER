@@ -50,49 +50,64 @@ async def get_event_bus(background_tasks: BackgroundTasks) -> EventBus:
 
 
 # Core Repositories
-async def get_entity_repository(client: AsyncClient = Depends(get_supabase_client)):
+async def get_entity_repository() -> "EntityRepository":
     from app.infrastructure.persistence.postgres.repositories.entity_repository import (
         EntityRepository,
     )
 
-    return EntityRepository(client)
+    return get_container().resolve(EntityRepository)
 
 
-async def get_twin_repository(client: AsyncClient = Depends(get_supabase_client)):
-    from app.infrastructure.persistence.postgres.repositories.twin_repository import TwinRepository
-
-    return TwinRepository(client)
-
-
-async def get_snapshot_repository(client: AsyncClient = Depends(get_supabase_client)):
-    from app.infrastructure.persistence.postgres.repositories.snapshot_repository import (
-        SnapshotRepository,
-    )
-
-    return SnapshotRepository(client)
-
-
-async def get_history_repository(client: AsyncClient = Depends(get_supabase_client)):
-    from app.infrastructure.persistence.postgres.repositories.history_repository import (
-        HistoryRepository,
-    )
-
-    return HistoryRepository(client)
+# We no longer instantiate repositories manually in FastAPI Depends, since they are managed by DI.
+# The getters below simply resolve the use-cases from the DI container.
 
 
 # Core Services
-async def get_twin_service(
-    twin_repo=Depends(get_twin_repository),
-    snapshot_repo=Depends(get_snapshot_repository),
-    history_repo=Depends(get_history_repository),
-    entity_repo=Depends(get_entity_repository),
-):
-    from app.services.twin_service import TwinService
+async def get_create_twin_use_case() -> "CreateTwinUseCase":
+    from app.application.twin.create_twin import CreateTwinUseCase
+    return get_container().resolve(CreateTwinUseCase)
 
-    return TwinService(twin_repo, snapshot_repo, history_repo, entity_repo)
+async def get_get_twin_use_case() -> "GetTwinUseCase":
+    from app.application.twin.get_twin import GetTwinUseCase
+    return get_container().resolve(GetTwinUseCase)
+
+async def get_list_twins_use_case() -> "ListTwinsUseCase":
+    from app.application.twin.list_twins import ListTwinsUseCase
+    return get_container().resolve(ListTwinsUseCase)
+
+async def get_update_twin_use_case() -> "UpdateTwinUseCase":
+    from app.application.twin.update_twin import UpdateTwinUseCase
+    return get_container().resolve(UpdateTwinUseCase)
+
+async def get_delete_twin_use_case() -> "DeleteTwinUseCase":
+    from app.application.twin.delete_twin import DeleteTwinUseCase
+    return get_container().resolve(DeleteTwinUseCase)
+
+async def get_get_twin_snapshots_use_case() -> "GetTwinSnapshotsUseCase":
+    from app.application.twin.get_snapshots import GetTwinSnapshotsUseCase
+    return get_container().resolve(GetTwinSnapshotsUseCase)
+
+async def get_get_twin_history_use_case() -> "GetTwinHistoryUseCase":
+    from app.application.twin.get_history import GetTwinHistoryUseCase
+    return get_container().resolve(GetTwinHistoryUseCase)
 
 
-async def get_entity_service(entity_repo=Depends(get_entity_repository)):
-    from app.services.entity_service import EntityService
+async def get_create_entity_use_case() -> "CreateEntityUseCase":
+    from app.application.entity.create_entity import CreateEntityUseCase
+    return get_container().resolve(CreateEntityUseCase)
 
-    return EntityService(entity_repo)
+async def get_get_entity_use_case() -> "GetEntityUseCase":
+    from app.application.entity.get_entity import GetEntityUseCase
+    return get_container().resolve(GetEntityUseCase)
+
+async def get_list_entities_use_case() -> "ListEntitiesUseCase":
+    from app.application.entity.list_entities import ListEntitiesUseCase
+    return get_container().resolve(ListEntitiesUseCase)
+
+async def get_update_entity_use_case() -> "UpdateEntityUseCase":
+    from app.application.entity.update_entity import UpdateEntityUseCase
+    return get_container().resolve(UpdateEntityUseCase)
+
+async def get_delete_entity_use_case() -> "DeleteEntityUseCase":
+    from app.application.entity.delete_entity import DeleteEntityUseCase
+    return get_container().resolve(DeleteEntityUseCase)
