@@ -1,55 +1,12 @@
 """Memory dependencies for API v1."""
 
-from fastapi import Depends
-from qdrant_client import AsyncQdrantClient
-from supabase import AsyncClient
-
-from app.config import Settings, get_settings
-from app.infrastructure.ai.kernel import AbstractAIKernel
-from app.interfaces.http.v1.dependencies_ai import get_ai_kernel
-from app.interfaces.http.v1.dependencies_core import (
-    get_event_bus,
-    get_qdrant_client,
-    get_supabase_client,
+from app.application.di import (
+    get_memory_metadata_repository,
+    get_memory_vector_repository,
+    get_create_memory_use_case,
+    get_delete_memory_use_case,
+    get_get_memory_use_case,
+    get_list_memories_use_case,
+    get_restore_memory_use_case,
+    get_update_memory_use_case,
 )
-from app.shared.events.bus import EventBus
-
-
-async def get_memory_metadata_repository(
-    client: AsyncClient = Depends(get_supabase_client),
-):
-    from app.infrastructure.persistence.postgres.repositories.memory_repository import (
-        MemoryMetadataRepository,
-    )
-
-    return MemoryMetadataRepository(client)
-
-
-async def get_memory_vector_repository(
-    client: AsyncQdrantClient = Depends(get_qdrant_client),
-    settings: Settings = Depends(get_settings),
-):
-    from app.infrastructure.persistence.postgres.repositories.vector_repository import (
-        MemoryVectorRepository,
-    )
-
-    return MemoryVectorRepository(client, settings)
-
-
-async def get_memory_service(
-    metadata_repo=Depends(get_memory_metadata_repository),
-    vector_repo=Depends(get_memory_vector_repository),
-    ai_kernel: AbstractAIKernel = Depends(get_ai_kernel),
-    event_bus: EventBus = Depends(get_event_bus),
-):
-    from app.services.memory_service import MemoryService
-    from app.shared.events.handlers.memory_created import MemoryCreatedHandler
-    from app.shared.events.models import MemoryLifecycleEvent
-    from app.workers.memory_worker import MemoryProcessingWorker
-
-    service = MemoryService(metadata_repo, vector_repo, ai_kernel, event_bus)
-    worker = MemoryProcessingWorker(service, ai_kernel, metadata_repo, vector_repo)
-    handler = MemoryCreatedHandler(worker)
-
-    event_bus.subscribe(MemoryLifecycleEvent, handler.handle)
-    return service
