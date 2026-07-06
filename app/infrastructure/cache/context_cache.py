@@ -14,7 +14,9 @@ from datetime import UTC, datetime
 import structlog
 
 from app.intelligence.intake.situation.enterprise_context import EnterpriseContext
-from app.services.context_freshness import ContextFreshnessPolicy
+from app.application.context.foundation.context_freshness import (
+    ContextFreshnessPolicy,
+)
 
 logger = structlog.get_logger(__name__)
 

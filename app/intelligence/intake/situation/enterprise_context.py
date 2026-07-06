@@ -18,7 +18,7 @@ Lifecycle:
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any
 from uuid import UUID, uuid4
 
@@ -73,7 +73,7 @@ class ContextProvenance(DomainBaseModel):
 
     provider: ContextSource
     service_name: str = Field(..., description="The service class that produced this item.")
-    retrieval_timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    retrieval_timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     confidence: float = Field(default=1.0, ge=0.0, le=1.0)
     ranking_score: float = Field(
         default=0.0,
@@ -138,7 +138,7 @@ class ContextSection(DomainBaseModel):
     priority: ContextPriority = ContextPriority.MEDIUM
     items: list[ContextItem] = Field(default_factory=list)
     token_estimate: int = Field(default=0, ge=0)
-    retrieved_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    retrieved_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     metadata: dict[str, Any] = Field(default_factory=dict)
 
     @property
@@ -172,7 +172,7 @@ class ContextWindow(DomainBaseModel):
         default=False,
         description="True if items were excluded due to budget exhaustion.",
     )
-    built_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    built_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -195,7 +195,7 @@ class ContextSummary(DomainBaseModel):
     source_count: int = Field(default=0)
     token_estimate: int = Field(default=0)
     compression_ratio: float | None = Field(default=None, ge=0.0, le=1.0)
-    generated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    generated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 # =============================================================================
@@ -212,7 +212,7 @@ class ContextMetadata(DomainBaseModel):
 
     schema_version: str = Field(default=CURRENT_CONTEXT_SCHEMA_VERSION)
     policy_id: str
-    assembled_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    assembled_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     expires_at: datetime | None = None
     total_providers_requested: int = Field(default=0)
     successful_providers: int = Field(default=0)
@@ -245,7 +245,7 @@ class ProviderFailureRecord(DomainBaseModel):
     provider: ContextSource
     error_type: str
     error_message: str
-    failed_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    failed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     attempts: int = Field(default=1, ge=1)
 
 
