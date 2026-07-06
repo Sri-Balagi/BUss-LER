@@ -13,7 +13,7 @@ Design principles:
 
 Lifecycle:
   BUILDING → ASSEMBLED → OPTIMIZED → CONSUMED → EXPIRED → ARCHIVED
-  (Enforced by ContextStateMachine in app/services/context_state.py)
+  (Enforced by ContextStateMachine in app/services/context/state.py)
 """
 
 from __future__ import annotations
