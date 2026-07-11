@@ -11,6 +11,8 @@ api_router = APIRouter()
 
 api_router.include_router(entities_router)
 api_router.include_router(twins_router)
+from app.interfaces.http.v1.memories import router as memories_router
+api_router.include_router(memories_router)
 api_router.include_router(system_router)
 
 

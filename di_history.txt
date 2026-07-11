@@ -1,0 +1,81 @@
+
+==================
+
+==================
+
+==================
+
+==================
+
+==================
+
+==================
+
+==================
+
+==================
+
+==================
+
+==================
+
+==================
+
+==================
+
+==================
+
+==================
+
+==================
+Now fix the critical DI wiring bug — `register_application_dependencies` is never called:
+==================
+
+==================
+
+==================
+
+==================
+
+==================
+
+==================
+
+==================
+
+==================
+
+==================
+
+==================
+
+==================
+
+==================
+
+==================
+
+==================
+
+==================
+
+==================
+Created At: 2026-07-11T16:44:05Z
+Completed At: 2026-07-11T16:44:09Z
+The following changes were made by the replace_file_content tool to: c:\Users\iamln\project\gemini xprize\bizos\extract.py. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -1,7 +1,7 @@
+ import json
+ import codecs
+ 
+-with codecs.open('.gemini/antigravity-ide/brain/42eeb5d8-839b-4b91-a189-12a1d00a6d1b/.system_generated/logs/transcript.jsonl', 'r', 'utf-8') as f:
++with codecs.open('C:/Users/iamln/.gemini/antigravity-ide/brain/42eeb5d8-839b-4b91-a189-12a1d00a6d1b/.system_generated/logs/transcript.jsonl', 'r', 'utf-8') as f:
+     for line in f:
+         if 'TargetFile' in line and 'di.py' in line:
+             obj = json.loads(line)
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.
+
+We did our best to apply changes despite some inaccuracies. Double check if the edit applied is what you intended.
+==================

@@ -22,7 +22,7 @@ class CreateMemoryUseCase:
         metadata_repo: AbstractMemoryRepository,
         vector_repo: AbstractVectorRepository,
         ai_kernel: AbstractAIKernel,
-        event_bus: EventBus,
+        event_bus: EventBus,    
     ):
         self._metadata_repo = metadata_repo
         self._vector_repo = vector_repo

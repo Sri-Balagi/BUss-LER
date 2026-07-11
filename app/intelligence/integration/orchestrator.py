@@ -9,8 +9,8 @@ class ExecutiveIntelligenceOrchestrator(IExecutiveIntelligenceOrchestrator):
     Orchestrates the cognitive pipeline for a given raw request.
     """
 
-    def __init__(self):
-        self.pipeline = CognitivePipeline()
+    def __init__(self, pipeline: CognitivePipeline):
+        self.pipeline = pipeline
 
     def process_request(self, raw_request: str) -> ExecutiveIntelligenceResult:
         # Create a unified cognitive session for the entire pipeline

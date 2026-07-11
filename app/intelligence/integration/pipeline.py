@@ -37,27 +37,45 @@ class CognitivePipeline(ICognitivePipeline):
     Wires together D1-D6 into a single deterministic executive pipeline.
     """
 
-    def __init__(self):
-        self.intent_engine = IntentEngine()
-        self.situation_engine = SituationAnalysisEngine()
+    def __init__(
+        self,
+        intent_engine: IntentEngine,
+        situation_engine: SituationAnalysisEngine,
+        objective_engine: ExecutiveObjectivesEngine,
+        goal_engine: GoalManagementEngine,
+        decision_engine: DecisionEngine,
+        planning_engine: PlanningEngine,
+        cycle_controller: CognitiveCycleController,
+        convergence_engine: ConvergenceEngine,
+        arbitration_engine: ExecutiveArbitrationEngine,
+        assumption_manager: AssumptionManager,
+        validation_engine: ExecutiveValidationEngine,
+        reflection_engine: ReflectionEngine,
+        evaluation_engine: OutcomeEvaluationEngine,
+        synthesis_engine: KnowledgeSynthesisEngine,
+        knowledge_repo: ExecutiveKnowledgeRepository,
+        heuristics_engine: ExecutiveHeuristicsEngine,
+    ):
+        self.intent_engine = intent_engine
+        self.situation_engine = situation_engine
 
-        self.objective_engine = ExecutiveObjectivesEngine()
-        self.goal_engine = GoalManagementEngine()
+        self.objective_engine = objective_engine
+        self.goal_engine = goal_engine
 
-        self.decision_engine = DecisionEngine()
-        self.planning_engine = PlanningEngine()
+        self.decision_engine = decision_engine
+        self.planning_engine = planning_engine
 
-        self.cycle_controller = CognitiveCycleController()
-        self.convergence_engine = ConvergenceEngine()
-        self.arbitration_engine = ExecutiveArbitrationEngine()
-        self.assumption_manager = AssumptionManager()
-        self.validation_engine = ExecutiveValidationEngine()
+        self.cycle_controller = cycle_controller
+        self.convergence_engine = convergence_engine
+        self.arbitration_engine = arbitration_engine
+        self.assumption_manager = assumption_manager
+        self.validation_engine = validation_engine
 
-        self.reflection_engine = ReflectionEngine()
-        self.evaluation_engine = OutcomeEvaluationEngine()
-        self.synthesis_engine = KnowledgeSynthesisEngine()
-        self.knowledge_repo = ExecutiveKnowledgeRepository()
-        self.heuristics_engine = ExecutiveHeuristicsEngine()
+        self.reflection_engine = reflection_engine
+        self.evaluation_engine = evaluation_engine
+        self.synthesis_engine = synthesis_engine
+        self.knowledge_repo = knowledge_repo
+        self.heuristics_engine = heuristics_engine
 
         # Mocking world model for pipeline testing
         self.world_model = BusinessWorldModel()

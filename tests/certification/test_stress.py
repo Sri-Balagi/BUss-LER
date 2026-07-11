@@ -7,7 +7,10 @@ def test_intelligence_pipeline_stress():
     """
     Simulates high load on the Intelligence orchestration layer.
     """
-    orchestrator = ExecutiveIntelligenceOrchestrator()
+    from app.bootstrap.container import build_container, get_container
+    from app.bootstrap.container import _global_container
+    container = get_container() if _global_container else build_container()
+    orchestrator = container.resolve(ExecutiveIntelligenceOrchestrator)
 
     start_time = time.time()
 

@@ -83,3 +83,8 @@ def register_platform_dependencies(container: "Container") -> None:
         return ExecutionStrategyFactory()
 
     container.register_factory(ExecutionStrategyFactory, build_execution_strategy_factory)
+
+    # 8. Application Layer Use Cases (Entity, Twin, Memory, etc.)
+    from app.application.di import register_application_dependencies
+
+    register_application_dependencies(container)

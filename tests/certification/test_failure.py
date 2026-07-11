@@ -8,7 +8,10 @@ from app.intelligence.runtime_bridge.errors import RuntimeIntegrationError
 
 
 def test_intelligence_failure_recovery(monkeypatch):
-    orchestrator = ExecutiveIntelligenceOrchestrator()
+    from app.bootstrap.container import build_container, get_container
+    from app.bootstrap.container import _global_container
+    container = get_container() if _global_container else build_container()
+    orchestrator = container.resolve(ExecutiveIntelligenceOrchestrator)
 
     # Inject failure into Observation layer
     def mock_analyze(*args, **kwargs):

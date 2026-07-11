@@ -9,7 +9,7 @@ Implementations:
 """
 
 from abc import ABC, abstractmethod
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 import structlog
 
@@ -76,7 +76,7 @@ class MemoryContextCache(AbstractContextCache):
         if entry is None:
             return None
         context, retrieved_at, expires_at = entry
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         if now > expires_at:
             del self._store[cache_key]
             logger.debug("Cache entry expired", cache_key=cache_key)
@@ -91,7 +91,7 @@ class MemoryContextCache(AbstractContextCache):
     ) -> None:
         from datetime import timedelta
 
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         expires_at = now + timedelta(seconds=ttl_seconds)
         self._store[cache_key] = (context, now, expires_at)
         logger.debug(

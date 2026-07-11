@@ -6,7 +6,10 @@ from app.intelligence.integration.orchestrator import ExecutiveIntelligenceOrche
 
 
 def test_pipeline_success():
-    orchestrator = ExecutiveIntelligenceOrchestrator()
+    from app.bootstrap.container import build_container, get_container
+    from app.bootstrap.container import _global_container
+    container = get_container() if _global_container else build_container()
+    orchestrator = container.resolve(ExecutiveIntelligenceOrchestrator)
     result = orchestrator.process_request("Maximize profits")
 
     assert result.summary.state == CognitivePipelineState.COMPLETED
@@ -21,7 +24,10 @@ def test_pipeline_success():
 
 
 def test_pipeline_error_propagation(monkeypatch):
-    orchestrator = ExecutiveIntelligenceOrchestrator()
+    from app.bootstrap.container import build_container, get_container
+    from app.bootstrap.container import _global_container
+    container = get_container() if _global_container else build_container()
+    orchestrator = container.resolve(ExecutiveIntelligenceOrchestrator)
 
     # Mock an error in the strategy layer
     def mock_formulate(*args, **kwargs):
