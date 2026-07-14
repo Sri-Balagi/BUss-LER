@@ -55,6 +55,11 @@ class ProviderCapabilities(BaseModel):
     latency_tier: str = "medium"
 
 
+class CapabilityNotSupportedError(Exception):
+    """Raised when a requested capability is not supported by the provider."""
+    pass
+
+
 class ILLMProvider(ABC):
     """Abstract interface for all LLM providers in BizOS."""
 
@@ -77,11 +82,11 @@ class ILLMProvider(ABC):
 
     async def generate_structured(self, request: StructuredRequest[T]) -> T:
         """Generate a structured Pydantic object using provider-native schema enforcement."""
-        raise NotImplementedError("This provider does not implement generate_structured")
+        raise CapabilityNotSupportedError(f"{self.provider_name} does not implement generate_structured")
 
     async def stream(self, request: AIRequest, prompt_text: str) -> AsyncIterator[StreamChunk]:
         """Stream generated text chunk by chunk."""
-        raise NotImplementedError("This provider does not implement streaming")
+        raise CapabilityNotSupportedError(f"{self.provider_name} does not implement streaming")
         yield  # Required to make this an async generator function
 
     @abstractmethod
@@ -91,7 +96,8 @@ class ILLMProvider(ABC):
 
     async def count_tokens(self, text: str, model: str | None = None) -> int:
         """Count tokens for the given text without generating output."""
-        raise NotImplementedError("This provider does not implement count_tokens")
+        # Default approximation for providers that don't implement this
+        return len(text) // 4
 
     @abstractmethod
     async def health_check(self) -> dict[str, Any]:

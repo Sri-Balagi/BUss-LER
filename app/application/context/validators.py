@@ -5,21 +5,20 @@ Prevents malformed EnterpriseContexts from progressing through the pipeline.
 """
 
 from abc import ABC, abstractmethod
-from datetime import datetime, timezone
-from typing import List
+from datetime import UTC, datetime
 
-from app.intelligence.intake.situation.enterprise_context import ContextSection
-from app.shared.enums import ContextSource
-from app.interfaces.http.schemas.base import DomainBaseModel
 from app.application.context.foundation.context_policies import ContextPolicy
+from app.intelligence.intake.situation.enterprise_context import ContextSection
+from app.interfaces.http.schemas.base import DomainBaseModel
+from app.shared.enums import ContextSource
 
 
 class ValidationResult(DomainBaseModel):
     """Result of context validation."""
 
     is_valid: bool
-    errors: List[str] = []
-    warnings: List[str] = []
+    errors: list[str] = []
+    warnings: list[str] = []
 
 
 class AbstractContextValidator(ABC):
@@ -28,7 +27,7 @@ class AbstractContextValidator(ABC):
     @abstractmethod
     def validate(
         self,
-        sections: List[ContextSection],
+        sections: list[ContextSection],
         policy: ContextPolicy,
     ) -> ValidationResult:
         pass
@@ -50,11 +49,11 @@ class DefaultContextValidator(AbstractContextValidator):
 
     def validate(
         self,
-        sections: List[ContextSection],
+        sections: list[ContextSection],
         policy: ContextPolicy,
     ) -> ValidationResult:
-        errors: List[str] = []
-        warnings: List[str] = []
+        errors: list[str] = []
+        warnings: list[str] = []
 
         present_sources = {s.source for s in sections}
 
@@ -95,7 +94,7 @@ class DefaultContextValidator(AbstractContextValidator):
                             )
 
         # 5. Metadata validation — assembled_at must not be in the future
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         for section in sections:
             if section.retrieved_at > now:
                 errors.append(
@@ -132,9 +131,7 @@ class DefaultContextValidator(AbstractContextValidator):
 
         # 8. Critical section verification
         if ContextSource.GOAL in policy.required_providers:
-            goal_section = next(
-                (s for s in sections if s.source == ContextSource.GOAL), None
-            )
+            goal_section = next((s for s in sections if s.source == ContextSource.GOAL), None)
             if goal_section is None or goal_section.is_empty:
                 errors.append(
                     "ContextSource.GOAL is required by policy but no active goals were found."

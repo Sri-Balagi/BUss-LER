@@ -1,9 +1,9 @@
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
 
-class UncertaintySource(str, Enum):
+class UncertaintySource(StrEnum):
     MISSING_DATA = "MISSING_DATA"
     STALE_DATA = "STALE_DATA"
     CONFLICTING_EVIDENCE = "CONFLICTING_EVIDENCE"

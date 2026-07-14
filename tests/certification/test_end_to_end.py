@@ -16,6 +16,7 @@ def test_end_to_end_certification():
     """
     # 1. Initialize Intelligence Orchestrator
     from app.bootstrap.container import build_container
+
     container = build_container()
     orchestrator = container.resolve(ExecutiveIntelligenceOrchestrator)
 

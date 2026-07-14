@@ -1,9 +1,9 @@
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
 
-class ValidationSeverity(str, Enum):
+class ValidationSeverity(StrEnum):
     INFO = "INFO"
     WARNING = "WARNING"
     FATAL = "FATAL"

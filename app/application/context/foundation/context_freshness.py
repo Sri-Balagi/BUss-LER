@@ -6,7 +6,7 @@ how long its contribution remains valid in the cache.
 The cache layer uses these policies instead of relying solely on raw TTL values.
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from app.interfaces.http.schemas.base import DomainBaseModel
 from app.shared.enums import ContextSource, RefreshStrategy
@@ -29,7 +29,7 @@ class ContextFreshnessPolicy(DomainBaseModel):
 
     def is_stale(self, retrieved_at: datetime) -> bool:
         """Return True if the cached entry has exceeded its max_age."""
-        age = (datetime.now(timezone.utc) - retrieved_at).total_seconds()
+        age = (datetime.now(UTC) - retrieved_at).total_seconds()
         return age > self.max_age_seconds
 
     def expires_at(self, retrieved_at: datetime) -> datetime:

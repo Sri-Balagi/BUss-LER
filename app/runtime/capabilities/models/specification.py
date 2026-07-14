@@ -24,6 +24,8 @@ class CapabilitySpecification(BaseModel):
     execution_mode: str = Field(
         default="async", description="Execution mode (async, thread, process)."
     )
+    cost: float = Field(default=0.0, description="Estimated cost per execution token/unit")
+    priority: int = Field(default=10, description="Routing priority (lower is higher priority)")
     metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional custom metadata."
     )

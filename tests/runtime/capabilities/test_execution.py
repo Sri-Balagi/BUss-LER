@@ -118,8 +118,8 @@ async def test_capability_lifecycle_success(fs_spec):
     assert res.status == ExecutionStatus.SUCCESS
     assert res.outputs == {"data": "file_contents_mock"}
     assert res.execution_trace_id == req.trace_id
-    assert cap.adapter.initialized == False  # Because cleanup was called
-    assert cap.adapter.connected == False
+    assert not cap.adapter.initialized  # Because cleanup was called
+    assert not cap.adapter.connected
 
 
 @pytest.mark.anyio
@@ -143,8 +143,8 @@ async def test_capability_lifecycle_validation_failure(fs_spec):
     assert "not supported" in res.errors[0]
 
     # Ensure cleanup still ran
-    assert cap.adapter.initialized == False
-    assert cap.adapter.connected == False
+    assert not cap.adapter.initialized
+    assert not cap.adapter.connected
 
 
 @pytest.mark.anyio
@@ -168,8 +168,8 @@ async def test_capability_lifecycle_execution_failure(net_spec):
     assert "Mock network failure" in res.errors[0]
 
     # Ensure cleanup still ran
-    assert cap.adapter.initialized == False
-    assert cap.adapter.connected == False
+    assert not cap.adapter.initialized
+    assert not cap.adapter.connected
 
 
 @pytest.mark.anyio

@@ -1,9 +1,9 @@
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
 
-class PolicyStatus(str, Enum):
+class PolicyStatus(StrEnum):
     COMPLIANT = "COMPLIANT"
     VIOLATION = "VIOLATION"
 

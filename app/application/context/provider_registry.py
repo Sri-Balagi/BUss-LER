@@ -7,30 +7,30 @@ Future integrations (CRM, ERP, Slack, Email, Calendar, Inventory) register
 themselves without requiring any modification to ContextEngine.
 """
 
-from typing import Dict, List, Optional, Iterator
-
-from app.intelligence.intake.situation.enterprise_context import ProviderMetadata
-from app.shared.enums import ContextSource
-from app.shared.exceptions.errors import ProviderNotRegisteredError, BizOSError
-from app.application.context.foundation.context_freshness import (
-    ContextFreshnessPolicy,
-    DEFAULT_FRESHNESS_POLICIES,
-)
-from app.platform.resilience.context_retry import ProviderRetryConfig
-from app.application.context.providers.abstract import AbstractContextProvider
+from collections.abc import Iterator
 
 import structlog
+
+from app.application.context.foundation.context_freshness import (
+    DEFAULT_FRESHNESS_POLICIES,
+    ContextFreshnessPolicy,
+)
+from app.application.context.providers.abstract import AbstractContextProvider
+from app.intelligence.intake.situation.enterprise_context import ProviderMetadata
+from app.platform.resilience.context_retry import ProviderRetryConfig
+from app.shared.enums import ContextSource
+from app.shared.exceptions.errors import BizOSError, ProviderNotRegisteredError
 
 logger = structlog.get_logger(__name__)
 
 
 class DuplicateProviderRegistrationError(BizOSError):
     """Raised when attempting to register a provider for a source that is already registered."""
-    
+
     def __init__(self, source: ContextSource):
         super().__init__(
             message=f"A provider is already registered for source '{source.value}'.",
-            detail="Silent replacement is not allowed. Unregister the existing provider first."
+            detail="Silent replacement is not allowed. Unregister the existing provider first.",
         )
 
 
@@ -62,14 +62,14 @@ class ContextProviderRegistry:
     """
 
     def __init__(self) -> None:
-        self._registry: Dict[ContextSource, RegistrationEntry] = {}
+        self._registry: dict[ContextSource, RegistrationEntry] = {}
 
     def register(
         self,
         provider: AbstractContextProvider,
         metadata: ProviderMetadata,
-        freshness_policy: Optional[ContextFreshnessPolicy] = None,
-        retry_config: Optional[ProviderRetryConfig] = None,
+        freshness_policy: ContextFreshnessPolicy | None = None,
+        retry_config: ProviderRetryConfig | None = None,
     ) -> None:
         """Register a provider for the given ContextSource.
 
@@ -101,13 +101,13 @@ class ContextProviderRegistry:
 
     def unregister(self, source: ContextSource) -> None:
         """Unregister a provider by source.
-        
+
         Raises:
             ProviderNotRegisteredError: If no provider is registered for the source.
         """
         if source not in self._registry:
             raise ProviderNotRegisteredError(source.value)
-        
+
         del self._registry[source]
         logger.info("ContextProvider unregistered", source=source.value)
 
@@ -138,10 +138,10 @@ class ContextProviderRegistry:
     def is_registered(self, source: ContextSource) -> bool:
         return source in self._registry
 
-    def registered_sources(self) -> List[ContextSource]:
+    def registered_sources(self) -> list[ContextSource]:
         return list(self._registry.keys())
 
-    def all_metadata(self) -> List[ProviderMetadata]:
+    def all_metadata(self) -> list[ProviderMetadata]:
         return [entry.metadata for entry in self._registry.values()]
 
     def __contains__(self, source: ContextSource) -> bool:

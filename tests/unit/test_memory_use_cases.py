@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock
 import pytest
 
 from app.application.memory.create_memory import CreateMemoryUseCase
-from app.infrastructure.ai.models import EmbeddingResponse, AIResponseMetadata
+from app.infrastructure.ai.models import AIResponseMetadata, EmbeddingResponse
 from app.intelligence.learning.repository.memory import Memory, MemoryCreate
 from app.shared.enums import EmbeddingStatus, MemoryCategory, MemorySource
 
@@ -57,13 +57,13 @@ async def test_create_memory_use_case_orchestration(
 
     # Setup mocks
     mock_metadata_repo.create.return_value = mock_memory
-    
+
     mock_embed_res = EmbeddingResponse(
         vector=[0.1, 0.2, 0.3],
-        metadata=AIResponseMetadata(model="test-embed-model", provider="test", latency_ms=10)
+        metadata=AIResponseMetadata(model="test-embed-model", provider="test", latency_ms=10),
     )
     mock_ai_kernel.embed.return_value = mock_embed_res
-    
+
     mock_metadata_repo.update_embedding_status.return_value = mock_memory
 
     data = MemoryCreate(
@@ -80,5 +80,7 @@ async def test_create_memory_use_case_orchestration(
     mock_metadata_repo.create.assert_called_once_with(twin_id, data)
     mock_ai_kernel.embed.assert_called_once()
     mock_vector_repo.upsert.assert_called_once()
-    mock_metadata_repo.update_embedding_status.assert_called_once_with(memory_id, EmbeddingStatus.COMPLETED)
+    mock_metadata_repo.update_embedding_status.assert_called_once_with(
+        memory_id, EmbeddingStatus.COMPLETED
+    )
     mock_event_bus.publish.assert_called_once()

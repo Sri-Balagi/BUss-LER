@@ -1,0 +1,9 @@
+{
+    "name": "math_tools_plugin",
+    "version": "1.0.0",
+    "description": "A canonical example of a BizOS Plugin providing capabilities.",
+    "author": "BizOS Team",
+    "dependencies": [],
+    "permissions": [],
+    "entrypoint": "plugin.py"
+}

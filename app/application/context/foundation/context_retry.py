@@ -6,15 +6,17 @@ and exponential backoff retry. No single provider can block assembly indefinitel
 
 import asyncio
 import random
-from typing import Optional, Union, Tuple, Type
 from uuid import UUID
 
-from pydantic import ConfigDict
 import structlog
+from pydantic import ConfigDict
 
-from app.intelligence.intake.situation.enterprise_context import ContextSection, ProviderFailureRecord
-from app.shared.enums import ContextSource
+from app.intelligence.intake.situation.enterprise_context import (
+    ContextSection,
+    ProviderFailureRecord,
+)
 from app.interfaces.http.schemas.base import DomainBaseModel
+from app.shared.enums import ContextSource
 
 logger = structlog.get_logger(__name__)
 
@@ -30,14 +32,15 @@ class ProviderRetryConfig(DomainBaseModel):
         jitter:          Whether to apply jitter to the delay.
         retry_on:        Exception classes that trigger a retry.
     """
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
-    
+
     timeout_seconds: float = 5.0
     max_retries: int = 2
     backoff_base: float = 1.0
     max_delay: float = 10.0
     jitter: bool = True
-    retry_on: Tuple[Type[Exception], ...] = (Exception,)
+    retry_on: tuple[type[Exception], ...] = (Exception,)
 
 
 async def provide_with_retry(
@@ -47,9 +50,9 @@ async def provide_with_retry(
     twin_id: UUID,
     policy,
     source: ContextSource,
-    context_id: Optional[UUID] = None,
+    context_id: UUID | None = None,
     event_bus=None,
-) -> Union[ContextSection, ProviderFailureRecord]:
+) -> ContextSection | ProviderFailureRecord:
     """Execute a provider with timeout and exponential backoff retry."""
     last_error: str = "unknown"
     attempt = 0
@@ -68,7 +71,7 @@ async def provide_with_retry(
                 )
             return result
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             last_error = f"TimeoutError after {retry_config.timeout_seconds}s"
             logger.warning(
                 "Provider timed out",
@@ -88,7 +91,7 @@ async def provide_with_retry(
                     attempt=attempt,
                 )
                 break
-            
+
             exc_name = type(exc).__name__
             last_error = f"{exc_name}: {exc}"
             logger.warning(
@@ -103,7 +106,7 @@ async def provide_with_retry(
             delay = retry_config.backoff_base * (2 ** (attempt - 1))
             if retry_config.jitter:
                 delay = delay * random.uniform(0.5, 1.5)
-            
+
             delay = min(delay, retry_config.max_delay)
             await asyncio.sleep(delay)
 
@@ -118,6 +121,7 @@ async def provide_with_retry(
     if event_bus is not None:
         try:
             from app.shared.events.models import ContextProviderFailedEvent
+
             event = ContextProviderFailedEvent(
                 correlation_id=ctx.correlation_id,
                 context_id=context_id,

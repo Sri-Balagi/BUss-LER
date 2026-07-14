@@ -114,7 +114,7 @@ async def test_generate_service_invocation_and_lifecycle(
 
     mock_provider.generate = AsyncMock(side_effect=mock_generate)
 
-    response = await ai_kernel.generate(request)
+    await ai_kernel.generate(request)
 
     # Verify PromptRegistry
     prompt_manager.resolve.assert_called_once_with("test_prompt", "v1", {})

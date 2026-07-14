@@ -1,9 +1,9 @@
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
 
-class AssumptionStatus(str, Enum):
+class AssumptionStatus(StrEnum):
     ACTIVE = "ACTIVE"
     VALIDATED = "VALIDATED"
     INVALIDATED = "INVALIDATED"

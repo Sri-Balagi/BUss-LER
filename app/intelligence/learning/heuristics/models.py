@@ -1,9 +1,9 @@
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
 
-class HeuristicStatus(str, Enum):
+class HeuristicStatus(StrEnum):
     ACTIVE = "ACTIVE"
     RETIRED = "RETIRED"
     PROPOSED = "PROPOSED"

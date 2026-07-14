@@ -12,7 +12,6 @@ Valid transitions:
 """
 
 import uuid
-from typing import Dict, List
 
 import structlog
 
@@ -25,7 +24,7 @@ logger = structlog.get_logger(__name__)
 class IntentStateMachine:
     """Enforces valid state transitions for Intent lifecycle."""
 
-    VALID_TRANSITIONS: Dict[IntentStatus, List[IntentStatus]] = {
+    VALID_TRANSITIONS: dict[IntentStatus, list[IntentStatus]] = {
         IntentStatus.PENDING: [
             IntentStatus.CLASSIFIED,
             IntentStatus.REJECTED,
@@ -41,9 +40,9 @@ class IntentStateMachine:
             IntentStatus.REJECTED,
             IntentStatus.EXPIRED,
         ],
-        IntentStatus.FULFILLED: [],   # Terminal
-        IntentStatus.REJECTED: [],    # Terminal
-        IntentStatus.EXPIRED: [],     # Terminal
+        IntentStatus.FULFILLED: [],  # Terminal
+        IntentStatus.REJECTED: [],  # Terminal
+        IntentStatus.EXPIRED: [],  # Terminal
     }
 
     @classmethod

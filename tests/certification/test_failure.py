@@ -8,8 +8,8 @@ from app.intelligence.runtime_bridge.errors import RuntimeIntegrationError
 
 
 def test_intelligence_failure_recovery(monkeypatch):
-    from app.bootstrap.container import build_container, get_container
-    from app.bootstrap.container import _global_container
+    from app.bootstrap.container import _global_container, build_container, get_container
+
     container = get_container() if _global_container else build_container()
     orchestrator = container.resolve(ExecutiveIntelligenceOrchestrator)
 

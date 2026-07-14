@@ -65,49 +65,71 @@ async def get_entity_repository() -> "EntityRepository":
 # Core Services
 async def get_create_twin_use_case() -> "CreateTwinUseCase":
     from app.application.twin.create_twin import CreateTwinUseCase
+
     return get_container().resolve(CreateTwinUseCase)
+
 
 async def get_get_twin_use_case() -> "GetTwinUseCase":
     from app.application.twin.get_twin import GetTwinUseCase
+
     return get_container().resolve(GetTwinUseCase)
+
 
 async def get_list_twins_use_case() -> "ListTwinsUseCase":
     from app.application.twin.list_twins import ListTwinsUseCase
+
     return get_container().resolve(ListTwinsUseCase)
+
 
 async def get_update_twin_use_case() -> "UpdateTwinUseCase":
     from app.application.twin.update_twin import UpdateTwinUseCase
+
     return get_container().resolve(UpdateTwinUseCase)
+
 
 async def get_delete_twin_use_case() -> "DeleteTwinUseCase":
     from app.application.twin.delete_twin import DeleteTwinUseCase
+
     return get_container().resolve(DeleteTwinUseCase)
+
 
 async def get_get_twin_snapshots_use_case() -> "GetTwinSnapshotsUseCase":
     from app.application.twin.get_snapshots import GetTwinSnapshotsUseCase
+
     return get_container().resolve(GetTwinSnapshotsUseCase)
+
 
 async def get_get_twin_history_use_case() -> "GetTwinHistoryUseCase":
     from app.application.twin.get_history import GetTwinHistoryUseCase
+
     return get_container().resolve(GetTwinHistoryUseCase)
 
 
 async def get_create_entity_use_case() -> "CreateEntityUseCase":
     from app.application.entity.create_entity import CreateEntityUseCase
+
     return get_container().resolve(CreateEntityUseCase)
+
 
 async def get_get_entity_use_case() -> "GetEntityUseCase":
     from app.application.entity.get_entity import GetEntityUseCase
+
     return get_container().resolve(GetEntityUseCase)
+
 
 async def get_list_entities_use_case() -> "ListEntitiesUseCase":
     from app.application.entity.list_entities import ListEntitiesUseCase
+
     return get_container().resolve(ListEntitiesUseCase)
+
 
 async def get_update_entity_use_case() -> "UpdateEntityUseCase":
     from app.application.entity.update_entity import UpdateEntityUseCase
+
     return get_container().resolve(UpdateEntityUseCase)
+
 
 async def get_delete_entity_use_case() -> "DeleteEntityUseCase":
     from app.application.entity.delete_entity import DeleteEntityUseCase
+
     return get_container().resolve(DeleteEntityUseCase)

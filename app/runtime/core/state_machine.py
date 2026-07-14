@@ -1,12 +1,12 @@
 from enum import Enum
-from typing import Generic, TypeVar
+from typing import TypeVar
 
 from app.runtime.core.exceptions import InvalidStateTransitionError
 
 T = TypeVar("T", bound=Enum)
 
 
-class BaseStateMachine(Generic[T]):
+class BaseStateMachine[T: Enum]:
     """
     Reusable state machine for runtime components (Tasks, Agents, Sessions).
     """

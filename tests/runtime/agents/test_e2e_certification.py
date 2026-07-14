@@ -250,7 +250,7 @@ def test_scenario_5_cancellation_propagates():
     asyncio.run(run())
 
     assert queues.get_queue(TaskState.COMPLETED).size() >= 0
-    assert scheduler._is_running == False
+    assert not scheduler._is_running
 
 
 def test_scenario_6_budget_exhaustion():

@@ -1,12 +1,10 @@
-import os
-
-with open('app/application/di.py', 'r') as f:
+with open("app/application/di.py") as f:
     lines = f.readlines()
 
 new_lines = []
 skip = False
 for line in lines:
-    if line.strip() == '# Planning':
+    if line.strip() == "# Planning":
         skip = True
         new_lines.append(line)
         new_lines.append("""
@@ -22,13 +20,13 @@ for line in lines:
         repository=c.resolve(PlanRepository),
         event_bus=c.resolve(EventBus)
     ))
-    
+
     from app.infrastructure.vectorstore.qdrant import QdrantService
     container.register_factory(PlanContextBuilder, lambda c: PlanContextBuilder(
         goal_service=c.resolve(GoalService),
         memory_service=c.resolve(QdrantService)
     ))
-    
+
     container.register_factory(PlanningEngine, lambda c: PlanningEngine(
         ai_kernel=c.resolve(AbstractAIKernel),
         plan_repository=c.resolve(PlanRepository),
@@ -58,11 +56,11 @@ for line in lines:
         event_bus=c.resolve(EventBus)
     ))
 """)
-    elif line.strip() == '# Context Engine':
+    elif line.strip() == "# Context Engine":
         skip = False
-    
+
     if not skip:
         new_lines.append(line)
 
-with open('app/application/di.py', 'w') as f:
+with open("app/application/di.py", "w") as f:
     f.writelines(new_lines)

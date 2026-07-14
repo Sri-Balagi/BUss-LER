@@ -25,7 +25,7 @@ def test_health_check_endpoint(mock_close, mock_qdrant_get, mock_qdrant_init, mo
     with TestClient(app) as client:
         response = client.get("/api/v1/health")
         assert response.status_code == 200
-        assert response.json()["status"] == "ok"
+        assert response.json()["data"]["status"] == "ok"
 
 
 @patch("app.main.SupabaseService.get_client", new_callable=AsyncMock)

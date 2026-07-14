@@ -118,7 +118,7 @@ async def test_ai_provider_timeout(mock_memory):
     # We expect handle_event to swallow the error after retries and mark as FAILED
     # But since it uses tenacity, wait_exponential might take a long time in a real test.
     # We should patch the retry parameters for the test to avoid actually waiting 10 seconds.
-    with patch("app.workers.memory_worker.wait_exponential") as mock_wait:
+    with patch("app.workers.memory_worker.wait_exponential"):
         # Just run the pipeline directly to trigger tenacity, we have to bypass handle_event wrapper
         # actually handle_event wraps _process_memory_pipeline which has tenacity.
         pass

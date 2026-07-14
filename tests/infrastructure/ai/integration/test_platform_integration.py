@@ -192,7 +192,7 @@ async def test_lifecycle_propagation(integration_container):
     request = AIRequest(
         prompt_id="test_prompt", version="1.0.0", context={"text": "lifecycle"}, provider="gemini"
     )
-    response = await kernel.generate(request)
+    await kernel.generate(request)
 
     # Ensure lifecycle_id was attached to request
     assert request.lifecycle is not None

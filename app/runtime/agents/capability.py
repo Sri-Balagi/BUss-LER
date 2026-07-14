@@ -20,6 +20,9 @@ class Capability(BaseModel):
     metadata: dict[str, str] = Field(
         default_factory=dict, description="Additional context or constraints"
     )
+    cost: float = Field(default=0.0, description="Estimated cost per execution token/unit")
+    timeout_ms: int = Field(default=30000, description="Maximum allowed execution time in ms")
+    priority: int = Field(default=10, description="Routing priority (lower is higher priority)")
 
     def __hash__(self):
         return hash((self.capability_id, self.version))

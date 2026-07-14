@@ -10,9 +10,9 @@ from abc import ABC, abstractmethod
 from typing import Any
 from uuid import UUID
 
-from app.shared.enums import ContextSource
-from app.intelligence.intake.situation.enterprise_context import ContextSection
 from app.application.context.foundation.context_policies import ContextPolicy
+from app.intelligence.intake.situation.enterprise_context import ContextSection
+from app.shared.enums import ContextSource
 
 
 class AbstractContextProvider(ABC):

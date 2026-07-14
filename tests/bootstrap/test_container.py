@@ -107,10 +107,18 @@ def test_build_container_singleton():
         build_container()
 
 
-def test_scoped_not_implemented():
+def test_scoped_dependencies():
     container = Container()
-    with pytest.raises(NotImplementedError, match="Wave 2"):
-        container.register_scoped(IDependencyA, lambda c: DependencyA())
-
-    with pytest.raises(NotImplementedError, match="Wave 2"):
-        container.resolve_scoped(IDependencyA)
+    container.register_scoped(IDependencyA, lambda c: DependencyA())
+    
+    # Resolve in current context
+    instance1 = container.resolve(IDependencyA)
+    instance2 = container.resolve(IDependencyA)
+    
+    # Should be the same instance within the same context
+    assert instance1 is instance2
+    assert isinstance(instance1, DependencyA)
+    
+    # We can't easily test cross-context async behavior in a simple sync test here without
+    # explicitly copying the contextvar context, but we verified the logic doesn't crash
+    # and registers properly instead of raising NotImplementedError.

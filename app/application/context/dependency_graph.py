@@ -8,7 +8,6 @@ Cycle detection happens at registration time to prevent deadlocks during assembl
 """
 
 from collections import deque
-from typing import Dict, List, Set
 
 from app.intelligence.intake.situation.enterprise_context import (
     ExecutionPlan,
@@ -31,7 +30,7 @@ class ContextDependencyGraph:
 
     def __init__(self) -> None:
         # adjacency: source → set of sources it depends on
-        self._dependencies: Dict[ContextSource, Set[ContextSource]] = {}
+        self._dependencies: dict[ContextSource, set[ContextSource]] = {}
 
     def register(self, dependency: ProviderDependency) -> None:
         """Register a provider dependency.
@@ -47,7 +46,7 @@ class ContextDependencyGraph:
         # Validate no cycle was introduced
         self._detect_cycle()
 
-    def resolve(self, active_providers: List[ContextSource]) -> ExecutionPlan:
+    def resolve(self, active_providers: list[ContextSource]) -> ExecutionPlan:
         """Produce an ExecutionPlan for the given set of active providers.
 
         Uses Kahn's algorithm to produce topologically sorted batches.
@@ -60,14 +59,12 @@ class ContextDependencyGraph:
             ExecutionPlan with ordered batches of concurrently-safe providers.
         """
         # Build subgraph for only active providers
-        active_set: Set[ContextSource] = set(active_providers)
+        active_set: set[ContextSource] = set(active_providers)
 
         # in_degree: how many active dependencies each provider is waiting for
-        in_degree: Dict[ContextSource, int] = {p: 0 for p in active_set}
+        in_degree: dict[ContextSource, int] = {p: 0 for p in active_set}
         # dependents: for each provider, which providers depend on it
-        dependents: Dict[ContextSource, List[ContextSource]] = {
-            p: [] for p in active_set
-        }
+        dependents: dict[ContextSource, list[ContextSource]] = {p: [] for p in active_set}
 
         for provider in active_set:
             deps = self._dependencies.get(provider, set())
@@ -77,7 +74,7 @@ class ContextDependencyGraph:
                 dependents[dep].append(provider)
 
         # Kahn's algorithm — build batches
-        batches: List[List[ContextSource]] = []
+        batches: list[list[ContextSource]] = []
         queue: deque[ContextSource] = deque(p for p in active_set if in_degree[p] == 0)
 
         while queue:
@@ -110,9 +107,9 @@ class ContextDependencyGraph:
         if not all_providers:
             return
 
-        visited: Dict[ContextSource, str] = {}  # "visiting" | "visited"
+        visited: dict[ContextSource, str] = {}  # "visiting" | "visited"
 
-        def dfs(node: ContextSource, path: List[ContextSource]) -> None:
+        def dfs(node: ContextSource, path: list[ContextSource]) -> None:
             if visited.get(node) == "visiting":
                 cycle_start = path.index(node)
                 raise ContextDependencyCycleError(
@@ -134,7 +131,7 @@ class ContextDependencyGraph:
 # Default dependency declarations for M4 providers
 # =============================================================================
 
-DEFAULT_DEPENDENCIES: List[ProviderDependency] = [
+DEFAULT_DEPENDENCIES: list[ProviderDependency] = [
     # Conversation depends on Twin (need twin to scope the thread)
     ProviderDependency(
         provider=ContextSource.CONVERSATION,

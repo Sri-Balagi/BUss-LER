@@ -70,3 +70,53 @@ async def readiness_probe() -> dict[str, Any]:
         "python": platform.python_version(),
         "uptime_seconds": round(time.time() - _start_time, 2),
     }
+
+
+from fastapi import Depends
+from app.interfaces.http.v1.dependencies_system import get_system_query_service
+from app.application.system.query_service import SystemQueryService
+from app.interfaces.http.v1.schemas.response import BizOSResponse
+
+
+@router.get(
+    "/workflows",
+    response_model=BizOSResponse[list[dict]],
+    summary="List Active Workflows",
+)
+async def get_active_workflows(
+    service: SystemQueryService = Depends(get_system_query_service),
+) -> BizOSResponse[list[dict]]:
+    """Retrieves active workflows from the runtime environment."""
+    data = await service.list_active_workflows()
+    return BizOSResponse.ok(data=data)
+
+
+@router.get(
+    "/registries/{registry_name}/items",
+    response_model=BizOSResponse[list[dict]],
+    summary="List Registry Items",
+)
+async def get_registry_items(
+    registry_name: str,
+    service: SystemQueryService = Depends(get_system_query_service),
+) -> BizOSResponse[list[dict]]:
+    """Retrieves items from a specified registry."""
+    from fastapi import HTTPException
+    try:
+        data = await service.list_registry_items(registry_name)
+        return BizOSResponse.ok(data=data)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@router.get(
+    "/memory",
+    response_model=BizOSResponse[dict],
+    summary="Get Memory Status",
+)
+async def get_memory_status(
+    service: SystemQueryService = Depends(get_system_query_service),
+) -> BizOSResponse[dict]:
+    """Retrieves the system's memory subsystem status."""
+    data = await service.get_memory_status()
+    return BizOSResponse.ok(data=data)
+

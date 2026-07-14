@@ -14,13 +14,13 @@ from __future__ import annotations
 
 import hashlib
 from abc import ABC, abstractmethod
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from math import exp
-from typing import List, Optional, Tuple
 from uuid import uuid4
 
 import structlog
 
+from app.application.context.foundation.context_policies import ContextPolicy
 from app.intelligence.intake.situation.enterprise_context import (
     ContextItem,
     ContextProvenance,
@@ -28,7 +28,6 @@ from app.intelligence.intake.situation.enterprise_context import (
     ContextWindow,
 )
 from app.shared.enums import ContextPriority, ContextSource
-from app.application.context.foundation.context_policies import ContextPolicy
 
 logger = structlog.get_logger(__name__)
 
@@ -72,9 +71,9 @@ class AbstractContextRanker(ABC):
     @abstractmethod
     def rank(
         self,
-        sections: List[ContextSection],
+        sections: list[ContextSection],
         policy: ContextPolicy,
-    ) -> List[ContextSection]:
+    ) -> list[ContextSection]:
         """Return sections with items ranked by relevance. Deterministic."""
         pass
 
@@ -94,10 +93,10 @@ class DefaultContextRanker(AbstractContextRanker):
 
     def rank(
         self,
-        sections: List[ContextSection],
+        sections: list[ContextSection],
         policy: ContextPolicy,
-    ) -> List[ContextSection]:
-        ranked_sections: List[ContextSection] = []
+    ) -> list[ContextSection]:
+        ranked_sections: list[ContextSection] = []
 
         for section in sections:
             ranked_items = sorted(
@@ -109,12 +108,8 @@ class DefaultContextRanker(AbstractContextRanker):
             updated_items = []
             for item in ranked_items:
                 score = self._score(item)
-                updated_provenance = item.provenance.model_copy(
-                    update={"ranking_score": score}
-                )
-                updated_item = item.model_copy(
-                    update={"provenance": updated_provenance}
-                )
+                updated_provenance = item.provenance.model_copy(update={"ranking_score": score})
+                updated_item = item.model_copy(update={"provenance": updated_provenance})
                 updated_items.append(updated_item)
 
             ranked_sections.append(section.model_copy(update={"items": updated_items}))
@@ -133,7 +128,7 @@ class DefaultContextRanker(AbstractContextRanker):
         intent_relevance = prov.confidence
 
         # recency: exponential decay on age in hours
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         age_hours = max(
             0.0,
             (now - prov.retrieval_timestamp).total_seconds() / 3600,
@@ -176,9 +171,9 @@ class AbstractContextCompressor(ABC):
     @abstractmethod
     def compress(
         self,
-        sections: List[ContextSection],
+        sections: list[ContextSection],
         budget: int,
-    ) -> List[ContextSection]:
+    ) -> list[ContextSection]:
         """Return compressed sections. Provenance is always preserved."""
         pass
 
@@ -198,10 +193,10 @@ class DefaultContextCompressor(AbstractContextCompressor):
 
     def compress(
         self,
-        sections: List[ContextSection],
+        sections: list[ContextSection],
         budget: int,
-    ) -> List[ContextSection]:
-        compressed: List[ContextSection] = []
+    ) -> list[ContextSection]:
+        compressed: list[ContextSection] = []
 
         for section in sections:
             deduped_items = self._deduplicate(section.items)
@@ -227,14 +222,14 @@ class DefaultContextCompressor(AbstractContextCompressor):
         fingerprint_source = f"{normalized_content}|{provider_val}|{domain_id}"
         return hashlib.md5(fingerprint_source.encode("utf-8")).hexdigest()
 
-    def _deduplicate(self, items: List[ContextItem]) -> List[ContextItem]:
+    def _deduplicate(self, items: list[ContextItem]) -> list[ContextItem]:
         """Group items by fingerprint; keep highest-ranked per group."""
-        groups: dict[str, List[ContextItem]] = {}
+        groups: dict[str, list[ContextItem]] = {}
         for item in items:
             fp = self._fingerprint(item)
             groups.setdefault(fp, []).append(item)
 
-        result: List[ContextItem] = []
+        result: list[ContextItem] = []
         for fp, group_items in groups.items():
             if len(group_items) == 1:
                 result.append(group_items[0])
@@ -245,8 +240,7 @@ class DefaultContextCompressor(AbstractContextCompressor):
             origin_ids = [i.item_id for i in group_items if i.item_id != best.item_id]
             updated_prov = best.provenance.model_copy(
                 update={
-                    "compression_origin": list(best.provenance.compression_origin)
-                    + origin_ids,
+                    "compression_origin": list(best.provenance.compression_origin) + origin_ids,
                     "compression_reason": (
                         f"Deduplicated {len(group_items)} items with identical semantic fingerprint."
                     ),
@@ -257,7 +251,7 @@ class DefaultContextCompressor(AbstractContextCompressor):
         return result
 
     @staticmethod
-    def _collapse_low_priority(items: List[ContextItem]) -> List[ContextItem]:
+    def _collapse_low_priority(items: list[ContextItem]) -> list[ContextItem]:
         """Collapse low-priority background items into a single summary item
         when there are more than 3 of them."""
         background = [i for i in items if i.priority == ContextPriority.BACKGROUND]
@@ -305,7 +299,7 @@ class AbstractContextWindowBuilder(ABC):
     @abstractmethod
     def build_window(
         self,
-        sections: List[ContextSection],
+        sections: list[ContextSection],
         budget: int,
         critical_reserve: float = 0.1,
     ) -> ContextWindow:
@@ -325,13 +319,13 @@ class DefaultContextWindowBuilder(AbstractContextWindowBuilder):
 
     def build_window(
         self,
-        sections: List[ContextSection],
+        sections: list[ContextSection],
         budget: int,
         critical_reserve: float = 0.1,
     ) -> ContextWindow:
         critical_reserve = int(budget * self._CRITICAL_RESERVE_RATIO)
         remaining_budget = budget
-        packed_sections: List[ContextSection] = []
+        packed_sections: list[ContextSection] = []
         items_included = 0
         items_excluded = 0
 
@@ -341,9 +335,7 @@ class DefaultContextWindowBuilder(AbstractContextWindowBuilder):
         remaining_sections = [s for s in sections if s.source not in critical_sources]
 
         for section in critical_sections:
-            packed, excluded, remaining_budget = self._pack_section(
-                section, remaining_budget
-            )
+            packed, excluded, remaining_budget = self._pack_section(section, remaining_budget)
             if packed:
                 packed_sections.append(packed)
                 items_included += packed.item_count
@@ -357,9 +349,7 @@ class DefaultContextWindowBuilder(AbstractContextWindowBuilder):
             if remaining_budget <= 0:
                 items_excluded += section.item_count
                 continue
-            packed, excluded, remaining_budget = self._pack_section(
-                section, remaining_budget
-            )
+            packed, excluded, remaining_budget = self._pack_section(section, remaining_budget)
             if packed:
                 packed_sections.append(packed)
                 items_included += packed.item_count
@@ -378,12 +368,12 @@ class DefaultContextWindowBuilder(AbstractContextWindowBuilder):
     @staticmethod
     def _pack_section(
         section: ContextSection, budget: int
-    ) -> Tuple[Optional[ContextSection], int, int]:
+    ) -> tuple[ContextSection | None, int, int]:
         """Pack as many items from a section as the budget allows.
 
         Returns: (packed_section | None, items_excluded, remaining_budget)
         """
-        packed_items: List[ContextItem] = []
+        packed_items: list[ContextItem] = []
         excluded = 0
 
         for item in section.items:

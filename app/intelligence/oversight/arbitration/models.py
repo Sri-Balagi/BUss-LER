@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
@@ -6,7 +6,7 @@ from app.intelligence.decision.decision.models import ExecutiveDecision
 from app.intelligence.decision.planning.models import ExecutivePlan
 
 
-class ArbitrationReason(str, Enum):
+class ArbitrationReason(StrEnum):
     HIGHER_CONFIDENCE = "HIGHER_CONFIDENCE"
     BETTER_STRATEGIC_ALIGNMENT = "BETTER_STRATEGIC_ALIGNMENT"
     LOWER_RISK = "LOWER_RISK"

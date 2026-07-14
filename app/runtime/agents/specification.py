@@ -1,11 +1,11 @@
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
 from app.runtime.agents.permissions import AgentPermission
 
 
-class ExecutionType(str, Enum):
+class ExecutionType(StrEnum):
     """Supported execution models for an agent."""
 
     SYNCHRONOUS = "SYNCHRONOUS"

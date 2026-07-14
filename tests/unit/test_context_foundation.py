@@ -5,17 +5,18 @@ from unittest.mock import MagicMock
 sys.modules["structlog"] = MagicMock()
 
 import asyncio
-from datetime import datetime, timezone
-import pytest
+from datetime import UTC, datetime, timezone
 from uuid import uuid4
 
+import pytest
+
 from app.application.context.foundation.context_freshness import (
-    ContextFreshnessPolicy,
     DEFAULT_FRESHNESS_POLICIES,
+    ContextFreshnessPolicy,
 )
 from app.application.context.foundation.context_policies import (
-    ContextPolicy,
     BUILT_IN_POLICIES,
+    ContextPolicy,
 )
 from app.platform.resilience.context_retry import (
     ProviderRetryConfig,
@@ -32,11 +33,11 @@ def test_context_freshness_import_and_logic():
         cache_ttl_seconds=20,
         refresh_strategy=RefreshStrategy.LAZY,
     )
-    
-    now = datetime.now(timezone.utc)
+
+    now = datetime.now(UTC)
     # Shouldn't be stale immediately
     assert not policy.is_stale(now)
-    
+
     # Expiry
     expires = policy.expires_at(now)
     assert (expires - now).total_seconds() == 20
@@ -48,11 +49,11 @@ def test_context_policies_import_and_logic():
     assert planning.policy_id == "planning"
     assert ContextSource.GOAL in planning.required_providers
     assert planning.token_budget == 64_000
-    
+
     recommendation = ContextPolicy.recommendation()
     assert recommendation.policy_id == "recommendation"
     assert recommendation.token_budget == 32_000
-    
+
     assert "planning" in BUILT_IN_POLICIES
     assert "recommendation" in BUILT_IN_POLICIES
 
@@ -67,19 +68,19 @@ async def test_context_retry_import_and_logic():
         max_delay=0.1,
         jitter=False,
     )
-    
+
     class MockProvider:
         def __init__(self):
             self.attempts = 0
-            
+
         async def provide(self, ctx, twin_id, policy):
             self.attempts += 1
             if self.attempts == 1:
                 raise ValueError("Temporary failure")
             return "Success"
-            
+
     provider = MockProvider()
-    
+
     result = await provide_with_retry(
         provider=provider,
         retry_config=config,
@@ -88,6 +89,6 @@ async def test_context_retry_import_and_logic():
         policy=MagicMock(),
         source=ContextSource.MEMORY,
     )
-    
+
     assert result == "Success"
     assert provider.attempts == 2

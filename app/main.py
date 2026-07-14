@@ -31,6 +31,9 @@ from app.interfaces.http.errors import register_exception_handlers
 from app.interfaces.http.metrics import MetricsMiddleware, metrics_endpoint
 from app.interfaces.http.middleware.request_id import RequestIDMiddleware
 from app.interfaces.http.middleware.security_headers import SecurityHeadersMiddleware
+from app.interfaces.http.middleware.pipeline import register_gateway_pipeline
+from app.interfaces.http.openapi import custom_openapi
+from app.interfaces.http.v1.routers.gateway import gateway_router
 from app.interfaces.http.v1.router import api_router
 from app.platform.resilience.graceful_shutdown import register_shutdown_handlers
 from app.platform.telemetry.otel import instrument_fastapi, setup_tracing
@@ -123,16 +126,14 @@ def create_app() -> FastAPI:
     )
 
     # ── Middleware (applied in reverse registration order) ────────────────────
+    
     # 1. Security headers (outermost — always applied last in response chain)
     app.add_middleware(SecurityHeadersMiddleware)
 
     # 2. Prometheus metrics collection
     app.add_middleware(MetricsMiddleware)
 
-    # 3. Request ID / Correlation ID injection
-    app.add_middleware(RequestIDMiddleware)
-
-    # 4. CORS (innermost middleware)
+    # 3. CORS
     cors_origins = (
         ["*"] if not settings.is_production else settings.model_fields.get("cors_origins", ["*"])  # type: ignore[arg-type]
     )
@@ -143,6 +144,9 @@ def create_app() -> FastAPI:
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["*"],
     )
+
+    # 4. Gateway Request Pipeline (Auth, Tenant, Rate Limiting, Idempotency, Context)
+    register_gateway_pipeline(app)
 
     # ── Request Logging ───────────────────────────────────────────────────────
     @app.middleware("http")
@@ -174,7 +178,13 @@ def create_app() -> FastAPI:
     register_exception_handlers(app)
 
     # ── API Routers ───────────────────────────────────────────────────────────
+    from app.interfaces.http.v1.routers.mcp import mcp_router
+    app.include_router(gateway_router, prefix="/api/v1")
+    app.include_router(mcp_router, prefix="/api/v1/mcp")
     app.include_router(api_router, prefix="/api/v1")
+
+    # ── OpenAPI Customization ─────────────────────────────────────────────────
+    app.openapi = lambda: custom_openapi(app)  # type: ignore
 
     # ── Instrument with OTEL (if enabled) ────────────────────────────────────
     instrument_fastapi(app)

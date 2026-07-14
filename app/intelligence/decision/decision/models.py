@@ -1,9 +1,9 @@
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
 
-class DecisionPriority(str, Enum):
+class DecisionPriority(StrEnum):
     ROUTINE = "ROUTINE"
     IMPORTANT = "IMPORTANT"
     URGENT = "URGENT"

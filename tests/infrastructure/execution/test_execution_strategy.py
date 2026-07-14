@@ -69,16 +69,18 @@ async def test_in_process_exception_isolation():
     assert "Something went wrong" in result.error
 
 
+def _dummy_success_fn() -> str:
+    return "success"
+
+
 @pytest.mark.asyncio
-async def test_subprocess_execution_raises():
+async def test_subprocess_execution_success():
     strategy = SubprocessExecutionStrategy()
-    context = ExecutionContext()
+    context = ExecutionContext(timeout_seconds=5.0)
 
-    async def dummy() -> None:
-        pass
-
-    with pytest.raises(NotImplementedError, match="Wave 2"):
-        await strategy.execute(dummy, context)
+    result = await strategy.execute(_dummy_success_fn, context)
+    assert result.success is True
+    assert result.result == "success"
 
 
 def test_factory_returns_correct_strategy():

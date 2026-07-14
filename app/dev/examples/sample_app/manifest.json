@@ -1,0 +1,9 @@
+{
+    "name": "data_processor_app",
+    "version": "1.0.0",
+    "description": "A canonical example of a BizOS App that processes data.",
+    "author": "BizOS Team",
+    "dependencies": [],
+    "permissions": ["fs:read", "fs:write"],
+    "entrypoint": "main.py"
+}

@@ -4,7 +4,11 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, status
 
-from app.interfaces.http.schemas.memory import CreateMemoryRequest, MemoryResponse, UpdateMemoryRequest
+from app.interfaces.http.schemas.memory import (
+    CreateMemoryRequest,
+    MemoryResponse,
+    UpdateMemoryRequest,
+)
 from app.interfaces.http.schemas.pagination import PaginatedResponse
 from app.interfaces.http.v1.dependencies_core import get_current_user
 from app.interfaces.http.v1.dependencies_memory import (
@@ -15,7 +19,6 @@ from app.interfaces.http.v1.dependencies_memory import (
     get_restore_memory_use_case,
     get_update_memory_use_case,
 )
-
 
 router = APIRouter(prefix="/memories", tags=["Memories"])
 

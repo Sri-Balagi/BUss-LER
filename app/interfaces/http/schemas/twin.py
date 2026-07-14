@@ -29,7 +29,7 @@ Schema Versioning:
 """
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -53,7 +53,7 @@ changes in a way that requires migration of existing twin data.
 # =============================================================================
 
 
-class ChangeType(str, Enum):
+class ChangeType(StrEnum):
     """Type of change recorded in twin history.
 
     Used by TwinHistory to categorize each audit entry.

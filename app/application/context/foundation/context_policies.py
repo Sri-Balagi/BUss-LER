@@ -125,9 +125,7 @@ class ContextPolicy(DomainBaseModel):
             enabled_providers=list(ContextSource),
             required_providers=[ContextSource.GOAL, ContextSource.TWIN],
             optional_providers=[
-                s
-                for s in ContextSource
-                if s not in [ContextSource.GOAL, ContextSource.TWIN]
+                s for s in ContextSource if s not in [ContextSource.GOAL, ContextSource.TWIN]
             ],
             token_budget=_DEFAULT_TOKEN_BUDGET,
         )
@@ -141,9 +139,7 @@ class ContextPolicy(DomainBaseModel):
             enabled_providers=list(ContextSource),
             required_providers=[ContextSource.INTENT, ContextSource.GOAL],
             optional_providers=[
-                s
-                for s in ContextSource
-                if s not in [ContextSource.INTENT, ContextSource.GOAL]
+                s for s in ContextSource if s not in [ContextSource.INTENT, ContextSource.GOAL]
             ],
             token_budget=_DEFAULT_TOKEN_BUDGET,
         )

@@ -24,5 +24,7 @@ class ListEntitiesUseCase:
         limit: int = 20,
         offset: int = 0,
     ) -> tuple[list[Entity], int]:
-        logger.debug("ListEntitiesUseCase: listing entities", user_id=str(user_id) if user_id else None)
+        logger.debug(
+            "ListEntitiesUseCase: listing entities", user_id=str(user_id) if user_id else None
+        )
         return await self._repo.list(user_id=user_id, is_active=True, limit=limit, offset=offset)

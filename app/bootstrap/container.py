@@ -12,16 +12,24 @@ class ContainerNotInitializedError(RuntimeError):
     pass
 
 
+import contextvars
+
 class Container:
     """A type-safe Dependency Injection container acting as the composition root."""
 
     def __init__(self) -> None:
         self._singletons: dict[type[Any], Any] = {}
         self._factories: dict[type[Any], Callable[[Container], Any]] = {}
+        self._scoped_factories: dict[type[Any], Callable[[Container], Any]] = {}
         self._overrides: dict[type[Any], Any] = {}
 
         # Track active resolution path to detect circular dependencies
         self._resolving: set[type[Any]] = set()
+        
+        # Scoped instances storage per context
+        self._scoped_instances: contextvars.ContextVar[dict[type[Any], Any]] = contextvars.ContextVar(
+            "scoped_instances", default={}
+        )
 
     def register_singleton(self, interface: type[T], instance: T) -> None:
         """Register a pre-instantiated singleton."""
@@ -32,8 +40,8 @@ class Container:
         self._factories[interface] = factory
 
     def register_scoped(self, interface: type[T], factory: Callable[["Container"], T]) -> None:
-        """Reserve scoped registration for Wave 2."""
-        raise NotImplementedError("Wave 2")
+        """Register a factory that is resolved once per request/context scope."""
+        self._scoped_factories[interface] = factory
 
     def override(self, interface: type[T], instance: T) -> None:
         """Override a dependency for testing purposes."""
@@ -46,6 +54,9 @@ class Container:
 
         if interface in self._singletons:
             return self._singletons[interface]
+            
+        if interface in self._scoped_factories:
+            return self.resolve_scoped(interface)
 
         if interface in self._factories:
             if interface in self._resolving:
@@ -65,8 +76,36 @@ class Container:
         raise KeyError(f"Service {interface.__name__} not registered in container")
 
     def resolve_scoped(self, interface: type[T]) -> T:
-        """Reserve scoped resolution for Wave 2."""
-        raise NotImplementedError("Wave 2")
+        """Resolve a dependency strictly bound to the current execution context."""
+        if interface not in self._scoped_factories:
+             raise KeyError(f"Service {interface.__name__} is not registered as scoped.")
+             
+        scoped_cache = self._scoped_instances.get()
+        # If running in a shared mutable dict fallback, make a new dict if it's the default
+        if id(scoped_cache) == id(self._scoped_instances.get()):
+             pass # contextvars will return the same default object if not explicitly set per task, but this is fine for fallback
+             
+        if interface in scoped_cache:
+            return scoped_cache[interface]
+            
+        if interface in self._resolving:
+            raise RecursionError(
+                f"Circular dependency detected while resolving {interface.__name__}"
+            )
+            
+        self._resolving.add(interface)
+        try:
+            instance = self._scoped_factories[interface](self)
+            
+            # ContextVar default is mutable so we should explicitly set a new dict if we modify it
+            current_cache = self._scoped_instances.get()
+            new_cache = current_cache.copy()
+            new_cache[interface] = instance
+            self._scoped_instances.set(new_cache)
+            
+            return instance
+        finally:
+            self._resolving.remove(interface)
 
 
 _global_container: Container | None = None

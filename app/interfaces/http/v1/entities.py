@@ -8,14 +8,13 @@ from app.interfaces.http.schemas.base import Entity, EntityCreate
 from app.interfaces.http.schemas.entity import EntityUpdate
 from app.interfaces.http.schemas.pagination import PaginatedResponse
 from app.interfaces.http.v1.dependencies_core import (
-    get_current_user,
     get_create_entity_use_case,
+    get_current_user,
+    get_delete_entity_use_case,
     get_get_entity_use_case,
     get_list_entities_use_case,
     get_update_entity_use_case,
-    get_delete_entity_use_case,
 )
-
 
 router = APIRouter(prefix="/entities", tags=["Entities"])
 

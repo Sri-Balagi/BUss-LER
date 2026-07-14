@@ -1,10 +1,10 @@
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
 
-class KnowledgeCategory(str, Enum):
+class KnowledgeCategory(StrEnum):
     STRATEGIC = "STRATEGIC"
     OPERATIONAL = "OPERATIONAL"
     TACTICAL = "TACTICAL"

@@ -1,9 +1,9 @@
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
 
-class CycleStatus(str, Enum):
+class CycleStatus(StrEnum):
     INITIALIZED = "INITIALIZED"
     IN_PROGRESS = "IN_PROGRESS"
     CONVERGED = "CONVERGED"

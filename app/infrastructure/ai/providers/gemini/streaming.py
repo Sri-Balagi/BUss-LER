@@ -15,7 +15,6 @@ class GeminiStreamAdapter:
         model: str,
         start_time: float,
     ) -> AsyncIterator[StreamChunk]:
-        chunk_index = 0
         prev_chunk = None
 
         async for chunk in response_stream:

@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class AgentPermission(str, Enum):
+class AgentPermission(StrEnum):
     """
     Declarative permissions for an agent.
     Enforced by the AgentContext and higher-level security boundaries.

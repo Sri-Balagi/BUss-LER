@@ -14,7 +14,6 @@ Follows the same pattern as GoalStateMachine and PlanStateMachine.
 from app.shared.enums import ContextStatus
 from app.shared.exceptions.errors import InvalidStateTransitionError
 
-
 # Allowed transitions: current_status → set of valid next statuses
 _ALLOWED_TRANSITIONS: dict[ContextStatus, set[ContextStatus]] = {
     ContextStatus.BUILDING: {ContextStatus.ASSEMBLED, ContextStatus.EXPIRED},

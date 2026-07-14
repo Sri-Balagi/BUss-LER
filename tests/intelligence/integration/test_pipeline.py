@@ -6,8 +6,8 @@ from app.intelligence.integration.orchestrator import ExecutiveIntelligenceOrche
 
 
 def test_pipeline_success():
-    from app.bootstrap.container import build_container, get_container
-    from app.bootstrap.container import _global_container
+    from app.bootstrap.container import _global_container, build_container, get_container
+
     container = get_container() if _global_container else build_container()
     orchestrator = container.resolve(ExecutiveIntelligenceOrchestrator)
     result = orchestrator.process_request("Maximize profits")
@@ -24,8 +24,8 @@ def test_pipeline_success():
 
 
 def test_pipeline_error_propagation(monkeypatch):
-    from app.bootstrap.container import build_container, get_container
-    from app.bootstrap.container import _global_container
+    from app.bootstrap.container import _global_container, build_container, get_container
+
     container = get_container() if _global_container else build_container()
     orchestrator = container.resolve(ExecutiveIntelligenceOrchestrator)
 

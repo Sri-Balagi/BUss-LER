@@ -1,5 +1,3 @@
-import os
-
 with open("app/application/di.py", "a") as f:
     f.write("""
     # =========================================================================
@@ -25,12 +23,12 @@ with open("app/application/di.py", "a") as f:
     from app.infrastructure.persistence.postgres.repositories.intent_repository import IntentRepository
     from app.application.intent.intent_classifier import IntentClassifier
     from app.application.intent.intent_service import IntentService
-    
+
     def build_intent_repo(c: "Container") -> IntentRepository:
         return IntentRepository(client=c.resolve(AsyncClient))
     container.register_factory(IntentRepository, build_intent_repo)
     container.register_factory(IntentClassifier, lambda c: IntentClassifier(
-        ai_kernel=c.resolve(AbstractAIKernel), 
+        ai_kernel=c.resolve(AbstractAIKernel),
         trace_service=c.resolve(CognitiveTraceService)
     ))
     container.register_factory(IntentService, lambda c: IntentService(
@@ -174,7 +172,7 @@ with open("app/application/di.py", "a") as f:
             metadata=ProviderMetadata(source=ContextSource.EXTERNAL, name="ExternalProvider", version="1.0"),
         )
         return registry
-    
+
     container.register_singleton(ContextProviderRegistry, build_context_registry(container))
 
     def build_context_engine(c: "Container") -> ContextEngine:

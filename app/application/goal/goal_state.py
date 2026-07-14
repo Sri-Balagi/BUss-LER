@@ -13,7 +13,6 @@ Valid transitions:
 """
 
 import uuid
-from typing import Dict, List
 
 import structlog
 
@@ -26,7 +25,7 @@ logger = structlog.get_logger(__name__)
 class GoalStateMachine:
     """Enforces valid state transitions for Goal lifecycle."""
 
-    VALID_TRANSITIONS: Dict[GoalStatus, List[GoalStatus]] = {
+    VALID_TRANSITIONS: dict[GoalStatus, list[GoalStatus]] = {
         GoalStatus.DRAFT: [
             GoalStatus.ACTIVE,
             GoalStatus.ABANDONED,
@@ -55,7 +54,7 @@ class GoalStateMachine:
         ],
         GoalStatus.COMPLETED: [],  # Terminal
         GoalStatus.ABANDONED: [
-            GoalStatus.ACTIVE,     # Allows reactivation
+            GoalStatus.ACTIVE,  # Allows reactivation
         ],
     }
 

@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 from uuid import uuid4
 
 from pydantic import UUID4, BaseModel, Field
 
 
-class ExecutionType(str, Enum):
+class ExecutionType(StrEnum):
     AGENT = "AGENT"
     TOOL = "TOOL"
     HUMAN_APPROVAL = "HUMAN_APPROVAL"

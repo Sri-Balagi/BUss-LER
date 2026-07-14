@@ -1,13 +1,13 @@
 import uuid
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import Field
 
 from app.interfaces.http.schemas.base import DomainBaseModel
 
 
-class EventType(str, Enum):
+class EventType(StrEnum):
     """Lifecycle event types."""
 
     CREATED = "CREATED"

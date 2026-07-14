@@ -1,6 +1,4 @@
-import os
-
-with open('app/application/di.py', 'a') as f:
+with open("app/application/di.py", "a") as f:
     f.write("""
     # =========================================================================
     # Cognitive Pipeline Engines (D1-D6)

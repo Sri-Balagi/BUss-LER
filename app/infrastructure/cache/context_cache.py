@@ -9,14 +9,14 @@ Implementations:
 """
 
 from abc import ABC, abstractmethod
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import structlog
 
-from app.intelligence.intake.situation.enterprise_context import EnterpriseContext
 from app.application.context.foundation.context_freshness import (
     ContextFreshnessPolicy,
 )
+from app.intelligence.intake.situation.enterprise_context import EnterpriseContext
 
 logger = structlog.get_logger(__name__)
 
@@ -76,7 +76,7 @@ class MemoryContextCache(AbstractContextCache):
         if entry is None:
             return None
         context, retrieved_at, expires_at = entry
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         if now > expires_at:
             del self._store[cache_key]
             logger.debug("Cache entry expired", cache_key=cache_key)
@@ -91,7 +91,7 @@ class MemoryContextCache(AbstractContextCache):
     ) -> None:
         from datetime import timedelta
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         expires_at = now + timedelta(seconds=ttl_seconds)
         self._store[cache_key] = (context, now, expires_at)
         logger.debug(
@@ -143,16 +143,38 @@ class MemoryContextCache(AbstractContextCache):
 
 
 class RedisContextCache(AbstractContextCache):
-    """Redis-backed cache stub. Raises NotImplementedError until M5.
+    """Redis-backed cache.
 
     Designed for distributed deployment scenarios.
     """
 
+    def __init__(self, redis_url: str) -> None:
+        import redis.asyncio as redis
+        self._redis = redis.from_url(redis_url)
+
     async def get(self, cache_key: str) -> EnterpriseContext | None:
-        raise NotImplementedError("RedisContextCache is not implemented in Milestone 4.")
+        import pickle
+        data = await self._redis.get(cache_key)
+        if not data:
+            return None
+        try:
+            entry = pickle.loads(data)
+            context, retrieved_at = entry
+            return context
+        except Exception as e:
+            logger.error("Failed to unpickle Redis cache entry", cache_key=cache_key, error=str(e))
+            return None
 
     async def set(self, cache_key: str, context: EnterpriseContext, ttl_seconds: int) -> None:
-        raise NotImplementedError("RedisContextCache is not implemented in Milestone 4.")
+        import pickle
+        now = datetime.now(UTC)
+        entry = (context, now)
+        try:
+            data = pickle.dumps(entry)
+            await self._redis.set(cache_key, data, ex=ttl_seconds)
+            logger.debug("Context cached in Redis", cache_key=cache_key, ttl_seconds=ttl_seconds)
+        except Exception as e:
+            logger.error("Failed to pickle/set Redis cache entry", cache_key=cache_key, error=str(e))
 
     async def invalidate(
         self,
@@ -161,10 +183,33 @@ class RedisContextCache(AbstractContextCache):
         reason: str = "manual_invalidation",
         event_bus=None,
     ) -> None:
-        raise NotImplementedError("RedisContextCache is not implemented in Milestone 4.")
+        await self._redis.delete(cache_key)
+        logger.info("Redis cache entry invalidated", cache_key=cache_key, reason=reason)
+        if event_bus is not None:
+            try:
+                from app.shared.events.models import ContextInvalidatedEvent
+
+                event = ContextInvalidatedEvent(
+                    correlation_id=cache_key,
+                    cache_key=cache_key,
+                    twin_id=twin_id,
+                    reason=reason,
+                )
+                event_bus.publish(event)
+            except Exception as exc:
+                logger.warning("Failed to publish ContextInvalidatedEvent", error=str(exc))
 
     async def is_fresh(self, cache_key: str, freshness_policy: ContextFreshnessPolicy) -> bool:
-        raise NotImplementedError("RedisContextCache is not implemented in Milestone 4.")
+        import pickle
+        data = await self._redis.get(cache_key)
+        if not data:
+            return False
+        try:
+            entry = pickle.loads(data)
+            _, retrieved_at = entry
+            return not freshness_policy.is_stale(retrieved_at)
+        except Exception:
+            return False
 
 
 @staticmethod

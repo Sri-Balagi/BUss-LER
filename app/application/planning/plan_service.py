@@ -12,97 +12,54 @@ Responsibilities:
 
 """
 
-
-
 from abc import ABC, abstractmethod
-
-from typing import Optional
-
 from uuid import UUID
-
-
 
 import structlog
 
-
-
-from app.shared.events.bus import EventBus
-
-from app.runtime.core.commands import UpdatePlanStatusCommand
-
-from app.intelligence.decision.planning.plan import Plan, PaginatedPlans
-
-from app.infrastructure.persistence.postgres.repositories.plan_repository import AbstractPlanRepository
-
-from app.core.context import OperationContext
-
 from app.application.planning.plan_state import PlanStateMachine
-
-
+from app.core.context import OperationContext
+from app.infrastructure.persistence.postgres.repositories.plan_repository import (
+    AbstractPlanRepository,
+)
+from app.intelligence.decision.planning.plan import PaginatedPlans, Plan
+from app.runtime.core.commands import UpdatePlanStatusCommand
+from app.shared.events.bus import EventBus
 
 logger = structlog.get_logger(__name__)
 
 
-
-
-
 class AbstractPlanService(ABC):
-
     @abstractmethod
-
     async def get_plan(self, ctx: OperationContext, plan_id: UUID) -> Plan:
 
         pass
 
-
-
     @abstractmethod
-
     async def list_plans(
-
         self,
-
         ctx: OperationContext,
-
         twin_id: UUID,
-
-        goal_id: Optional[UUID] = None,
-
-        intent_id: Optional[UUID] = None,
-
+        goal_id: UUID | None = None,
+        intent_id: UUID | None = None,
         limit: int = 20,
-
         offset: int = 0,
-
     ) -> PaginatedPlans:
 
         pass
 
-
-
     @abstractmethod
-
-    async def update_plan_status(
-
-        self, ctx: OperationContext, cmd: UpdatePlanStatusCommand
-
-    ) -> Plan:
+    async def update_plan_status(self, ctx: OperationContext, cmd: UpdatePlanStatusCommand) -> Plan:
 
         pass
 
 
-
-
-
 class PlanService(AbstractPlanService):
-
     def __init__(self, repository: AbstractPlanRepository, event_bus: EventBus) -> None:
 
         self._repository = repository
 
         self._event_bus = event_bus
-
-
 
     async def get_plan(self, ctx: OperationContext, plan_id: UUID) -> Plan:
 
@@ -112,24 +69,14 @@ class PlanService(AbstractPlanService):
 
         return await self._repository.get_by_id(plan_id)
 
-
-
     async def list_plans(
-
         self,
-
         ctx: OperationContext,
-
         twin_id: UUID,
-
-        goal_id: Optional[UUID] = None,
-
-        intent_id: Optional[UUID] = None,
-
+        goal_id: UUID | None = None,
+        intent_id: UUID | None = None,
         limit: int = 20,
-
         offset: int = 0,
-
     ) -> PaginatedPlans:
 
         log = logger.bind(correlation_id=ctx.correlation_id, twin_id=str(twin_id))
@@ -137,50 +84,27 @@ class PlanService(AbstractPlanService):
         log.info("Listing plans")
 
         return await self._repository.list_by_twin(
-
             twin_id=twin_id,
-
             goal_id=goal_id,
-
             intent_id=intent_id,
-
             limit=limit,
-
             offset=offset,
-
         )
 
-
-
-    async def update_plan_status(
-
-        self, ctx: OperationContext, cmd: UpdatePlanStatusCommand
-
-    ) -> Plan:
+    async def update_plan_status(self, ctx: OperationContext, cmd: UpdatePlanStatusCommand) -> Plan:
 
         log = logger.bind(correlation_id=ctx.correlation_id, plan_id=str(cmd.plan_id))
 
         log.info("Updating plan status", target=cmd.target_status.value)
 
-
-
         plan = await self._repository.get_by_id(cmd.plan_id)
 
-
-
         new_status = PlanStateMachine.transition(
-
             plan_id=plan.id,
-
             current_status=plan.status,
-
             target_status=cmd.target_status,
-
         )
-
-
 
         updated = await self._repository.update_status(plan.id, new_status)
 
         return updated
-

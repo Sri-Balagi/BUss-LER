@@ -1,10 +1,15 @@
 import uuid
+
 import structlog
 
 from app.infrastructure.ai.kernel import AbstractAIKernel
 from app.infrastructure.ai.models import EmbeddingRequest
-from app.infrastructure.persistence.postgres.repositories.memory_repository import AbstractMemoryRepository
-from app.infrastructure.persistence.postgres.repositories.vector_repository import AbstractVectorRepository
+from app.infrastructure.persistence.postgres.repositories.memory_repository import (
+    AbstractMemoryRepository,
+)
+from app.infrastructure.persistence.postgres.repositories.vector_repository import (
+    AbstractVectorRepository,
+)
 from app.infrastructure.vectorstore.models import MemoryVectorPoint
 from app.intelligence.learning.repository.memory import Memory, MemoryUpdate
 from app.shared.enums import EmbeddingStatus
@@ -29,8 +34,14 @@ class UpdateMemoryUseCase:
         self._ai_kernel = ai_kernel
         self._event_bus = event_bus
 
-    async def execute(self, memory_id: uuid.UUID, data: MemoryUpdate, correlation_id: str) -> Memory:
-        logger.info("Starting memory update orchestration", memory_id=str(memory_id), correlation_id=correlation_id)
+    async def execute(
+        self, memory_id: uuid.UUID, data: MemoryUpdate, correlation_id: str
+    ) -> Memory:
+        logger.info(
+            "Starting memory update orchestration",
+            memory_id=str(memory_id),
+            correlation_id=correlation_id,
+        )
 
         # 1. Fetch current memory to check if content changed
         original_memory = await self._metadata_repo.get_by_id(memory_id)
@@ -51,29 +62,37 @@ class UpdateMemoryUseCase:
                     summary = await self._ai_kernel.summarize(memory.content)
                     memory = await self._metadata_repo.update_summary(memory.id, summary)
                 except Exception as e:
-                    logger.warning("Failed to regenerate memory summary", memory_id=str(memory.id), error=str(e))
+                    logger.warning(
+                        "Failed to regenerate memory summary",
+                        memory_id=str(memory.id),
+                        error=str(e),
+                    )
 
             try:
                 embed_req = EmbeddingRequest(content=memory.content)
                 embed_res = await self._ai_kernel.embed(embed_req)
 
-                point = MemoryVectorPoint(
-                    id=memory.id,
-                    vector=embed_res.vector,
-                    payload=memory
-                )
+                point = MemoryVectorPoint(id=memory.id, vector=embed_res.vector, payload=memory)
                 await self._vector_repo.upsert(point)
-                memory = await self._metadata_repo.update_embedding_status(memory.id, EmbeddingStatus.COMPLETED)
+                memory = await self._metadata_repo.update_embedding_status(
+                    memory.id, EmbeddingStatus.COMPLETED
+                )
             except Exception as e:
-                logger.error("Failed to regenerate/upsert embedding for memory", memory_id=str(memory.id), error=str(e))
-                memory = await self._metadata_repo.update_embedding_status(memory.id, EmbeddingStatus.FAILED)
+                logger.error(
+                    "Failed to regenerate/upsert embedding for memory",
+                    memory_id=str(memory.id),
+                    error=str(e),
+                )
+                memory = await self._metadata_repo.update_embedding_status(
+                    memory.id, EmbeddingStatus.FAILED
+                )
 
         # 4. Publish Event
         event = MemoryLifecycleEvent(
             correlation_id=correlation_id,
             memory_id=memory.id,
             twin_id=memory.twin_id,
-            event_type=EventType.UPDATED
+            event_type=EventType.UPDATED,
         )
         self._event_bus.publish(event)
 
