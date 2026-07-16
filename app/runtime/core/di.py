@@ -78,9 +78,13 @@ def register_platform_dependencies(container: "Container") -> None:
     container.register_singleton(IExecutionStrategy, InProcessExecutionStrategy())
 
     def build_execution_strategy_factory(c: "Container") -> ExecutionStrategyFactory:
-        # In a real DI setup with multiple strategies, the factory might take the container to resolve them.
-        # But for Wave 0, the factory just creates them or we can just register the factory itself.
-        return ExecutionStrategyFactory()
+        from app.domain.security.interfaces import IAuditPublisher
+        audit_pub = None
+        try:
+            audit_pub = c.resolve(IAuditPublisher)
+        except Exception:
+            pass
+        return ExecutionStrategyFactory(audit_publisher=audit_pub)
 
     container.register_factory(ExecutionStrategyFactory, build_execution_strategy_factory)
 

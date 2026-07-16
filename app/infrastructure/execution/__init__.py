@@ -7,6 +7,7 @@ from app.infrastructure.execution.strategy import (
     IExecutionStrategy,
 )
 from app.infrastructure.execution.subprocess_strategy import SubprocessExecutionStrategy
+from app.infrastructure.execution.sandboxed_strategy import SandboxedExecutionStrategy
 
 __all__ = [
     "ExecutionStrategy",
@@ -15,5 +16,6 @@ __all__ = [
     "IExecutionStrategy",
     "InProcessExecutionStrategy",
     "SubprocessExecutionStrategy",
+    "SandboxedExecutionStrategy",
     "ExecutionStrategyFactory",
 ]

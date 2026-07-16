@@ -24,11 +24,14 @@ class QdrantService:
     def get_client(cls, settings: Settings) -> AsyncQdrantClient:
         """Get or initialize the Qdrant client singleton."""
         if cls._instance is None:
-            cls._instance = AsyncQdrantClient(
-                host=settings.qdrant_host,
-                port=settings.qdrant_port,
-                timeout=10.0,
-            )
+            if settings.is_test:
+                cls._instance = AsyncQdrantClient(location=":memory:")
+            else:
+                cls._instance = AsyncQdrantClient(
+                    host=settings.qdrant_host,
+                    port=settings.qdrant_port,
+                    timeout=10.0,
+                )
         return cls._instance
 
     @classmethod

@@ -32,6 +32,7 @@ from app.interfaces.http.metrics import MetricsMiddleware, metrics_endpoint
 from app.interfaces.http.middleware.request_id import RequestIDMiddleware
 from app.interfaces.http.middleware.security_headers import SecurityHeadersMiddleware
 from app.interfaces.http.middleware.pipeline import register_gateway_pipeline
+from app.interfaces.http.middleware.audit_middleware import AuditMiddleware
 from app.interfaces.http.openapi import custom_openapi
 from app.interfaces.http.v1.routers.gateway import gateway_router
 from app.interfaces.http.v1.router import api_router
@@ -91,6 +92,10 @@ async def lifespan(app: FastAPI):  # type: ignore[type-arg]
         container.resolve(ProviderRegistry)
         container.resolve(PromptRegistry)
         container.resolve(IResourceBudget)
+        
+        from app.infrastructure.security.audit import AuditSubscriber
+        logger.info("Initializing Audit & Security Observability")
+        container.resolve(AuditSubscriber)
 
         logger.info("Startup complete — BizOS is ready to serve requests")
         yield
@@ -144,6 +149,9 @@ def create_app() -> FastAPI:
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["*"],
     )
+    
+    # 3.5. Audit Middleware
+    app.add_middleware(AuditMiddleware)
 
     # 4. Gateway Request Pipeline (Auth, Tenant, Rate Limiting, Idempotency, Context)
     register_gateway_pipeline(app)

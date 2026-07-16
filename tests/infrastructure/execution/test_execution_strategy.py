@@ -84,11 +84,12 @@ async def test_subprocess_execution_success():
 
 
 def test_factory_returns_correct_strategy():
-    in_process = ExecutionStrategyFactory.get_strategy(ExecutionStrategy.IN_PROCESS)
+    factory = ExecutionStrategyFactory()
+    in_process = factory.get_strategy(ExecutionStrategy.IN_PROCESS)
     assert isinstance(in_process, InProcessExecutionStrategy)
 
-    subprocess = ExecutionStrategyFactory.get_strategy(ExecutionStrategy.SUBPROCESS)
+    subprocess = factory.get_strategy(ExecutionStrategy.SUBPROCESS)
     assert isinstance(subprocess, SubprocessExecutionStrategy)
 
     with pytest.raises(NotImplementedError):
-        ExecutionStrategyFactory.get_strategy(ExecutionStrategy.CONTAINER)
+        factory.get_strategy(ExecutionStrategy.CONTAINER)

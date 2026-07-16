@@ -61,6 +61,13 @@ class Settings(BaseSettings):
         default=["*"],
         description="Allowed CORS origins. Restrict to specific domains in production.",
     )
+    encryption_key_base64: str | None = Field(
+        None, description="Base64 encoded AES-256-GCM encryption key"
+    )
+    jwt_secret: str | None = Field(
+        None, description="Secret key for signing JWTs. If not provided, fallback is used."
+    )
+    bcrypt_rounds: int = Field(12, ge=4, description="Bcrypt hashing rounds")
 
     # ── Observability ─────────────────────────────────────────────────────────
     otel_enabled: bool = Field(False, description="Enable OpenTelemetry tracing")
@@ -113,6 +120,23 @@ class Settings(BaseSettings):
         if v not in allowed:
             msg = f"APP_ENV must be one of: {', '.join(sorted(allowed))}"
             raise ValueError(msg)
+        return v
+
+    @field_validator("encryption_key_base64")
+    @classmethod
+    def validate_encryption_key(cls, v: str | None, info) -> str | None:
+        # info.data might not have app_env if it failed validation, but assuming it did:
+        env = info.data.get("app_env", "development")
+        if env == "production" and not v:
+            raise ValueError("ENCRYPTION_KEY_BASE64 is strictly required in production")
+        return v
+        
+    @field_validator("jwt_secret")
+    @classmethod
+    def validate_jwt_secret(cls, v: str | None, info) -> str | None:
+        env = info.data.get("app_env", "development")
+        if env == "production" and not v:
+            raise ValueError("JWT_SECRET is strictly required in production")
         return v
 
     @field_validator("log_level")

@@ -124,6 +124,10 @@ def build_container() -> Container:
 
     register_platform_dependencies(container)
 
+    # Wire security dependencies
+    from app.application.security.di import register_security_dependencies
+    register_security_dependencies(container)
+
     _global_container = container
     return _global_container
 

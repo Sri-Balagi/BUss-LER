@@ -19,7 +19,9 @@ class EventType(StrEnum):
     PLAN_GENERATED = "PLAN_GENERATED"
     RECOMMENDATION_GENERATED = "RECOMMENDATION_GENERATED"
     TRACE_RECORDED = "TRACE_RECORDED"
-
+    AUDIT_LOGGED = "AUDIT_LOGGED"
+    SECURITY_VIOLATION = "SECURITY_VIOLATION"
+    SECURITY_GRANTED = "SECURITY_GRANTED"
 
 class DomainEvent(DomainBaseModel):
     """Base class for all BizOS events."""
@@ -236,3 +238,37 @@ class ConversationUpdatedEvent(DomainEvent):
     twin_id: uuid.UUID
     turn_count: int
     role: str
+
+
+# =============================================================================
+# Audit & Security Events (Wave 4 - Milestone 5)
+# =============================================================================
+
+class AuditCategory(StrEnum):
+    AUTHENTICATION = "AUTHENTICATION"
+    AUTHORIZATION = "AUTHORIZATION"
+    SANDBOX = "SANDBOX"
+    API_REQUEST = "API_REQUEST"
+    POLICY = "POLICY"
+    SYSTEM = "SYSTEM"
+
+
+class AuditEvent(DomainEvent):
+    """Immutable audit record emitted as a domain event."""
+    
+    event_version: str = Field(default="1.0")
+    category: AuditCategory
+    execution_context: dict | None = None
+    tenant_id: str | None = None
+    user_id: str | None = None
+    trace_id: str | None = None
+    resource: str | None = None
+    action: str
+    result: str
+    metadata: dict | None = None
+
+
+class SecurityEvent(AuditEvent):
+    """Specific audit event for security-critical operations."""
+    
+    severity: str = Field(default="INFO")

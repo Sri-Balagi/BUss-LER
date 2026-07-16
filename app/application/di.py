@@ -99,10 +99,10 @@ def register_application_dependencies(container: "Container") -> None:
     # Intelligence Subsystems (Milestones 3-6)
     # =========================================================================
     from app.infrastructure.ai.kernel import AbstractAIKernel
-    from app.shared.events.bus import BackgroundTasksEventBus, EventBus
+    from app.shared.events.bus import AsyncioEventBus, EventBus
 
     # Register a global EventBus singleton
-    container.register_singleton(EventBus, BackgroundTasksEventBus())
+    container.register_singleton(EventBus, AsyncioEventBus())
 
     # Trace
     from app.application.trace.cognitive_trace_service import CognitiveTraceService

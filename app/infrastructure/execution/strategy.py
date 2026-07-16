@@ -1,16 +1,17 @@
 from abc import ABC, abstractmethod
 from collections.abc import Callable
-from enum import StrEnum
+from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel
 
 
-class ExecutionStrategy(StrEnum):
+class ExecutionStrategy(str, Enum):
     """Supported execution strategies for tools/operations."""
 
     IN_PROCESS = "in_process"
     SUBPROCESS = "subprocess"
+    SANDBOXED = "sandboxed"
     CONTAINER = "container"
     REMOTE_WORKER = "remote_worker"
 
@@ -20,6 +21,7 @@ class ExecutionContext(BaseModel):
 
     lifecycle_id: str | None = None
     timeout_seconds: float = 30.0
+    sandbox_policy: Any | None = None  # To avoid circular dependency with domain, we use Any here. In practice, it's a SandboxPolicy.
 
 
 class ExecutionResult(BaseModel):
