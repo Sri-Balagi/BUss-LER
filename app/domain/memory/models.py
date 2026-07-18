@@ -1,99 +1,50 @@
 import enum
 from typing import Any, Dict, List, Optional
-from uuid import UUID
+from uuid import UUID, uuid4
+from datetime import datetime, timezone
 
 from pydantic import BaseModel, Field
 
-from app.domain.common.biz_object import BizObject
-
-
 class MemoryType(str, enum.Enum):
-    WORKING = "WORKING"
+    CONVERSATION = "CONVERSATION"
+    WORKFLOW = "WORKFLOW"
+    BUSINESS = "BUSINESS"
+    KNOWLEDGE = "KNOWLEDGE"
     EPISODIC = "EPISODIC"
     SEMANTIC = "SEMANTIC"
-    PROCEDURAL = "PROCEDURAL"
+    TASK = "TASK"
 
-
-class MemoryScope(str, enum.Enum):
-    SESSION = "SESSION"
-    WORKFLOW = "WORKFLOW"
+class MemorySource(str, enum.Enum):
     USER = "USER"
-    TENANT = "TENANT"
-    GLOBAL = "GLOBAL"
+    SYSTEM = "SYSTEM"
+    AGENT = "AGENT"
+    TOOL = "TOOL"
+    LLM = "LLM"
 
-
-class MemoryImportance(str, enum.Enum):
-    LOW = "LOW"
-    NORMAL = "NORMAL"
-    HIGH = "HIGH"
-    CRITICAL = "CRITICAL"
-
-
-class MemoryRecord(BizObject):
-    """Base class for all canonical long-term memory records."""
-    memory_type: MemoryType = Field(..., description="The type of memory.")
-    scope: MemoryScope = Field(default=MemoryScope.TENANT, description="The scope/lifetime of this memory.")
-    importance: MemoryImportance = Field(default=MemoryImportance.NORMAL, description="Priority for consolidation and retrieval.")
+class MemoryMetadata(BaseModel):
+    tags: List[str] = Field(default_factory=list)
+    custom: Dict[str, Any] = Field(default_factory=dict)
     
-    content: Dict[str, Any] = Field(..., description="The actual memory content (structured data).")
-    associated_entities: List[UUID] = Field(default_factory=list, description="Immutable UUID references to Business Knowledge Graph entities.")
+class MemoryPolicy(BaseModel):
+    retention_policy: str = Field(default="PERSISTENT")
+    expiration_policy: Optional[str] = Field(default=None) # e.g. "30d", "never"
+    importance_threshold: float = Field(default=0.0, description="Minimum importance to retain")
+    retrieval_priority: int = Field(default=1)
+
+class MemoryRecord(BaseModel):
+    """Canonical memory record as per Wave 10 specifications."""
+    memory_id: UUID = Field(default_factory=uuid4)
+    memory_type: MemoryType = Field(...)
+    source: MemorySource = Field(...)
+    title: str = Field(...)
+    content: str = Field(...)
+    metadata: MemoryMetadata = Field(default_factory=MemoryMetadata)
+    embedding: Optional[List[float]] = Field(default=None)
+    importance: float = Field(default=0.5, ge=0.0, le=1.0)
     
-    # Future-proofing for Intelligence Layers
-    version: int = Field(default=1, description="Version for optimistic concurrency and tracking.")
-    provenance: Optional[str] = Field(default=None, description="Source of this memory (e.g., 'System', 'User:XYZ', 'Agent:ABC').")
-    embedding_refs: List[str] = Field(default_factory=list, description="References to semantic vector storage IDs.")
-
-
-# Concrete Memory Types
-
-class WorkingMemory(MemoryRecord):
-    """Short-term, request/session scoped memory."""
-    memory_type: MemoryType = Field(default=MemoryType.WORKING, frozen=True)
-    scope: MemoryScope = Field(default=MemoryScope.SESSION)
-
-
-class EpisodicMemory(MemoryRecord):
-    """Memory of events and experiences."""
-    memory_type: MemoryType = Field(default=MemoryType.EPISODIC, frozen=True)
-    event_timestamp: Optional[str] = Field(default=None, description="ISO-8601 timestamp of when the event occurred.")
-
-
-class SemanticMemory(MemoryRecord):
-    """Memory of facts and knowledge."""
-    memory_type: MemoryType = Field(default=MemoryType.SEMANTIC, frozen=True)
-    fact_confidence: float = Field(default=1.0, description="Confidence score between 0.0 and 1.0.")
-
-
-class ProceduralMemory(MemoryRecord):
-    """Memory of skills, workflows, and execution patterns."""
-    memory_type: MemoryType = Field(default=MemoryType.PROCEDURAL, frozen=True)
-    success_rate: Optional[float] = Field(default=None, description="Historical success rate of this procedure.")
-
-
-class MemorySnapshot(BaseModel):
-    """Immutable point-in-time collection of memory records for Reasoning/Digital Twin processes."""
-    snapshot_id: UUID = Field(..., description="Unique ID for this snapshot.")
-    created_at: str = Field(..., description="ISO-8601 timestamp of when this snapshot was captured.")
-    tenant_id: Optional[UUID] = Field(default=None, description="Tenant context of this snapshot.")
-    version: int = Field(default=1, description="Snapshot version.")
-    records: List[MemoryRecord] = Field(default_factory=list, description="The immutable collection of memory records.")
+    workflow_id: Optional[str] = Field(default=None)
+    session_id: Optional[str] = Field(default=None)
+    principal_id: Optional[str] = Field(default=None)
     
-    class Config:
-        frozen = True
-
-
-class MemoryQuery(BaseModel):
-    """Stable query value object for retrieving memory records."""
-    memory_types: Optional[List[MemoryType]] = Field(default=None, description="Filter by specific memory types.")
-    scopes: Optional[List[MemoryScope]] = Field(default=None, description="Filter by specific memory scopes.")
-    importance: Optional[List[MemoryImportance]] = Field(default=None, description="Filter by memory importance.")
-    associated_entities: Optional[List[UUID]] = Field(default=None, description="Filter by associated BKG entities.")
-    tenant_id: Optional[UUID] = Field(default=None, description="Filter by tenant ID.")
-    created_before: Optional[str] = Field(default=None, description="ISO-8601 timestamp to filter memories created before.")
-    created_after: Optional[str] = Field(default=None, description="ISO-8601 timestamp to filter memories created after.")
-    limit: int = Field(default=100, description="Maximum number of records to return.")
-    offset: int = Field(default=0, description="Number of records to skip.")
-    sort_order: str = Field(default="desc", description="Sort order by creation time: 'asc' or 'desc'.")
-
-    class Config:
-        frozen = True
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    updated_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())

@@ -42,6 +42,10 @@ class MockBaseProvider(ILLMProvider):
         model: Optional[str] = None
     ) -> str:
         return f"Response from {self._name}"
+        
+    async def generate_embeddings(self, text: str, model: Optional[str] = None) -> List[float]:
+        # Return deterministic mock embedding
+        return [0.1, 0.2, 0.3, 0.4, 0.5]
 
 class GeminiProvider(MockBaseProvider):
     def __init__(self):

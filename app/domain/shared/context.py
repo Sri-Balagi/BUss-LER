@@ -18,6 +18,7 @@ class ExecutionContext(BaseModel):
     correlation_id: str
     approval_context: Optional[Dict[str, Any]] = Field(default_factory=dict)
     application_context: Optional[Dict[str, Any]] = Field(default_factory=dict)
+    memory_metrics: Optional[Dict[str, Any]] = Field(default_factory=dict)
 
     @model_validator(mode='before')
     @classmethod

@@ -73,3 +73,7 @@ class IIntelligencePlatform(ABC):
         model: Optional[str] = None
     ) -> str:
         pass
+
+    @abstractmethod
+    async def generate_embeddings(self, text: str, model: Optional[str] = None) -> List[float]:
+        pass

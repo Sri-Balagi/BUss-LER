@@ -97,6 +97,17 @@ class UnifiedIntelligencePlatform(IIntelligencePlatform):
                 
         raise RuntimeError(f"All LLM providers failed. Last error: {last_error}")
 
+    async def generate_embeddings(self, text: str, model: Optional[str] = None) -> List[float]:
+        chain = self._get_providers_chain()
+        last_error = None
+        for provider in chain:
+            try:
+                return await provider.generate_embeddings(text, model)
+            except Exception as e:
+                last_error = e
+                continue
+        raise RuntimeError(f"All LLM providers failed embedding. Last error: {last_error}")
+
     # --- Existing wave 5 facade methods ---
 
     async def execute_request(self, request: UnifiedExecutionRequest) -> UnifiedExecutionResult:

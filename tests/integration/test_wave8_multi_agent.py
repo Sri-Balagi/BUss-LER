@@ -23,6 +23,10 @@ from app.application.agents.behaviors.reasoning import ReasoningBehavior
 from app.application.agents.behaviors.executor import ExecutorBehavior
 from app.application.intelligence.providers import CognitiveSimulatorProvider
 from app.application.intelligence.platform import UnifiedIntelligencePlatform
+from app.application.memory.providers import InMemoryProvider
+from app.application.memory.platform import UnifiedMemoryPlatform
+from app.application.memory.retriever import MemoryRetriever
+from app.application.memory.context import ContextBuilder
 from app.domain.session.models import Session, SessionParticipant
 from app.domain.session.repository import ISessionRepository
 from app.domain.tasks.repository import InMemoryTaskRepository
@@ -94,10 +98,16 @@ def setup_environment():
         providers=providers,
         default_provider="simulator"
     )
+    
+    # Initialize Memory
+    memory_provider = InMemoryProvider()
+    memory_platform = UnifiedMemoryPlatform(memory_provider, platform)
+    retriever = MemoryRetriever(memory_platform)
+    context_builder = ContextBuilder(platform)
 
     runtime.register_behavior(AgentType.PLANNER, PlannerBehavior(event_bus, registry, task_repo, platform))
-    runtime.register_behavior(AgentType.RESEARCH, ResearchBehavior(platform))
-    runtime.register_behavior(AgentType.REASONING, ReasoningBehavior(platform))
+    runtime.register_behavior(AgentType.RESEARCH, ResearchBehavior(platform, retriever, context_builder, memory_platform))
+    runtime.register_behavior(AgentType.REASONING, ReasoningBehavior(platform, retriever, context_builder, memory_platform))
     runtime.register_behavior(AgentType.EXECUTOR, ExecutorBehavior())
     
     # Init a session

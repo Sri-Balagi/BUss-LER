@@ -30,3 +30,8 @@ class ILLMProvider(ABC):
     ) -> str:
         """Standard chat completion."""
         pass
+
+    @abstractmethod
+    async def generate_embeddings(self, text: str, model: Optional[str] = None) -> List[float]:
+        """Generate vector embeddings for semantic search."""
+        pass

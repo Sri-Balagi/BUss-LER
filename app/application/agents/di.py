@@ -12,6 +12,9 @@ from app.shared.events.bus import EventBus
 from app.domain.session.repository import ISessionRepository
 from app.domain.tasks.repository import ITaskRepository
 from app.domain.intelligence.platform import IIntelligencePlatform
+from app.application.memory.retriever import MemoryRetriever
+from app.application.memory.context import ContextBuilder
+from app.domain.memory.platform import IMemoryPlatform
 
 def register_agent_dependencies(container: Container) -> None:
     registry = InMemoryAgentRegistry()
@@ -23,12 +26,15 @@ def register_agent_dependencies(container: Container) -> None:
         session_repo = c.resolve(ISessionRepository)
         task_repo = c.resolve(ITaskRepository)
         platform = c.resolve(IIntelligencePlatform)
+        retriever = c.resolve(MemoryRetriever)
+        context_builder = c.resolve(ContextBuilder)
+        memory_platform = c.resolve(IMemoryPlatform)
         runtime = AgentRuntime(registry, event_bus, session_repo, task_repo)
         
         # Register behaviors
         runtime.register_behavior(AgentType.PLANNER, PlannerBehavior(event_bus, registry, task_repo, platform))
-        runtime.register_behavior(AgentType.RESEARCH, ResearchBehavior(platform))
-        runtime.register_behavior(AgentType.REASONING, ReasoningBehavior(platform))
+        runtime.register_behavior(AgentType.RESEARCH, ResearchBehavior(platform, retriever, context_builder, memory_platform))
+        runtime.register_behavior(AgentType.REASONING, ReasoningBehavior(platform, retriever, context_builder, memory_platform))
         runtime.register_behavior(AgentType.EXECUTOR, ExecutorBehavior())
         return runtime
         
