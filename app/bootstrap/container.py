@@ -169,6 +169,10 @@ def build_container() -> Container:
     from app.application.learning.di import register_learning_subsystem
     register_learning_subsystem(container)
 
+    # Wire Wave 6 Application dependencies
+    from app.application.applications.di import register_application_services
+    register_application_services(container)
+
     _global_container = container
     return _global_container
 
