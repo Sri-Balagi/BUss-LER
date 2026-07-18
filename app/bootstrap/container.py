@@ -73,7 +73,8 @@ class Container:
             finally:
                 self._resolving.remove(interface)
 
-        raise KeyError(f"Service {interface.__name__} not registered in container")
+        name = getattr(interface, "__name__", str(interface))
+        raise KeyError(f"Service {name} not registered in container")
 
     def resolve_scoped(self, interface: type[T]) -> T:
         """Resolve a dependency strictly bound to the current execution context."""
@@ -127,6 +128,46 @@ def build_container() -> Container:
     # Wire security dependencies
     from app.application.security.di import register_security_dependencies
     register_security_dependencies(container)
+
+    # Wire knowledge dependencies
+    from app.application.knowledge.di import register_knowledge_dependencies
+    register_knowledge_dependencies(container)
+
+    # Wire memory dependencies
+    from app.application.memory.di import register_memory_dependencies
+    register_memory_dependencies(container)
+    
+    # Wire intelligence infrastructure
+    from app.application.intelligence.di import register_intelligence_infrastructure
+    register_intelligence_infrastructure(container)
+    
+    # Wire twin dependencies
+    from app.application.twin.di import register_twin_dependencies
+    register_twin_dependencies(container)
+    
+    # Wire retrieval dependencies
+    from app.application.retrieval.di import register_retrieval_dependencies
+    register_retrieval_dependencies(container)
+
+    # Wire reasoning dependencies
+    from app.application.reasoning.di import register_reasoning_dependencies
+    register_reasoning_dependencies(container)
+
+    # Wire planning dependencies
+    from app.application.planning.di import register_planning_dependencies
+    register_planning_dependencies(container)
+    
+    # Wire workflow intelligence
+    from app.application.workflow.di import configure_workflow_intelligence
+    configure_workflow_intelligence(container)
+
+    # Wire cognition dependencies
+    from app.application.cognition.di import configure_cognition_dependencies
+    configure_cognition_dependencies(container)
+
+    # Wire learning dependencies
+    from app.application.learning.di import register_learning_subsystem
+    register_learning_subsystem(container)
 
     _global_container = container
     return _global_container
