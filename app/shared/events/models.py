@@ -595,3 +595,23 @@ class TaskDelegatedEvent(DomainEvent):
     delegatee_id: str
     tenant_id: str | None = None
     task_description: str
+    task_id: str | None = None
+    workflow_id: str | None = None
+    session_id: str | None = None
+    principal_type: str | None = None
+    principal_id: str | None = None
+
+class TaskCompletedEvent(DomainEvent):
+    workflow_id: str
+    task_id: str
+    session_id: str
+    principal_type: str
+    principal_id: str
+    outputs: dict | None = None
+
+class WorkflowCompletedEvent(DomainEvent):
+    workflow_id: str
+    session_id: str
+    principal_type: str
+    principal_id: str
+    final_outputs: dict | None = None
