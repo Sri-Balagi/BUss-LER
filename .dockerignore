@@ -1,50 +1,17 @@
-﻿# Python
 __pycache__/
 *.py[cod]
-*.pyo
-.Python
-*.egg-info/
-dist/
-build/
-.eggs/
-
-# Virtual environments
+*$py.class
+.env
 .venv/
+env/
 venv/
-.uv/
-
-# Testing
 .pytest_cache/
 .coverage
 coverage.xml
 htmlcov/
-.hypothesis/
-
-# Development
-.env
-*.env.local
-*.env.*.local
-
-# Git
-.git/
-.gitignore
-
-# Documentation
-docs/
-*.md
-!README.md
-
-# CI/CD
-.github/
-
-# Temp files
-*.log
-*.tmp
-*.swp
-mutants/
-scripts/
-
-# IDE
-.vscode/
+dist/
+build/
+*.egg-info/
 .idea/
-*.iml
+.vscode/
+*.log
