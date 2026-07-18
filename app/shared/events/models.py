@@ -1,13 +1,13 @@
 import uuid
-from datetime import UTC, datetime
-from enum import StrEnum
+from datetime import datetime, timezone
+from enum import Enum
 
 from pydantic import Field
 
 from app.interfaces.http.schemas.base import DomainBaseModel
 
 
-class EventType(StrEnum):
+class EventType(str, Enum):
     """Lifecycle event types."""
 
     CREATED = "CREATED"
@@ -22,12 +22,19 @@ class EventType(StrEnum):
     AUDIT_LOGGED = "AUDIT_LOGGED"
     SECURITY_VIOLATION = "SECURITY_VIOLATION"
     SECURITY_GRANTED = "SECURITY_GRANTED"
+    AGENT_REGISTERED = "AGENT_REGISTERED"
+    AGENT_STARTED = "AGENT_STARTED"
+    AGENT_COMPLETED = "AGENT_COMPLETED"
+    AGENT_FAILED = "AGENT_FAILED"
+    AGENT_BLOCKED = "AGENT_BLOCKED"
+    TASK_DELEGATED = "TASK_DELEGATED"
+    APPROVAL_EXPIRED = "APPROVAL_EXPIRED"
 
 class DomainEvent(DomainBaseModel):
     """Base class for all BizOS events."""
 
     event_id: uuid.UUID = Field(default_factory=uuid.uuid4)
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     correlation_id: str = Field(..., description="Trace ID linking operations together.")
     causation_id: str | None = Field(
         default=None, description="The ID of the event that caused this event."
@@ -244,7 +251,7 @@ class ConversationUpdatedEvent(DomainEvent):
 # Audit & Security Events (Wave 4 - Milestone 5)
 # =============================================================================
 
-class AuditCategory(StrEnum):
+class AuditCategory(str, Enum):
     AUTHENTICATION = "AUTHENTICATION"
     AUTHORIZATION = "AUTHORIZATION"
     SANDBOX = "SANDBOX"
@@ -439,7 +446,7 @@ class ConversationUpdatedEvent(DomainEvent):
 # Audit & Security Events (Wave 4 - Milestone 5)
 # =============================================================================
 
-class AuditCategory(StrEnum):
+class AuditCategory(str, Enum):
     AUTHENTICATION = "AUTHENTICATION"
     AUTHORIZATION = "AUTHORIZATION"
     SANDBOX = "SANDBOX"
@@ -508,3 +515,83 @@ class TriggerFailedEvent(DomainEvent):
     trigger_id: str
     tenant_id: str | None = None
     reason: str
+
+
+# =============================================================================
+# Approval Events (Wave 7 - Human Interaction Layer)
+# =============================================================================
+
+class ApprovalCreatedEvent(DomainEvent):
+    """Emitted when a new approval request is registered in the system."""
+    approval_id: str
+    tenant_id: str | None = None
+    target_type: str
+    target_id: str
+    requested_by: str
+
+class ApprovalRequestedEvent(DomainEvent):
+    """Emitted when the notification broker should alert users about an approval."""
+    approval_id: str
+    tenant_id: str | None = None
+    target_type: str
+    target_id: str
+    requested_by: str
+
+class ApprovalApprovedEvent(DomainEvent):
+    """Emitted when an approval transitions to APPROVED state."""
+    approval_id: str
+    tenant_id: str | None = None
+    target_type: str
+    target_id: str
+    approved_by: str
+
+class ApprovalRejectedEvent(DomainEvent):
+    """Emitted when an approval transitions to REJECTED state."""
+    approval_id: str
+    tenant_id: str | None = None
+    target_type: str
+    target_id: str
+    rejected_by: str
+    reason: str | None = None
+
+class ApprovalExpiredEvent(DomainEvent):
+    """Emitted when an approval transitions to EXPIRED state due to timeout."""
+    approval_id: str
+    tenant_id: str | None = None
+    target_type: str
+    target_id: str
+
+
+# =============================================================================
+# Agent Events (Wave 7.5 - Agent Foundation)
+# =============================================================================
+
+class AgentRegisteredEvent(DomainEvent):
+    agent_id: str
+    tenant_id: str | None = None
+    agent_type: str
+
+class AgentStartedEvent(DomainEvent):
+    agent_id: str
+    tenant_id: str | None = None
+
+class AgentCompletedEvent(DomainEvent):
+    agent_id: str
+    tenant_id: str | None = None
+    result: str | None = None
+
+class AgentFailedEvent(DomainEvent):
+    agent_id: str
+    tenant_id: str | None = None
+    reason: str
+
+class AgentBlockedEvent(DomainEvent):
+    agent_id: str
+    tenant_id: str | None = None
+    reason: str
+
+class TaskDelegatedEvent(DomainEvent):
+    delegator_id: str
+    delegatee_id: str
+    tenant_id: str | None = None
+    task_description: str

@@ -173,6 +173,14 @@ def build_container() -> Container:
     from app.application.applications.di import register_application_services
     register_application_services(container)
 
+    # Wire Wave 7 Notification and Human Interaction Layer
+    from app.application.notifications.di import register_notification_dependencies
+    register_notification_dependencies(container)
+
+    # Wire Wave 7.5 Agent Foundation
+    from app.application.agents.di import register_agent_dependencies
+    register_agent_dependencies(container)
+
     _global_container = container
     return _global_container
 

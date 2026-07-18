@@ -6,6 +6,7 @@ if TYPE_CHECKING:
 
 from app.domain.intelligence.capability import CapabilityType
 from app.domain.applications.context.models import ApplicationContext
+from app.domain.shared.context import ExecutionContext
 from app.domain.applications.registry.models import ApplicationMetadata
 
 class ApplicationResponse:
@@ -28,7 +29,7 @@ class ICognitiveApplication(abc.ABC):
         pass
 
     @abc.abstractmethod
-    async def execute(self, context: ApplicationContext) -> ApplicationResponse:
+    async def execute(self, context: ApplicationContext | ExecutionContext) -> ApplicationResponse:
         """Execute the application returning a single response."""
         pass
 
@@ -41,7 +42,7 @@ class IStreamingCognitiveApplication(ICognitiveApplication):
     """Interface for applications that stream responses."""
     
     @abc.abstractmethod
-    async def execute_stream(self, context: ApplicationContext) -> AsyncIterator[ApplicationResponse]:
+    async def execute_stream(self, context: ApplicationContext | ExecutionContext) -> AsyncIterator[ApplicationResponse]:
         """Execute the application asynchronously returning a stream."""
         pass
 
@@ -49,7 +50,7 @@ class IAsynchronousCognitiveApplication(ICognitiveApplication):
     """Interface for applications that support durable background execution (CQRS)."""
     
     @abc.abstractmethod
-    async def submit_job(self, context: ApplicationContext) -> str:
+    async def submit_job(self, context: ApplicationContext | ExecutionContext) -> str:
         """Submit a job asynchronously and return a JobId."""
         pass
         
