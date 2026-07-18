@@ -7,20 +7,33 @@ from app.domain.workflows.models import Task, TaskStatus
 from app.domain.approval.models import Approval
 from app.shared.events.models import ApprovalExpiredEvent, TaskDelegatedEvent
 from app.shared.enums import AgentType
+from app.domain.intelligence.schemas import PlannerResult
+from app.domain.intelligence.platform import IIntelligencePlatform
 
 from app.domain.tasks.repository import ITaskRepository
 
 logger = logging.getLogger(__name__)
 
 class PlannerBehavior(IAgentBehavior):
-    def __init__(self, event_bus, registry, task_repo: ITaskRepository):
+    def __init__(self, event_bus, registry, task_repo: ITaskRepository, platform: IIntelligencePlatform):
         self._event_bus = event_bus
         self._registry = registry
         self._task_repo = task_repo
+        self._platform = platform
 
     async def execute(self, task: Task) -> Task:
-        # Step 1: Research, Step 2: Reasoning, Step 3: Executor
-        task.inputs["plan_steps"] = [AgentType.RESEARCH, AgentType.REASONING, AgentType.EXECUTOR]
+        prompt = f"Create an execution plan for objective: {task.objective}"
+        result = await self._platform.generate_structured(prompt=prompt, schema=PlannerResult)
+        
+        # Map string agent names to AgentType enums
+        plan_steps = []
+        for step in result.plan_steps:
+            try:
+                plan_steps.append(AgentType(step.upper()))
+            except ValueError:
+                pass
+                
+        task.inputs["plan_steps"] = plan_steps
         task.inputs["current_step_index"] = 0
         
         # Start first step

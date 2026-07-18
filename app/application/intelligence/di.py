@@ -25,9 +25,22 @@ def register_intelligence_infrastructure(container: Container) -> None:
     from app.application.intelligence.platform import UnifiedIntelligencePlatform
     
     def _platform_factory(c: Container) -> IIntelligencePlatform:
+        from app.application.intelligence.providers import (
+            GeminiProvider, OpenAIProvider, ClaudeProvider, OllamaProvider, CognitiveSimulatorProvider
+        )
+        providers = {
+            "gemini": GeminiProvider(),
+            "openai": OpenAIProvider(),
+            "claude": ClaudeProvider(),
+            "ollama": OllamaProvider(),
+            "simulator": CognitiveSimulatorProvider()
+        }
         return UnifiedIntelligencePlatform(
             kernel=c.resolve(IntelligenceKernel),
-            registry=c.resolve(ICapabilityRegistry)
+            registry=c.resolve(ICapabilityRegistry),
+            providers=providers,
+            default_provider="simulator",
+            fallback_providers=["openai", "gemini"]
         )
         
     container.register_factory(IIntelligencePlatform, _platform_factory)

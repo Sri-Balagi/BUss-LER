@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field
+from typing import Any, Dict, List, Optional, Type
 
 from app.domain.intelligence.context import IntelligenceContext
 from app.domain.intelligence.telemetry import IntelligenceMetrics
@@ -52,4 +53,23 @@ class IIntelligencePlatform(ABC):
     @abstractmethod
     async def get_execution_status(self, execution_id: str) -> Dict[str, Any]:
         """Retrieve execution status and metrics."""
+        pass
+
+    @abstractmethod
+    async def generate_structured(
+        self,
+        prompt: str,
+        schema: Type[BaseModel],
+        tools: Optional[List[Any]] = None,
+        model: Optional[str] = None
+    ) -> BaseModel:
+        pass
+        
+    @abstractmethod
+    async def chat_completion(
+        self,
+        messages: List[Dict[str, str]],
+        tools: Optional[List[Any]] = None,
+        model: Optional[str] = None
+    ) -> str:
         pass

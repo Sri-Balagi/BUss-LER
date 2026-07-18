@@ -21,6 +21,8 @@ from app.application.agents.behaviors.planner import PlannerBehavior
 from app.application.agents.behaviors.research import ResearchBehavior
 from app.application.agents.behaviors.reasoning import ReasoningBehavior
 from app.application.agents.behaviors.executor import ExecutorBehavior
+from app.application.intelligence.providers import CognitiveSimulatorProvider
+from app.application.intelligence.platform import UnifiedIntelligencePlatform
 from app.domain.session.models import Session, SessionParticipant
 from app.domain.session.repository import ISessionRepository
 from app.domain.tasks.repository import InMemoryTaskRepository
@@ -84,9 +86,18 @@ def setup_environment():
     registry.register_agent(reasoning)
     registry.register_agent(executor)
     
-    runtime.register_behavior(AgentType.PLANNER, PlannerBehavior(event_bus, registry, task_repo))
-    runtime.register_behavior(AgentType.RESEARCH, ResearchBehavior())
-    runtime.register_behavior(AgentType.REASONING, ReasoningBehavior())
+    # Initialize Platform
+    providers = {"simulator": CognitiveSimulatorProvider()}
+    platform = UnifiedIntelligencePlatform(
+        kernel=type("MockKernel", (), {"event_router": event_bus})(),
+        registry=None,
+        providers=providers,
+        default_provider="simulator"
+    )
+
+    runtime.register_behavior(AgentType.PLANNER, PlannerBehavior(event_bus, registry, task_repo, platform))
+    runtime.register_behavior(AgentType.RESEARCH, ResearchBehavior(platform))
+    runtime.register_behavior(AgentType.REASONING, ReasoningBehavior(platform))
     runtime.register_behavior(AgentType.EXECUTOR, ExecutorBehavior())
     
     # Init a session
