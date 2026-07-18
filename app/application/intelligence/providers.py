@@ -22,6 +22,12 @@ class MockBaseProvider(ILLMProvider):
         schema_name = schema.__name__
         if schema_name == "PlannerResult":
             return schema(plan_steps=["RESEARCH", "REASONING", "EXECUTOR"], objective_summary="Mocked Plan")
+        elif schema_name == "PlannerCandidatePlans":
+            from app.domain.intelligence.schemas import PlannerResult
+            return schema(candidates=[
+                PlannerResult(plan_steps=["RESEARCH", "REASONING", "EXECUTOR"], objective_summary="Standard Plan"),
+                PlannerResult(plan_steps=["RESEARCH", "EXECUTOR"], objective_summary="Fast Plan")
+            ])
         elif schema_name == "ResearchResult":
             return schema(findings="Mocked findings.", sources=["Mock Source"], confidence=0.9)
         elif schema_name == "ReasoningResult":

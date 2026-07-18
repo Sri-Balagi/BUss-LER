@@ -16,3 +16,6 @@ class ReasoningResult(BaseModel):
 class PlannerResult(BaseModel):
     plan_steps: List[str] = Field(..., description="List of agent capabilities to invoke in order.")
     objective_summary: str = Field(..., description="A short summary of the understood goal.")
+
+class PlannerCandidatePlans(BaseModel):
+    candidates: List[PlannerResult] = Field(..., description="List of candidate plans.")

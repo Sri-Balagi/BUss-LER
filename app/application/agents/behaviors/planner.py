@@ -7,27 +7,77 @@ from app.domain.workflows.models import Task, TaskStatus
 from app.domain.approval.models import Approval
 from app.shared.events.models import ApprovalExpiredEvent, TaskDelegatedEvent
 from app.shared.enums import AgentType
-from app.domain.intelligence.schemas import PlannerResult
+from app.domain.intelligence.schemas import PlannerResult, PlannerCandidatePlans
 from app.domain.intelligence.platform import IIntelligencePlatform
 
 from app.domain.tasks.repository import ITaskRepository
+from app.domain.decisions.platform import IDecisionPlatform
+from app.domain.memory.platform import IMemoryPlatform
+from app.domain.memory.models import MemoryRecord, MemoryType, MemorySource
+from app.domain.decisions.models import DecisionPolicy
+import uuid
 
 logger = logging.getLogger(__name__)
 
 class PlannerBehavior(IAgentBehavior):
-    def __init__(self, event_bus, registry, task_repo: ITaskRepository, platform: IIntelligencePlatform):
+    def __init__(self, event_bus, registry, task_repo: ITaskRepository, platform: IIntelligencePlatform, decision_platform: IDecisionPlatform, memory_platform: IMemoryPlatform):
         self._event_bus = event_bus
         self._registry = registry
         self._task_repo = task_repo
         self._platform = platform
+        self._decision_platform = decision_platform
+        self._memory_platform = memory_platform
+        self._policy = DecisionPolicy(approval_threshold=0.8)
 
     async def execute(self, task: Task) -> Task:
-        prompt = f"Create an execution plan for objective: {task.objective}"
-        result = await self._platform.generate_structured(prompt=prompt, schema=PlannerResult)
+        prompt = f"Create candidate execution plans for objective: {task.objective}"
+        result = await self._platform.generate_structured(prompt=prompt, schema=PlannerCandidatePlans)
+        # Evaluate candidate plans
+        options = [{"id": str(i), "plan_steps": p.plan_steps} for i, p in enumerate(result.candidates)]
+        if not options:
+            task.status = TaskStatus.FAILED
+            return task
+
+        decision = await self._decision_platform.evaluate_options(
+            goal_id=uuid.uuid4(),
+            context={"objective": task.objective},
+            options=options
+        )
+        
+        # Persist decision to memory
+        memory = MemoryRecord(
+            memory_type=MemoryType.TASK,
+            source=MemorySource.AGENT,
+            title=f"Decision for {task.objective}",
+            content=f"Selected option {decision.selected_option} with confidence {decision.confidence}. Justification: {decision.justification}",
+            workflow_id=task.workflow_id
+        )
+        await self._memory_platform.store(memory)
+        
+        # Metrics
+        if task.execution_context and hasattr(task.execution_context, "decision_metrics"):
+            metrics = task.execution_context.decision_metrics
+            metrics["confidence"] = decision.confidence
+            metrics["approval_required"] = decision.confidence < self._policy.approval_threshold
+
+        if decision.confidence < self._policy.approval_threshold:
+            task.status = TaskStatus.BLOCKED_ON_APPROVAL
+            # Emit approval event
+            from app.shared.events.models import ApprovalCreatedEvent
+            await self._event_bus.publish(ApprovalCreatedEvent(
+                correlation_id=task.execution_context.correlation_id,
+                approval_id=str(uuid.uuid4()),
+                target_type="TASK",
+                target_id=task.task_id,
+                requested_by=task.assigned_agent_id
+            ))
+            return task
+            
+        selected_steps = decision.selected_option["plan_steps"]
         
         # Map string agent names to AgentType enums
         plan_steps = []
-        for step in result.plan_steps:
+        for step in selected_steps:
             try:
                 plan_steps.append(AgentType(step.upper()))
             except ValueError:
@@ -85,6 +135,20 @@ class PlannerBehavior(IAgentBehavior):
         ))
         
     async def resume(self, task: Task, approval: Approval) -> Task:
+        from app.domain.approval.models import ApprovalState
+        from app.domain.decisions.models import ReplanReason
+        
+        if approval.state == ApprovalState.APPROVED:
+            # Continue with current plan
+            task.status = TaskStatus.IN_PROGRESS
+            await self._delegate_next_step(task)
+        elif approval.state == ApprovalState.REJECTED:
+            # Replan
+            task.outputs["replan_reason"] = ReplanReason.APPROVAL_REJECTED.value
+            task.objective = task.objective + f" (Avoid previously rejected plan, reason: {approval.reason})"
+            # Restart planning
+            return await self.execute(task)
+        
         return task
         
     async def handle_expiration(self, task: Task, event: ApprovalExpiredEvent) -> Task:

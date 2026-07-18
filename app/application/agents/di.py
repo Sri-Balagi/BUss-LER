@@ -15,6 +15,10 @@ from app.domain.intelligence.platform import IIntelligencePlatform
 from app.application.memory.retriever import MemoryRetriever
 from app.application.memory.context import ContextBuilder
 from app.domain.memory.platform import IMemoryPlatform
+from app.domain.decisions.platform import IDecisionPlatform
+from app.application.decisions.platform import DecisionPlatform
+from app.domain.knowledge.repository import IKnowledgeRepository
+from app.infrastructure.knowledge.repository import InMemoryKnowledgeRepository
 
 def register_agent_dependencies(container: Container) -> None:
     registry = InMemoryAgentRegistry()
@@ -29,10 +33,15 @@ def register_agent_dependencies(container: Container) -> None:
         retriever = c.resolve(MemoryRetriever)
         context_builder = c.resolve(ContextBuilder)
         memory_platform = c.resolve(IMemoryPlatform)
+        
+        # Decision platform
+        knowledge_repo = InMemoryKnowledgeRepository()
+        decision_platform = DecisionPlatform(platform, memory_platform, knowledge_repo)
+        
         runtime = AgentRuntime(registry, event_bus, session_repo, task_repo)
         
         # Register behaviors
-        runtime.register_behavior(AgentType.PLANNER, PlannerBehavior(event_bus, registry, task_repo, platform))
+        runtime.register_behavior(AgentType.PLANNER, PlannerBehavior(event_bus, registry, task_repo, platform, decision_platform, memory_platform))
         runtime.register_behavior(AgentType.RESEARCH, ResearchBehavior(platform, retriever, context_builder, memory_platform))
         runtime.register_behavior(AgentType.REASONING, ReasoningBehavior(platform, retriever, context_builder, memory_platform))
         runtime.register_behavior(AgentType.EXECUTOR, ExecutorBehavior())

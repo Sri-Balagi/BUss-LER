@@ -105,7 +105,13 @@ def setup_environment():
     retriever = MemoryRetriever(memory_platform)
     context_builder = ContextBuilder(platform)
 
-    runtime.register_behavior(AgentType.PLANNER, PlannerBehavior(event_bus, registry, task_repo, platform))
+    # Initialize Decision
+    from app.infrastructure.knowledge.repository import InMemoryKnowledgeRepository
+    from app.application.decisions.platform import DecisionPlatform
+    knowledge_repo = InMemoryKnowledgeRepository()
+    decision_platform = DecisionPlatform(platform, memory_platform, knowledge_repo)
+
+    runtime.register_behavior(AgentType.PLANNER, PlannerBehavior(event_bus, registry, task_repo, platform, decision_platform, memory_platform))
     runtime.register_behavior(AgentType.RESEARCH, ResearchBehavior(platform, retriever, context_builder, memory_platform))
     runtime.register_behavior(AgentType.REASONING, ReasoningBehavior(platform, retriever, context_builder, memory_platform))
     runtime.register_behavior(AgentType.EXECUTOR, ExecutorBehavior())
