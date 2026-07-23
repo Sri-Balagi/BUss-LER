@@ -118,9 +118,9 @@ def test_dead_letter_queue():
     assert dlq.count() == 1
 
 def test_configuration_manager():
-    config = ConfigurationManager({"app": {"debug": True, "port": 8080}})
+    config = ConfigurationManager({"app": {"debug": True, "port": 8000}})
     assert config.get("app.debug") is True
-    assert config.get("app.port") == 8080
+    assert config.get("app.port") == 8000
     config.set("app.port", 9090)
     assert config.get("app.port") == 9090
     assert config.get("app.missing", "default") == "default"

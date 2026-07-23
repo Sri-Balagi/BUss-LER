@@ -7,34 +7,51 @@
 -- 1. ENUMS
 -- =============================================================================
 
-CREATE TYPE intent_status_enum AS ENUM (
-    'pending', 'classified', 'confirmed', 'fulfilled', 'rejected', 'expired'
-);
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'intent_status_enum') THEN
+        CREATE TYPE intent_status_enum AS ENUM (
+            'pending', 'classified', 'confirmed', 'fulfilled', 'rejected', 'expired'
+        );
+    END IF;
 
-CREATE TYPE intent_type_enum AS ENUM (
-    'inventory', 'calendar', 'analytics', 'finance', 'communication',
-    'task_management', 'reporting', 'research', 'general'
-);
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'intent_type_enum') THEN
+        CREATE TYPE intent_type_enum AS ENUM (
+            'inventory', 'calendar', 'analytics', 'finance', 'communication',
+            'task_management', 'reporting', 'research', 'general'
+        );
+    END IF;
 
-CREATE TYPE goal_status_enum AS ENUM (
-    'draft', 'active', 'in_progress', 'paused', 'blocked', 'completed', 'abandoned'
-);
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'goal_status_enum') THEN
+        CREATE TYPE goal_status_enum AS ENUM (
+            'draft', 'active', 'in_progress', 'paused', 'blocked', 'completed', 'abandoned'
+        );
+    END IF;
 
-CREATE TYPE goal_type_enum AS ENUM (
-    'strategic', 'operational', 'tactical'
-);
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'goal_type_enum') THEN
+        CREATE TYPE goal_type_enum AS ENUM (
+            'strategic', 'operational', 'tactical'
+        );
+    END IF;
 
-CREATE TYPE plan_status_enum AS ENUM (
-    'draft', 'approved', 'executing', 'completed', 'abandoned'
-);
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'plan_status_enum') THEN
+        CREATE TYPE plan_status_enum AS ENUM (
+            'draft', 'approved', 'executing', 'completed', 'abandoned'
+        );
+    END IF;
 
-CREATE TYPE recommendation_status_enum AS ENUM (
-    'generated', 'presented', 'accepted', 'rejected', 'ignored', 'superseded'
-);
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'recommendation_status_enum') THEN
+        CREATE TYPE recommendation_status_enum AS ENUM (
+            'generated', 'presented', 'accepted', 'rejected', 'ignored', 'superseded'
+        );
+    END IF;
 
-CREATE TYPE recommendation_confidence_enum AS ENUM (
-    'high', 'medium', 'low'
-);
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'recommendation_confidence_enum') THEN
+        CREATE TYPE recommendation_confidence_enum AS ENUM (
+            'high', 'medium', 'low'
+        );
+    END IF;
+END$$;
 
 -- =============================================================================
 -- 2. TABLES
@@ -147,35 +164,35 @@ CREATE TABLE IF NOT EXISTS cognitive_traces (
 -- 3. INDEXES
 -- =============================================================================
 
-CREATE INDEX idx_intents_twin_id ON intents(twin_id);
-CREATE INDEX idx_goals_twin_id ON goals(twin_id);
-CREATE INDEX idx_goals_status ON goals(status);
-CREATE INDEX idx_plans_twin_id ON plans(twin_id);
-CREATE INDEX idx_recommendations_twin_id ON recommendations(twin_id);
-CREATE INDEX idx_recommendations_status ON recommendations(status);
-CREATE INDEX idx_cognitive_traces_twin_id ON cognitive_traces(twin_id);
-CREATE INDEX idx_cognitive_traces_operation ON cognitive_traces(operation_type);
-CREATE INDEX idx_cognitive_traces_context ON cognitive_traces(operation_context_id);
+CREATE INDEX IF NOT EXISTS idx_intents_twin_id ON intents(twin_id);
+CREATE INDEX IF NOT EXISTS idx_goals_twin_id ON goals(twin_id);
+CREATE INDEX IF NOT EXISTS idx_goals_status ON goals(status);
+CREATE INDEX IF NOT EXISTS idx_plans_twin_id ON plans(twin_id);
+CREATE INDEX IF NOT EXISTS idx_recommendations_twin_id ON recommendations(twin_id);
+CREATE INDEX IF NOT EXISTS idx_recommendations_status ON recommendations(status);
+CREATE INDEX IF NOT EXISTS idx_cognitive_traces_twin_id ON cognitive_traces(twin_id);
+CREATE INDEX IF NOT EXISTS idx_cognitive_traces_operation ON cognitive_traces(operation_type);
+CREATE INDEX IF NOT EXISTS idx_cognitive_traces_context ON cognitive_traces(operation_context_id);
 
 -- =============================================================================
 -- 4. TRIGGERS (updated_at)
 -- =============================================================================
 
-CREATE TRIGGER update_intents_updated_at
+CREATE OR REPLACE TRIGGER update_intents_updated_at
     BEFORE UPDATE ON intents
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
-CREATE TRIGGER update_goals_updated_at
+CREATE OR REPLACE TRIGGER update_goals_updated_at
     BEFORE UPDATE ON goals
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
-CREATE TRIGGER update_plans_updated_at
+CREATE OR REPLACE TRIGGER update_plans_updated_at
     BEFORE UPDATE ON plans
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
-CREATE TRIGGER update_recommendations_updated_at
+CREATE OR REPLACE TRIGGER update_recommendations_updated_at
     BEFORE UPDATE ON recommendations
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 -- Note: cognitive_traces is append-only, no update trigger needed.
 -- Note: intent_goal_links is relation-only, no update trigger needed.

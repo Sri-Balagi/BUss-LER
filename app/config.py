@@ -10,6 +10,8 @@ Settings reference: configs/settings_reference.md
 from __future__ import annotations
 
 from functools import lru_cache
+import logging
+import os
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -173,4 +175,13 @@ def get_settings() -> Settings:
     Uses lru_cache so environment variables are read exactly once
     per application lifecycle.
     """
+    _logger = logging.getLogger(__name__)
+    if _logger.isEnabledFor(logging.DEBUG):
+        critical_keys = ["SUPABASE_URL", "SUPABASE_KEY", "GEMINI_API_KEY"]
+        for key in critical_keys:
+            _logger.debug(
+                "Config bootstrap check",
+                extra={"key": key, "present": key in os.environ},
+            )
+
     return Settings()

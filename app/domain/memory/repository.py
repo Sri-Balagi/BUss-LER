@@ -2,7 +2,7 @@ import abc
 from typing import List, Optional
 from uuid import UUID
 
-from app.domain.memory.models import MemoryQuery, MemoryRecord, MemoryScope, MemorySnapshot
+from app.domain.memory.models import MemoryRecord
 
 
 class IMemoryRepository(abc.ABC):
@@ -34,11 +34,7 @@ class IMemoryRepository(abc.ABC):
         """
         pass
 
-    # New advanced querying method using stable MemoryQuery value object
-    @abc.abstractmethod
-    async def find(self, query: MemoryQuery) -> List[MemoryRecord]:
-        """Find memory records matching the comprehensive MemoryQuery."""
-        pass
+
 
     # Batch operations
     @abc.abstractmethod
@@ -57,21 +53,11 @@ class IMemoryRepository(abc.ABC):
         """Find memories explicitly associated with a given entity (e.g., KnowledgeNode ID)."""
         pass
 
-    @abc.abstractmethod
-    async def find_by_scope(self, scope: MemoryScope) -> List[MemoryRecord]:
-        """Find memories limited to a specific lifetime scope."""
-        pass
+
 
     @abc.abstractmethod
     async def find_by_time_range(self, start_time: Optional[str] = None, end_time: Optional[str] = None) -> List[MemoryRecord]:
         """Find memories created within a specific ISO-8601 time window."""
         pass
 
-    # Snapshot abstraction
-    @abc.abstractmethod
-    async def get_snapshot(self, query: MemoryQuery) -> MemorySnapshot:
-        """
-        Generate an immutable point-in-time snapshot of the memory state
-        matching the provided query criteria.
-        """
-        pass
+

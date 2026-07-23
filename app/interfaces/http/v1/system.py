@@ -20,7 +20,7 @@ logger = structlog.get_logger()
 # Track startup time for uptime reporting
 _start_time = time.time()
 
-router = APIRouter(tags=["system"])
+router = APIRouter(tags=["System"])
 
 
 @router.get(

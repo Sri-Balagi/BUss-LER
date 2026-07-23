@@ -5,8 +5,14 @@ including the fundamental TokenBudget and TokenUsageRecord models,
 as well as the BudgetPolicy enum for enforcement rules.
 """
 
-from datetime import UTC, datetime
-from enum import StrEnum
+from datetime import timezone, datetime
+try:
+    from enum import StrEnum
+except ImportError:
+    from enum import Enum
+    class StrEnum(str, Enum):
+        pass
+
 
 from pydantic import Field
 
@@ -37,7 +43,7 @@ class TokenBudget(DomainBaseModel):
     )
     current_day_usage: int = Field(default=0, description="Tokens consumed so far today.")
     last_reset_date: datetime = Field(
-        default_factory=lambda: datetime.now(UTC),
+        default_factory=lambda: datetime.now(timezone.utc),
         description="The date this budget's daily usage was last reset to 0.",
     )
 
@@ -54,6 +60,6 @@ class TokenUsageRecord(DomainBaseModel):
     total_tokens: int = Field(default=0, description="Total tokens consumed.")
     session_id: str | None = Field(None, description="Cognitive session ID, if applicable.")
     timestamp: datetime = Field(
-        default_factory=lambda: datetime.now(UTC),
+        default_factory=lambda: datetime.now(timezone.utc),
         description="When the tokens were consumed.",
     )

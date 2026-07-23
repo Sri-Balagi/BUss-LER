@@ -24,7 +24,6 @@ try:
         "bizos",
         broker=_broker,
         backend=_backend,
-        include=["app.runtime.workers"],
     )
 
     app.conf.update(

@@ -8,7 +8,7 @@ from app.domain.memory.events import (
     MemoryRetrieved,
     MemoryUpdated,
 )
-from app.domain.memory.models import MemoryQuery, MemoryRecord, MemoryScope, MemorySnapshot
+from app.domain.memory.models import MemoryRecord
 from app.domain.memory.repository import IMemoryRepository
 from app.shared.events.bus import EventBus
 
@@ -35,23 +35,21 @@ class MemoryEngineService:
         await self._repository.save(record)
         
         event = MemoryCreated(
-            memory_id=record.id,
+            memory_id=record.memory_id,
             memory_type=record.memory_type,
-            scope=record.scope,
-            tenant_id=record.tenant_id,
+            scope="DEFAULT",
             correlation_id=str(uuid4())
         )
         await self._event_bus.publish(event)
-        logger.info(f"Saved {record.memory_type} Memory {record.id}.")
+        logger.info(f"Saved {record.memory_type} Memory {record.memory_id}.")
 
     async def get_memory(self, memory_id: UUID, query_context: Optional[str] = None) -> Optional[MemoryRecord]:
         """Retrieve a memory record and publish MemoryRetrieved for tracking usage."""
         record = await self._repository.get(memory_id)
         if record:
             event = MemoryRetrieved(
-                memory_id=record.id,
+                memory_id=record.memory_id,
                 query_context=query_context,
-                tenant_id=record.tenant_id,
                 correlation_id=str(uuid4())
             )
             await self._event_bus.publish(event)
@@ -62,13 +60,12 @@ class MemoryEngineService:
         await self._repository.save(record)
         
         event = MemoryUpdated(
-            memory_id=record.id,
-            updates={"version": record.version, "importance": record.importance},
-            tenant_id=record.tenant_id,
+            memory_id=record.memory_id,
+            updates={"importance": record.importance},
             correlation_id=str(uuid4())
         )
         await self._event_bus.publish(event)
-        logger.info(f"Updated Memory {record.id}.")
+        logger.info(f"Updated Memory {record.memory_id}.")
 
     async def remove_memory(self, memory_id: UUID) -> None:
         """Remove a memory record and publish MemoryRemoved."""
@@ -81,7 +78,6 @@ class MemoryEngineService:
         
         event = MemoryRemoved(
             memory_id=memory_id,
-            tenant_id=record.tenant_id,
             correlation_id=str(uuid4())
         )
         await self._event_bus.publish(event)
@@ -91,13 +87,7 @@ class MemoryEngineService:
         """Search memory by text content."""
         return await self._repository.search(query_text, limit)
 
-    async def find(self, query: MemoryQuery) -> List[MemoryRecord]:
-        """Find memory records by structured query."""
-        return await self._repository.find(query)
 
-    async def get_snapshot(self, query: MemoryQuery) -> MemorySnapshot:
-        """Get an immutable point-in-time snapshot of the memory state."""
-        return await self._repository.get_snapshot(query)
 
     async def batch_save(self, records: List[MemoryRecord]) -> None:
         """Save multiple memory records efficiently."""

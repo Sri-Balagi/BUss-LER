@@ -6,7 +6,13 @@ the underlying persistence mechanism (in-memory, Redis, Supabase).
 """
 
 from abc import ABC, abstractmethod
-from enum import StrEnum
+try:
+    from enum import StrEnum
+except ImportError:
+    from enum import Enum
+    class StrEnum(str, Enum):
+        pass
+
 from typing import Any
 
 from app.infrastructure.ai.budgets.models import TokenBudget

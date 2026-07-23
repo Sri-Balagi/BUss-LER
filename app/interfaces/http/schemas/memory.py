@@ -10,6 +10,7 @@ from app.shared.enums import EmbeddingStatus, MemoryCategory, MemorySource
 class CreateMemoryRequest(BaseModel):
     """Client request to create a new memory."""
 
+    twin_id: uuid.UUID = Field(..., description="The Digital Twin that owns this memory.")
     content: str = Field(..., description="The raw memory content.")
     title: str = Field(default="Untitled", description="Human-readable title.")
     source: MemorySource = Field(

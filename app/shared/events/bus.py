@@ -54,7 +54,7 @@ class BackgroundTasksEventBus(EventBus):
             self._handlers[event_type].append(handler)
         logger.debug(
             "Handler subscribed to EventBus",
-            event_type=event_type.__name__,
+            event_type=getattr(event_type, '__name__', str(event_type)),
             handler=handler.__name__,
         )
 
@@ -63,7 +63,7 @@ class BackgroundTasksEventBus(EventBus):
             self._handlers[event_type].remove(handler)
             logger.debug(
                 "Handler unsubscribed from EventBus",
-                event_type=event_type.__name__,
+                event_type=getattr(event_type, '__name__', str(event_type)),
                 handler=handler.__name__,
             )
 
@@ -76,7 +76,9 @@ class BackgroundTasksEventBus(EventBus):
             return
 
         handlers = self._handlers.get(type(event), [])
-        if not handlers:
+        wildcard_handlers = self._handlers.get("*", [])
+        all_handlers = handlers + wildcard_handlers
+        if not all_handlers:
             logger.debug(
                 "No handlers registered for event on EventBus",
                 event_type=type(event).__name__,
@@ -90,7 +92,7 @@ class BackgroundTasksEventBus(EventBus):
             correlation_id=event.correlation_id,
         )
 
-        for handler in handlers:
+        for handler in all_handlers:
             self._background_tasks.add_task(handler, event)
 
 
@@ -112,7 +114,7 @@ class AsyncioEventBus(EventBus):
             self._handlers[event_type].append(handler)
         logger.debug(
             "Handler subscribed to AsyncioEventBus",
-            event_type=event_type.__name__,
+            event_type=getattr(event_type, '__name__', str(event_type)),
             handler=handler.__name__,
         )
 
@@ -121,13 +123,15 @@ class AsyncioEventBus(EventBus):
             self._handlers[event_type].remove(handler)
             logger.debug(
                 "Handler unsubscribed from AsyncioEventBus",
-                event_type=event_type.__name__,
+                event_type=getattr(event_type, '__name__', str(event_type)),
                 handler=handler.__name__,
             )
 
     def publish(self, event: DomainEvent) -> None:
         handlers = self._handlers.get(type(event), [])
-        if not handlers:
+        wildcard_handlers = self._handlers.get("*", [])
+        all_handlers = handlers + wildcard_handlers
+        if not all_handlers:
             logger.debug(
                 "No handlers registered for event on AsyncioEventBus",
                 event_type=type(event).__name__,
@@ -143,7 +147,7 @@ class AsyncioEventBus(EventBus):
 
         try:
             loop = asyncio.get_running_loop()
-            for handler in handlers:
+            for handler in all_handlers:
                 # Wrap handler to suppress exceptions so one failed handler doesn't crash others
                 async def safe_execute(h=handler, e=event):
                     try:

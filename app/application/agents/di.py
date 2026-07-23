@@ -10,7 +10,8 @@ from app.application.agents.behaviors.executor import ExecutorBehavior
 from app.shared.enums import AgentType
 from app.shared.events.bus import EventBus
 from app.domain.session.repository import ISessionRepository
-from app.domain.tasks.repository import ITaskRepository
+from app.infrastructure.session.memory import InMemorySessionRepository
+from app.domain.tasks.repository import ITaskRepository, InMemoryTaskRepository
 from app.domain.intelligence.platform import IIntelligencePlatform
 from app.application.memory.retriever import MemoryRetriever
 from app.application.memory.context import ContextBuilder
@@ -47,4 +48,8 @@ def register_agent_dependencies(container: Container) -> None:
         runtime.register_behavior(AgentType.EXECUTOR, ExecutorBehavior())
         return runtime
         
+    # Add ITaskRepository registration
+    container.register_singleton(ITaskRepository, InMemoryTaskRepository())
+    # Add ISessionRepository registration
+    container.register_singleton(ISessionRepository, InMemorySessionRepository())
     container.register_singleton(AgentRuntime, build_agent_runtime(container))

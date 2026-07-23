@@ -7,7 +7,7 @@ async def verify_mcp():
     print("--- MCP Verification ---")
     
     # Simulating the SSE connection and sending a message to the JSON-RPC endpoint
-    async with httpx.AsyncClient(base_url="http://localhost:8080") as client:
+    async with httpx.AsyncClient(base_url="http://localhost:8000") as client:
         # Check if the server is up first
         try:
             health = await client.get("/api/v1/health")

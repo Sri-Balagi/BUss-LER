@@ -10,32 +10,41 @@
 -- 1. ENUMS
 -- =============================================================================
 
-CREATE TYPE memory_category_enum AS ENUM (
-    'observation',
-    'event',
-    'interaction',
-    'decision',
-    'task',
-    'reflection',
-    'goal_progress',
-    'alert',
-    'system'
-);
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'memory_category_enum') THEN
+        CREATE TYPE memory_category_enum AS ENUM (
+            'observation',
+            'event',
+            'interaction',
+            'decision',
+            'task',
+            'reflection',
+            'goal_progress',
+            'alert',
+            'system'
+        );
+    END IF;
 
-CREATE TYPE memory_source_enum AS ENUM (
-    'conversation',
-    'document',
-    'execution',
-    'observation',
-    'user_input'
-);
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'memory_source_enum') THEN
+        CREATE TYPE memory_source_enum AS ENUM (
+            'conversation',
+            'document',
+            'execution',
+            'observation',
+            'user_input'
+        );
+    END IF;
 
-CREATE TYPE embedding_status_enum AS ENUM (
-    'pending',
-    'processing',
-    'completed',
-    'failed'
-);
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'embedding_status_enum') THEN
+        CREATE TYPE embedding_status_enum AS ENUM (
+            'pending',
+            'processing',
+            'completed',
+            'failed'
+        );
+    END IF;
+END$$;
 
 -- =============================================================================
 -- 2. TABLES
@@ -63,25 +72,25 @@ CREATE TABLE IF NOT EXISTS memories (
 -- =============================================================================
 
 -- Fast lookup of memories by twin
-CREATE INDEX idx_memories_twin_id ON memories(twin_id);
+CREATE INDEX IF NOT EXISTS idx_memories_twin_id ON memories(twin_id);
 
 -- Filter by category
-CREATE INDEX idx_memories_category ON memories(memory_category);
+CREATE INDEX IF NOT EXISTS idx_memories_category ON memories(memory_category);
 
 -- Filter by embedding status (crucial for background workers polling for 'pending')
-CREATE INDEX idx_memories_embedding_status ON memories(embedding_status);
+CREATE INDEX IF NOT EXISTS idx_memories_embedding_status ON memories(embedding_status);
 
 -- JSONB indexing for metadata filtering
-CREATE INDEX idx_memories_metadata ON memories USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_memories_metadata ON memories USING GIN (metadata);
 
 -- =============================================================================
 -- 4. TRIGGERS
 -- =============================================================================
 
-CREATE TRIGGER update_memories_updated_at
+CREATE OR REPLACE TRIGGER update_memories_updated_at
     BEFORE UPDATE ON memories
     FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
+    EXECUTE FUNCTION update_updated_at();
 
 -- =============================================================================
 -- MIGRATION COMPLETE

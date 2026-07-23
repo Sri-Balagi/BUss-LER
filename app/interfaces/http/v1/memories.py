@@ -1,9 +1,11 @@
 """Memories API endpoints."""
 
+import uuid
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, Request, status
 
+from app.intelligence.learning.repository.memory import MemoryCreate, MemoryUpdate
 from app.interfaces.http.schemas.memory import (
     CreateMemoryRequest,
     MemoryResponse,
@@ -23,6 +25,28 @@ from app.interfaces.http.v1.dependencies_memory import (
 router = APIRouter(prefix="/memories", tags=["Memories"])
 
 
+def _to_domain_create(data: CreateMemoryRequest, twin_id: UUID) -> MemoryCreate:
+    """Convert HTTP request schema to domain MemoryCreate model."""
+    return MemoryCreate(
+        title=getattr(data, "title", "Untitled"),
+        content=data.content,
+        memory_category=data.memory_category,
+        source=data.source,
+        importance=data.importance,
+        metadata=data.metadata,
+    )
+
+
+def _to_domain_update(data: UpdateMemoryRequest) -> MemoryUpdate:
+    """Convert HTTP request schema to domain MemoryUpdate model."""
+    return MemoryUpdate(
+        content=data.content,
+        memory_category=data.memory_category,
+        metadata=data.metadata,
+        importance=data.importance,
+    )
+
+
 @router.post(
     "",
     response_model=MemoryResponse,
@@ -30,12 +54,24 @@ router = APIRouter(prefix="/memories", tags=["Memories"])
     summary="Create a new Memory",
 )
 async def create_memory(
+    request: Request,
     data: CreateMemoryRequest,
     current_user: UUID = Depends(get_current_user),
     use_case=Depends(get_create_memory_use_case),
 ) -> MemoryResponse:
-    """Create a new memory for a Digital Twin."""
-    return await use_case.execute(user_id=current_user, data=data)
+    """Create a new memory for a Digital Twin.
+    
+    The twin_id must be provided in the request body.
+    """
+    # twin_id comes from the request body if included, otherwise use current_user as fallback
+    twin_id: UUID = getattr(data, "twin_id", current_user)
+    correlation_id = str(getattr(request.state, "correlation_id", uuid.uuid4()))
+    domain_data = _to_domain_create(data, twin_id)
+    return await use_case.execute(
+        twin_id=twin_id,
+        data=domain_data,
+        correlation_id=correlation_id,
+    )
 
 
 @router.get(
@@ -50,7 +86,13 @@ async def list_memories(
     use_case=Depends(get_list_memories_use_case),
 ) -> PaginatedResponse[MemoryResponse]:
     """List all active memories for a twin."""
-    items, total = await use_case.execute(twin_id=twin_id, limit=limit, offset=offset)
+    result = await use_case.execute(twin_id=twin_id, limit=limit, offset=offset)
+    # Handle both (items, total) tuple and PaginatedMemories object
+    if isinstance(result, tuple):
+        items, total = result
+    else:
+        items = result.items if hasattr(result, "items") else []
+        total = result.total if hasattr(result, "total") else len(items)
     return PaginatedResponse(
         items=items,
         total=total,
@@ -79,12 +121,15 @@ async def get_memory(
     summary="Update Memory",
 )
 async def update_memory(
+    request: Request,
     memory_id: UUID,
     data: UpdateMemoryRequest,
     use_case=Depends(get_update_memory_use_case),
 ) -> MemoryResponse:
     """Update an active memory's fields."""
-    return await use_case.execute(memory_id, data)
+    correlation_id = str(getattr(request.state, "correlation_id", uuid.uuid4()))
+    domain_data = _to_domain_update(data)
+    return await use_case.execute(memory_id, domain_data, correlation_id)
 
 
 @router.delete(
@@ -93,11 +138,13 @@ async def update_memory(
     summary="Soft-delete Memory",
 )
 async def delete_memory(
+    request: Request,
     memory_id: UUID,
     use_case=Depends(get_delete_memory_use_case),
 ) -> None:
     """Soft-delete a memory and remove it from vectorstore."""
-    await use_case.execute(memory_id)
+    correlation_id = str(getattr(request.state, "correlation_id", uuid.uuid4()))
+    await use_case.execute(memory_id, correlation_id)
 
 
 @router.post(

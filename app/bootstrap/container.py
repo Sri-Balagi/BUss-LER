@@ -120,6 +120,11 @@ def build_container() -> Container:
 
     container = Container()
 
+    # Register Settings singleton so infrastructure components can resolve it
+    from app.config import get_settings, Settings
+    settings_instance = get_settings()
+    container.register_singleton(Settings, settings_instance)
+
     # Wire platform dependencies
     from app.runtime.core.di import register_platform_dependencies
 

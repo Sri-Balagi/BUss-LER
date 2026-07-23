@@ -7,17 +7,26 @@
 -- 1. ENUMS
 -- =============================================================================
 
-CREATE TYPE context_status_enum AS ENUM (
-    'building', 'assembled', 'optimized', 'consumed', 'expired', 'archived'
-);
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'context_status_enum') THEN
+        CREATE TYPE context_status_enum AS ENUM (
+            'building', 'assembled', 'optimized', 'consumed', 'expired', 'archived'
+        );
+    END IF;
 
-CREATE TYPE conversation_status_enum AS ENUM (
-    'active', 'archived'
-);
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'conversation_status_enum') THEN
+        CREATE TYPE conversation_status_enum AS ENUM (
+            'active', 'archived'
+        );
+    END IF;
 
-CREATE TYPE conversation_role_enum AS ENUM (
-    'user', 'assistant', 'system', 'tool'
-);
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'conversation_role_enum') THEN
+        CREATE TYPE conversation_role_enum AS ENUM (
+            'user', 'assistant', 'system', 'tool'
+        );
+    END IF;
+END$$;
 
 -- =============================================================================
 -- 2. ENTERPRISE CONTEXTS TABLE
@@ -57,7 +66,7 @@ CREATE INDEX IF NOT EXISTS idx_enterprise_contexts_expires_at
 -- updated_at trigger
 CREATE OR REPLACE TRIGGER set_enterprise_contexts_updated_at
     BEFORE UPDATE ON enterprise_contexts
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 -- Row-Level Security
 ALTER TABLE enterprise_contexts ENABLE ROW LEVEL SECURITY;
@@ -103,7 +112,7 @@ CREATE INDEX IF NOT EXISTS idx_conversation_threads_twin_status
 -- updated_at trigger
 CREATE OR REPLACE TRIGGER set_conversation_threads_updated_at
     BEFORE UPDATE ON conversation_threads
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 -- Row-Level Security
 ALTER TABLE conversation_threads ENABLE ROW LEVEL SECURITY;

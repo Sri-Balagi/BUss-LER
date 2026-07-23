@@ -3,7 +3,7 @@ import time
 import httpx
 import asyncio
 
-BASE_URL = os.getenv("BIZOS_BASE_URL", "http://localhost:8080")
+BASE_URL = os.getenv("BIZOS_BASE_URL", "http://localhost:8000")
 
 def print_result(name: str, success: bool, latency: float = 0, error: str = ""):
     status = "[PASS]" if success else "[FAIL]"
