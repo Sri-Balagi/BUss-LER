@@ -37,4 +37,6 @@ class BizOSResponse[DataT](BaseModel):
         meta: dict[str, Any] | None = None
     ) -> "BizOSResponse[None]":
         error = ErrorDetail(code=code, message=message, target=target, details=details)
-        return cls(success=False, data=None, error=error, meta=meta or {})
+        return cls(success=False, data=None, error=error, meta=meta or {})  # type: ignore[return-value]  # Generic error response factory returns BizOSResponse[None].
+
+

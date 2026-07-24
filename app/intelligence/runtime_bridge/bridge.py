@@ -21,8 +21,9 @@ class IntelligenceRuntimeBridge(IIntelligenceRuntimeBridge):
     Acts as the exclusive translation boundary between M6 Intelligence and M5 Runtime.
     """
 
-    def __init__(self, adapter: ISupervisorAdapter = None):
+    def __init__(self, adapter: ISupervisorAdapter | None = None):
         self.adapter = adapter or SupervisorAdapter()
+
 
     def execute_directives(self, directives: list[ExecutiveDirective]) -> RuntimeIntegrationResult:
         if not directives:

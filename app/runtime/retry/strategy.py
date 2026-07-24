@@ -38,12 +38,13 @@ class DefaultRetryStrategy(IRetryStrategy):
         # But for now, let's just do a basic implementation:
 
         # We can pretend we check budget:
-        cost = task.execution_descriptor.metadata.get("estimated_cost", 1.0)
+        cost = task.descriptor.metadata.get("estimated_cost", 1.0)
         if not context.has_sufficient_budget(cost):
             return False
 
         # Example limit check
-        attempt = task.execution_descriptor.metadata.get("retry_attempt", 0)
+        attempt = task.descriptor.metadata.get("retry_attempt", 0)
+
         if attempt >= 3:
             return False
 

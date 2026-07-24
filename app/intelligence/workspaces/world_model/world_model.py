@@ -20,5 +20,6 @@ class BusinessWorldModel:
     def update_belief(self, belief: Belief):
         self.beliefs[belief.key] = belief
 
-    def get_belief(self, key: str) -> Belief:
+    def get_belief(self, key: str) -> Belief | None:
         return self.beliefs.get(key)
+

@@ -126,22 +126,21 @@ class CognitivePipeline(ICognitivePipeline):
                 decision = self.decision_engine.evaluate(
                     objective,
                     situation,
-                    StrategicConstraintSet(set_id="cs1", constraints=[]),
+                    StrategicConstraintSet(constraints=[]),
                     PolicyAssessment(status=PolicyStatus.COMPLIANT, violations=[]),
                     [
                         DecisionAlternative(
                             alternative_id="alt1",
                             description="Mock Alternative",
                             estimated_value=1.0,
-                            required_capabilities=[],
                             constraint_compliance=True,
                             policy_compliance=True,
                         )
                     ],
                 )
 
-                # Check convergence
-                convergence = self.convergence_engine.evaluate_convergence([], decision)
+                # Check convergence — decision is guaranteed non-None here
+                convergence = self.convergence_engine.evaluate_convergence([], decision)  # type: ignore[arg-type]  # decision is None only before first iteration; guarded above.
                 if convergence.status.value == "CONVERGED":
                     cycle_state = self.cycle_controller.mark_converged(cycle_state)
                 elif cycle_state.current_iteration >= 2:

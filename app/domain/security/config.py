@@ -11,7 +11,7 @@ class SecurityConfig(BaseModel):
     """
     encryption_key: bytes = Field(..., description="The decoded AES-256-GCM key (32 bytes)")
     bcrypt_rounds: int = Field(12, ge=4, description="Number of rounds for bcrypt hashing")
-    token_length_bytes: int = Field(32, ge=16, description="Byte length for generated tokens")
+    token_length_bytes: int = Field(default=32, ge=16, description="Byte length for generated tokens")
     jwt_keys: dict[str, str] = Field(default_factory=dict, description="Dictionary of Key IDs (kid) to their signing keys/secrets")
 
     @classmethod
@@ -36,4 +36,5 @@ class SecurityConfig(BaseModel):
             # Fallback for local dev
             jwt_keys["default"] = "fallback-jwt-secret-do-not-use-in-production"
 
-        return cls(encryption_key=key, bcrypt_rounds=rounds, jwt_keys=jwt_keys)
+        return cls(encryption_key=key, bcrypt_rounds=rounds, token_length_bytes=32, jwt_keys=jwt_keys)
+

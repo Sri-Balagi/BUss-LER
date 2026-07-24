@@ -2,7 +2,8 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from app.domain.session.models import Session
+from app.domain.session.models import Session, SessionParticipant
+from app.shared.enums import PrincipalType
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
 
@@ -17,10 +18,11 @@ class SessionCreateRequest(BaseModel):
 async def create_session(req: SessionCreateRequest):
     session = Session(
         tenant_id=req.tenant_id,
-        user_id=req.user_id
+        participants=[SessionParticipant(id=req.user_id, type=PrincipalType.HUMAN)]
     )
     _session_store[session.session_id] = session
     return session
+
 
 @router.get("/{session_id}", response_model=Session)
 async def get_session(session_id: str):

@@ -14,8 +14,9 @@ class TwinCreated(DomainEvent):
 class TwinStateUpdated(DomainEvent):
     entity_id: UUID
     tenant_id: UUID
-    version: int
+    version: int  # type: ignore[assignment]  # Entity state integer version shadows DomainEvent schema version string.
     changes: dict[str, Any]
+
 
 
 class TwinDesynchronized(DomainEvent):

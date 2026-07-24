@@ -21,7 +21,7 @@ class TimeoutPolicy:
         self.timeout_seconds = timeout_seconds
 
 class ExecutionPolicy:
-    def __init__(self, retry: RetryPolicy = None, timeout: TimeoutPolicy = None):
+    def __init__(self, retry: RetryPolicy | None = None, timeout: TimeoutPolicy | None = None):
         self.retry = retry or RetryPolicy()
         self.timeout = timeout or TimeoutPolicy()
 
@@ -43,7 +43,8 @@ class ExecutionPolicy:
                 delay = self.retry.base_delay * (2 ** (attempts - 1)) if self.retry.exponential else self.retry.base_delay
                 await asyncio.sleep(delay)
 
-        raise last_exception
+        raise last_exception or RuntimeError("Execution policy retries exhausted")
+
 
 class CircuitBreaker:
     def __init__(self, failure_threshold: int = 5, recovery_timeout: float = 60.0):

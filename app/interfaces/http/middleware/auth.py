@@ -14,7 +14,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
     Allows anonymous requests to pass through (enforcement happens at the router level).
     """
 
-    async def dispatch(self, request: Request, call_next) -> Response:  # type: ignore
+    async def dispatch(self, request: Request, call_next) -> Response:
         auth_header = request.headers.get("Authorization")
         api_key_header = request.headers.get("X-API-Key")
 
@@ -40,9 +40,10 @@ class AuthMiddleware(BaseHTTPMiddleware):
                             token,
                             settings.jwt_secret or "",
                             algorithms=["HS256"],
-                            options=options,
+                            options=options,  # type: ignore[arg-type]  # PyJWT options dictionary schema
                             audience="authenticated"
                         )
+
 
                         request.state.is_authenticated = True
                         request.state.auth_method = "jwt"

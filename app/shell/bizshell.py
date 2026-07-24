@@ -49,13 +49,14 @@ class BizShell(cmd.Cmd):
 
         return self.dispatcher.dispatch(command, args)
 
-    def default(self, line: str) -> bool:
+    def default(self, line: str) -> bool:  # type: ignore[override]  # cmd.Cmd in typeshed annotations expects None, but returning bool controls loop termination.
         """Called on an input line when the command prefix is not recognized."""
         if line == "EOF":
             print()
             sys.exit(0)
         self.execute_command(line)
         return False
+
 
     def do_exit(self, arg: str) -> bool:
         """Exit the shell."""

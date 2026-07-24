@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class CapabilityManager(ICapabilityExecutor):
-    def __init__(self, registry: CapabilityRegistry, middlewares: list[IMiddleware] = None):
+    def __init__(self, registry: CapabilityRegistry, middlewares: list[IMiddleware] | None = None):
         self.registry = registry
         self.middlewares = middlewares or []
 
@@ -31,9 +31,10 @@ class CapabilityManager(ICapabilityExecutor):
             operation=request.operation,
             requested_version=request.execution_metadata.get("version"),
             execution_trace_id=request.trace_id,
-            permissions=request.permissions,
+            permissions=[str(p) for p in request.permissions],
             caller_agent_id=request.caller_id,
         )
+
 
         # 2. Resolve via Registry
         try:

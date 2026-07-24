@@ -22,7 +22,8 @@ class SequentialExecutionPolicy(IExecutionPolicy):
         decision = ExecutionDecision(parallel_execution=False)
 
         if task:
-            cost = task.execution_descriptor.metadata.get("estimated_cost", 1.0)
+            cost = task.descriptor.metadata.get("estimated_cost", 1.0)
+
             # Check budget passively
             if context.has_sufficient_budget(cost):
                 decision.tasks_to_execute = [task]

@@ -74,9 +74,10 @@ class PythonAuditHookEnforcer(ISandboxPolicyEnforcer):
             # Note: standard library imports trigger 'open', so strict file blocking requires careful tuning.
             # For this milestone, we only block if it explicitly violates the allowed_dirs if one is set.
             path = args[0]
-            if isinstance(path, str) or isinstance(path, bytes):
+            if isinstance(path, (str, bytes)):
                 try:
-                    path_str = os.fspath(path)
+                    path_raw = os.fspath(path)
+                    path_str: str = path_raw.decode("utf-8", errors="replace") if isinstance(path_raw, bytes) else str(path_raw)
                 except Exception:
                     return # Ignore unparseable paths
 
@@ -84,3 +85,4 @@ class PythonAuditHookEnforcer(ISandboxPolicyEnforcer):
                 if self._allowed_dirs:
                     if not self._is_path_allowed(path_str):
                         raise PermissionError(f"Sandbox policy violation: file access blocked ({path_str})")
+

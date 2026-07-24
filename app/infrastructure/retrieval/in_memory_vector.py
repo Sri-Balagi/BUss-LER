@@ -15,7 +15,8 @@ class InMemoryVectorRepository(IVectorRepository):
         self._documents: dict[UUID, dict] = {}
         self._lock = asyncio.Lock()
 
-    async def add_document(self, entity_id: UUID, content: str, vector: list[float], metadata: dict = None):
+    async def add_document(self, entity_id: UUID, content: str, vector: list[float], metadata: dict | None = None):
+
         """Helper to seed mock data during tests."""
         async with self._lock:
             self._documents[entity_id] = {

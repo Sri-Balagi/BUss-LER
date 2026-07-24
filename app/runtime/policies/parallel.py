@@ -22,7 +22,8 @@ class ParallelExecutionPolicy(IExecutionPolicy):
         decision = ExecutionDecision(parallel_execution=True)
 
         for task in all_ready:
-            cost = task.execution_descriptor.metadata.get("estimated_cost", 1.0)
+            cost = task.descriptor.metadata.get("estimated_cost", 1.0)
+
             if context.has_sufficient_budget(cost):
                 decision.tasks_to_execute.append(task)
             else:

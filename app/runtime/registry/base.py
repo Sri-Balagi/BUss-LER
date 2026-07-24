@@ -96,7 +96,8 @@ class BaseRegistry[T](ABC):
         if isinstance(item, BaseModel):
             return item.model_dump(mode="json")
         elif hasattr(item, "to_dict"):
-            return item.to_dict() # type: ignore
+            return item.to_dict()
+
         else:
             raise NotImplementedError(f"[{self.name}] Cannot serialize item: {type(item)}")
 

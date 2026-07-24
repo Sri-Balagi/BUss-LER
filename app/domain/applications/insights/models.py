@@ -48,4 +48,5 @@ class InsightGenerated(DomainEvent):
     tenant_id: str | None
     insight_type: InsightType
     execution_id: str
-    timestamp: float = Field(default_factory=lambda: __import__("time").time())
+    timestamp: float = Field(default_factory=lambda: __import__("time").time())  # type: ignore[assignment]  # Epoch float timestamp overrides DomainEvent datetime object.
+

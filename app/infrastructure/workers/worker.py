@@ -14,7 +14,8 @@ class DistributedWorker:
         self.broker = broker
         self.is_running = False
         self._task = None
-        self._handlers = {}
+        self._handlers: dict[str, Callable[..., Any]] = {}
+
 
     def register_handler(self, task_type: str, handler: Callable):
         self._handlers[task_type] = handler
@@ -39,8 +40,9 @@ class DistributedWorker:
 
     async def _process_message(self, msg: dict):
         task_type = msg.get("type")
-        handler = self._handlers.get(task_type)
+        handler = self._handlers.get(str(task_type)) if task_type is not None else None
         if handler:
+
             logger.info(f"Worker {self.worker_id} executing {task_type}")
             try:
                 await handler(msg)

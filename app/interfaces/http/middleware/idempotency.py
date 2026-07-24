@@ -23,7 +23,8 @@ class IdempotencyMiddleware(BaseHTTPMiddleware):
         else:
             self.redis = None
 
-    async def dispatch(self, request: Request, call_next) -> Response:  # type: ignore
+    async def dispatch(self, request: Request, call_next) -> Response:
+
         if request.method not in ("POST", "PUT", "PATCH", "DELETE"):
             return await call_next(request)
 

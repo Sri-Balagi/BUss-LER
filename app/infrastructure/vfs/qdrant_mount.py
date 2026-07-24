@@ -17,6 +17,8 @@ from typing import Any
 from app.infrastructure.vfs.vfs import IVirtualMount, IVirtualNode
 
 
+from pydantic import PrivateAttr
+
 class QdrantNode(IVirtualNode):
     """
     A VFS node backed by a single Qdrant point.
@@ -30,12 +32,16 @@ class QdrantNode(IVirtualNode):
 
     model_config = {"arbitrary_types_allowed": True}
 
+    _collection: str = PrivateAttr(default="")
+    _point_id: str = PrivateAttr(default="")
+    _client: Any = PrivateAttr(default=None)
+
     def model_post_init(self, __context: Any) -> None:
         parts = self.path.replace("qdrant://", "").split("/", 1)
-        object.__setattr__(self, "_collection", parts[0] if parts else "")
-        object.__setattr__(self, "_point_id", parts[1] if len(parts) > 1 else "")
-        if not hasattr(self, "_client"):
-            object.__setattr__(self, "_client", None)
+        self._collection = parts[0] if parts else ""
+        self._point_id = parts[1] if len(parts) > 1 else ""
+        self._client = None
+
 
     def read(self) -> Any:
         """Synchronous read stub. Use async_read for production."""

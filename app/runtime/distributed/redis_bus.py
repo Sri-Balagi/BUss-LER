@@ -16,7 +16,7 @@ import os
 from collections.abc import Generator
 from typing import Any
 
-import redis  # type: ignore[import]
+import redis
 
 from app.runtime.distributed.interfaces import IDistributedSystemBus
 
@@ -30,8 +30,9 @@ class RedisSystemBus(IDistributedSystemBus):
     """
 
     def __init__(self, redis_url: str | None = None) -> None:
-        url = redis_url or os.getenv("REDIS_URL", "redis://localhost:6379/0")
+        url: str = redis_url or os.getenv("REDIS_URL") or "redis://localhost:6379/0"
         self._client = redis.Redis.from_url(url, decode_responses=True)
+
         self._pubsub = self._client.pubsub(ignore_subscribe_messages=True)
 
     def publish(self, channel: str, message: Any) -> None:

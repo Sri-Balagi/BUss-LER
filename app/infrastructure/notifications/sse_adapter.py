@@ -9,9 +9,9 @@ class SSEAdapter(INotificationAdapter):
     Adapter for Server-Sent Events (SSE).
     Maintains a list of active subscriptions and dispatches events to them.
     """
-    def __init__(self):
+    def __init__(self) -> None:
         # A list of queues for active subscribers
-        self._subscribers: set[asyncio.Queue] = set()
+        self._subscribers: set[asyncio.Queue[dict[str, object]]] = set()
 
     async def dispatch(self, event: DomainEvent) -> None:
         """
@@ -27,11 +27,12 @@ class SSEAdapter(INotificationAdapter):
             except asyncio.QueueFull:
                 pass # Queue is full, drop or handle it.
 
-    def subscribe(self) -> asyncio.Queue:
-        queue = asyncio.Queue(maxsize=100)
+    def subscribe(self) -> asyncio.Queue[dict[str, object]]:
+        queue: asyncio.Queue[dict[str, object]] = asyncio.Queue(maxsize=100)
         self._subscribers.add(queue)
         return queue
 
-    def unsubscribe(self, queue: asyncio.Queue) -> None:
+    def unsubscribe(self, queue: asyncio.Queue[dict[str, object]]) -> None:
         if queue in self._subscribers:
             self._subscribers.remove(queue)
+

@@ -24,7 +24,7 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
     These are attached to `request.state` and bound to the structured logger context.
     """
 
-    async def dispatch(self, request: Request, call_next) -> Response:  # type: ignore
+    async def dispatch(self, request: Request, call_next) -> Response:
         start_time = time.time()
 
         # 1. Resolve IDs from headers or generate new ones

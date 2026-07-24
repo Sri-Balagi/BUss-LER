@@ -1,6 +1,7 @@
 import abc
+from uuid import UUID
 
-from app.domain.retrieval.models import RetrievalContext, RetrievalResultItem
+from app.domain.retrieval.models import RetrievalContext, RetrievalResultItem, RetrievalSource
 
 
 class IRankingStrategy(abc.ABC):
@@ -23,7 +24,7 @@ class ReciprocalRankFusionStrategy(IRankingStrategy):
 
     def rank(self, context: RetrievalContext, items: list[RetrievalResultItem]) -> list[RetrievalResultItem]:
         # Group items by source to calculate their source-specific rank
-        source_groups = {}
+        source_groups: dict[RetrievalSource, list[RetrievalResultItem]] = {}
         for item in items:
             source_groups.setdefault(item.source, []).append(item)
 
@@ -32,8 +33,10 @@ class ReciprocalRankFusionStrategy(IRankingStrategy):
             group_items.sort(key=lambda x: x.relevance_score, reverse=True)
 
         # Calculate RRF score for each entity
-        rrf_scores = {}
-        merged_items = {}
+        rrf_scores: dict[UUID, float] = {}
+        merged_items: dict[UUID, RetrievalResultItem] = {}
+
+
 
         for source, group_items in source_groups.items():
             for rank, item in enumerate(group_items, start=1):

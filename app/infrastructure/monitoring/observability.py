@@ -7,17 +7,18 @@ class MetricsRegistry:
         self.counters = {}
         self.histograms = {}
 
-    def inc(self, name: str, value: float = 1, labels: dict[str, str] = None):
+    def inc(self, name: str, value: float = 1, labels: dict[str, str] | None = None):
         key = self._format_key(name, labels)
         self.counters[key] = self.counters.get(key, 0) + value
 
-    def observe(self, name: str, value: float, labels: dict[str, str] = None):
+    def observe(self, name: str, value: float, labels: dict[str, str] | None = None):
         key = self._format_key(name, labels)
         if key not in self.histograms:
             self.histograms[key] = []
         self.histograms[key].append(value)
 
-    def _format_key(self, name: str, labels: dict[str, str]) -> str:
+    def _format_key(self, name: str, labels: dict[str, str] | None) -> str:
+
         if not labels:
             return name
         lbls = ",".join([f'{k}="{v}"' for k, v in sorted(labels.items())])
@@ -36,7 +37,8 @@ class TraceContext:
         self.start_time = time.time()
 
 class Tracer:
-    def start_span(self, name: str, trace_id: str = None) -> TraceContext:
+    def start_span(self, name: str, trace_id: str | None = None) -> TraceContext:
+
         import uuid
         tid = trace_id or str(uuid.uuid4())
         sid = str(uuid.uuid4())

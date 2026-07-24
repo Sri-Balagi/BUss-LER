@@ -30,10 +30,11 @@ class IMessageQueue(ABC):
 
 class IDatabaseProvider(ABC):
     @abstractmethod
-    async def execute(self, query: str, params: tuple = None) -> Any: pass
+    async def execute(self, query: str, params: tuple[Any, ...] | None = None) -> Any: pass
 
     @abstractmethod
-    async def fetch(self, query: str, params: tuple = None) -> list[dict[str, Any]]: pass
+    async def fetch(self, query: str, params: tuple[Any, ...] | None = None) -> list[dict[str, Any]]: pass
+
 
 class IObjectStorage(ABC):
     @abstractmethod

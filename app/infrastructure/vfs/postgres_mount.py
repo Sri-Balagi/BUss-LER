@@ -16,11 +16,12 @@ from __future__ import annotations
 from typing import Any
 
 from app.infrastructure.vfs.vfs import IVirtualMount, IVirtualNode
+from pydantic import PrivateAttr
 
 
 class PostgresNode(IVirtualNode):
     """
-    A VFS node backed by a single Postgres row (via Supabase REST).
+    A VFS node representing a row in a Postgres table.
 
     path     : ``pg://<table>/<row_id>``
     metadata : Populated at construction time with table / row_id.
@@ -31,13 +32,16 @@ class PostgresNode(IVirtualNode):
 
     model_config = {"arbitrary_types_allowed": True}
 
+    _table: str = PrivateAttr(default="")
+    _row_id: str = PrivateAttr(default="")
+    _client: Any = PrivateAttr(default=None)
+
     def model_post_init(self, __context: Any) -> None:  # noqa: D401
         # Parse path: pg://<table>/<row_id>
         parts = self.path.replace("pg://", "").split("/", 1)
-        object.__setattr__(self, "_table", parts[0] if parts else "")
-        object.__setattr__(self, "_row_id", parts[1] if len(parts) > 1 else "")
-        if not hasattr(self, "_client"):
-            object.__setattr__(self, "_client", None)
+        self._table = parts[0] if parts else ""
+        self._row_id = parts[1] if len(parts) > 1 else ""
+        self._client = None
 
     def read(self) -> Any:
         """

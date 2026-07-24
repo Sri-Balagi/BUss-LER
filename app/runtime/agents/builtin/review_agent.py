@@ -26,10 +26,10 @@ class ReviewAgent(BaseAgent):
 
         return AgentResult(
             status=AgentResultStatus.SUCCESS,
-            output={"review_status": "Approved", "confidence": 0.95},
+            outputs={"review_status": "Approved", "confidence": 0.95},
             metrics={"duration_ms": 100},
-            artifacts=[]
         )
+
 
     def suspend(self) -> None:
         pass

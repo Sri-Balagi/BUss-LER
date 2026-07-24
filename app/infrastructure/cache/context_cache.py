@@ -10,6 +10,8 @@ Implementations:
 
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
+from typing import Any
+from uuid import UUID
 
 import structlog
 
@@ -43,9 +45,9 @@ class AbstractContextCache(ABC):
     async def invalidate(
         self,
         cache_key: str,
-        twin_id,
+        twin_id: UUID,
         reason: str = "manual_invalidation",
-        event_bus=None,
+        event_bus: Any = None,
     ) -> None:
         """Remove a cache entry and publish ContextInvalidatedEvent on the EventBus."""
         pass
@@ -103,9 +105,9 @@ class MemoryContextCache(AbstractContextCache):
     async def invalidate(
         self,
         cache_key: str,
-        twin_id,
+        twin_id: UUID,
         reason: str = "manual_invalidation",
-        event_bus=None,
+        event_bus: Any = None,
     ) -> None:
         removed = self._store.pop(cache_key, None)
         if removed:
@@ -179,9 +181,9 @@ class RedisContextCache(AbstractContextCache):
     async def invalidate(
         self,
         cache_key: str,
-        twin_id,
+        twin_id: UUID,
         reason: str = "manual_invalidation",
-        event_bus=None,
+        event_bus: Any = None,
     ) -> None:
         await self._redis.delete(cache_key)
         logger.info("Redis cache entry invalidated", cache_key=cache_key, reason=reason)
@@ -212,8 +214,7 @@ class RedisContextCache(AbstractContextCache):
             return False
 
 
-@staticmethod
-def build_cache_key(twin_id, policy_id: str, intent_id=None) -> str:
+def build_cache_key(twin_id: object, policy_id: str, intent_id: object = None) -> str:
     """Canonical cache key factory."""
     intent_part = str(intent_id) if intent_id else "no_intent"
     return f"{twin_id}:{policy_id}:{intent_part}"

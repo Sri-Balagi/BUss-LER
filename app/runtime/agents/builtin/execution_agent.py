@@ -26,10 +26,10 @@ class ExecutionAgent(BaseAgent):
 
         return AgentResult(
             status=AgentResultStatus.SUCCESS,
-            output={"execution_status": "Step executed successfully"},
+            outputs={"execution_status": "Step executed successfully"},
             metrics={"duration_ms": 100},
-            artifacts=[]
         )
+
 
     def suspend(self) -> None:
         pass

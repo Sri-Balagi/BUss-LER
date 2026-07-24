@@ -13,7 +13,7 @@ from __future__ import annotations
 import os
 from typing import Any
 
-from celery import Celery  # type: ignore[import]
+from celery import Celery
 
 from app.runtime.distributed.interfaces import IDistributedScheduler
 
@@ -27,12 +27,12 @@ class CeleryDistributedScheduler(IDistributedScheduler):
     """
 
     def __init__(self, broker_url: str | None = None) -> None:
-        self._broker_url: str = broker_url or os.getenv(
-            "CELERY_BROKER_URL", "redis://localhost:6379/0"
+        _default_broker = "redis://localhost:6379/0"
+        self._broker_url: str = broker_url if broker_url is not None else (
+            os.getenv("CELERY_BROKER_URL") or _default_broker
         )
-        self._result_backend: str = os.getenv(
-            "CELERY_RESULT_BACKEND", self._broker_url
-        )
+        celery_result_backend = os.getenv("CELERY_RESULT_BACKEND")
+        self._result_backend: str = celery_result_backend if celery_result_backend is not None else self._broker_url
         self._app: Celery = Celery(
             "bizos",
             broker=self._broker_url,

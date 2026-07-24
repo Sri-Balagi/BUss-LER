@@ -36,7 +36,8 @@ class TaskDAG(BaseModel):
             raise DAGValidationError(f"Task {task.task_id} already exists in DAG.")
         self.tasks[task.task_id] = task
 
-    def validate(self) -> None:
+    def validate(self) -> None:  # type: ignore[override]  # DAG instance validation method.
+
         """
         Validates the DAG:
         1. Checks for missing dependencies.

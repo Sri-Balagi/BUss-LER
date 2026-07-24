@@ -59,7 +59,8 @@ class MetricsMiddleware(BaseHTTPMiddleware):
     # Paths to exclude from metrics collection
     EXCLUDE_PATHS = {"/metrics", "/api/v1/health", "/api/v1/live", "/api/v1/ready"}
 
-    async def dispatch(self, request: Request, call_next) -> Response:  # type: ignore[override]
+    async def dispatch(self, request: Request, call_next) -> Response:
+
         if request.url.path in self.EXCLUDE_PATHS:
             return await call_next(request)
 

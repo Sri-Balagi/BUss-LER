@@ -32,7 +32,8 @@ class RateLimiterMiddleware(BaseHTTPMiddleware):
         else:
             self.redis = None
 
-    async def dispatch(self, request: Request, call_next) -> Response:  # type: ignore
+    async def dispatch(self, request: Request, call_next) -> Response:
+
         # Identify client (Tenant ID, API Key, or IP)
         client_id = getattr(request.state, "resolved_tenant_id", None)
         if not client_id:

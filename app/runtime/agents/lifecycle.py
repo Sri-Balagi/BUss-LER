@@ -1,5 +1,6 @@
 import logging
 from enum import StrEnum
+from typing import Any
 
 from app.runtime.agents.context import AgentContext
 from app.runtime.agents.events import (
@@ -45,7 +46,8 @@ class AgentLifecycleManager:
         self._state = AgentState.CREATED
         self._agent_id = agent_id
         self._task_id = task_id
-        self._events_emitted = []  # For testing/telemetry
+        self._events_emitted: list[Any] = []  # For testing/telemetry
+
 
     @property
     def state(self) -> AgentState:

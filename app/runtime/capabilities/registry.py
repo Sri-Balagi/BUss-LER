@@ -8,7 +8,7 @@ from app.runtime.capabilities.resolution import ExactMatchStrategy, ICapabilityR
 
 
 class CapabilityRegistry:
-    def __init__(self, default_strategy: ICapabilityResolutionStrategy = None):
+    def __init__(self, default_strategy: ICapabilityResolutionStrategy | None = None):
         self._capabilities: list[tuple[CapabilitySpecification, ICapabilityFactory]] = []
         self.default_strategy = default_strategy or ExactMatchStrategy()
 
@@ -23,8 +23,9 @@ class CapabilityRegistry:
         ]
 
     def resolve(
-        self, context: CapabilityResolutionContext, strategy: ICapabilityResolutionStrategy = None
+        self, context: CapabilityResolutionContext, strategy: ICapabilityResolutionStrategy | None = None
     ) -> CapabilityResolutionDecision:
+
         active_strategy = strategy or self.default_strategy
         return active_strategy.resolve(context, self._capabilities)
 

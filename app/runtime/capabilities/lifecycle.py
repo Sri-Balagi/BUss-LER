@@ -15,9 +15,10 @@ class CapabilityLifecycleManager:
     Manages lifecycle transitions for a capability.
     """
 
-    def __init__(self, capability: ICapability, middlewares: list[IMiddleware] = None):
+    def __init__(self, capability: ICapability, middlewares: list[IMiddleware] | None = None):
         self.capability = capability
         self.pipeline = CapabilityPipeline(middlewares)
+
 
     async def execute_request(
         self, request: CapabilityRequest, context: CapabilityContext

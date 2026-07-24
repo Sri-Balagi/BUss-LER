@@ -23,8 +23,10 @@ class CancellationToken(ICancellationToken):
 
     def register_callback(self, callback: Callable[[], Awaitable[None]]) -> None:
         if self._cancelled:
-            # If already cancelled, execute immediately as a fire-and-forget task
-            asyncio.create_task(callback())
+            async def _run() -> None:
+                await callback()
+            asyncio.create_task(_run())
+
         else:
             self._callbacks.append(callback)
 

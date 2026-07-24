@@ -26,10 +26,10 @@ class ResearchAgent(BaseAgent):
 
         return AgentResult(
             status=AgentResultStatus.SUCCESS,
-            output={"research_summary": "Extracted knowledge based on the payload"},
+            outputs={"research_summary": "Extracted knowledge based on the payload"},
             metrics={"duration_ms": 100},
-            artifacts=[]
         )
+
 
     def suspend(self) -> None:
         logger.debug("ResearchAgent suspended", identity=self.specification.identity)

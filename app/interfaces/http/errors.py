@@ -60,7 +60,9 @@ async def duplicate_memory_handler(request: Request, exc: DuplicateMemoryError) 
     )
 
 
-async def domain_validation_handler(request: Request, exc: DomainValidationError) -> JSONResponse:
+async def domain_validation_handler(
+    request: Request, exc: DomainValidationError
+) -> JSONResponse:
     logger.warning("Domain validation failed", url=str(request.url), detail=exc.detail)
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -94,12 +96,41 @@ async def ai_kernel_error_handler(request: Request, exc: AIKernelError) -> JSONR
 
 def register_exception_handlers(app: FastAPI) -> None:
     """Register all domain exception handlers to the FastAPI app."""
-    app.add_exception_handler(NotFoundError, generic_not_found_handler)
-    app.add_exception_handler(VersionConflictError, version_conflict_handler)
-    app.add_exception_handler(DuplicateTwinError, duplicate_twin_handler)
-    app.add_exception_handler(DuplicateMemoryError, duplicate_memory_handler)
-    app.add_exception_handler(DomainValidationError, domain_validation_handler)
-    app.add_exception_handler(RepositoryError, repository_error_handler)
-    app.add_exception_handler(ServiceError, service_error_handler)
-    app.add_exception_handler(AIKernelError, ai_kernel_error_handler)
-    app.add_exception_handler(BizOSError, generic_bizos_error_handler)
+    app.add_exception_handler(
+        NotFoundError,
+        generic_not_found_handler,  # type: ignore[arg-type]  # Narrowed exc type; safe at runtime.
+    )
+    app.add_exception_handler(
+        VersionConflictError,
+        version_conflict_handler,  # type: ignore[arg-type]  # Narrowed exc type; safe at runtime.
+    )
+    app.add_exception_handler(
+        DuplicateTwinError,
+        duplicate_twin_handler,  # type: ignore[arg-type]  # Narrowed exc type; safe at runtime.
+    )
+    app.add_exception_handler(
+        DuplicateMemoryError,
+        duplicate_memory_handler,  # type: ignore[arg-type]  # Narrowed exc type; safe at runtime.
+    )
+    app.add_exception_handler(
+        DomainValidationError,
+        domain_validation_handler,  # type: ignore[arg-type]  # Narrowed exc type; safe at runtime.
+    )
+    app.add_exception_handler(
+        RepositoryError,
+        repository_error_handler,  # type: ignore[arg-type]  # Narrowed exc type; safe at runtime.
+    )
+    app.add_exception_handler(
+        ServiceError,
+        service_error_handler,  # type: ignore[arg-type]  # Narrowed exc type; safe at runtime.
+    )
+    app.add_exception_handler(
+        AIKernelError,
+        ai_kernel_error_handler,  # type: ignore[arg-type]  # Narrowed exc type; safe at runtime.
+    )
+    app.add_exception_handler(
+        BizOSError,
+        generic_bizos_error_handler,  # type: ignore[arg-type]  # Narrowed exc type; safe at runtime.
+    )
+
+

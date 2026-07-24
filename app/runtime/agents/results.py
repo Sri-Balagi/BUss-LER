@@ -12,6 +12,10 @@ class AgentStatus(StrEnum):
     FAILURE = "FAILURE"
 
 
+AgentResultStatus = AgentStatus
+
+
+
 class AgentResult(BaseModel):
     """
     Structured outcome of an agent's execution.

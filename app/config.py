@@ -13,7 +13,7 @@ import logging
 import os
 from functools import lru_cache
 
-from pydantic import Field, field_validator
+from pydantic import Field, ValidationInfo, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -129,7 +129,7 @@ class Settings(BaseSettings):
 
     @field_validator("encryption_key_base64")
     @classmethod
-    def validate_encryption_key(cls, v: str | None, info) -> str | None:
+    def validate_encryption_key(cls, v: str | None, info: ValidationInfo) -> str | None:
         # info.data might not have app_env if it failed validation, but assuming it did:
         env = info.data.get("app_env", "development")
         if env == "production" and not v:
@@ -138,7 +138,7 @@ class Settings(BaseSettings):
 
     @field_validator("jwt_secret")
     @classmethod
-    def validate_jwt_secret(cls, v: str | None, info) -> str | None:
+    def validate_jwt_secret(cls, v: str | None, info: ValidationInfo) -> str | None:
         env = info.data.get("app_env", "development")
         if env == "production" and not v:
             raise ValueError("JWT_SECRET is strictly required in production")
@@ -187,4 +187,4 @@ def get_settings() -> Settings:
                 extra={"key": key, "present": key in os.environ},
             )
 
-    return Settings()
+    return Settings()  # type: ignore[call-arg]  # pydantic-settings resolves required fields from env vars at runtime.

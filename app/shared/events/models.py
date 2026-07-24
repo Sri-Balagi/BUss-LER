@@ -266,6 +266,7 @@ class AuditCategory(StrEnum):
 class AuditEvent(DomainEvent):
     """Immutable audit record emitted as a domain event."""
 
+
     event_version: str = Field(default="1.0")
     category: AuditCategory
     execution_context: dict | None = None

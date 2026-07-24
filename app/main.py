@@ -48,6 +48,7 @@ logger = structlog.get_logger()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+
     """Application lifecycle manager.
 
     Handles startup validation and graceful shutdown.
@@ -93,6 +94,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         container.resolve(ProviderRegistry)
         container.resolve(PromptRegistry)
         container.resolve(IResourceBudget)
+
 
         from app.infrastructure.security.audit import AuditSubscriber
         logger.info("Initializing Audit & Security Observability")
@@ -143,6 +145,7 @@ def create_app() -> FastAPI:
     cors_origins: list[str] = (
         ["*"] if not settings.is_production else list(getattr(settings, "cors_origins", ["*"]))
     )
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=cors_origins,
@@ -160,6 +163,7 @@ def create_app() -> FastAPI:
     # ── Request Logging ───────────────────────────────────────────────────────
     @app.middleware("http")
     async def log_requests(request: Request, call_next: Any) -> Response:
+
         start = time.perf_counter()
         response = await call_next(request)
         duration = time.perf_counter() - start
@@ -198,7 +202,7 @@ def create_app() -> FastAPI:
     app.include_router(api_router, prefix="/api/v1")
 
     # ── OpenAPI Customization ─────────────────────────────────────────────────
-    app.openapi = lambda: custom_openapi(app)  # type: ignore
+    app.openapi = lambda: custom_openapi(app)  # type: ignore[method-assign]  # FastAPI openapi is overridden for custom schema generation.
 
     # ── Instrument with OTEL (if enabled) ────────────────────────────────────
     instrument_fastapi(app)

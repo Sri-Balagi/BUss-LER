@@ -17,8 +17,9 @@ class CapabilityPipeline:
     Manages the sequential execution of middlewares wrapping the capability execution.
     """
 
-    def __init__(self, middlewares: list[IMiddleware] = None):
+    def __init__(self, middlewares: list[IMiddleware] | None = None):
         self.middlewares = middlewares or []
+
 
     def add_middleware(self, middleware: IMiddleware) -> None:
         self.middlewares.append(middleware)

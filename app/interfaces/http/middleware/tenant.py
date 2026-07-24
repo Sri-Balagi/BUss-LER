@@ -8,7 +8,7 @@ class TenantResolutionMiddleware(BaseHTTPMiddleware):
     Extracts tenant from X-Tenant-ID header or authentication claims.
     """
 
-    async def dispatch(self, request: Request, call_next) -> Response:  # type: ignore
+    async def dispatch(self, request: Request, call_next) -> Response:
         tenant_id = request.headers.get("X-Tenant-ID")
 
         # If no explicit header, attempt to pull from auth context

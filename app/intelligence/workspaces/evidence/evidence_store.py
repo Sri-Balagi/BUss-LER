@@ -16,5 +16,6 @@ class EvidenceStore:
     def add_evidence(self, evidence: Evidence):
         self._evidence[evidence.fact_id] = evidence
 
-    def get_evidence(self, fact_id: str) -> Evidence:
+    def get_evidence(self, fact_id: str) -> Evidence | None:
         return self._evidence.get(fact_id)
+

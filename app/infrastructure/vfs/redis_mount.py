@@ -14,7 +14,9 @@ from __future__ import annotations
 
 import json
 import os
-from typing import Any
+from typing import Any, Optional
+
+from pydantic import PrivateAttr
 
 from app.infrastructure.vfs.vfs import IVirtualMount, IVirtualNode
 
@@ -28,26 +30,30 @@ class RedisNode(IVirtualNode):
     """
 
     path: str
-    metadata: dict
+    metadata: dict[str, object]
 
     model_config = {"arbitrary_types_allowed": True}
+
+    # Private attributes resolved from URI at init time
+    _key: str = PrivateAttr(default="")
+    _ttl: Optional[int] = PrivateAttr(default=None)
+    _client: Any = PrivateAttr(default=None)
 
     def model_post_init(self, __context: Any) -> None:
         # Parse key and TTL from the URI path
         raw = self.path.replace("redis://", "")
         if "#ttl=" in raw:
             key_part, ttl_part = raw.split("#ttl=", 1)
-            object.__setattr__(self, "_key", key_part)
+            self._key = key_part
             try:
-                object.__setattr__(self, "_ttl", int(ttl_part))
+                self._ttl = int(ttl_part)
             except ValueError:
-                object.__setattr__(self, "_ttl", None)
+                self._ttl = None
         else:
-            object.__setattr__(self, "_key", raw)
-            object.__setattr__(self, "_ttl", None)
+            self._key = raw
+            self._ttl = None
         # _client is set externally by RedisMount.resolve() after construction
-        if not hasattr(self, "_client"):
-            object.__setattr__(self, "_client", None)
+        self._client = None
 
     def read(self) -> Any:
         """Synchronous read from Redis."""
@@ -89,7 +95,7 @@ class RedisMount(IVirtualMount):
             An initialised redis.Redis (sync) client.
             If None, a client is created lazily from REDIS_URL.
         """
-        self._client = redis_client
+        self._client: Any = redis_client
 
     def _get_client(self) -> Any:
         if self._client is not None:
@@ -109,6 +115,6 @@ class RedisMount(IVirtualMount):
             path=uri,
             metadata={"scheme": "redis", "uri": uri},
         )
-        # Set _client after construction — Pydantic ignores unknown kwargs.
-        object.__setattr__(node, "_client", self._get_client())
+        # Set _client after construction via PrivateAttr assignment
+        node._client = self._get_client()
         return node

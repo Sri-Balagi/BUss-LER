@@ -92,19 +92,19 @@ class TwinMetadata(BaseModel):
         ),
     )
     created_by: str | None = Field(
-        None,
+        default=None,
         max_length=200,
         description="Identifier of who/what created this twin (user, system, agent).",
     )
     updated_by: str | None = Field(
-        None,
+        default=None,
         max_length=200,
         description="Identifier of who/what last updated this twin.",
     )
     source: str | None = Field(
-        None,
+        default=None,
         max_length=200,
-        description="Origin of the twin data (api, import, migration, etc.).",
+        description="Source tracking (e.g., import pipeline, manual, API).",
     )
     labels: list[str] = Field(
         default_factory=list,
@@ -148,7 +148,8 @@ class DigitalTwinCreate(DomainBaseModel):
         ),
     )
     metadata: TwinMetadata = Field(
-        default_factory=TwinMetadata,
+        default_factory=lambda: TwinMetadata(),
+
         description=(
             "System-level metadata including schema_version, labels, "
             "external_ids, and source tracking."

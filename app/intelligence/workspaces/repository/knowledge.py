@@ -20,5 +20,6 @@ class ExecutiveKnowledgeRepository:
     def store_knowledge(self, knowledge: StrategicKnowledge):
         self.knowledge_base[knowledge.k_id] = knowledge
 
-    def retrieve_knowledge(self, k_id: str) -> StrategicKnowledge:
+    def retrieve_knowledge(self, k_id: str) -> StrategicKnowledge | None:
         return self.knowledge_base.get(k_id)
+

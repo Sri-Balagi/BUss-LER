@@ -54,7 +54,8 @@ class InMemoryPolicyRepository(IPolicyRepository):
         """
         Resolves the roles to a flat set of permission string values.
         """
-        permissions = set()
+        permissions: set[str] = set()
+
         for role in roles:
             # We map role name to a set of enums, then extract their string values
             role_perms = self._role_permissions.get(role, set())

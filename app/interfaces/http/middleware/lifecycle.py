@@ -8,7 +8,7 @@ class ApiLifecycleMiddleware(BaseHTTPMiddleware):
     Can inject standard HTTP headers like Deprecation and Sunset.
     """
 
-    async def dispatch(self, request: Request, call_next) -> Response:  # type: ignore
+    async def dispatch(self, request: Request, call_next) -> Response:
         response = await call_next(request)
 
         # Example of how we might evaluate endpoint deprecation:

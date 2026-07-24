@@ -21,9 +21,11 @@ class SituationAnalysisEngine:
         kpis: list[KPIAssessment],
         world_model: BusinessWorldModel,
     ) -> SituationAssessment:
-        risks = []
-        opportunities = []
-        gaps = []
+        risks: list[SituationRisk] = []
+        opportunities: list[SituationOpportunity] = []
+        gaps: list[SituationGap] = []
+
+
 
         # Analyze KPIs
         for kpi in kpis:

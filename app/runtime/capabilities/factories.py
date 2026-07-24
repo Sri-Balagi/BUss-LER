@@ -14,7 +14,7 @@ class TransientCapabilityFactory(ICapabilityFactory):
 
     def create(self, spec: CapabilitySpecification) -> ICapability:
         adapter = self.adapter_cls()
-        return self.capability_cls(spec=spec, adapter=adapter)
+        return self.capability_cls(spec=spec, adapter=adapter)  # type: ignore[call-arg]  # Concrete ICapability subclasses define __init__(spec, adapter).
 
 
 class SingletonCapabilityFactory(ICapabilityFactory):
@@ -25,10 +25,11 @@ class SingletonCapabilityFactory(ICapabilityFactory):
     def __init__(self, capability_cls: type[ICapability], adapter_cls: type[IResourceAdapter]):
         self.capability_cls = capability_cls
         self.adapter_cls = adapter_cls
-        self._instance = None
+        self._instance: ICapability | None = None
 
     def create(self, spec: CapabilitySpecification) -> ICapability:
         if self._instance is None:
             adapter = self.adapter_cls()
-            self._instance = self.capability_cls(spec=spec, adapter=adapter)
+            self._instance = self.capability_cls(spec=spec, adapter=adapter)  # type: ignore[call-arg]  # Concrete ICapability subclasses define __init__(spec, adapter).
         return self._instance
+

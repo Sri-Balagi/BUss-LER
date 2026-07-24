@@ -22,7 +22,7 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
     - X-Correlation-ID: propagated from caller if present, else same as request ID.
     """
 
-    async def dispatch(self, request: Request, call_next) -> Response:  # type: ignore[override]
+    async def dispatch(self, request: Request, call_next) -> Response:
         request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
         correlation_id = request.headers.get("X-Correlation-ID") or request_id
 

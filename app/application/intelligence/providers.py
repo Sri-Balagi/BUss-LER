@@ -41,7 +41,9 @@ class MockBaseProvider(ILLMProvider):
                 confidence=0.85
             )
         # generic fallback
-        return schema(**{f: None for f in schema.__fields__})
+        fields = getattr(schema, "model_fields", getattr(schema, "__fields__", {}))
+        return schema(**{f: None for f in fields})
+
 
     async def chat_completion(
         self,

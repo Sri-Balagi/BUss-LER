@@ -36,7 +36,7 @@ class SystemQueryService:
             # Assuming IRuntimeManager exposes process_manager which exposes process_table
             # or we just return an empty list for MVP since we don't have real workflows running yet.
             if hasattr(self.runtime_manager, "process_manager"):
-                processes = self.runtime_manager.process_manager.list_processes() # type: ignore
+                processes = self.runtime_manager.process_manager.list_processes()
                 return [{"id": str(p.pid), "status": p.state.name, "started": p.start_time.isoformat() if p.start_time else None} for p in processes]
         except AttributeError:
             pass
@@ -59,7 +59,8 @@ class SystemQueryService:
             if hasattr(item, "model_dump"):
                 serialized.append(item.model_dump())
             elif hasattr(item, "to_dict"):
-                serialized.append(item.to_dict()) # type: ignore
+                serialized.append(item.to_dict())
+
             else:
                 # Basic fallback
                 serialized.append(
