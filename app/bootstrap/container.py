@@ -1,7 +1,8 @@
 """Dependency Injection container setup."""
 
+import contextvars
 from collections.abc import Callable
-from typing import Any, TypeVar
+from typing import Any, TypeVar, overload
 
 T = TypeVar("T")
 
@@ -11,8 +12,6 @@ class ContainerNotInitializedError(RuntimeError):
 
     pass
 
-
-import contextvars
 
 class Container:
     """A type-safe Dependency Injection container acting as the composition root."""
@@ -25,36 +24,40 @@ class Container:
 
         # Track active resolution path to detect circular dependencies
         self._resolving: set[type[Any]] = set()
-        
+
         # Scoped instances storage per context
         self._scoped_instances: contextvars.ContextVar[dict[type[Any], Any]] = contextvars.ContextVar(
             "scoped_instances", default={}
         )
 
-    def register_singleton(self, interface: type[T], instance: T) -> None:
+    def register_singleton(self, interface: type[T] | Any, instance: T) -> None:
         """Register a pre-instantiated singleton."""
         self._singletons[interface] = instance
 
-    def register_factory(self, interface: type[T], factory: Callable[["Container"], T]) -> None:
+    def register_factory(self, interface: type[T] | Any, factory: Callable[["Container"], T]) -> None:
         """Register a factory function that will be called when resolving."""
         self._factories[interface] = factory
 
-    def register_scoped(self, interface: type[T], factory: Callable[["Container"], T]) -> None:
+    def register_scoped(self, interface: type[T] | Any, factory: Callable[["Container"], T]) -> None:
         """Register a factory that is resolved once per request/context scope."""
         self._scoped_factories[interface] = factory
 
-    def override(self, interface: type[T], instance: T) -> None:
+    def override(self, interface: type[T] | Any, instance: T) -> None:
         """Override a dependency for testing purposes."""
         self._overrides[interface] = instance
 
-    def resolve(self, interface: type[T]) -> T:
+    @overload
+    def resolve(self, interface: type[T]) -> T: ...
+    @overload
+    def resolve(self, interface: Any) -> Any: ...
+    def resolve(self, interface: Any) -> Any:
         """Resolve a dependency from the container."""
         if interface in self._overrides:
             return self._overrides[interface]
 
         if interface in self._singletons:
             return self._singletons[interface]
-            
+
         if interface in self._scoped_factories:
             return self.resolve_scoped(interface)
 
@@ -76,34 +79,38 @@ class Container:
         name = getattr(interface, "__name__", str(interface))
         raise KeyError(f"Service {name} not registered in container")
 
-    def resolve_scoped(self, interface: type[T]) -> T:
+    @overload
+    def resolve_scoped(self, interface: type[T]) -> T: ...
+    @overload
+    def resolve_scoped(self, interface: Any) -> Any: ...
+    def resolve_scoped(self, interface: Any) -> Any:
         """Resolve a dependency strictly bound to the current execution context."""
         if interface not in self._scoped_factories:
              raise KeyError(f"Service {interface.__name__} is not registered as scoped.")
-             
+
         scoped_cache = self._scoped_instances.get()
         # If running in a shared mutable dict fallback, make a new dict if it's the default
         if id(scoped_cache) == id(self._scoped_instances.get()):
              pass # contextvars will return the same default object if not explicitly set per task, but this is fine for fallback
-             
+
         if interface in scoped_cache:
             return scoped_cache[interface]
-            
+
         if interface in self._resolving:
             raise RecursionError(
                 f"Circular dependency detected while resolving {interface.__name__}"
             )
-            
+
         self._resolving.add(interface)
         try:
             instance = self._scoped_factories[interface](self)
-            
+
             # ContextVar default is mutable so we should explicitly set a new dict if we modify it
             current_cache = self._scoped_instances.get()
             new_cache = current_cache.copy()
             new_cache[interface] = instance
             self._scoped_instances.set(new_cache)
-            
+
             return instance
         finally:
             self._resolving.remove(interface)
@@ -121,7 +128,7 @@ def build_container() -> Container:
     container = Container()
 
     # Register Settings singleton so infrastructure components can resolve it
-    from app.config import get_settings, Settings
+    from app.config import Settings, get_settings
     settings_instance = get_settings()
     container.register_singleton(Settings, settings_instance)
 
@@ -141,15 +148,15 @@ def build_container() -> Container:
     # Wire memory dependencies
     from app.application.memory.di import register_memory_dependencies
     register_memory_dependencies(container)
-    
+
     # Wire intelligence infrastructure
     from app.application.intelligence.di import register_intelligence_infrastructure
     register_intelligence_infrastructure(container)
-    
+
     # Wire twin dependencies
     from app.application.twin.di import register_twin_dependencies
     register_twin_dependencies(container)
-    
+
     # Wire retrieval dependencies
     from app.application.retrieval.di import register_retrieval_dependencies
     register_retrieval_dependencies(container)
@@ -161,7 +168,7 @@ def build_container() -> Container:
     # Wire planning dependencies
     from app.application.planning.di import register_planning_dependencies
     register_planning_dependencies(container)
-    
+
     # Wire workflow intelligence
     from app.application.workflow.di import configure_workflow_intelligence
     configure_workflow_intelligence(container)

@@ -1,6 +1,9 @@
-from pydantic import BaseModel, Field, ConfigDict, model_validator
-from typing import Optional, Dict, Any
+from typing import Any
+
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+
 from app.shared.enums import PrincipalType
+
 
 class ExecutionContext(BaseModel):
     """
@@ -16,11 +19,11 @@ class ExecutionContext(BaseModel):
     conversation_id: str
     trace_id: str
     correlation_id: str
-    approval_context: Optional[Dict[str, Any]] = Field(default_factory=dict)
-    application_context: Optional[Dict[str, Any]] = Field(default_factory=dict)
-    memory_metrics: Optional[Dict[str, Any]] = Field(default_factory=dict)
-    decision_metrics: Optional[Dict[str, Any]] = Field(default_factory=dict)
-    reliability_metrics: Optional[Dict[str, Any]] = Field(default_factory=dict)
+    approval_context: dict[str, Any] | None = Field(default_factory=dict)
+    application_context: dict[str, Any] | None = Field(default_factory=dict)
+    memory_metrics: dict[str, Any] | None = Field(default_factory=dict)
+    decision_metrics: dict[str, Any] | None = Field(default_factory=dict)
+    reliability_metrics: dict[str, Any] | None = Field(default_factory=dict)
 
     @model_validator(mode='before')
     @classmethod
@@ -35,7 +38,7 @@ class ExecutionContext(BaseModel):
         return data
 
     @property
-    def user_id(self) -> Optional[str]:
+    def user_id(self) -> str | None:
         """Backward compatibility for Wave 6/7 apps expecting user_id."""
         if self.principal_type == PrincipalType.HUMAN:
             return self.principal_id

@@ -1,21 +1,20 @@
-import time
 import uuid
+from typing import cast
 
+from app.application.intelligence.kernel import EventRouter
 from app.domain.intelligence.capability import CapabilityType
-from app.domain.intelligence.pipeline import PipelineContext, PipelineResult, IPipelineStep
-from app.application.intelligence.kernel import IntelligenceKernel
-from app.domain.learning.models import LearningContext, LearningResult
-from app.domain.learning.provider import ILearningProvider
+from app.domain.intelligence.pipeline import IPipelineStep, PipelineContext, PipelineResult
+from app.domain.intelligence.provider import ICapabilityRegistry
 from app.domain.learning.events import (
-    LearningStarted,
+    KnowledgeConsolidated,
+    KnowledgeExtracted,
     LearningCompleted,
     LearningFailed,
-    KnowledgeExtracted,
-    KnowledgeConsolidated
+    LearningStarted,
 )
+from app.domain.learning.models import LearningContext, LearningResult
+from app.domain.learning.provider import ILearningProvider
 
-from app.domain.intelligence.provider import ICapabilityRegistry
-from app.application.intelligence.kernel import EventRouter
 
 class ConsolidationStep(IPipelineStep[LearningContext, LearningResult]):
     """
@@ -48,7 +47,7 @@ class ConsolidationStep(IPipelineStep[LearningContext, LearningResult]):
 
         try:
             # Resolve the active learning provider
-            provider = self._registry.resolve_provider(CapabilityType.LEARNING)
+            provider = cast(ILearningProvider | None, self._registry.resolve_provider(CapabilityType.LEARNING))
             if not provider:
                 raise RuntimeError("No Learning Provider registered.")
 

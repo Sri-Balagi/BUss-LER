@@ -1,8 +1,10 @@
-from pydantic import BaseModel, Field
-from typing import List, Dict, Any, Optional
 import uuid
+from typing import Any
 
-from app.shared.enums import AgentType, AgentStatus
+from pydantic import BaseModel, Field
+
+from app.shared.enums import AgentStatus, AgentType
+
 
 class Capability(BaseModel):
     """
@@ -12,7 +14,7 @@ class Capability(BaseModel):
     name: str
     description: str
     version: str = "1.0.0"
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 class Agent(BaseModel):
     """
@@ -25,5 +27,5 @@ class Agent(BaseModel):
     version: str = "1.0.0"
     status: AgentStatus = AgentStatus.REGISTERED
     agent_type: AgentType
-    capabilities: List[Capability] = Field(default_factory=list)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    capabilities: list[Capability] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)

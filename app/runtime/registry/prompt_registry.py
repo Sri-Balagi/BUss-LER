@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -17,5 +17,5 @@ class PromptRegistry(BaseRegistry[PromptMetadata]):
     Registry for managing System Prompts and Templates.
     """
 
-    def _deserialize_item(self, data: Dict[str, Any]) -> PromptMetadata:
+    def _deserialize_item(self, data: dict[str, Any]) -> PromptMetadata:
         return PromptMetadata.model_validate(data)

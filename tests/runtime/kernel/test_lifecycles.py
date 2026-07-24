@@ -1,11 +1,14 @@
-import pytest
 from uuid import uuid4
-from app.runtime.kernel.process import ProcessTable, ProcessState, ProcessControlBlock, ProcessType
+
+import pytest
+
 from app.runtime.kernel.manager import ProcessManager
+from app.runtime.kernel.process import ProcessControlBlock, ProcessState, ProcessTable, ProcessType
+from app.runtime.lifecycle.interfaces import InvalidStateTransitionError
+from app.runtime.lifecycle.process import ProcessLifecycleManager
 from app.runtime.lifecycle.session import SessionLifecycleManager
 from app.runtime.lifecycle.workflow import WorkflowLifecycleManager
-from app.runtime.lifecycle.process import ProcessLifecycleManager
-from app.runtime.lifecycle.interfaces import InvalidStateTransitionError
+
 
 def test_session_lifecycle():
     mgr = SessionLifecycleManager()

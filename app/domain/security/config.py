@@ -1,5 +1,7 @@
-from pydantic import BaseModel, Field, field_validator
 import base64
+
+from pydantic import BaseModel, Field
+
 
 class SecurityConfig(BaseModel):
     """
@@ -11,7 +13,7 @@ class SecurityConfig(BaseModel):
     bcrypt_rounds: int = Field(12, ge=4, description="Number of rounds for bcrypt hashing")
     token_length_bytes: int = Field(32, ge=16, description="Byte length for generated tokens")
     jwt_keys: dict[str, str] = Field(default_factory=dict, description="Dictionary of Key IDs (kid) to their signing keys/secrets")
-    
+
     @classmethod
     def from_settings(cls, key_base64: str | None, rounds: int = 12, jwt_secret: str | None = None) -> "SecurityConfig":
         """Builds the config, applying fail-fast validation for the encryption key."""
@@ -23,15 +25,15 @@ class SecurityConfig(BaseModel):
                 key = base64.b64decode(key_base64)
             except Exception as e:
                 raise ValueError("ENCRYPTION_KEY_BASE64 must be a valid base64 string") from e
-                
+
             if len(key) != 32:
                 raise ValueError("ENCRYPTION_KEY_BASE64 must decode to exactly 32 bytes for AES-256-GCM")
-                
+
         jwt_keys = {}
         if jwt_secret:
             jwt_keys["default"] = jwt_secret
         else:
             # Fallback for local dev
             jwt_keys["default"] = "fallback-jwt-secret-do-not-use-in-production"
-                
+
         return cls(encryption_key=key, bcrypt_rounds=rounds, jwt_keys=jwt_keys)

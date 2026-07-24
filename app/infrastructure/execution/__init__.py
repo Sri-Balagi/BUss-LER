@@ -1,5 +1,6 @@
 from app.infrastructure.execution.factory import ExecutionStrategyFactory
 from app.infrastructure.execution.in_process import InProcessExecutionStrategy
+from app.infrastructure.execution.sandboxed_strategy import SandboxedExecutionStrategy
 from app.infrastructure.execution.strategy import (
     ExecutionContext,
     ExecutionResult,
@@ -7,7 +8,6 @@ from app.infrastructure.execution.strategy import (
     IExecutionStrategy,
 )
 from app.infrastructure.execution.subprocess_strategy import SubprocessExecutionStrategy
-from app.infrastructure.execution.sandboxed_strategy import SandboxedExecutionStrategy
 
 __all__ = [
     "ExecutionStrategy",

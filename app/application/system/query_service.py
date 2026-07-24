@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any
 
 from app.runtime.kernel.interfaces import IRuntimeManager
 from app.runtime.registry.base import BaseRegistry
@@ -17,19 +17,19 @@ class SystemQueryService:
         workflow_registry: BaseRegistry[Any],
     ):
         self.runtime_manager = runtime_manager
-        
+
         # Centralized mapping of available registries for queries
-        self._registries: Dict[str, BaseRegistry[Any]] = {
+        self._registries: dict[str, BaseRegistry[Any]] = {
             "ToolRegistry": tool_registry,
             "WorkflowRegistry": workflow_registry,
         }
 
-    async def list_active_workflows(self) -> List[Dict[str, Any]]:
+    async def list_active_workflows(self) -> list[dict[str, Any]]:
         """
         Retrieves a list of currently active workflows/processes from the Kernel.
         """
         # In a fully realized system, runtime_manager.list_processes() would exist.
-        # Since IRuntimeManager doesn't expose it directly in MVP, we might need 
+        # Since IRuntimeManager doesn't expose it directly in MVP, we might need
         # to query the ProcessManager or ProcessTable.
         # Let's check what IRuntimeManager actually exposes. For now, we return empty list if not implemented.
         try:
@@ -40,19 +40,19 @@ class SystemQueryService:
                 return [{"id": str(p.pid), "status": p.state.name, "started": p.start_time.isoformat() if p.start_time else None} for p in processes]
         except AttributeError:
             pass
-            
+
         return []
 
-    async def list_registry_items(self, registry_name: str) -> List[Dict[str, Any]]:
+    async def list_registry_items(self, registry_name: str) -> list[dict[str, Any]]:
         """
         Retrieves all items from a specified registry.
         """
         registry = self._registries.get(registry_name)
         if not registry:
             raise ValueError(f"Registry not found: {registry_name}")
-            
+
         items = await registry.list_all()
-        
+
         # Serialize based on whether the items are Pydantic models or plain objects
         serialized = []
         for item in items:
@@ -69,10 +69,10 @@ class SystemQueryService:
                         "type": getattr(item, "type", "Unknown"),
                     }
                 )
-                
+
         return serialized
 
-    async def get_memory_status(self) -> Dict[str, Any]:
+    async def get_memory_status(self) -> dict[str, Any]:
         """
         Retrieves the status of the memory subsystem.
         """

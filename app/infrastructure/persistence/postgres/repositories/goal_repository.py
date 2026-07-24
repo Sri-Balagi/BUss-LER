@@ -14,9 +14,11 @@ Table: goals, intent_goal_links
 import time
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
+from typing import Any
 from uuid import UUID
 
 import structlog
+from postgrest.types import CountMethod
 from supabase import AsyncClient
 
 from app.intelligence.strategy.goals.goal import (
@@ -87,9 +89,13 @@ class GoalRepository(AbstractGoalRepository):
     def __init__(self, client: AsyncClient) -> None:
         self._client = client
 
+    @staticmethod
+    def _deserialize(row: Any) -> Goal:
+        return Goal.model_validate(dict(row) if isinstance(row, dict) else {})
+
     async def create(self, twin_id: UUID, data: GoalCreate) -> Goal:
         start = time.time()
-        insert_data = {
+        insert_data: dict[str, Any] = {
             "twin_id": str(twin_id),
             "title": data.title,
             "goal_type": data.goal_type.value,
@@ -111,8 +117,10 @@ class GoalRepository(AbstractGoalRepository):
             raise RepositoryError("goal.create", str(exc)) from exc
 
         duration_ms = (time.time() - start) * 1000
-        logger.info("Created goal", goal_id=response.data[0]["id"], latency_ms=duration_ms)
-        return Goal.model_validate(response.data[0])
+        first_row = response.data[0] if response.data and isinstance(response.data, list) else {}
+        goal_id = first_row.get("id") if isinstance(first_row, dict) else ""
+        logger.info("Created goal", goal_id=str(goal_id), latency_ms=duration_ms)
+        return self._deserialize(first_row)
 
     async def get_by_id(self, goal_id: UUID) -> Goal:
         start = time.time()
@@ -131,7 +139,7 @@ class GoalRepository(AbstractGoalRepository):
             goal_id=str(goal_id),
             latency_ms=(time.time() - start) * 1000,
         )
-        return Goal.model_validate(response.data[0])
+        return self._deserialize(response.data[0])
 
     async def list_by_twin(
         self,
@@ -146,7 +154,7 @@ class GoalRepository(AbstractGoalRepository):
         try:
             query = (
                 self._client.table(self._table)
-                .select("*", count="exact")
+                .select("*", count=CountMethod.exact)
                 .eq("twin_id", str(twin_id))
             )
             if not include_deleted:
@@ -162,7 +170,8 @@ class GoalRepository(AbstractGoalRepository):
         except Exception as exc:
             raise RepositoryError("goal.list_by_twin", str(exc)) from exc
 
-        items = [Goal.model_validate(row) for row in response.data]
+        data_list = response.data if isinstance(response.data, list) else []
+        items = [self._deserialize(row) for row in data_list]
         total = response.count if response.count is not None else len(items)
         logger.debug(
             "Listed goals",

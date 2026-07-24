@@ -23,6 +23,10 @@ class TraceContextProvider(AbstractContextProvider):
 
         self._trace_service = trace_service
 
+    @property
+    def source(self) -> ContextSource:
+        return ContextSource.TRACE
+
     async def provide(self, ctx, twin_id: UUID, policy) -> ContextSection:
 
         items = []

@@ -1,6 +1,7 @@
 import time
-from typing import Optional
+from typing import cast
 
+from app.application.intelligence.kernel import EventRouter
 from app.domain.intelligence.capability import CapabilityType
 from app.domain.intelligence.pipeline import IIntelligencePipeline, PipelineContext, PipelineResult
 from app.domain.intelligence.provider import ICapabilityRegistry
@@ -14,14 +15,13 @@ from app.domain.planning.events import (
 from app.domain.planning.models import Goal, Plan, PlanningContext, PlanStatus
 from app.domain.planning.provider import IPlanningProvider
 from app.domain.planning.validator import IPlanValidator
-from app.application.intelligence.kernel import EventRouter
 
 
 class PlanningPipeline(IIntelligencePipeline):
     """
     Orchestrates the generation and validation of execution plans.
     """
-    
+
     def __init__(
         self,
         registry: ICapabilityRegistry,
@@ -34,10 +34,10 @@ class PlanningPipeline(IIntelligencePipeline):
 
     async def execute(self, context: PipelineContext[Goal]) -> PipelineResult[Plan]:
         start_time = time.perf_counter()
-        
-        planning_context: PlanningContext = context.execution_context
+
+        planning_context = cast(PlanningContext, context.execution_context)
         goal: Goal = context.payload
-        
+
         # Publish PlanGenerationStarted event
         await self._event_router.publish(
             PlanGenerationStarted(
@@ -46,19 +46,19 @@ class PlanningPipeline(IIntelligencePipeline):
                 correlation_id=planning_context.correlation_id,
             )
         )
-        
+
         # Resolve Provider
-        provider: Optional[IPlanningProvider] = self._registry.resolve_provider(CapabilityType.PLANNING)
+        provider = cast(IPlanningProvider | None, self._registry.resolve_provider(CapabilityType.PLANNING))
         if not provider:
             raise RuntimeError("No available PLANNING provider found in capability registry.")
-            
+
         # Generate Plan
         plan = await provider.generate_plan(planning_context, goal)
-        
+
         # Validation
         plan.transition_status(PlanStatus.VALIDATING)
         errors = self._validator.validate_plan(plan)
-        
+
         if errors:
             plan.transition_status(PlanStatus.INVALID, errors=errors)
             await self._event_router.publish(
@@ -96,7 +96,7 @@ class PlanningPipeline(IIntelligencePipeline):
             token_usage={},
             provider_metadata=provider.get_metadata().model_dump()
         )
-        
+
         return PipelineResult(
             context=planning_context,
             payload=plan,

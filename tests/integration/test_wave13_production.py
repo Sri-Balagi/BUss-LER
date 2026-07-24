@@ -1,10 +1,13 @@
-import pytest
 import asyncio
+
+import pytest
+
 from app.infrastructure.cache.manager import CacheManager
-from app.infrastructure.workers.worker import DistributedWorker
-from app.infrastructure.providers.interfaces import IMessageQueue, IRedisProvider
 from app.infrastructure.dr.manager import DisasterRecoveryManager, IBackupProvider
 from app.infrastructure.monitoring.observability import MetricsRegistry, Tracer
+from app.infrastructure.providers.interfaces import IMessageQueue, IRedisProvider
+from app.infrastructure.workers.worker import DistributedWorker
+
 
 class MockRedisProvider(IRedisProvider):
     def __init__(self):
@@ -45,18 +48,18 @@ async def test_cache_manager():
 async def test_distributed_worker():
     mq = MockMessageQueue()
     worker = DistributedWorker("task_q", mq)
-    
+
     processed = False
     async def handler(msg):
         nonlocal processed
         processed = True
-        
+
     worker.register_handler("TEST_TASK", handler)
-    
+
     await mq.push("task_q", {"id": "1", "type": "TEST_TASK"})
     msg = await mq.pop("task_q")
     await worker._process_message(msg)
-    
+
     assert processed is True
     assert "1" in mq.acked
 
@@ -73,7 +76,7 @@ def test_monitoring():
     registry.inc("http_requests", 1, {"method": "GET"})
     output = registry.export_prometheus()
     assert 'http_requests{method="GET"} 1' in output
-    
+
     tracer = Tracer()
     ctx = tracer.start_span("test")
     assert ctx.trace_id is not None

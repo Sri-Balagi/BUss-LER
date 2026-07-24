@@ -132,7 +132,7 @@ class IntentService(AbstractIntentService):
             raw_text=intent.raw_text,
         )
 
-        await self._event_bus.publish(event, ctx)
+        self._event_bus.publish(event, ctx)
 
         log.info("Intent created", intent_id=str(intent.id))
 
@@ -210,7 +210,7 @@ class IntentService(AbstractIntentService):
             confidence=classify_result.analysis.confidence.value,
         )
 
-        await self._event_bus.publish(event, ctx)
+        self._event_bus.publish(event, ctx)
 
         log.info(
             "Intent classified",

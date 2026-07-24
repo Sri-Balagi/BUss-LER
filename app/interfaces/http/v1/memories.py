@@ -22,49 +22,50 @@ from app.interfaces.http.v1.dependencies_memory import (
     get_update_memory_use_case,
 )
 
-router = APIRouter(prefix="/memories", tags=["Memories"])
+router = APIRouter(tags=["Memories"])
 
 
 def _to_domain_create(data: CreateMemoryRequest, twin_id: UUID) -> MemoryCreate:
     """Convert HTTP request schema to domain MemoryCreate model."""
+    from decimal import Decimal
+
+    importance = Decimal(str(data.importance)) if hasattr(data, "importance") and data.importance is not None else Decimal("0.50")
     return MemoryCreate(
         title=getattr(data, "title", "Untitled"),
         content=data.content,
         memory_category=data.memory_category,
         source=data.source,
-        importance=data.importance,
-        metadata=data.metadata,
+        importance=importance,
+        metadata=data.metadata if hasattr(data, "metadata") and data.metadata is not None else {},
     )
 
 
 def _to_domain_update(data: UpdateMemoryRequest) -> MemoryUpdate:
     """Convert HTTP request schema to domain MemoryUpdate model."""
+    from decimal import Decimal
+
+    importance = Decimal(str(data.importance)) if hasattr(data, "importance") and data.importance is not None else None
     return MemoryUpdate(
         content=data.content,
-        memory_category=data.memory_category,
-        metadata=data.metadata,
-        importance=data.importance,
+        metadata=data.metadata if hasattr(data, "metadata") else None,
+        importance=importance,
     )
 
 
 @router.post(
-    "",
+    "/twins/{twin_id}/memories",
     response_model=MemoryResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Create a new Memory",
 )
 async def create_memory(
     request: Request,
+    twin_id: UUID,
     data: CreateMemoryRequest,
     current_user: UUID = Depends(get_current_user),
     use_case=Depends(get_create_memory_use_case),
 ) -> MemoryResponse:
-    """Create a new memory for a Digital Twin.
-    
-    The twin_id must be provided in the request body.
-    """
-    # twin_id comes from the request body if included, otherwise use current_user as fallback
-    twin_id: UUID = getattr(data, "twin_id", current_user)
+    """Create a new memory for a Digital Twin."""
     correlation_id = str(getattr(request.state, "correlation_id", uuid.uuid4()))
     domain_data = _to_domain_create(data, twin_id)
     return await use_case.execute(
@@ -75,7 +76,7 @@ async def create_memory(
 
 
 @router.get(
-    "",
+    "/memories",
     response_model=PaginatedResponse[MemoryResponse],
     summary="List active Memories",
 )
@@ -103,7 +104,7 @@ async def list_memories(
 
 
 @router.get(
-    "/{memory_id}",
+    "/memories/{memory_id}",
     response_model=MemoryResponse,
     summary="Get Memory by ID",
 )
@@ -116,7 +117,7 @@ async def get_memory(
 
 
 @router.put(
-    "/{memory_id}",
+    "/memories/{memory_id}",
     response_model=MemoryResponse,
     summary="Update Memory",
 )
@@ -133,7 +134,7 @@ async def update_memory(
 
 
 @router.delete(
-    "/{memory_id}",
+    "/memories/{memory_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Soft-delete Memory",
 )
@@ -148,7 +149,7 @@ async def delete_memory(
 
 
 @router.post(
-    "/{memory_id}/restore",
+    "/memories/{memory_id}/restore",
     response_model=MemoryResponse,
     summary="Restore Memory",
 )

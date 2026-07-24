@@ -1,6 +1,7 @@
 import json
 import logging
 from pathlib import Path
+
 from app.sdk.core.app_base import BizOSApp
 from app.sdk.manifest.app_manifest import AppManifest
 
@@ -22,9 +23,9 @@ class DataProcessorApp(BizOSApp):
 
 if __name__ == "__main__":
     manifest_path = Path(__file__).parent / "manifest.json"
-    with open(manifest_path, "r") as f:
+    with open(manifest_path) as f:
         data = json.load(f)
-    
+
     app = DataProcessorApp(manifest=AppManifest.model_validate(data))
     try:
         app.run()

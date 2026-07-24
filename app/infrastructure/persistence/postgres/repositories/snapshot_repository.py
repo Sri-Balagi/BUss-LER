@@ -8,9 +8,11 @@ RPC function during twin updates. This repository also exposes a
 Snapshots are **immutable** — no update or delete operations exist.
 """
 
+from typing import Any
 from uuid import UUID
 
 import structlog
+from postgrest.types import CountMethod
 from supabase import AsyncClient
 
 from app.interfaces.http.schemas.twin import TwinSnapshot
@@ -55,7 +57,7 @@ class SnapshotRepository:
         Raises:
             RepositoryError: If the insert fails.
         """
-        insert_data = {
+        insert_data: dict[str, Any] = {
             "twin_id": str(twin_id),
             "twin_version": twin_version,
             "snapshot_data": snapshot_data,
@@ -128,7 +130,7 @@ class SnapshotRepository:
         try:
             response = (
                 await self._client.table(self._table_name)
-                .select("*", count="exact")
+                .select("*", count=CountMethod.exact)
                 .eq("twin_id", str(twin_id))
                 .order("created_at", desc=True)
                 .range(offset, offset + limit - 1)

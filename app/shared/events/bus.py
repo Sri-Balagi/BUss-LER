@@ -10,7 +10,7 @@ from app.shared.events.models import DomainEvent
 
 logger = structlog.get_logger(__name__)
 
-EventHandler = Callable[[DomainEvent], Coroutine[Any, Any, None]]
+EventHandler = Callable[[Any], Coroutine[Any, Any, None]]
 
 
 class EventBus(ABC):
@@ -20,17 +20,17 @@ class EventBus(ABC):
     """
 
     @abstractmethod
-    def subscribe(self, event_type: type[DomainEvent], handler: EventHandler) -> None:
+    def subscribe(self, event_type: Any, handler: EventHandler) -> None:
         """Register a handler for a specific event type."""
         pass
 
     @abstractmethod
-    def unsubscribe(self, event_type: type[DomainEvent], handler: EventHandler) -> None:
+    def unsubscribe(self, event_type: Any, handler: EventHandler) -> None:
         """Unregister a handler."""
         pass
 
     @abstractmethod
-    def publish(self, event: DomainEvent) -> None:
+    def publish(self, event: DomainEvent, ctx: Any = None) -> None:
         """Publish an event to all registered handlers asynchronously."""
         pass
 
@@ -40,9 +40,9 @@ class BackgroundTasksEventBus(EventBus):
     FastAPI BackgroundTasks implementation of the EventBus.
     """
 
-    def __init__(self, background_tasks: BackgroundTasks = None):
+    def __init__(self, background_tasks: BackgroundTasks | None = None):
         self._background_tasks = background_tasks
-        self._handlers: dict[type[DomainEvent], list[EventHandler]] = {}
+        self._handlers: dict[Any, list[EventHandler]] = {}
 
     def set_background_tasks(self, background_tasks: BackgroundTasks) -> None:
         self._background_tasks = background_tasks
@@ -67,7 +67,7 @@ class BackgroundTasksEventBus(EventBus):
                 handler=handler.__name__,
             )
 
-    def publish(self, event: DomainEvent) -> None:
+    def publish(self, event: DomainEvent, ctx: Any = None) -> None:
         if not self._background_tasks:
             logger.warning(
                 "No background_tasks provided, EventBus dropped event",
@@ -105,9 +105,9 @@ class AsyncioEventBus(EventBus):
     """
 
     def __init__(self) -> None:
-        self._handlers: dict[type[DomainEvent], list[EventHandler]] = {}
+        self._handlers: dict[Any, list[EventHandler]] = {}
 
-    def subscribe(self, event_type: type[DomainEvent], handler: EventHandler) -> None:
+    def subscribe(self, event_type: Any, handler: EventHandler) -> None:
         if event_type not in self._handlers:
             self._handlers[event_type] = []
         if handler not in self._handlers[event_type]:
@@ -118,7 +118,7 @@ class AsyncioEventBus(EventBus):
             handler=handler.__name__,
         )
 
-    def unsubscribe(self, event_type: type[DomainEvent], handler: EventHandler) -> None:
+    def unsubscribe(self, event_type: Any, handler: EventHandler) -> None:
         if event_type in self._handlers and handler in self._handlers[event_type]:
             self._handlers[event_type].remove(handler)
             logger.debug(
@@ -127,7 +127,7 @@ class AsyncioEventBus(EventBus):
                 handler=handler.__name__,
             )
 
-    def publish(self, event: DomainEvent) -> None:
+    def publish(self, event: DomainEvent, ctx: Any = None) -> None:
         handlers = self._handlers.get(type(event), [])
         wildcard_handlers = self._handlers.get("*", [])
         all_handlers = handlers + wildcard_handlers
@@ -154,7 +154,7 @@ class AsyncioEventBus(EventBus):
                         await h(e)
                     except Exception as ex:
                         logger.error("AsyncioEventBus handler failed", handler=h.__name__, event_id=str(e.event_id), error=str(ex))
-                
+
                 loop.create_task(safe_execute())
         except RuntimeError:
             logger.warning("No running event loop found, cannot publish asynchronously", event_id=str(event.event_id))

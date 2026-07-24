@@ -5,12 +5,14 @@ including the fundamental TokenBudget and TokenUsageRecord models,
 as well as the BudgetPolicy enum for enforcement rules.
 """
 
-from datetime import timezone, datetime
-try:
+import enum
+import sys
+from datetime import UTC, datetime
+
+if sys.version_info >= (3, 11):
     from enum import StrEnum
-except ImportError:
-    from enum import Enum
-    class StrEnum(str, Enum):
+else:
+    class StrEnum(str, enum.Enum):
         pass
 
 
@@ -32,10 +34,10 @@ class TokenBudget(DomainBaseModel):
 
     entity_id: str = Field(..., description="The entity this budget applies to.")
     daily_limit: int | None = Field(
-        None, description="Maximum tokens allowed per day. None means unlimited."
+        default=None, description="Maximum tokens allowed per day. None means unlimited."
     )
     session_limit: int | None = Field(
-        None, description="Maximum tokens allowed per cognitive session. None means unlimited."
+        default=None, description="Maximum tokens allowed per cognitive session. None means unlimited."
     )
     policy: BudgetPolicy = Field(
         default=BudgetPolicy.WARN,
@@ -43,7 +45,7 @@ class TokenBudget(DomainBaseModel):
     )
     current_day_usage: int = Field(default=0, description="Tokens consumed so far today.")
     last_reset_date: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
+        default_factory=lambda: datetime.now(UTC),
         description="The date this budget's daily usage was last reset to 0.",
     )
 
@@ -60,6 +62,6 @@ class TokenUsageRecord(DomainBaseModel):
     total_tokens: int = Field(default=0, description="Total tokens consumed.")
     session_id: str | None = Field(None, description="Cognitive session ID, if applicable.")
     timestamp: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
+        default_factory=lambda: datetime.now(UTC),
         description="When the tokens were consumed.",
     )

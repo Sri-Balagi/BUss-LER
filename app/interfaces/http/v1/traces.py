@@ -14,7 +14,10 @@ from fastapi import APIRouter, Depends, Query
 
 from app.application.trace.cognitive_trace_service import CognitiveTraceListQuery
 from app.core.context import OperationContext
-from app.intelligence.learning.repository.cognitive_trace import CognitiveTrace, PaginatedCognitiveTraces
+from app.intelligence.learning.repository.cognitive_trace import (
+    CognitiveTrace,
+    PaginatedCognitiveTraces,
+)
 from app.interfaces.http.v1.dependencies_core import get_operation_context
 from app.interfaces.http.v1.dependencies_trace import get_cognitive_trace_service
 

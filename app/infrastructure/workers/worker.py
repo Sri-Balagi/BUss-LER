@@ -1,8 +1,9 @@
 import asyncio
 import logging
-import uuid
 import time
-from typing import Callable, Any
+import uuid
+from collections.abc import Callable
+from typing import Any
 
 logger = logging.getLogger("bizos.worker")
 

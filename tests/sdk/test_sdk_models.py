@@ -1,5 +1,6 @@
 from app.sdk.client.config import SDKConfig
-from app.sdk.client.models import SDKResponse, RegistryItemModel
+from app.sdk.client.models import RegistryItemModel, SDKResponse
+
 
 def test_sdk_config():
     config = SDKConfig(base_url="http://test", api_key="secret")

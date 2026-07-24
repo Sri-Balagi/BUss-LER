@@ -73,7 +73,7 @@ class ContextEngine(AbstractContextEngine):
         ranker,  # AbstractContextRanker
         compressor,  # AbstractContextCompressor
         window_builder,  # AbstractContextWindowBuilder
-        repository: AbstractEnterpriseContextRepository = None,
+        repository: AbstractEnterpriseContextRepository | None = None,
         event_bus=None,  # EventBus
         trace_service=None,  # AbstractCognitiveTraceService
     ) -> None:
@@ -410,7 +410,7 @@ class ContextEngine(AbstractContextEngine):
             return
 
         if failures:
-            self._event_bus.publish(
+            await self._event_bus.publish(
                 ContextPartiallyBuiltEvent(
                     correlation_id=ctx.correlation_id,
                     context_id=context.context_id,
@@ -422,7 +422,7 @@ class ContextEngine(AbstractContextEngine):
             )
 
         else:
-            self._event_bus.publish(
+            await self._event_bus.publish(
                 ContextBuiltEvent(
                     correlation_id=ctx.correlation_id,
                     context_id=context.context_id,

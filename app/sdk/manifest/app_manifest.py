@@ -1,4 +1,3 @@
-from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -12,12 +11,12 @@ class AppManifest(BaseModel):
     version: str = Field(default="0.1.0", description="SemVer version string.")
     description: str = Field(default="", description="Human-readable description.")
     author: str = Field(default="unknown")
-    
+
     # Dependencies required by this app
-    dependencies: List[str] = Field(default_factory=list)
-    
+    dependencies: list[str] = Field(default_factory=list)
+
     # Required permissions (e.g., 'fs:read', 'network:external')
-    permissions: List[str] = Field(default_factory=list)
-    
+    permissions: list[str] = Field(default_factory=list)
+
     # Entry points
-    entrypoint: Optional[str] = None
+    entrypoint: str | None = None

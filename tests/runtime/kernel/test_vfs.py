@@ -1,5 +1,7 @@
 import pytest
+
 from app.infrastructure.vfs.vfs import IVirtualFileSystem, MountManager, PathResolver
+
 
 class DummyVFS(IVirtualFileSystem):
     def mount_manager(self): return None

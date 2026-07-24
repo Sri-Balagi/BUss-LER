@@ -83,7 +83,7 @@ async def test_snapshot_repository_list_error(snapshot_repo, mock_supabase_clien
 # HistoryRepository Tests
 # =====================================================================
 
-from app.models.twin import ChangeType
+from app.models.twin import ChangeType  # noqa: E402
 
 
 @pytest.mark.asyncio

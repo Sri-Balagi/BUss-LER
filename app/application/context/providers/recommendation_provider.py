@@ -21,6 +21,10 @@ class RecommendationContextProvider(AbstractContextProvider):
 
         self._recommendation_service = recommendation_service
 
+    @property
+    def source(self) -> ContextSource:
+        return ContextSource.RECOMMENDATION
+
     async def provide(self, ctx, twin_id: UUID, policy) -> ContextSection:
 
         items = []

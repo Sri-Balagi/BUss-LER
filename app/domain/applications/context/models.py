@@ -1,13 +1,15 @@
+from typing import Any
+
 from pydantic import BaseModel, Field
-from typing import Dict, Any, Optional
+
 
 class ApplicationContext(BaseModel):
     """Base context for executing a cognitive application."""
     user_id: str = Field(..., description="The user initiating the request")
     tenant_id: str = Field(..., description="The tenant context")
-    trace_id: Optional[str] = Field(None, description="Distributed tracing ID")
-    span_id: Optional[str] = Field(None, description="Distributed tracing span ID")
-    variables: Dict[str, Any] = Field(default_factory=dict, description="Temporary variables for execution")
+    trace_id: str | None = Field(None, description="Distributed tracing ID")
+    span_id: str | None = Field(None, description="Distributed tracing span ID")
+    variables: dict[str, Any] = Field(default_factory=dict, description="Temporary variables for execution")
 
 class ChatContext(ApplicationContext):
     """Context specifically for conversational copilots."""

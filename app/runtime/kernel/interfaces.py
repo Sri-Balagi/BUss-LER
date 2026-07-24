@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import UUID
+
 
 class IKernel(ABC):
     """The root Kernel abstraction for BizOS."""
@@ -17,7 +18,7 @@ class IProcessManager(ABC):
         pass
 
     @abstractmethod
-    def get_status(self, pid: UUID) -> Optional[Any]:
+    def get_status(self, pid: UUID) -> Any | None:
         pass
 
 class IRuntimeManager(ABC):
@@ -61,5 +62,5 @@ class IPolicyEngine(ABC):
 class IServiceDiscovery(ABC):
     """Manages discovery of Agents, Capabilities, Tools, Plugins, and Domain Packs."""
     @abstractmethod
-    def discover(self, service_type: str) -> List[Any]:
+    def discover(self, service_type: str) -> list[Any]:
         pass

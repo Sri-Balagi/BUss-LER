@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 from uuid import UUID
 
 from pydantic import Field
@@ -11,18 +11,21 @@ class NodeCreated(DomainEvent):
     node_id: UUID = Field(..., description="The ID of the created node.")
     entity_type: str = Field(..., description="The type of the entity.")
     name: str = Field(..., description="The name of the entity.")
+    tenant_id: UUID | str | None = Field(default=None, description="Tenant ID.")
 
 
 class NodeUpdated(DomainEvent):
     """Event emitted when a KnowledgeNode is updated in the graph."""
     node_id: UUID = Field(..., description="The ID of the updated node.")
     entity_type: str = Field(..., description="The type of the entity.")
-    updates: Dict[str, Any] = Field(..., description="Dictionary of updated fields and new values.")
+    updates: dict[str, Any] = Field(..., description="Dictionary of updated fields and new values.")
+    tenant_id: UUID | str | None = Field(default=None, description="Tenant ID.")
 
 
 class NodeRemoved(DomainEvent):
     """Event emitted when a KnowledgeNode is removed from the graph."""
     node_id: UUID = Field(..., description="The ID of the removed node.")
+    tenant_id: UUID | str | None = Field(default=None, description="Tenant ID.")
 
 
 class EdgeCreated(DomainEvent):
@@ -31,6 +34,7 @@ class EdgeCreated(DomainEvent):
     source_id: UUID = Field(..., description="The ID of the source node.")
     target_id: UUID = Field(..., description="The ID of the target node.")
     relationship_type: str = Field(..., description="The type of the relationship.")
+    tenant_id: UUID | str | None = Field(default=None, description="Tenant ID.")
 
 
 class EdgeRemoved(DomainEvent):
@@ -39,3 +43,4 @@ class EdgeRemoved(DomainEvent):
     source_id: UUID = Field(..., description="The ID of the source node.")
     target_id: UUID = Field(..., description="The ID of the target node.")
     relationship_type: str = Field(..., description="The type of the relationship.")
+    tenant_id: UUID | str | None = Field(default=None, description="Tenant ID.")

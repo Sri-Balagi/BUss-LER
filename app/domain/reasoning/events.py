@@ -1,4 +1,3 @@
-from typing import Any, Dict, Optional
 from uuid import UUID
 
 from app.shared.events.models import DomainEvent
@@ -7,7 +6,7 @@ from app.shared.events.models import DomainEvent
 class ReasoningStarted(DomainEvent):
     tenant_id: UUID
     query_text: str
-    target_entity_id: Optional[UUID] = None
+    target_entity_id: UUID | None = None
 
 
 class ReasoningCompleted(DomainEvent):

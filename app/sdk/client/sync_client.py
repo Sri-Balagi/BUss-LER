@@ -1,8 +1,9 @@
+from typing import Any
+
 import httpx
-from typing import Any, Dict, List, Optional
 
 from app.sdk.client.config import SDKConfig
-from app.sdk.client.models import RegistryItemModel, SDKResponse, ToolExecutionRequest
+from app.sdk.client.models import RegistryItemModel, SDKResponse
 
 
 class BizOSClient:
@@ -10,7 +11,7 @@ class BizOSClient:
     Synchronous client for interacting with the BizOS API.
     """
 
-    def __init__(self, config: Optional[SDKConfig] = None):
+    def __init__(self, config: SDKConfig | None = None):
         self.config = config or SDKConfig()
         self._client = httpx.Client(
             base_url=self.config.base_url,
@@ -46,7 +47,7 @@ class BizOSClient:
 
     # ── Registry Commands ───────────────────────────────────────────────────
 
-    def list_registry_items(self, registry_name: str) -> List[RegistryItemModel]:
+    def list_registry_items(self, registry_name: str) -> list[RegistryItemModel]:
         """Lists items in a given registry."""
         response = self._client.get(f"/api/v1/registries/{registry_name}/items")
         result = self._handle_response(response)
@@ -56,7 +57,7 @@ class BizOSClient:
 
     # ── Execution Commands ──────────────────────────────────────────────────
 
-    def list_active_workflows(self) -> List[Dict[str, Any]]:
+    def list_active_workflows(self) -> list[dict[str, Any]]:
         """Lists currently active workflows from the runtime environment."""
         response = self._client.get("/api/v1/workflows")
         result = self._handle_response(response)
@@ -64,7 +65,7 @@ class BizOSClient:
             return result.data
         return []
 
-    def get_memory_status(self) -> Dict[str, Any]:
+    def get_memory_status(self) -> dict[str, Any]:
         """Retrieves system memory status."""
         response = self._client.get("/api/v1/memory")
         result = self._handle_response(response)

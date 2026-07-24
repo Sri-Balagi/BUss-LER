@@ -1,12 +1,14 @@
-import json
-from typing import Any, Dict, List, Optional, Type
+from typing import Any
+
 from pydantic import BaseModel
+
 from app.domain.intelligence.llm_provider import ILLMProvider
+
 
 class MockBaseProvider(ILLMProvider):
     def __init__(self, name: str):
         self._name = name
-        
+
     @property
     def provider_name(self) -> str:
         return self._name
@@ -14,9 +16,9 @@ class MockBaseProvider(ILLMProvider):
     async def generate_structured(
         self,
         prompt: str,
-        schema: Type[BaseModel],
-        tools: Optional[List[Any]] = None,
-        model: Optional[str] = None
+        schema: type[BaseModel],
+        tools: list[Any] | None = None,
+        model: str | None = None
     ) -> BaseModel:
         # Mock structured response based on schema name
         schema_name = schema.__name__
@@ -43,13 +45,13 @@ class MockBaseProvider(ILLMProvider):
 
     async def chat_completion(
         self,
-        messages: List[Dict[str, str]],
-        tools: Optional[List[Any]] = None,
-        model: Optional[str] = None
+        messages: list[dict[str, str]],
+        tools: list[Any] | None = None,
+        model: str | None = None
     ) -> str:
         return f"Response from {self._name}"
-        
-    async def generate_embeddings(self, text: str, model: Optional[str] = None) -> List[float]:
+
+    async def generate_embeddings(self, text: str, model: str | None = None) -> list[float]:
         # Return deterministic mock embedding
         return [0.1, 0.2, 0.3, 0.4, 0.5]
 

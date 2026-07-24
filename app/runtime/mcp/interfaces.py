@@ -1,7 +1,13 @@
 from abc import ABC, abstractmethod
-from typing import Any, AsyncGenerator, Callable, Dict
+from collections.abc import AsyncGenerator
+from typing import Any
 
-from app.runtime.mcp.models import MCPCallRequest, MCPCallResponse, MCPNegotiationRequest, MCPNegotiationResponse
+from app.runtime.mcp.models import (
+    MCPCallRequest,
+    MCPCallResponse,
+    MCPNegotiationRequest,
+    MCPNegotiationResponse,
+)
 
 
 class IMCPTransport(ABC):
@@ -20,12 +26,12 @@ class IMCPTransport(ABC):
         pass
 
     @abstractmethod
-    async def send(self, message: Dict[str, Any]) -> None:
+    async def send(self, message: dict[str, Any]) -> None:
         """Sends a JSON-RPC message over the transport."""
         pass
 
     @abstractmethod
-    def receive(self) -> AsyncGenerator[Dict[str, Any], None]:
+    def receive(self) -> AsyncGenerator[dict[str, Any], None]:
         """Yields incoming JSON-RPC messages."""
         pass
 
@@ -41,7 +47,7 @@ class IMCPServer(ABC):
         pass
 
     @abstractmethod
-    async def list_tools(self) -> Dict[str, Any]:
+    async def list_tools(self) -> dict[str, Any]:
         """Returns all tools available on this server."""
         pass
 
@@ -61,5 +67,5 @@ class IMCPClient(ABC):
         pass
 
     @abstractmethod
-    async def call_tool(self, name: str, arguments: Dict[str, Any]) -> MCPCallResponse:
+    async def call_tool(self, name: str, arguments: dict[str, Any]) -> MCPCallResponse:
         pass

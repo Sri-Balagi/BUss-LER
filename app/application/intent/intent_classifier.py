@@ -148,19 +148,7 @@ class IntentClassifier(AbstractIntentClassifier):
                 detail=f"AI response failed IntentAnalysis schema validation: {exc}",
             ) from exc
 
-        # Step 4: Business validation
-
-        if not analysis.intent_type:
-            raise AIOutputValidationError(
-                operation="intent_classification",
-                detail="IntentAnalysis.intent_type is required but was not provided by AI.",
-            )
-
-        if not analysis.confidence:
-            raise AIOutputValidationError(
-                operation="intent_classification",
-                detail="IntentAnalysis.confidence is required but was not provided by AI.",
-            )
+        # Step 4: Business validation (Removed redundant Pydantic checks)
 
         # Step 5: Record CognitiveTrace (passive — does not affect classification result)
 

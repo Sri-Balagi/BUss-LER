@@ -39,4 +39,4 @@ class MemoryVectorPoint(DomainBaseModel):
     id: UUID = Field(..., description="The Qdrant Point ID, which matches the memory_id.")
     vector: list[float] = Field(..., description="The raw embedding vector.")
     payload: MemoryVectorPayload = Field(..., description="The structured metadata payload.")
-    score: float | None = Field(None, description="Similarity score returned during search.")
+    score: float | None = Field(default=None, description="Similarity score returned during search.")

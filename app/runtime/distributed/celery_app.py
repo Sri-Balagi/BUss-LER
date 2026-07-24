@@ -15,7 +15,7 @@ from __future__ import annotations
 import os
 
 try:
-    from celery import Celery  # type: ignore[import]
+    from celery import Celery
 
     _broker = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
     _backend = os.getenv("CELERY_RESULT_BACKEND", _broker)
@@ -36,7 +36,16 @@ try:
         task_acks_late=True,  # Ensures at-least-once delivery
     )
 
+    from celery.signals import worker_process_init
+
+    @worker_process_init.connect
+    def init_worker(**kwargs):
+        """Initialize the DI container once per worker process."""
+        from app.bootstrap.container import _global_container, build_container
+        if _global_container is None:
+            build_container()
+
 except ImportError:
     # Graceful degradation: app is None when celery is not installed.
     # Tests that test distributed behaviour directly should mock or skip.
-    app = None  # type: ignore[assignment]
+    app = None

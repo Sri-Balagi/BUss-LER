@@ -7,7 +7,7 @@ in separate modules so the domain/application layers remain free of
 infrastructure dependencies (Clean Architecture / Dependency Inversion).
 """
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import Any
 from uuid import UUID
 
 

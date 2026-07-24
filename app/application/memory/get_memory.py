@@ -1,8 +1,6 @@
 import uuid
 
-from app.infrastructure.persistence.postgres.repositories.memory_repository import (
-    AbstractMemoryRepository,
-)
+from app.domain.memory.repository import AbstractMemoryRepository
 from app.intelligence.learning.repository.memory import Memory
 
 

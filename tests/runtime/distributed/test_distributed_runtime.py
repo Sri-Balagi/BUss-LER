@@ -7,8 +7,8 @@ Infrastructure calls are mocked using unittest.mock so these tests pass in any C
 from __future__ import annotations
 
 import json
-from unittest.mock import MagicMock, patch, PropertyMock
-from uuid import uuid4, UUID
+from unittest.mock import MagicMock, PropertyMock, patch
+from uuid import UUID, uuid4
 
 import pytest
 
@@ -18,7 +18,6 @@ from app.runtime.distributed.interfaces import (
     IWorkerNode,
 )
 from app.runtime.distributed.worker_node import BizOSWorkerNode
-
 
 # ---------------------------------------------------------------------------
 # IDistributedScheduler — interface stub tests (no broker needed)

@@ -1,8 +1,15 @@
 from fastapi import FastAPI
 
-from app.infrastructure.applications.gateway.middleware.tracing import OpenTelemetryMiddleware
 from app.infrastructure.applications.gateway.middleware.auth import GatewayAuthMiddleware
-from app.infrastructure.applications.gateway.routers import health, apps, events, approvals, sessions
+from app.infrastructure.applications.gateway.middleware.tracing import OpenTelemetryMiddleware
+from app.infrastructure.applications.gateway.routers import (
+    approvals,
+    apps,
+    events,
+    health,
+    sessions,
+)
+
 
 def create_gateway_app() -> FastAPI:
     """Create and configure the Unified Cognitive Gateway FastAPI application."""

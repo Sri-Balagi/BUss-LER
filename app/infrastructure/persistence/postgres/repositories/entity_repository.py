@@ -7,6 +7,7 @@ access logic; business rules belong in the service layer.
 from uuid import UUID
 
 import structlog
+from postgrest.types import CountMethod
 from supabase import AsyncClient
 
 from app.interfaces.http.schemas.base import Entity, EntityCreate
@@ -106,7 +107,7 @@ class EntityRepository:
             RepositoryError: If the query fails.
         """
         try:
-            query = self._client.table(self._table_name).select("*", count="exact")
+            query = self._client.table(self._table_name).select("*", count=CountMethod.exact)
 
             if user_id is not None:
                 query = query.eq("user_id", str(user_id))

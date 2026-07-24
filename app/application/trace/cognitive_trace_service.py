@@ -28,11 +28,17 @@ from uuid import UUID
 import structlog
 from pydantic import BaseModel
 
+from app.core.context import OperationContext
+from app.infrastructure.persistence.postgres.repositories.cognitive_trace_repository import (
+    AbstractCognitiveTraceRepository,
+)
 from app.intelligence.learning.repository.cognitive_trace import (
     CognitiveTrace,
     CognitiveTraceCreate,
     PaginatedCognitiveTraces,
 )
+from app.runtime.core.results import CreateCognitiveTraceResult
+from app.shared.events.bus import EventBus
 from app.shared.events.models import CognitiveTraceRecordedEvent
 from app.shared.exceptions.errors import RepositoryError
 
@@ -43,13 +49,6 @@ class CognitiveTraceListQuery(BaseModel):
     limit: int = 50
     offset: int = 0
 
-
-from app.core.context import OperationContext
-from app.infrastructure.persistence.postgres.repositories.cognitive_trace_repository import (
-    AbstractCognitiveTraceRepository,
-)
-from app.runtime.core.results import CreateCognitiveTraceResult
-from app.shared.events.bus import EventBus
 
 logger = structlog.get_logger(__name__)
 
@@ -125,7 +124,7 @@ class CognitiveTraceService(AbstractCognitiveTraceService):
             latency_ms=trace.latency_ms,
         )
 
-        await self._event_bus.publish(event, ctx)
+        self._event_bus.publish(event, ctx)
 
         log.info(
             "Cognitive trace recorded",

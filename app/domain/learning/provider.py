@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import List
 
 from app.domain.intelligence.provider import IIntelligenceProvider
 from app.domain.learning.models import LearningContext, LearningResult
@@ -17,10 +16,10 @@ class ILearningProvider(IIntelligenceProvider, ABC):
         """
         Extracts insights from the agent's reflection feedback and consolidates
         them into long-term persistence.
-        
+
         Args:
             context: The context containing the agent's reflection feedback.
-            
+
         Returns:
             LearningResult containing metrics and consolidated items.
         """

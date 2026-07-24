@@ -14,8 +14,8 @@ from app.repositories.entity_repository import EntityRepository
 logger = structlog.get_logger()
 
 
-from mutmut.mutation.trampoline import MutantDict
-from mutmut.mutation.trampoline import wrap_in_trampoline as _mutmut_mutated
+from mutmut.mutation.trampoline import MutantDict  # noqa: E402
+from mutmut.mutation.trampoline import wrap_in_trampoline as _mutmut_mutated  # noqa: E402
 
 mutants_xǁEntityServiceǁ__init____mutmut: MutantDict = {}  # type: ignore
 mutants_xǁEntityServiceǁget_by_id__mutmut: MutantDict = {}  # type: ignore

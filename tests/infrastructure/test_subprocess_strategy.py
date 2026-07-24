@@ -1,4 +1,5 @@
 import asyncio
+
 import pytest
 
 from app.infrastructure.execution.strategy import ExecutionContext
@@ -23,9 +24,9 @@ def sample_failing_function():
 async def test_subprocess_success():
     strategy = SubprocessExecutionStrategy()
     context = ExecutionContext(timeout_seconds=5.0)
-    
+
     result = await strategy.execute(sample_function, context, 1, 2, z=3)
-    
+
     assert result.success is True
     assert result.result == 6
     assert result.error is None
@@ -35,9 +36,9 @@ async def test_subprocess_success():
 async def test_subprocess_timeout():
     strategy = SubprocessExecutionStrategy()
     context = ExecutionContext(timeout_seconds=0.5)
-    
+
     result = await strategy.execute(sample_blocking_function, context)
-    
+
     assert result.success is False
     assert "timed out" in result.error
 
@@ -46,8 +47,8 @@ async def test_subprocess_timeout():
 async def test_subprocess_exception():
     strategy = SubprocessExecutionStrategy()
     context = ExecutionContext(timeout_seconds=5.0)
-    
+
     result = await strategy.execute(sample_failing_function, context)
-    
+
     assert result.success is False
     assert "intentional error" in result.error

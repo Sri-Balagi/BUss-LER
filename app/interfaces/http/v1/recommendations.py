@@ -23,7 +23,10 @@ from app.interfaces.http.v1.dependencies_recommendation import (
     get_recommendation_engine,
     get_recommendation_service,
 )
-from app.runtime.core.commands import GenerateRecommendationsCommand, UpdateRecommendationStatusCommand
+from app.runtime.core.commands import (
+    GenerateRecommendationsCommand,
+    UpdateRecommendationStatusCommand,
+)
 from app.shared.enums import RecommendationStatus
 
 router = APIRouter(prefix="/recommendations", tags=["Recommendation Engine"])

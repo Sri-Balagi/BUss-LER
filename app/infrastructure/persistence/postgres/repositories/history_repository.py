@@ -9,6 +9,7 @@ method for manual entries (e.g., on twin creation or deletion).
 from uuid import UUID
 
 import structlog
+from postgrest.types import CountMethod
 from supabase import AsyncClient
 
 from app.interfaces.http.schemas.twin import ChangeType, TwinHistory
@@ -112,7 +113,7 @@ class HistoryRepository:
         try:
             response = (
                 await self._client.table(self._table_name)
-                .select("*", count="exact")
+                .select("*", count=CountMethod.exact)
                 .eq("twin_id", str(twin_id))
                 .order("created_at", desc=True)
                 .range(offset, offset + limit - 1)

@@ -1,8 +1,8 @@
-from typing import Any, Dict
+from typing import Any
 from uuid import UUID
 
-from app.shared.events.models import DomainEvent
 from app.domain.twin.models import TwinLifecycleStatus
+from app.shared.events.models import DomainEvent
 
 
 class TwinCreated(DomainEvent):
@@ -15,7 +15,7 @@ class TwinStateUpdated(DomainEvent):
     entity_id: UUID
     tenant_id: UUID
     version: int
-    changes: Dict[str, Any]
+    changes: dict[str, Any]
 
 
 class TwinDesynchronized(DomainEvent):

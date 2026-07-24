@@ -8,9 +8,11 @@ are committed in a single database transaction.
 """
 
 import re
+from typing import Any
 from uuid import UUID
 
 import structlog
+from postgrest.types import CountMethod
 from supabase import AsyncClient
 
 from app.interfaces.http.schemas.twin import DigitalTwin, DigitalTwinCreate, DigitalTwinUpdate
@@ -45,7 +47,7 @@ class TwinRepository:
             DuplicateTwinError: If the entity already has a twin.
             RepositoryError: If the insert fails.
         """
-        insert_data = {
+        insert_data: dict[str, Any] = {
             "entity_id": str(data.entity_id),
             "state": data.state,
             "metadata": data.metadata.model_dump(),
@@ -146,7 +148,7 @@ class TwinRepository:
         try:
             response = (
                 await self._client.table(self._table_name)
-                .select("*", count="exact")
+                .select("*", count=CountMethod.exact)
                 .order("created_at", desc=True)
                 .range(offset, offset + limit - 1)
                 .execute()
@@ -158,6 +160,10 @@ class TwinRepository:
         items = [DigitalTwin.model_validate(row) for row in response.data]
         total = response.count if response.count is not None else len(items)
         return items, total
+
+    async def update(self, twin_id: UUID, data: DigitalTwinUpdate) -> DigitalTwin:
+        """Alias for update_with_snapshot."""
+        return await self.update_with_snapshot(twin_id, data)
 
     async def update_with_snapshot(self, twin_id: UUID, data: DigitalTwinUpdate) -> DigitalTwin:
         """Atomically update a twin via the database RPC function.

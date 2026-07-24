@@ -4,25 +4,25 @@ from unittest.mock import MagicMock
 # Mock structlog before importing
 sys.modules["structlog"] = MagicMock()
 
-import asyncio
-from datetime import UTC, datetime, timezone
-from uuid import uuid4
+import asyncio  # noqa: E402
+from datetime import UTC, datetime, timezone  # noqa: E402
+from uuid import uuid4  # noqa: E402
 
-import pytest
+import pytest  # noqa: E402
 
-from app.application.context.foundation.context_freshness import (
+from app.application.context.foundation.context_freshness import (  # noqa: E402
     DEFAULT_FRESHNESS_POLICIES,
     ContextFreshnessPolicy,
 )
-from app.application.context.foundation.context_policies import (
+from app.application.context.foundation.context_policies import (  # noqa: E402
     BUILT_IN_POLICIES,
     ContextPolicy,
 )
-from app.platform.resilience.context_retry import (
+from app.platform.resilience.context_retry import (  # noqa: E402
     ProviderRetryConfig,
     provide_with_retry,
 )
-from app.shared.enums import ContextSource, RefreshStrategy
+from app.shared.enums import ContextSource, RefreshStrategy  # noqa: E402
 
 
 def test_context_freshness_import_and_logic():

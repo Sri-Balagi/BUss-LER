@@ -1,7 +1,6 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import StrEnum
-from typing import Any, Dict
-from uuid import UUID
+
 from pydantic import Field
 
 from app.domain.intelligence.context import IntelligenceContext
@@ -23,7 +22,7 @@ class WorkflowOptimizationContext(IntelligenceContext):
     workflow: Workflow
     optimization_suggestions: list[str] = Field(default_factory=list)
     state: WorkflowState = Field(default=WorkflowState.ANALYZING)
-    
+
     class Config:
         arbitrary_types_allowed = True
 
@@ -43,9 +42,12 @@ class WorkflowOptimizationResult:
     error_message: str | None = None
 
 
-class IWorkflowIntelligenceProvider(IIntelligenceProvider):
+import abc
+
+class IWorkflowIntelligenceProvider(IIntelligenceProvider, abc.ABC):
     """Abstract interface for capabilities that can optimize a workflow."""
-    
+
+    @abc.abstractmethod
     async def optimize(self, context: WorkflowOptimizationContext) -> WorkflowOptimizationResult:
         """Analyze and optimize the workflow DAG."""
         pass

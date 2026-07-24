@@ -1,6 +1,5 @@
 from enum import StrEnum
-from typing import Any, Dict, List, Optional
-from uuid import UUID
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -39,7 +38,7 @@ class TriggerContext(ApplicationContext):
 class TriggerCondition(BaseModel):
     """A condition that must be evaluated before the action is taken."""
     condition_type: str = Field(..., description="Type of evaluator to use, e.g., 'threshold', 'boolean', 'ai_predicate'")
-    parameters: Dict[str, Any] = Field(default_factory=dict, description="Parameters for the condition evaluator")
+    parameters: dict[str, Any] = Field(default_factory=dict, description="Parameters for the condition evaluator")
 
 
 class TriggerAction(BaseModel):
@@ -47,24 +46,24 @@ class TriggerAction(BaseModel):
     target_app_id: str = Field(..., description="The ID of the cognitive application to dispatch")
     execution_mode: ExecutionMode = Field(default=ExecutionMode.QUEUE)
     priority: TriggerPriority = Field(default=TriggerPriority.NORMAL)
-    payload: Dict[str, Any] = Field(default_factory=dict, description="The payload to send to the target application")
+    payload: dict[str, Any] = Field(default_factory=dict, description="The payload to send to the target application")
 
 
 class CognitiveTrigger(BaseModel):
     """The core aggregate root representing a registered trigger rule."""
     trigger_id: str = Field(..., description="Unique ID of this trigger configuration")
     trigger_type: TriggerType
-    conditions: List[TriggerCondition] = Field(default_factory=list, description="All conditions must pass for the trigger to fire")
+    conditions: list[TriggerCondition] = Field(default_factory=list, description="All conditions must pass for the trigger to fire")
     action: TriggerAction = Field(..., description="The action to perform if conditions are met")
-    tenant_id: Optional[str] = None
+    tenant_id: str | None = None
     enabled: bool = True
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class TriggerExecutionResult(BaseModel):
     """Result of a trigger evaluation or execution."""
     trigger_id: str
-    target_job_id: Optional[str] = None
+    target_job_id: str | None = None
     success: bool
     reason: str
-    metrics: Dict[str, Any] = Field(default_factory=dict)
+    metrics: dict[str, Any] = Field(default_factory=dict)

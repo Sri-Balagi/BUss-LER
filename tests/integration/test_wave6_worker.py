@@ -1,17 +1,22 @@
-import pytest
-import uuid
 import asyncio
+import uuid
 from unittest.mock import AsyncMock, patch
 
-from app.bootstrap.container import build_container, reset_container_for_testing
-from app.application.applications.worker.app import AutonomousWorkerApplication
-from app.domain.applications.registry.interfaces import IApplicationRegistry
-from app.domain.intelligence.platform import IIntelligencePlatform, UnifiedExecutionResult
-from app.domain.applications.worker.models import JobStatus
-from app.infrastructure.applications.gateway.app import create_gateway_app
+import pytest
 from fastapi.testclient import TestClient
+
+from app.application.applications.worker.app import AutonomousWorkerApplication
+from app.bootstrap.container import build_container, reset_container_for_testing
+from app.domain.applications.registry.interfaces import IApplicationRegistry
+from app.domain.applications.worker.models import JobStatus
+from app.domain.intelligence.platform import (
+    IIntelligencePlatform,
+    UnifiedExecutionMetrics,
+    UnifiedExecutionResult,
+)
 from app.domain.intelligence.telemetry import IntelligenceMetrics
-from app.domain.intelligence.platform import UnifiedExecutionMetrics
+from app.infrastructure.applications.gateway.app import create_gateway_app
+
 
 class MockPlatform(IIntelligencePlatform):
     async def execute_request(self, request):
@@ -29,18 +34,27 @@ class MockPlatform(IIntelligencePlatform):
     async def get_execution_status(self, execution_id):
         pass
 
+    async def generate_structured(self, prompt, schema, tools=None, model=None):
+        return schema()
+
+    async def chat_completion(self, messages, tools=None, model=None):
+        return "mocked response"
+
+    async def generate_embeddings(self, text, model=None):
+        return [0.0] * 1536
+
 @pytest.fixture
 def test_container():
     reset_container_for_testing()
     container = build_container()
-    
+
     # Replace real platform with mock to speed up tests and avoid LLM calls
     mock_platform = MockPlatform()
     container.override(IIntelligencePlatform, mock_platform)
-    
+
     # Force resolve
     container.resolve(AutonomousWorkerApplication)
-    
+
     yield container
     reset_container_for_testing()
 
@@ -53,7 +67,7 @@ def test_client(test_container):
 async def test_worker_metadata(test_container):
     registry = test_container.resolve(IApplicationRegistry)
     app = registry.resolve("bizos.worker.v1")
-    
+
     assert app is not None
     assert app.metadata().id == "bizos.worker.v1"
     assert app.metadata().name == "BizOS Autonomous Worker"
@@ -65,16 +79,16 @@ def test_worker_job_lifecycle(test_client):
         "task_id": "task-456",
         "variables": {"goal": "Test background goal"}
     }
-    
+
     # 1. Submit Job
     response = test_client.post("/apps/bizos.worker.v1/jobs", json=payload, headers=headers)
     assert response.status_code == 200
     job_id = response.json()["job_id"]
-    
+
     import time
     max_retries = 10
     final_status = None
-    
+
     # 2. Poll for completion
     for _ in range(max_retries):
         status_resp = test_client.get(f"/apps/bizos.worker.v1/jobs/{job_id}", headers=headers)
@@ -84,9 +98,9 @@ def test_worker_job_lifecycle(test_client):
         if final_status in ["COMPLETED", "FAILED"]:
             break
         time.sleep(0.1)
-        
+
     assert final_status == "COMPLETED", f"Job failed or timed out. Last status: {final_status}. Error: {job_record.get('error')}"
-    
+
     # Verify result
     status_resp = test_client.get(f"/apps/bizos.worker.v1/jobs/{job_id}", headers=headers)
     job_record = status_resp.json()

@@ -1,14 +1,11 @@
-import asyncio
 import logging
 import uuid
-from typing import Optional
 
 from app.application.intelligence.kernel import IntelligenceKernel
-from app.domain.intelligence.pipeline import PipelineContext
-from app.domain.cognition.events import LearningRequested
-from app.domain.learning.models import LearningContext, LearningResult
 from app.application.learning.steps.consolidation_step import ConsolidationStep
-
+from app.domain.cognition.events import LearningRequested
+from app.domain.intelligence.pipeline import PipelineContext
+from app.domain.learning.models import LearningContext, LearningResult
 
 logger = logging.getLogger(__name__)
 
@@ -26,13 +23,13 @@ class LearningService:
 
     async def initialize(self):
         """Initializes the service by subscribing to relevant events."""
-        # Note: EventRouter currently doesn't expose subscribe directly for domain handlers easily, 
+        # Note: EventRouter currently doesn't expose subscribe directly for domain handlers easily,
         # but in Wave 5 testing we use the EventBus.
         # Assuming the Kernel provides a way or we just use the EventBus.
         # For this implementation, we assume the host bootstraps this handler.
         pass
 
-    async def handle_learning_requested(self, event: LearningRequested) -> Optional[LearningResult]:
+    async def handle_learning_requested(self, event: LearningRequested) -> LearningResult | None:
         """
         Asynchronously handles the LearningRequested event.
         Executes the learning consolidation pipeline without blocking the cognition loop.
@@ -57,9 +54,10 @@ class LearningService:
                 self._consolidation_step,
                 pipeline_context
             )
-            
-            logger.info(f"learning_pipeline_completed agent_id={event.agent_id} success={result.payload.success}")
-            return result.payload
+
+            if result.payload and hasattr(result.payload, "success"):
+                logger.info(f"learning_pipeline_completed agent_id={event.agent_id} success={result.payload.success}")
+            return result.payload if isinstance(result.payload, LearningResult) else None
 
         except Exception as e:
             logger.error(f"learning_pipeline_failed agent_id={event.agent_id} error={e}")

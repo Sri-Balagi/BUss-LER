@@ -1,6 +1,5 @@
 import asyncio
 import uuid
-from typing import Any
 
 import structlog
 
@@ -8,7 +7,6 @@ from app.runtime.agents.context import AgentContext
 from app.runtime.agents.interfaces import BaseAgent, IAgentFactory
 from app.runtime.agents.results import AgentResult, AgentResultStatus
 from app.runtime.agents.specification import AgentSpecification
-from app.runtime.capabilities.models.specification import CapabilitySpecification
 
 logger = structlog.get_logger(__name__)
 
@@ -22,10 +20,10 @@ class ResearchAgent(BaseAgent):
 
     async def execute(self) -> AgentResult:
         logger.info("ResearchAgent executing capability", identity=self.specification.identity)
-        
+
         # M9 Stub execution
         await asyncio.sleep(0.1)
-        
+
         return AgentResult(
             status=AgentResultStatus.SUCCESS,
             output={"research_summary": "Extracted knowledge based on the payload"},

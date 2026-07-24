@@ -1,8 +1,10 @@
 import json
 import sys
-from pathlib import Path
+
 from fastapi.openapi.utils import get_openapi
+
 from app.infrastructure.applications.gateway.app import create_app
+
 
 def generate_openapi(output_path: str = "openapi.json"):
     app = create_app()

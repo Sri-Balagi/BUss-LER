@@ -10,14 +10,14 @@ from app.interfaces.http.v1.schemas.response import BizOSResponse
 def app():
     # Create a minimal app to test the pipeline
     test_app = FastAPI()
-    
+
     # Register the pipeline
     register_gateway_pipeline(test_app)
-    
+
     @test_app.get("/test")
     async def test_endpoint():
         return {"status": "ok"}
-        
+
     @test_app.post("/mutate")
     async def mutate_endpoint():
         return {"status": "mutated"}
@@ -32,7 +32,7 @@ def client(app):
 
 def test_gateway_pipeline_injects_tracing_headers(client):
     response = client.get("/test")
-    
+
     assert response.status_code == 200
     assert "X-Request-ID" in response.headers
     assert "X-Correlation-ID" in response.headers
@@ -41,10 +41,10 @@ def test_gateway_pipeline_injects_tracing_headers(client):
 
 def test_gateway_pipeline_rejects_invalid_jwt(client):
     response = client.get("/test", headers={"Authorization": "Bearer "})
-    
+
     # Empty token string causes our simple middleware to reject it
     assert response.status_code == 401
-    
+
     data = response.json()
     assert data["success"] is False
     assert data["error"]["code"] == "unauthorized"
@@ -60,6 +60,6 @@ def test_gateway_pipeline_idempotency_ignores_get(client):
     # GET requests should not be cached by IdempotencyMiddleware
     response1 = client.get("/test", headers={"Idempotency-Key": "test-key-1"})
     response2 = client.get("/test", headers={"Idempotency-Key": "test-key-1"})
-    
+
     assert response1.status_code == 200
     assert response2.status_code == 200

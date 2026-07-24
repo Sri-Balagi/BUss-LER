@@ -1,10 +1,10 @@
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
+
 import structlog
 
-from app.domain.security.interfaces import IIdentityProvider, IHasher
-from app.domain.security.models import ExecutionContext, AuthenticationResult, AuthenticationStatus
 from app.domain.identity.interfaces import IAPIKeyRepository
+from app.domain.security.interfaces import IHasher, IIdentityProvider
+from app.domain.security.models import AuthenticationResult, AuthenticationStatus, ExecutionContext
 
 logger = structlog.get_logger()
 
@@ -13,7 +13,7 @@ class APIKeyIdentityProvider(IIdentityProvider):
     Identity Provider that authenticates using an API Key.
     Retrieves the key metadata by prefix and verifies the hash.
     """
-    
+
     def __init__(self, repo: IAPIKeyRepository, hasher: IHasher):
         self._repo = repo
         self._hasher = hasher
@@ -28,24 +28,24 @@ class APIKeyIdentityProvider(IIdentityProvider):
         if not credentials or len(credentials) < 8:
             logger.warning("api_key_too_short")
             return AuthenticationResult.failure(AuthenticationStatus.INVALID_TOKEN, "API Key too short")
-            
+
         prefix = credentials[:8]
-        
+
         # Look up key by prefix
         api_key = await self._repo.get_by_prefix(prefix)
         if not api_key:
             logger.warning("api_key_not_found", prefix=prefix)
             return AuthenticationResult.failure(AuthenticationStatus.AUTHENTICATION_FAILED, "API Key not found")
-            
+
         if not api_key.is_valid():
             logger.warning("api_key_invalid_state", prefix=prefix, status=api_key.status.value)
             return AuthenticationResult.failure(AuthenticationStatus.REVOKED, f"API Key in invalid state: {api_key.status.value}")
-            
+
         # Verify the hash
         if not self._hasher.verify(credentials, api_key.key_hash):
             logger.warning("api_key_hash_mismatch", prefix=prefix)
             return AuthenticationResult.failure(AuthenticationStatus.INVALID_TOKEN, "API Key hash mismatch")
-            
+
         # Build the ExecutionContext
         context = ExecutionContext(
             is_authenticated=True,
@@ -53,6 +53,6 @@ class APIKeyIdentityProvider(IIdentityProvider):
             roles=[], # Usually API Keys act on behalf of a system or have roles assigned, handled by AuthZ
             scopes=api_key.scopes,
             authentication_method="api_key",
-            authenticated_at=datetime.now(timezone.utc)
+            authenticated_at=datetime.now(UTC)
         )
         return AuthenticationResult.success(context)

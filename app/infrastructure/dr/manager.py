@@ -1,10 +1,11 @@
-from abc import ABC, abstractmethod
 import logging
+from abc import ABC, abstractmethod
+
 
 class IBackupProvider(ABC):
     @abstractmethod
     async def create_snapshot(self, resource_id: str) -> str: pass
-    
+
     @abstractmethod
     async def restore_snapshot(self, resource_id: str, snapshot_id: str): pass
 

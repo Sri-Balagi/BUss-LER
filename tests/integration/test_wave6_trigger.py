@@ -1,21 +1,22 @@
-import pytest
 import uuid
-from typing import Dict, Any
+from typing import Any
 
-from app.domain.applications.trigger.models import TriggerType, ExecutionMode
-from app.domain.applications.registry.interfaces import IApplicationRegistry
-from app.shared.events.bus import EventBus
+import pytest
+
 from app.bootstrap.container import get_container
+from app.domain.applications.registry.interfaces import IApplicationRegistry
+from app.domain.applications.trigger.models import ExecutionMode, TriggerType
+from app.shared.events.bus import EventBus
 
 
 # Mock EventBus for testing
 class MockEventBus(EventBus):
     def __init__(self):
         self.published_events = []
-        
-    async def publish(self, event: Any) -> None:
+
+    def publish(self, event: Any) -> None:
         self.published_events.append(event)
-        
+
     async def subscribe(self, event_type: type, handler: Any) -> None:
         pass
 
@@ -23,26 +24,33 @@ class MockEventBus(EventBus):
         pass
 
 
-from app.bootstrap.container import build_container, reset_container_for_testing
-from app.infrastructure.applications.gateway.app import create_gateway_app
-from fastapi.testclient import TestClient
+from fastapi.testclient import TestClient  # noqa: E402
+
+from app.bootstrap.container import build_container, reset_container_for_testing  # noqa: E402
+from app.infrastructure.applications.gateway.app import create_gateway_app  # noqa: E402
+
 
 @pytest.fixture
 def test_container():
     reset_container_for_testing()
     container = build_container()
-    
+
     # Override EventBus
     mock_bus = MockEventBus()
     container.override(EventBus, mock_bus)
-    
+
     # Force resolve to register the apps
     from app.application.applications.trigger.app import CognitiveTriggerEngine
-    from app.domain.applications.trigger.models import CognitiveTrigger, TriggerCondition, TriggerAction, TriggerPriority
-    
+    from app.domain.applications.trigger.models import (
+        CognitiveTrigger,
+        TriggerAction,
+        TriggerCondition,
+        TriggerPriority,
+    )
+
     trigger_engine = container.resolve(CognitiveTriggerEngine)
     trigger_engine._event_bus = mock_bus  # ensure patch
-    
+
     # Register a test trigger
     trigger = CognitiveTrigger(
         trigger_id="test-trigger-1",
@@ -62,11 +70,11 @@ def test_container():
         tenant_id="test-tenant"
     )
     trigger_engine.register_trigger(trigger)
-    
+
     # Ensure worker app has the mock event bus if needed
     from app.application.applications.worker.app import AutonomousWorkerApplication
-    worker_app = container.resolve(AutonomousWorkerApplication)
-    
+    container.resolve(AutonomousWorkerApplication)
+
     yield container
     reset_container_for_testing()
 
@@ -119,16 +127,16 @@ def test_trigger_job_lifecycle(test_client, mock_event_bus):
         time.sleep(0.1)
 
     assert final_status == "COMPLETED", f"Trigger job failed. Last status: {final_status}. Error: {job_record.get('error')}"
-    
+
     result = job_record.get("result", {})
     assert result.get("success") is True
     target_job_id = result.get("target_job_id")
     assert target_job_id is not None
-    
+
     # 3. Verify Target Job (Worker) is enqueued/completed
     worker_resp = test_client.get(f"/apps/bizos.worker.v1/jobs/{target_job_id}", headers=headers)
     assert worker_resp.status_code == 200
-    
+
     # 4. Verify Events were published
     published_types = [type(e).__name__ for e in mock_event_bus.published_events]
     assert "TriggerReceivedEvent" in published_types

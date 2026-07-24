@@ -31,6 +31,10 @@ class GoalContextProvider(AbstractContextProvider):
 
         self._goal_service = goal_service
 
+    @property
+    def source(self) -> ContextSource:
+        return ContextSource.GOAL
+
     async def provide(self, ctx, twin_id: UUID, policy) -> ContextSection:
 
         items = []

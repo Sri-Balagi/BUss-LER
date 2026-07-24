@@ -1,8 +1,9 @@
 from uuid import UUID
-from typing import Optional
-from app.runtime.kernel.interfaces import IRuntimeManager, IProcessManager
-from app.runtime.kernel.process import ProcessControlBlock, ProcessTable, ProcessState
+
+from app.runtime.kernel.interfaces import IProcessManager, IRuntimeManager
+from app.runtime.kernel.process import ProcessControlBlock, ProcessState, ProcessTable
 from app.shared.bus.system_bus import ISystemBus
+
 
 class ProcessManager(IProcessManager):
     """
@@ -13,11 +14,11 @@ class ProcessManager(IProcessManager):
 
     def spawn(self, pcb: ProcessControlBlock) -> None:
         self.process_table.register_process(pcb)
-        
+
     def terminate(self, pid: UUID) -> None:
         self.process_table.update_state(pid, ProcessState.TERMINATED)
-        
-    def get_status(self, pid: UUID) -> Optional[ProcessState]:
+
+    def get_status(self, pid: UUID) -> ProcessState | None:
         pcb = self.process_table.get_process(pid)
         return pcb.state if pcb else None
 
@@ -30,14 +31,14 @@ class RuntimeManager(IRuntimeManager):
         self.process_manager = process_manager
         self.system_bus = system_bus
         self._is_running = False
-        
+
     def start_runtime(self) -> None:
         self._is_running = True
-        
+
         class OSReadyEvent:
             pass
-            
+
         self.system_bus.publish_event(OSReadyEvent())
-        
+
     def shutdown_runtime(self) -> None:
         self._is_running = False

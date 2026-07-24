@@ -10,11 +10,11 @@ class ApiLifecycleMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next) -> Response:  # type: ignore
         response = await call_next(request)
-        
+
         # Example of how we might evaluate endpoint deprecation:
         # If the path matches deprecated v1 paths, we add headers
         # if "/api/v1/legacy" in request.url.path:
         #     response.headers["Deprecation"] = "true"
         #     response.headers["Sunset"] = "Wed, 01 Jan 2027 23:59:59 GMT"
-            
+
         return response

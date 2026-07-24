@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from app.runtime.capabilities.adapters.base import IResourceAdapter
 from app.runtime.capabilities.models.request import CapabilityRequest

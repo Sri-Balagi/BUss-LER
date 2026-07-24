@@ -1,4 +1,5 @@
-from typing import Any, Callable, Dict, List
+from collections.abc import Callable
+from typing import Any
 
 from app.sdk.client.sync_client import BizOSClient
 from app.shell.formatter import ShellFormatter
@@ -13,13 +14,13 @@ class ShellDispatcher:
     def __init__(self, client: BizOSClient, formatter: ShellFormatter):
         self.client = client
         self.formatter = formatter
-        self._commands: Dict[str, Callable[..., Any]] = {}
+        self._commands: dict[str, Callable[..., Any]] = {}
 
     def register_command(self, name: str, handler: Callable[..., Any]) -> None:
         """Registers a handler for a specific shell command."""
         self._commands[name] = handler
 
-    def dispatch(self, command: str, args: List[str]) -> int:
+    def dispatch(self, command: str, args: list[str]) -> int:
         """
         Executes a command and returns a standardized exit code.
         0 = Success
@@ -31,7 +32,7 @@ class ShellDispatcher:
         if not handler:
             self.formatter.print_error(f"Command not found: {command}")
             return 127
-            
+
         try:
             return handler(self.client, self.formatter, args)
         except Exception as e:

@@ -9,7 +9,7 @@ class IAsyncCognitivePipeline(ABC):
     @abstractmethod
     async def run_loop(self, session: CognitiveSession) -> None:
         """Run the cognitive loop continuously until convergence, failure, or suspension.
-        
+
         Mutates the session state and appends CycleRecords directly.
         """
         pass

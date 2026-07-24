@@ -9,9 +9,9 @@ Settings reference: configs/settings_reference.md
 
 from __future__ import annotations
 
-from functools import lru_cache
 import logging
 import os
+from functools import lru_cache
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -76,6 +76,9 @@ class Settings(BaseSettings):
     otel_exporter_otlp_endpoint: str | None = Field(
         None, description="OTLP endpoint (e.g. http://otel-collector:4318)"
     )
+    metrics_token: str | None = Field(
+        None, description="Token required to access the /metrics endpoint"
+    )
 
     # ── Feature Flags ─────────────────────────────────────────────────────────
     enable_background_processing: bool = Field(
@@ -132,7 +135,7 @@ class Settings(BaseSettings):
         if env == "production" and not v:
             raise ValueError("ENCRYPTION_KEY_BASE64 is strictly required in production")
         return v
-        
+
     @field_validator("jwt_secret")
     @classmethod
     def validate_jwt_secret(cls, v: str | None, info) -> str | None:

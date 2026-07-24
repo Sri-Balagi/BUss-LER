@@ -13,7 +13,6 @@ Design
 """
 from __future__ import annotations
 
-import json
 from typing import Any
 
 from app.infrastructure.vfs.vfs import IVirtualMount, IVirtualNode

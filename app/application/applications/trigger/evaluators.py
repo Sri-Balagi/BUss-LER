@@ -1,6 +1,6 @@
-from typing import Dict, Type
 from app.domain.applications.trigger.interfaces import IConditionEvaluator
 from app.domain.applications.trigger.models import TriggerCondition, TriggerContext
+
 
 class AlwaysTrueEvaluator(IConditionEvaluator):
     """A dummy evaluator that always returns True, for testing or manual triggers."""
@@ -15,8 +15,8 @@ class AlwaysTrueEvaluator(IConditionEvaluator):
 class ConditionEvaluatorRegistry:
     """Registry to resolve condition evaluators dynamically."""
     def __init__(self):
-        self._evaluators: Dict[str, IConditionEvaluator] = {}
-        
+        self._evaluators: dict[str, IConditionEvaluator] = {}
+
         # Register defaults
         self.register(AlwaysTrueEvaluator())
 

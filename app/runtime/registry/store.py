@@ -1,22 +1,22 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Generic, List, Optional, TypeVar
+from typing import TypeVar
 
 T = TypeVar("T")
 
 
-class IRegistryStore(ABC, Generic[T]):
+class IRegistryStore[T](ABC):
     """
     Decouples the persistence layer from the Registry logic.
     Provides fundamental CRUD operations for registry items.
     """
 
     @abstractmethod
-    async def get(self, item_id: str) -> Optional[T]:
+    async def get(self, item_id: str) -> T | None:
         """Retrieve an item by its unique ID."""
         pass
 
     @abstractmethod
-    async def list_all(self) -> List[T]:
+    async def list_all(self) -> list[T]:
         """Retrieve all items in the store."""
         pass
 
@@ -43,12 +43,12 @@ class InMemoryRegistryStore(IRegistryStore[T]):
     """
 
     def __init__(self) -> None:
-        self._store: Dict[str, T] = {}
+        self._store: dict[str, T] = {}
 
-    async def get(self, item_id: str) -> Optional[T]:
+    async def get(self, item_id: str) -> T | None:
         return self._store.get(item_id)
 
-    async def list_all(self) -> List[T]:
+    async def list_all(self) -> list[T]:
         return list(self._store.values())
 
     async def set(self, item_id: str, item: T) -> None:

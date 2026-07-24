@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any
 from uuid import UUID
 
 from pydantic import Field
@@ -16,7 +16,7 @@ class MemoryCreated(DomainEvent):
 class MemoryUpdated(DomainEvent):
     """Event emitted when a MemoryRecord is updated."""
     memory_id: UUID = Field(..., description="The ID of the updated memory.")
-    updates: Dict[str, Any] = Field(..., description="Dictionary of updated fields and new values.")
+    updates: dict[str, Any] = Field(..., description="Dictionary of updated fields and new values.")
 
 
 class MemoryRemoved(DomainEvent):
@@ -27,7 +27,7 @@ class MemoryRemoved(DomainEvent):
 class MemoryRetrieved(DomainEvent):
     """Event emitted when a MemoryRecord is accessed (for usage tracking/forgetting curve)."""
     memory_id: UUID = Field(..., description="The ID of the retrieved memory.")
-    query_context: Optional[str] = Field(default=None, description="Context of the retrieval.")
+    query_context: str | None = Field(default=None, description="Context of the retrieval.")
 
 
 class MemoryConsolidated(DomainEvent):

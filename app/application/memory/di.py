@@ -8,32 +8,31 @@ from __future__ import annotations
 from qdrant_client import AsyncQdrantClient
 from supabase import AsyncClient
 
+from app.application.memory.context import ContextBuilder
 from app.application.memory.create_memory import CreateMemoryUseCase
 from app.application.memory.delete_memory import DeleteMemoryUseCase
 from app.application.memory.get_memory import GetMemoryUseCase
 from app.application.memory.list_memories import ListMemoriesUseCase
+from app.application.memory.platform import UnifiedMemoryPlatform
+from app.application.memory.providers import InMemoryProvider
 from app.application.memory.restore_memory import RestoreMemoryUseCase
+from app.application.memory.retriever import MemoryRetriever
 from app.application.memory.service import MemoryEngineService
 from app.application.memory.update_memory import UpdateMemoryUseCase
 from app.bootstrap.container import Container
 from app.config import Settings
-from app.domain.memory.repository import IMemoryRepository
-from app.domain.memory.platform import IMemoryPlatform
 from app.domain.intelligence.platform import IIntelligencePlatform
+from app.domain.memory.platform import IMemoryPlatform
+from app.domain.memory.repository import AbstractMemoryRepository, IMemoryRepository
+from app.domain.memory.vector_repository import AbstractVectorRepository
 from app.infrastructure.ai.kernel import AbstractAIKernel
 from app.infrastructure.memory.in_memory import InMemoryMemoryRepository
 from app.infrastructure.persistence.postgres.repositories.memory_repository import (
-    AbstractMemoryRepository,
     MemoryMetadataRepository,
 )
 from app.infrastructure.persistence.postgres.repositories.vector_repository import (
-    AbstractVectorRepository,
     MemoryVectorRepository,
 )
-from app.application.memory.platform import UnifiedMemoryPlatform
-from app.application.memory.providers import InMemoryProvider
-from app.application.memory.retriever import MemoryRetriever
-from app.application.memory.context import ContextBuilder
 from app.shared.events.bus import EventBus
 
 

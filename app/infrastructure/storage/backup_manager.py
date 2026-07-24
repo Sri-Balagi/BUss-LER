@@ -15,7 +15,7 @@ Design
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
@@ -70,7 +70,7 @@ class BackupManager:
         record = {
             "backup_id": backup_id,
             "label": label,
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
             "snapshot_count": len(entries),
             "snapshots": entries,
         }

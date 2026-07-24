@@ -2,12 +2,8 @@ import uuid
 
 import structlog
 
-from app.infrastructure.persistence.postgres.repositories.memory_repository import (
-    AbstractMemoryRepository,
-)
-from app.infrastructure.persistence.postgres.repositories.vector_repository import (
-    AbstractVectorRepository,
-)
+from app.domain.memory.repository import AbstractMemoryRepository
+from app.domain.memory.vector_repository import AbstractVectorRepository
 from app.shared.events.bus import EventBus
 from app.shared.events.models import EventType, MemoryLifecycleEvent
 
@@ -49,6 +45,8 @@ class DeleteMemoryUseCase:
                 memory_id=str(memory_id),
                 error=str(e),
             )
+            from app.shared.enums import EmbeddingStatus
+            await self._metadata_repo.update_embedding_status(memory_id, EmbeddingStatus.FAILED)
 
         # 3. Publish Event
         event = MemoryLifecycleEvent(

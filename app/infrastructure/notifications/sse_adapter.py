@@ -1,17 +1,17 @@
 import asyncio
-import json
-from typing import Dict, Set, Callable
+
 from app.application.notifications.interfaces import INotificationAdapter
 from app.shared.events.models import DomainEvent
 
+
 class SSEAdapter(INotificationAdapter):
     """
-    Adapter for Server-Sent Events (SSE). 
+    Adapter for Server-Sent Events (SSE).
     Maintains a list of active subscriptions and dispatches events to them.
     """
     def __init__(self):
         # A list of queues for active subscribers
-        self._subscribers: Set[asyncio.Queue] = set()
+        self._subscribers: set[asyncio.Queue] = set()
 
     async def dispatch(self, event: DomainEvent) -> None:
         """

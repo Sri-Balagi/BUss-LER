@@ -1,5 +1,7 @@
 import pytest
+
 from app.runtime.kernel.syscall import ISyscallInterface, KernelRing
+
 
 class DummySyscall(ISyscallInterface):
     def start_session(self, context): return None

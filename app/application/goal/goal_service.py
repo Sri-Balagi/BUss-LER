@@ -142,7 +142,7 @@ class GoalService(AbstractGoalService):
             title=goal.title,
         )
 
-        await self._event_bus.publish(event, ctx)
+        self._event_bus.publish(event, ctx)
 
         log.info("Goal created", goal_id=str(goal.id))
 
@@ -219,7 +219,7 @@ class GoalService(AbstractGoalService):
         update_data = GoalUpdate(status=new_status)
 
         if new_status == GoalStatus.COMPLETED:
-            update_data = GoalUpdate(status=new_status, completed_at=datetime.now(UTC).isoformat())
+            update_data = GoalUpdate(status=new_status, completed_at=datetime.now(UTC))
 
         elif previous_status == GoalStatus.COMPLETED and new_status != GoalStatus.COMPLETED:
             # Clear completed_at if transitioning back out of completed
@@ -238,7 +238,7 @@ class GoalService(AbstractGoalService):
             new_status=new_status.value,
         )
 
-        await self._event_bus.publish(event, ctx)
+        self._event_bus.publish(event, ctx)
 
         if new_status == GoalStatus.COMPLETED:
             completed_event = GoalCompletedEvent(
@@ -248,7 +248,7 @@ class GoalService(AbstractGoalService):
                 title=updated.title,
             )
 
-            await self._event_bus.publish(completed_event, ctx)
+            self._event_bus.publish(completed_event, ctx)
 
         return updated
 

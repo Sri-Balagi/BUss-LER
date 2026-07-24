@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
 from collections.abc import AsyncIterator
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from app.infrastructure.ai.prompts.registry import PromptRegistry
 
 import structlog
 from pydantic import BaseModel as PydanticBaseModel
@@ -10,6 +13,7 @@ from app.infrastructure.ai.models import (
     AIRequest,
     AIRequestLifecycle,
     AIResponse,
+    AIResponseMetadata,
     ClassifyRequest,
     ClassifyResponse,
     EmbeddingRequest,
@@ -41,7 +45,7 @@ class AbstractAIKernel(ABC):
         pass
 
     @abstractmethod
-    async def stream(self, request: AIRequest) -> AsyncIterator[StreamChunk]:
+    def stream(self, request: AIRequest) -> AsyncIterator[StreamChunk]:
         """Stream a generated response."""
         pass
 
@@ -77,7 +81,7 @@ class AIKernel(AbstractAIKernel):
     def __init__(
         self,
         router: ProviderRouter,
-        prompt_manager: PromptManager,
+        prompt_manager: PromptRegistry | PromptManager | Any,
         budget: IResourceBudget,
     ):
         self._router = router
@@ -241,12 +245,12 @@ class AIKernel(AbstractAIKernel):
         model = "unknown"
 
         async for chunk in provider.stream(request, resolved_prompt):
-            if getattr(chunk, "completion_tokens", None):
+            if chunk.completion_tokens is not None:
                 total_completion_tokens += chunk.completion_tokens
-            if getattr(chunk, "prompt_tokens", None):
+            if chunk.prompt_tokens is not None:
                 prompt_tokens = chunk.prompt_tokens
-            if getattr(chunk, "model", None):
-                model = chunk.model
+            if hasattr(chunk, "model"):
+                model = str(getattr(chunk, "model"))
             yield chunk
 
         await self._budget.record_consumption(
@@ -331,7 +335,8 @@ class AIKernel(AbstractAIKernel):
 
         response = await self.generate_structured(gen_req, DynamicSchema)
 
-        return ClassifyResponse(raw_json=response.model_dump(), metadata=None)
+        metadata = AIResponseMetadata(provider="system", model="system", latency_ms=0.0)
+        return ClassifyResponse(raw_json=response.model_dump(), metadata=metadata)
 
     async def health_check(self) -> dict[str, Any]:
         """Check the health of all registered providers."""

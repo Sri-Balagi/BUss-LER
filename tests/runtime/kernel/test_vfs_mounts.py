@@ -1,8 +1,11 @@
+from typing import Any
+
 import pytest
-from app.infrastructure.vfs.vfs import IVirtualMount, IVirtualNode
+
 from app.infrastructure.vfs.mount_registry import MountRegistry
 from app.infrastructure.vfs.path_resolver import MountResolver
-from typing import Any
+from app.infrastructure.vfs.vfs import IVirtualMount, IVirtualNode
+
 
 class DummyNode(IVirtualNode):
     path: str = "twin://123/memory"

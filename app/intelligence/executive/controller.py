@@ -41,7 +41,7 @@ class ExecutiveController(IExecutiveController):
         mode: ReasoningMode = ReasoningMode.ANALYTICAL,
     ) -> ExecutiveIntelligenceResult:
         """Entry point for a new autonomous execution session."""
-        
+
         logger.info(
             "Starting new autonomous session",
             twin_id=str(twin_id) if twin_id else "none",
@@ -78,11 +78,11 @@ class ExecutiveController(IExecutiveController):
             # Note: The Wave-0 pipeline signature is preserved for backward compatibility
             # during M7. In M8, this will become an async continuous loop.
             result = self.pipeline.run_pipeline(raw_request, session)
-            
+
             # M7: Transition to completed since run_pipeline is currently synchronous
             if session.lifecycle_state == SessionLifecycleState.RUNNING:
                 session.transition(SessionLifecycleState.COMPLETED)
-                
+
             event_bus.publish(
                 SessionEvent(
                     session_id=session.session_id,
@@ -108,7 +108,7 @@ class ExecutiveController(IExecutiveController):
                     )
                 )
             raise
-        
+
         finally:
             # Cleanup resources
             await event_bus.stop()
@@ -118,7 +118,7 @@ class ExecutiveController(IExecutiveController):
         self, session_id: str, trigger_event: Any = None
     ) -> ExecutiveIntelligenceResult:
         """Resume a suspended session.
-        
+
         For M7, this is a stub as the M7 pipeline is synchronous.
         Will be fully implemented in M10 (Autonomous Resumption).
         """

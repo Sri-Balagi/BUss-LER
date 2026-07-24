@@ -6,11 +6,11 @@ from app.domain.planning.models import Goal, Plan, PlanningContext
 
 class IPlanningProvider(IIntelligenceProvider):
     """
-    Interface for planning capabilities. 
+    Interface for planning capabilities.
     Extends the intelligence provider to ensure registration via CapabilityRegistry.
     Provider implementations must remain LLM/execution agnostic at the domain level.
     """
-    
+
     @abstractmethod
     async def generate_plan(self, context: PlanningContext, goal: Goal) -> Plan:
         """

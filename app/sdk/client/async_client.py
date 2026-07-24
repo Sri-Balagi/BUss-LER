@@ -1,8 +1,9 @@
+from typing import Any
+
 import httpx
-from typing import Any, Dict, List, Optional
 
 from app.sdk.client.config import SDKConfig
-from app.sdk.client.models import RegistryItemModel, SDKResponse, ToolExecutionRequest
+from app.sdk.client.models import RegistryItemModel, SDKResponse
 
 
 class AsyncBizOSClient:
@@ -10,7 +11,7 @@ class AsyncBizOSClient:
     Asynchronous client for interacting with the BizOS API.
     """
 
-    def __init__(self, config: Optional[SDKConfig] = None):
+    def __init__(self, config: SDKConfig | None = None):
         self.config = config or SDKConfig()
         self._client = httpx.AsyncClient(
             base_url=self.config.base_url,
@@ -41,21 +42,21 @@ class AsyncBizOSClient:
         response = await self._client.get("/api/v1/health")
         return self._handle_response(response)
 
-    async def list_registry_items(self, registry_name: str) -> List[RegistryItemModel]:
+    async def list_registry_items(self, registry_name: str) -> list[RegistryItemModel]:
         response = await self._client.get(f"/api/v1/registries/{registry_name}/items")
         result = self._handle_response(response)
         if result.success and result.data:
             return [RegistryItemModel(**item) for item in result.data]
         return []
 
-    async def list_active_workflows(self) -> List[Dict[str, Any]]:
+    async def list_active_workflows(self) -> list[dict[str, Any]]:
         response = await self._client.get("/api/v1/workflows")
         result = self._handle_response(response)
         if result.success and result.data:
             return result.data
         return []
 
-    async def get_memory_status(self) -> Dict[str, Any]:
+    async def get_memory_status(self) -> dict[str, Any]:
         response = await self._client.get("/api/v1/memory")
         result = self._handle_response(response)
         if result.success and result.data:

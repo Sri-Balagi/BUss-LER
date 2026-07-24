@@ -1,10 +1,12 @@
 import abc
 from uuid import UUID
+
 from app.domain.intelligence.context import IntelligenceContext
+
 
 class ITwinSynchronizer(abc.ABC):
     """Base strategy interface for synchronizing twins from source events."""
-    
+
     @abc.abstractmethod
     async def synchronize(self, context: IntelligenceContext, entity_id: UUID) -> None:
         pass

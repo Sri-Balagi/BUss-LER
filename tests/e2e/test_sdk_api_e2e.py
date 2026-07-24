@@ -1,8 +1,10 @@
 import pytest
 from fastapi.testclient import TestClient
+
 from app.main import app
 from app.sdk.client.config import SDKConfig
 from app.sdk.client.sync_client import BizOSClient
+
 
 @pytest.fixture
 def e2e_client():

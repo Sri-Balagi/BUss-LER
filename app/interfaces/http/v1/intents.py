@@ -15,7 +15,6 @@ from fastapi import APIRouter, Depends, Query, status
 
 from app.core.context import OperationContext
 from app.interfaces.http.schemas.intent import (
-    ClassifyIntentRequest,
     ClassifyIntentResponse,
     CreateIntentRequest,
     IntentResponse,

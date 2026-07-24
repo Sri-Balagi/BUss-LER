@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -18,5 +18,5 @@ class ModelRegistry(BaseRegistry[ModelMetadata]):
     Registry for managing AI Models.
     """
 
-    def _deserialize_item(self, data: Dict[str, Any]) -> ModelMetadata:
+    def _deserialize_item(self, data: dict[str, Any]) -> ModelMetadata:
         return ModelMetadata.model_validate(data)

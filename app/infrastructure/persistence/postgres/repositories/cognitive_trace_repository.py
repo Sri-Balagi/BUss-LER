@@ -8,9 +8,12 @@ Records are NEVER modified after creation.
 
 import time
 from abc import ABC, abstractmethod
+from collections.abc import Mapping
+from typing import Any
 from uuid import UUID
 
 import structlog
+from postgrest.types import CountMethod
 from supabase import AsyncClient
 
 from app.intelligence.learning.repository.cognitive_trace import (
@@ -66,6 +69,8 @@ class AbstractCognitiveTraceRepository(ABC):
 
 
 class CognitiveTraceRepository(AbstractCognitiveTraceRepository):
+    """Data access layer for the ``cognitive_traces`` table."""
+
     _table = "cognitive_traces"
 
     def __init__(self, client: AsyncClient) -> None:
@@ -73,7 +78,7 @@ class CognitiveTraceRepository(AbstractCognitiveTraceRepository):
 
     async def create(self, data: CognitiveTraceCreate) -> CognitiveTrace:
         start = time.time()
-        insert_data = {
+        insert_data: dict[str, Any] = {
             "twin_id": str(data.twin_id),
             "operation_type": data.operation_type,
             "provider": data.provider,
@@ -101,13 +106,15 @@ class CognitiveTraceRepository(AbstractCognitiveTraceRepository):
             logger.error("Failed to create cognitive trace", error=str(exc))
             raise RepositoryError("cognitive_trace.create", str(exc)) from exc
 
+        first_row = response.data[0] if response.data and isinstance(response.data, list) else {}
+        trace_id = first_row.get("id") if isinstance(first_row, dict) else ""
         logger.info(
             "Cognitive trace recorded",
-            trace_id=response.data[0]["id"],
+            trace_id=str(trace_id),
             operation_type=data.operation_type,
             latency_ms=(time.time() - start) * 1000,
         )
-        return self._deserialize(response.data[0])
+        return self._deserialize(first_row)
 
     async def get_by_id(self, trace_id: UUID) -> CognitiveTrace:
         try:
@@ -131,7 +138,7 @@ class CognitiveTraceRepository(AbstractCognitiveTraceRepository):
         try:
             query = (
                 self._client.table(self._table)
-                .select("*", count="exact")
+                .select("*", count=CountMethod.exact)
                 .eq("twin_id", str(twin_id))
             )
             if operation_type:
@@ -142,11 +149,17 @@ class CognitiveTraceRepository(AbstractCognitiveTraceRepository):
                 .execute()
             )
         except Exception as exc:
+            logger.error("Failed to list cognitive traces", twin_id=str(twin_id), error=str(exc))
             raise RepositoryError("cognitive_trace.list_by_twin", str(exc)) from exc
 
         items = [self._deserialize(row) for row in response.data]
         total = response.count if response.count is not None else len(items)
-        return PaginatedCognitiveTraces(items=items, total_count=total, limit=limit, offset=offset)
+        return PaginatedCognitiveTraces(
+            items=items,
+            total_count=total,
+            limit=limit,
+            offset=offset,
+        )
 
     async def list_by_operation(
         self, operation_type: str, limit: int = 20, offset: int = 0
@@ -154,7 +167,7 @@ class CognitiveTraceRepository(AbstractCognitiveTraceRepository):
         try:
             response = (
                 await self._client.table(self._table)
-                .select("*", count="exact")
+                .select("*", count=CountMethod.exact)
                 .eq("operation_type", operation_type)
                 .order("created_at", desc=True)
                 .range(offset, offset + limit - 1)
@@ -173,7 +186,7 @@ class CognitiveTraceRepository(AbstractCognitiveTraceRepository):
         try:
             response = (
                 await self._client.table(self._table)
-                .select("*", count="exact")
+                .select("*", count=CountMethod.exact)
                 .eq("operation_context_id", operation_context_id)
                 .order("created_at", desc=True)
                 .range(offset, offset + limit - 1)
@@ -196,15 +209,16 @@ class CognitiveTraceRepository(AbstractCognitiveTraceRepository):
         return status
 
     @staticmethod
-    def _deserialize(row: dict) -> CognitiveTrace:
+    def _deserialize(row: Any) -> CognitiveTrace:
         from uuid import UUID as PUUID
 
         from app.intelligence.learning.repository.cognitive_trace import CognitiveTraceTokenUsage
 
-        if row.get("token_usage") and isinstance(row["token_usage"], dict):
-            row["token_usage"] = CognitiveTraceTokenUsage.model_validate(row["token_usage"])
-        if row.get("memory_ids_used"):
-            row["memory_ids_used"] = [PUUID(mid) for mid in row["memory_ids_used"]]
-        if row.get("goal_ids_used"):
-            row["goal_ids_used"] = [PUUID(gid) for gid in row["goal_ids_used"]]
-        return CognitiveTrace.model_validate(row)
+        row_dict = dict(row) if isinstance(row, (dict, Mapping)) else {}
+        if row_dict.get("token_usage") and isinstance(row_dict["token_usage"], dict):
+            row_dict["token_usage"] = CognitiveTraceTokenUsage.model_validate(row_dict["token_usage"])
+        if row_dict.get("memory_ids_used") and isinstance(row_dict["memory_ids_used"], list):
+            row_dict["memory_ids_used"] = [PUUID(str(mid)) for mid in row_dict["memory_ids_used"]]
+        if row_dict.get("goal_ids_used") and isinstance(row_dict["goal_ids_used"], list):
+            row_dict["goal_ids_used"] = [PUUID(str(gid)) for gid in row_dict["goal_ids_used"]]
+        return CognitiveTrace.model_validate(row_dict)

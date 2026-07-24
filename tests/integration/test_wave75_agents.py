@@ -1,12 +1,14 @@
 import pytest
-from app.domain.shared.context import ExecutionContext
-from app.domain.session.models import Session, SessionParticipant
-from app.domain.approval.models import Approval, ApprovalState
-from app.domain.agents.models import Agent, Capability
+
 from app.application.agents.registry import InMemoryAgentRegistry
-from app.shared.enums import PrincipalType, ParticipantRole, AgentType, AgentStatus
 from app.bootstrap.container import build_container, reset_container_for_testing
 from app.domain.agents.interfaces import IAgentRegistry
+from app.domain.agents.models import Agent, Capability
+from app.domain.approval.models import Approval, ApprovalState
+from app.domain.session.models import Session, SessionParticipant
+from app.domain.shared.context import ExecutionContext
+from app.shared.enums import AgentStatus, AgentType, ParticipantRole, PrincipalType
+
 
 def test_execution_context_backward_compatibility():
     # Constructing with legacy user_id
@@ -71,7 +73,7 @@ def test_approval_expiration():
 
 def test_agent_registry():
     registry = InMemoryAgentRegistry()
-    
+
     agent = Agent(
         name="Research Assistant",
         description="Assists in web research",
@@ -80,15 +82,15 @@ def test_agent_registry():
             Capability(name="WebSearch", description="Searches the web")
         ]
     )
-    
+
     registry.register_agent(agent)
-    
+
     fetched = registry.get_agent(agent.id)
     assert fetched is not None
     assert fetched.name == "Research Assistant"
-    
+
     by_type = registry.find_by_type(AgentType.RESEARCH)
     assert len(by_type) == 1
-    
+
     by_cap = registry.find_by_capability("WebSearch")
     assert len(by_cap) == 1

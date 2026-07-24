@@ -5,9 +5,11 @@ Tables: conversation_threads, conversation_turns
 
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
+from typing import Any
 from uuid import UUID
 
 import structlog
+from postgrest.types import CountMethod
 from supabase import AsyncClient
 
 from app.interfaces.http.schemas.conversation import (
@@ -81,7 +83,8 @@ class ConversationRepository(AbstractConversationRepository):
         }
         try:
             result = await self._client.table(_THREADS_TABLE).insert(payload).execute()
-            return ConversationThread(**result.data[0])
+            row = result.data[0] if result.data and isinstance(result.data, list) else {}
+            return ConversationThread.model_validate(row)
         except Exception as exc:
             raise RepositoryError(operation="conversation.create_thread", detail=str(exc)) from exc
 
@@ -97,7 +100,8 @@ class ConversationRepository(AbstractConversationRepository):
             )
             if not result.data:
                 raise ConversationNotFoundError(str(thread_id))
-            return ConversationThread(**result.data)
+            row = result.data if isinstance(result.data, dict) else (result.data[0] if isinstance(result.data, list) and result.data else {})
+            return ConversationThread.model_validate(row)
         except ConversationNotFoundError:
             raise
         except Exception as exc:
@@ -109,7 +113,7 @@ class ConversationRepository(AbstractConversationRepository):
         try:
             count_result = (
                 await self._client.table(_TURNS_TABLE)
-                .select("id", count="exact")
+                .select("id", count=CountMethod.exact)
                 .eq("thread_id", str(data.thread_id))
                 .execute()
             )
@@ -117,14 +121,14 @@ class ConversationRepository(AbstractConversationRepository):
         except Exception:
             turn_index = 0
 
-        payload = {
+        payload: dict[str, Any] = {
             "thread_id": str(data.thread_id),
+            "turn_index": turn_index,
             "role": data.role.value,
             "content": data.content,
             "agent_id": str(data.agent_id) if data.agent_id else None,
             "tokens_used": data.tokens_used,
             "tool_calls": data.tool_calls,
-            "turn_index": turn_index,
             "metadata": data.metadata,
             "created_at": now,
         }
@@ -137,7 +141,8 @@ class ConversationRepository(AbstractConversationRepository):
                 .eq("id", str(data.thread_id))
                 .execute()
             )
-            return ConversationTurn(**result.data[0])
+            row = result.data[0] if result.data and isinstance(result.data, list) else {}
+            return ConversationTurn.model_validate(row)
         except Exception as exc:
             raise RepositoryError(operation="conversation.add_turn", detail=str(exc)) from exc
 
@@ -151,7 +156,8 @@ class ConversationRepository(AbstractConversationRepository):
                 .limit(limit)
                 .execute()
             )
-            return [ConversationTurn(**row) for row in result.data]
+            data_list = result.data if isinstance(result.data, list) else []
+            return [ConversationTurn.model_validate(row) for row in data_list]
         except Exception as exc:
             raise RepositoryError(
                 operation="conversation.get_recent_turns", detail=str(exc)
@@ -167,7 +173,7 @@ class ConversationRepository(AbstractConversationRepository):
         try:
             query = (
                 self._client.table(_THREADS_TABLE)
-                .select("*", count="exact")
+                .select("*", count=CountMethod.exact)
                 .eq("twin_id", str(twin_id))
                 .is_("archived_at", "null")
                 .order("created_at", desc=True)
@@ -176,7 +182,8 @@ class ConversationRepository(AbstractConversationRepository):
             if status:
                 query = query.eq("status", status.value)
             result = await query.execute()
-            items = [ConversationThread(**row) for row in result.data]
+            data_list = result.data if isinstance(result.data, list) else []
+            items = [ConversationThread.model_validate(row) for row in data_list]
             return PaginatedConversationThreads(
                 items=items,
                 total_count=result.count or 0,
@@ -203,7 +210,8 @@ class ConversationRepository(AbstractConversationRepository):
             )
             if not result.data:
                 raise ConversationNotFoundError(str(thread_id))
-            return ConversationThread(**result.data[0])
+            row = result.data[0] if isinstance(result.data, list) and result.data else {}
+            return ConversationThread.model_validate(row)
         except ConversationNotFoundError:
             raise
         except Exception as exc:

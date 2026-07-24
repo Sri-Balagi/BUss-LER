@@ -237,37 +237,6 @@ async def test_goal_provider_happy(ctx, policy):
     assert "test goal" in section.items[0].content
 
 
-@pytest.mark.asyncio
-async def test_memory_provider_happy(ctx, policy):
-    service = AsyncMock()
-    mock_item = MagicMock()
-    mock_item.memory.id = uuid4()
-    mock_item.memory.content = "test memory content"
-    mock_item.similarity_score = 0.95
-
-    mock_result = MagicMock()
-    mock_result.items = [mock_item]
-    service.search_memories.return_value = mock_result
-
-    provider = MemoryContextProvider(service)
-    section = await provider.provide(ctx, uuid4(), policy)
-    assert section.source == ContextSource.MEMORY
-    assert len(section.items) == 1
-    assert section.items[0].content == "test memory content"
-
-
-@pytest.mark.asyncio
-async def test_goal_provider_happy(ctx, policy):
-    service = AsyncMock()
-    mock_goal = MagicMock()
-    mock_goal.id = uuid4()
-    mock_goal.title = "test goal"
-    mock_goal.description = "desc"
-    mock_goal.status.value = "active"
-    mock_goal.priority.value = "high"
-    service.get_active_goals.return_value = [mock_goal]
-
-    provider = GoalContextProvider(service)
     section = await provider.provide(ctx, uuid4(), policy)
     assert section.source == ContextSource.GOAL
     assert len(section.items) == 1

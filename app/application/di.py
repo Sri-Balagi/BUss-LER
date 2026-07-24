@@ -115,7 +115,8 @@ def register_application_dependencies(container: "Container") -> None:
 
     container.register_factory(TraceRepository, build_trace_repo)
     container.register_factory(
-        CognitiveTraceService, lambda c: CognitiveTraceService(c.resolve(TraceRepository))
+        CognitiveTraceService,
+        lambda c: CognitiveTraceService(c.resolve(TraceRepository), c.resolve(EventBus)),
     )
 
     # Intent
@@ -204,7 +205,7 @@ def register_application_dependencies(container: "Container") -> None:
         lambda c: PlanningEngine(
             ai_kernel=c.resolve(AbstractAIKernel),
             plan_repository=c.resolve(PlanRepository),
-            context_builder=c.resolve(PlanContextBuilder),
+            context_engine=c.resolve(AbstractContextEngine),
             goal_service=c.resolve(GoalService),
             trace_service=c.resolve(CognitiveTraceService),
             event_bus=c.resolve(EventBus),
@@ -233,7 +234,7 @@ def register_application_dependencies(container: "Container") -> None:
         lambda c: RecommendationEngine(
             ai_kernel=c.resolve(AbstractAIKernel),
             repository=c.resolve(RecommendationRepository),
-            context_builder=c.resolve(PlanContextBuilder),
+            context_engine=c.resolve(AbstractContextEngine),
             trace_service=c.resolve(CognitiveTraceService),
             event_bus=c.resolve(EventBus),
         ),
@@ -375,24 +376,20 @@ def register_application_dependencies(container: "Container") -> None:
 
     from app.intelligence.decision.decision.engine import DecisionEngine
     from app.intelligence.decision.planning.engine import PlanningEngine as CognitivePlanningEngine
+    from app.intelligence.executive.approval import HumanApprovalProvider, IApprovalProvider
+    from app.intelligence.executive.controller import ExecutiveController
+    from app.intelligence.executive.interfaces import IExecutiveController
+
+    # Wave-1 Executive Runtime (M7)
+    from app.intelligence.executive.session_factory import SessionFactory
+
+    # Wave-1 AI OS Core (M8-M10)
+    from app.intelligence.executive.session_store import InMemorySessionStore, ISessionStore
+    from app.intelligence.executive.workflow import IWorkflowEngine, LocalDAGWorkflowEngine
     from app.intelligence.intake.intent.engine import IntentEngine as CognitiveIntentEngine
     from app.intelligence.intake.situation.engine import SituationAnalysisEngine
     from app.intelligence.integration.orchestrator import ExecutiveIntelligenceOrchestrator
     from app.intelligence.integration.pipeline import CognitivePipeline
-    
-    # Wave-1 Executive Runtime (M7)
-    from app.intelligence.executive.session_factory import SessionFactory
-    from app.intelligence.executive.interfaces import IExecutiveController
-    from app.intelligence.executive.controller import ExecutiveController
-    
-    # Wave-1 AI OS Core (M8-M10)
-    from app.intelligence.executive.session_store import ISessionStore, InMemorySessionStore
-    from app.intelligence.executive.workflow import IWorkflowEngine, LocalDAGWorkflowEngine
-    from app.intelligence.executive.approval import IApprovalProvider, HumanApprovalProvider
-    from app.intelligence.pipeline.interfaces import IAsyncCognitivePipeline
-    from app.intelligence.pipeline.pipeline import AsyncCognitivePipeline
-    from app.intelligence.pipeline.builtin_phases import ExecutePhase, ReflectPhase, LearnPhase
-
     from app.intelligence.learning.evaluation.engine import OutcomeEvaluationEngine
     from app.intelligence.learning.heuristics.engine import ExecutiveHeuristicsEngine
     from app.intelligence.learning.reflection.engine import ReflectionEngine
@@ -403,6 +400,9 @@ def register_application_dependencies(container: "Container") -> None:
     from app.intelligence.oversight.convergence.engine import ConvergenceEngine
     from app.intelligence.oversight.cycle.engine import CognitiveCycleController
     from app.intelligence.oversight.validation.engine import ExecutiveValidationEngine
+    from app.intelligence.pipeline.builtin_phases import ExecutePhase, LearnPhase, ReflectPhase
+    from app.intelligence.pipeline.interfaces import IAsyncCognitivePipeline
+    from app.intelligence.pipeline.pipeline import AsyncCognitivePipeline
     from app.intelligence.strategy.goals.engine import GoalManagementEngine
     from app.intelligence.strategy.objectives.engine import ExecutiveObjectivesEngine
 
@@ -481,10 +481,10 @@ def register_application_dependencies(container: "Container") -> None:
                 return factory
 
             container.register_factory(engine_cls, make_factory(engine_cls))
-            
+
     # Bind the Wave-1 Controller Interface to its Implementation
     container.register_factory(IExecutiveController, lambda c: c.resolve(ExecutiveController))
-    
+
     # Bind OS Interfaces
     container.register_factory(ISessionStore, lambda c: c.resolve(InMemorySessionStore))
     container.register_factory(IWorkflowEngine, lambda c: c.resolve(LocalDAGWorkflowEngine))
@@ -494,43 +494,50 @@ def register_application_dependencies(container: "Container") -> None:
     # =========================================================================
     # Wave-2 OS Kernel Foundations (V7.0)
     # =========================================================================
-    from app.infrastructure.vfs.vfs import IVirtualFileSystem
-    from app.runtime.kernel.interfaces import (
-        IKernel,
-        IRuntimeManager,
-        IProcessManager,
-        ISessionManager,
-        IScheduler,
-        IResourceManager,
-        IPolicyEngine,
-        IServiceDiscovery,
-    )
-    from app.runtime.kernel.syscall import ISyscallInterface
-    
-    # Milestone 2 Concrete Imports
-    from app.shared.bus.system_bus import ISystemBus, LocalSystemBus
-    from app.runtime.kernel.manager import RuntimeManager, ProcessManager
-    from app.runtime.kernel.scheduler import LocalScheduler
-    from app.runtime.kernel.process import ProcessTable
-    
-    from app.runtime.lifecycle.interfaces import ILifecycleManager
-    from app.runtime.lifecycle.session import SessionLifecycleManager
-    from app.runtime.lifecycle.workflow import WorkflowLifecycleManager
-    from app.runtime.lifecycle.process import ProcessLifecycleManager
-    
     from app.infrastructure.storage.storage_manager import IStorageManager
     from app.infrastructure.vfs.mount_registry import MountRegistry
     from app.infrastructure.vfs.path_resolver import MountResolver
+    from app.infrastructure.vfs.vfs import IVirtualFileSystem
+    from app.runtime.kernel.interfaces import (
+        IKernel,
+        IPolicyEngine,
+        IProcessManager,
+        IResourceManager,
+        IRuntimeManager,
+        IScheduler,
+        IServiceDiscovery,
+        ISessionManager,
+    )
+    from app.runtime.kernel.manager import ProcessManager, RuntimeManager
+    from app.runtime.kernel.process import ProcessTable
+    from app.runtime.kernel.scheduler import LocalScheduler
+    from app.runtime.kernel.syscall import ISyscallInterface
+    from app.runtime.lifecycle.process import ProcessLifecycleManager
+    from app.runtime.lifecycle.session import SessionLifecycleManager
+    from app.runtime.lifecycle.workflow import WorkflowLifecycleManager
+
+    # Milestone 2 Concrete Imports
+    from app.shared.bus.system_bus import ISystemBus, LocalSystemBus
 
     # Placeholder implementations for remaining abstractions
-    class PlaceholderKernel(IKernel): pass
-    class PlaceholderSessionManager(ISessionManager): pass
-    class PlaceholderResourceManager(IResourceManager): pass
-    class PlaceholderPolicyEngine(IPolicyEngine): pass
-    class PlaceholderServiceDiscovery(IServiceDiscovery): pass
-    class PlaceholderStorageManager(IStorageManager): 
+    class PlaceholderKernel(IKernel):
+        pass
+    class PlaceholderSessionManager(ISessionManager):
+        def create_session(self, *args, **kwargs): pass
+        def get_session(self, *args, **kwargs): pass
+        def terminate_session(self, *args, **kwargs): pass
+    class PlaceholderResourceManager(IResourceManager):
+        def allocate(self, *args, **kwargs): pass
+        def release(self, *args, **kwargs): pass
+        def get_usage(self, *args, **kwargs): pass
+    class PlaceholderPolicyEngine(IPolicyEngine):
+        def check_permission(self, *args, **kwargs): pass
+    class PlaceholderServiceDiscovery(IServiceDiscovery):
+        def discover(self, *args, **kwargs): pass
+        def register(self, *args, **kwargs): pass
+    class PlaceholderStorageManager(IStorageManager):
         def ping(self) -> bool: return True
-    
+
     class PlaceholderSyscall(ISyscallInterface):
         def start_session(self, context): pass
         def stop_session(self, session_id): pass
@@ -548,7 +555,7 @@ def register_application_dependencies(container: "Container") -> None:
         def log(self, level, message): pass
         def checkpoint(self, pid): pass
         def restore(self, pid, checkpoint_uri): pass
-        
+
     class PlaceholderVFS(IVirtualFileSystem):
         def mount_manager(self): pass
         def path_resolver(self): pass
@@ -562,50 +569,50 @@ def register_application_dependencies(container: "Container") -> None:
     container.register_factory(IServiceDiscovery, lambda c: PlaceholderServiceDiscovery())
     container.register_factory(ISyscallInterface, lambda c: PlaceholderSyscall())
     container.register_factory(IVirtualFileSystem, lambda c: PlaceholderVFS())
-    
+
     # Milestone 2 DI Bindings
     container.register_singleton(ISystemBus, lambda c: LocalSystemBus())
     container.register_singleton(ProcessTable, lambda c: ProcessTable())
     container.register_singleton(IProcessManager, lambda c: ProcessManager(c.resolve(ProcessTable)))
     container.register_singleton(IRuntimeManager, lambda c: RuntimeManager(c.resolve(IProcessManager), c.resolve(ISystemBus)))
     container.register_singleton(IScheduler, lambda c: LocalScheduler(c.resolve(IProcessManager)))
-    
+
     container.register_singleton(SessionLifecycleManager, lambda c: SessionLifecycleManager())
     container.register_singleton(WorkflowLifecycleManager, lambda c: WorkflowLifecycleManager())
     container.register_singleton(ProcessLifecycleManager, lambda c: ProcessLifecycleManager(c.resolve(IProcessManager)))
-    
+
     container.register_singleton(IStorageManager, lambda c: PlaceholderStorageManager())
     container.register_singleton(MountRegistry, lambda c: MountRegistry())
     container.register_singleton(MountResolver, lambda c: MountResolver(c.resolve(MountRegistry)))
 
     # System Query Service (Wave 3.1)
+    from app.application.system.query_service import SystemQueryService
     from app.runtime.registry.store import InMemoryRegistryStore
     from app.runtime.registry.tool_registry import ToolRegistry
     from app.runtime.registry.workflow_registry import WorkflowRegistry
-    from app.application.system.query_service import SystemQueryService
-    
+
     # Normally these registries would have persistent stores. For MVP, we use InMemoryRegistryStore
     container.register_factory(InMemoryRegistryStore, lambda c: InMemoryRegistryStore())
     container.register_factory(ToolRegistry, lambda c: ToolRegistry("ToolRegistry", c.resolve(InMemoryRegistryStore)))
     container.register_factory(WorkflowRegistry, lambda c: WorkflowRegistry("WorkflowRegistry", c.resolve(InMemoryRegistryStore)))
-    
+
     container.register_factory(SystemQueryService, lambda c: SystemQueryService(
         runtime_manager=c.resolve(IRuntimeManager),
         tool_registry=c.resolve(ToolRegistry),
         workflow_registry=c.resolve(WorkflowRegistry)
     ))
-    
+
     from app.runtime.mcp.bridge import MCPBridge
     container.register_factory(MCPBridge, lambda c: MCPBridge(c.resolve(ToolRegistry)))
 
     # =========================================================================
     # Wave-2 Milestone 3 — Distributed Runtime (V7.0)
     # =========================================================================
+    from app.runtime.distributed.celery_scheduler import CeleryDistributedScheduler
     from app.runtime.distributed.interfaces import (
         IDistributedScheduler,
         IDistributedSystemBus,
     )
-    from app.runtime.distributed.celery_scheduler import CeleryDistributedScheduler
     from app.runtime.distributed.redis_bus import RedisSystemBus
     from app.runtime.distributed.worker_node import BizOSWorkerNode
 
@@ -626,12 +633,12 @@ def register_application_dependencies(container: "Container") -> None:
     # =========================================================================
     # Wave-2 Milestone 4 — Storage Layer (V7.0)
     # =========================================================================
+    from app.infrastructure.storage.backup_manager import BackupManager
+    from app.infrastructure.storage.concrete_storage_manager import ConcreteStorageManager
+    from app.infrastructure.storage.snapshot_manager import SnapshotManager
     from app.infrastructure.vfs.postgres_mount import PostgresMount
     from app.infrastructure.vfs.qdrant_mount import QdrantMount
     from app.infrastructure.vfs.redis_mount import RedisMount
-    from app.infrastructure.storage.snapshot_manager import SnapshotManager
-    from app.infrastructure.storage.backup_manager import BackupManager
-    from app.infrastructure.storage.concrete_storage_manager import ConcreteStorageManager
 
     # VFS Mounts — registered individually so callers can resolve by concrete type.
     # Clients are None by default; startup wiring (lifespan) will inject live clients.

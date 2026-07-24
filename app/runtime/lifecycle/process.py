@@ -1,7 +1,9 @@
 from uuid import UUID
+
 from app.runtime.kernel.manager import ProcessManager
 from app.runtime.kernel.process import ProcessState
 from app.runtime.lifecycle.interfaces import ILifecycleManager, InvalidStateTransitionError
+
 
 class ProcessLifecycleManager(ILifecycleManager):
     """

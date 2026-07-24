@@ -9,12 +9,12 @@ class DeterministicPlanningProvider(IPlanningProvider):
     Mock implementation for deterministic plan generation.
     Creates predictable plans based on input goals without invoking LLMs.
     """
-    
+
     def __init__(self, priority: int = 1, name: str = "DeterministicPlanner"):
         self._priority = priority
         self._name = name
         self._status = ProviderLifecycleStatus.READY
-        
+
     def get_metadata(self) -> CapabilityMetadata:
         return CapabilityMetadata(
             capability_id=f"deterministic-{self._name.lower()}",
@@ -24,19 +24,19 @@ class DeterministicPlanningProvider(IPlanningProvider):
             priority=self._priority,
             supported_features=["deterministic_mocking"]
         )
-        
+
     def set_status(self, status: ProviderLifecycleStatus) -> None:
         self._status = status
-        
+
     def get_status(self) -> ProviderLifecycleStatus:
         return self._status
-        
+
     async def generate_plan(self, context: PlanningContext, goal: Goal) -> Plan:
         """
         Generates a deterministic plan based on the goal description.
         """
         plan = Plan(goal_id=goal.goal_id)
-        
+
         if "invalid" in goal.description.lower():
             # Generate a plan with a cycle to test validation
             step1 = PlanStep(action="Step 1")
@@ -58,5 +58,5 @@ class DeterministicPlanningProvider(IPlanningProvider):
             plan.add_step(step1)
             plan.add_step(step2)
             plan.add_dependency(step2.step_id, step1.step_id)
-            
+
         return plan

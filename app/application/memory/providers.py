@@ -1,12 +1,12 @@
-from typing import Any, Dict, List, Optional
 from uuid import UUID
 
-from app.domain.memory.provider import IMemoryProvider
 from app.domain.memory.models import MemoryRecord
+from app.domain.memory.provider import IMemoryProvider
+
 
 class InMemoryProvider(IMemoryProvider):
     def __init__(self):
-        self._store: Dict[UUID, MemoryRecord] = {}
+        self._store: dict[UUID, MemoryRecord] = {}
 
     @property
     def provider_name(self) -> str:
@@ -15,10 +15,10 @@ class InMemoryProvider(IMemoryProvider):
     async def store(self, record: MemoryRecord) -> None:
         self._store[record.memory_id] = record
 
-    async def retrieve(self, memory_id: UUID) -> Optional[MemoryRecord]:
+    async def retrieve(self, memory_id: UUID) -> MemoryRecord | None:
         return self._store.get(memory_id)
 
-    async def search(self, query: str, limit: int = 10, **filters) -> List[MemoryRecord]:
+    async def search(self, query: str, limit: int = 10, **filters) -> list[MemoryRecord]:
         results = []
         for record in self._store.values():
             # Mock keyword search
@@ -37,7 +37,7 @@ class VectorMemoryProvider(InMemoryProvider):
     @property
     def provider_name(self) -> str:
         return "vector"
-        
+
 class SQLMemoryProvider(InMemoryProvider):
     @property
     def provider_name(self) -> str:

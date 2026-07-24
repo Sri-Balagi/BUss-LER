@@ -14,7 +14,9 @@ All kernel access is via app.bootstrap or app.interfaces.http.v1.dependencies.
 from __future__ import annotations
 
 import time
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+from typing import Any
 
 import structlog
 from fastapi import FastAPI, Request
@@ -29,13 +31,12 @@ from app.infrastructure.persistence.postgres.supabase import SupabaseService
 from app.infrastructure.vectorstore.qdrant import QdrantService
 from app.interfaces.http.errors import register_exception_handlers
 from app.interfaces.http.metrics import MetricsMiddleware, metrics_endpoint
-from app.interfaces.http.middleware.request_id import RequestIDMiddleware
-from app.interfaces.http.middleware.security_headers import SecurityHeadersMiddleware
-from app.interfaces.http.middleware.pipeline import register_gateway_pipeline
 from app.interfaces.http.middleware.audit_middleware import AuditMiddleware
+from app.interfaces.http.middleware.pipeline import register_gateway_pipeline
+from app.interfaces.http.middleware.security_headers import SecurityHeadersMiddleware
 from app.interfaces.http.openapi import custom_openapi
-from app.interfaces.http.v1.routers.gateway import gateway_router
 from app.interfaces.http.v1.router import api_router
+from app.interfaces.http.v1.routers.gateway import gateway_router
 from app.platform.resilience.graceful_shutdown import register_shutdown_handlers
 from app.platform.telemetry.otel import instrument_fastapi, setup_tracing
 
@@ -46,7 +47,7 @@ logger = structlog.get_logger()
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):  # type: ignore[type-arg]
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifecycle manager.
 
     Handles startup validation and graceful shutdown.
@@ -92,7 +93,7 @@ async def lifespan(app: FastAPI):  # type: ignore[type-arg]
         container.resolve(ProviderRegistry)
         container.resolve(PromptRegistry)
         container.resolve(IResourceBudget)
-        
+
         from app.infrastructure.security.audit import AuditSubscriber
         logger.info("Initializing Audit & Security Observability")
         container.resolve(AuditSubscriber)
@@ -131,7 +132,7 @@ def create_app() -> FastAPI:
     )
 
     # ── Middleware (applied in reverse registration order) ────────────────────
-    
+
     # 1. Security headers (outermost — always applied last in response chain)
     app.add_middleware(SecurityHeadersMiddleware)
 
@@ -139,8 +140,8 @@ def create_app() -> FastAPI:
     app.add_middleware(MetricsMiddleware)
 
     # 3. CORS
-    cors_origins = (
-        ["*"] if not settings.is_production else settings.model_fields.get("cors_origins", ["*"])  # type: ignore[arg-type]
+    cors_origins: list[str] = (
+        ["*"] if not settings.is_production else list(getattr(settings, "cors_origins", ["*"]))
     )
     app.add_middleware(
         CORSMiddleware,
@@ -149,7 +150,7 @@ def create_app() -> FastAPI:
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["*"],
     )
-    
+
     # 3.5. Audit Middleware
     app.add_middleware(AuditMiddleware)
 
@@ -158,7 +159,7 @@ def create_app() -> FastAPI:
 
     # ── Request Logging ───────────────────────────────────────────────────────
     @app.middleware("http")
-    async def log_requests(request: Request, call_next):  # type: ignore[type-arg]
+    async def log_requests(request: Request, call_next: Any) -> Response:
         start = time.perf_counter()
         response = await call_next(request)
         duration = time.perf_counter() - start
@@ -180,6 +181,11 @@ def create_app() -> FastAPI:
     # ── Prometheus /metrics endpoint ──────────────────────────────────────────
     @app.get("/metrics", include_in_schema=False)
     async def _metrics(request: Request) -> Response:
+        if settings.metrics_token:
+            token = request.headers.get("X-Metrics-Token") or request.headers.get("Authorization")
+            if token != settings.metrics_token and token != f"Bearer {settings.metrics_token}":
+                from fastapi import HTTPException
+                raise HTTPException(status_code=403, detail="Forbidden")
         return metrics_endpoint(request)
 
     # ── Exception Handlers ────────────────────────────────────────────────────

@@ -1,4 +1,3 @@
-from typing import List, Set
 
 from app.domain.security.interfaces import IPolicyRepository
 from app.domain.security.permissions import SystemPermission
@@ -9,7 +8,7 @@ class InMemoryPolicyRepository(IPolicyRepository):
     In-memory implementation of the policy repository.
     Maps roles to a set of explicit SystemPermissions.
     """
-    
+
     def __init__(self):
         # A static role-to-permission mapping for this milestone
         self._role_permissions = {
@@ -51,7 +50,7 @@ class InMemoryPolicyRepository(IPolicyRepository):
             }
         }
 
-    async def get_permissions_for_roles(self, roles: List[str]) -> Set[str]:
+    async def get_permissions_for_roles(self, roles: list[str]) -> set[str]:
         """
         Resolves the roles to a flat set of permission string values.
         """
@@ -60,5 +59,5 @@ class InMemoryPolicyRepository(IPolicyRepository):
             # We map role name to a set of enums, then extract their string values
             role_perms = self._role_permissions.get(role, set())
             permissions.update(p.value for p in role_perms)
-            
+
         return permissions

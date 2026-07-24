@@ -5,12 +5,14 @@ This allows the AIKernel to enforce budgets without knowing about
 the underlying persistence mechanism (in-memory, Redis, Supabase).
 """
 
+import enum
+import sys
 from abc import ABC, abstractmethod
-try:
+
+if sys.version_info >= (3, 11):
     from enum import StrEnum
-except ImportError:
-    from enum import Enum
-    class StrEnum(str, Enum):
+else:
+    class StrEnum(str, enum.Enum):
         pass
 
 from typing import Any

@@ -111,7 +111,7 @@ class IntentBase(DomainBaseModel):
         description="The original natural language input from the user.",
     )
     title: str | None = Field(
-        None,
+        default=None,
         max_length=255,
         description="AI-generated human-readable title (populated after classification).",
     )
@@ -145,7 +145,7 @@ class IntentCreate(IntentBase):
 class IntentUpdate(DomainBaseModel):
     """Schema for partially updating an intent."""
 
-    title: str | None = Field(None, max_length=255)
+    title: str | None = Field(default=None, max_length=255)
     intent_type: IntentType | None = None
     status: IntentStatus | None = None
     analysis: IntentAnalysis | None = None

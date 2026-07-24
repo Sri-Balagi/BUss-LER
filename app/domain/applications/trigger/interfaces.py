@@ -1,7 +1,6 @@
 import abc
-from typing import Dict, Any
 
-from app.domain.applications.trigger.models import TriggerContext, TriggerCondition
+from app.domain.applications.trigger.models import TriggerCondition, TriggerContext
 
 
 class IConditionEvaluator(abc.ABC):

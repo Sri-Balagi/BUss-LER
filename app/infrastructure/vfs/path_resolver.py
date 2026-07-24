@@ -1,6 +1,8 @@
 from urllib.parse import urlparse
-from app.infrastructure.vfs.vfs import IVirtualNode
+
 from app.infrastructure.vfs.mount_registry import MountRegistry
+from app.infrastructure.vfs.vfs import IVirtualNode
+
 
 class MountResolver:
     """
@@ -15,9 +17,9 @@ class MountResolver:
         """
         parsed = urlparse(uri)
         scheme = parsed.scheme
-        
+
         mount = self.registry.get_mount(scheme)
         if not mount:
             raise ValueError(f"No mount registered for scheme '{scheme}'")
-            
+
         return mount.resolve(uri)

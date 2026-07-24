@@ -1,12 +1,11 @@
 import asyncio
 import time
-from typing import List
 
-from app.domain.learning.provider import ILearningProvider
-from app.domain.learning.models import LearningContext, LearningResult, LearningMetrics
-from app.domain.intelligence.provider import ProviderLifecycleStatus
 from app.domain.cognition.models import ReflectionFeedback
 from app.domain.intelligence.capability import CapabilityMetadata, CapabilityType
+from app.domain.intelligence.provider import ProviderLifecycleStatus
+from app.domain.learning.models import LearningContext, LearningMetrics, LearningResult
+from app.domain.learning.provider import ILearningProvider
 
 
 class MockLearningProvider(ILearningProvider):
@@ -31,7 +30,7 @@ class MockLearningProvider(ILearningProvider):
 
     def set_status(self, status: ProviderLifecycleStatus) -> None:
         self._status = status
-        
+
     def get_status(self) -> ProviderLifecycleStatus:
         return self._status
 
@@ -47,15 +46,15 @@ class MockLearningProvider(ILearningProvider):
         Simulates extracting and consolidating knowledge.
         """
         start_time = time.time()
-        
+
         # Simulate async work
         await asyncio.sleep(0.01)
-        
+
         # Determine items consolidated based on feedback
         extracted_items = []
         if context.feedback and context.feedback == ReflectionFeedback.IS_COMPLETE:
             extracted_items = ["rule_1", "rule_2"]
-        
+
         consolidation_time_ms = (time.time() - start_time) * 1000.0
 
         metrics = LearningMetrics(

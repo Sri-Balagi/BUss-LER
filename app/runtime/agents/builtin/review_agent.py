@@ -20,10 +20,10 @@ class ReviewAgent(BaseAgent):
 
     async def execute(self) -> AgentResult:
         logger.info("ReviewAgent executing capability", identity=self.specification.identity)
-        
+
         # M9 Stub execution
         await asyncio.sleep(0.1)
-        
+
         return AgentResult(
             status=AgentResultStatus.SUCCESS,
             output={"review_status": "Approved", "confidence": 0.95},

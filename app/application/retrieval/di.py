@@ -11,19 +11,19 @@ from app.shared.events.bus import EventBus
 
 def register_retrieval_dependencies(container: Container) -> None:
     """Register all Knowledge Retrieval (RAG) dependencies."""
-    
+
     # Infrastructure
     container.register_singleton(
         IVectorRepository,
         InMemoryVectorRepository()
     )
-    
+
     # Domain Strategy
     container.register_singleton(
         IRankingStrategy,
         ReciprocalRankFusionStrategy()
     )
-    
+
     # Pipeline
     def _pipeline_factory(c: Container) -> IRetrievalPipeline:
         return DefaultRetrievalPipeline(
@@ -33,11 +33,11 @@ def register_retrieval_dependencies(container: Container) -> None:
             ranking_strategy=c.resolve(IRankingStrategy),
             event_bus=c.resolve(EventBus)
         )
-        
+
     container.register_factory(IRetrievalPipeline, _pipeline_factory)
-    
+
     # Service
     def _service_factory(c: Container) -> RetrievalEngineService:
         return RetrievalEngineService(pipeline=c.resolve(IRetrievalPipeline))
-        
+
     container.register_factory(RetrievalEngineService, _service_factory)

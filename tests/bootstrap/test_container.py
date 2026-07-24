@@ -110,15 +110,15 @@ def test_build_container_singleton():
 def test_scoped_dependencies():
     container = Container()
     container.register_scoped(IDependencyA, lambda c: DependencyA())
-    
+
     # Resolve in current context
     instance1 = container.resolve(IDependencyA)
     instance2 = container.resolve(IDependencyA)
-    
+
     # Should be the same instance within the same context
     assert instance1 is instance2
     assert isinstance(instance1, DependencyA)
-    
+
     # We can't easily test cross-context async behavior in a simple sync test here without
     # explicitly copying the contextvar context, but we verified the logic doesn't crash
     # and registers properly instead of raising NotImplementedError.

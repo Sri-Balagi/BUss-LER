@@ -1,6 +1,7 @@
 from uuid import UUID
-from typing import Dict, Any
+
 from app.runtime.lifecycle.interfaces import ILifecycleManager, InvalidStateTransitionError
+
 
 class SessionLifecycleManager(ILifecycleManager):
     """
@@ -8,7 +9,7 @@ class SessionLifecycleManager(ILifecycleManager):
     States: CREATED -> INITIALIZED -> RUNNING -> AWAITING_INPUT -> COMPLETED | FAILED
     """
     def __init__(self):
-        self._states: Dict[UUID, str] = {}
+        self._states: dict[UUID, str] = {}
         self._valid_transitions = {
             "CREATED": ["INITIALIZED", "FAILED"],
             "INITIALIZED": ["RUNNING", "FAILED"],

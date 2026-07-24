@@ -12,7 +12,6 @@ from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
-
 # ── Wave-0 models (unchanged) ─────────────────────────────────────────────────
 
 class ReasoningMode(StrEnum):

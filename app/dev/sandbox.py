@@ -1,6 +1,5 @@
-import json
 import logging
-from typing import Any, Dict
+from typing import Any
 
 from app.sdk.client.config import SDKConfig
 from app.sdk.client.sync_client import BizOSClient
@@ -17,7 +16,7 @@ class DevSandbox:
     def __init__(self):
         self.config = SDKConfig(base_url="http://localhost:8000")
         self.client = BizOSClient(config=self.config)
-        self.state: Dict[str, Any] = {}
+        self.state: dict[str, Any] = {}
 
     def start(self) -> None:
         logger.info("Starting DevSandbox...")

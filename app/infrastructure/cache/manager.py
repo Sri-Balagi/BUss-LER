@@ -1,13 +1,15 @@
 import json
-from typing import Optional, Any
+from typing import Any
+
 from app.infrastructure.providers.interfaces import IRedisProvider
+
 
 class CacheManager:
     def __init__(self, redis: IRedisProvider):
         self._redis = redis
         self._stats = {"hits": 0, "misses": 0, "invalidations": 0}
 
-    async def get(self, key: str) -> Optional[Any]:
+    async def get(self, key: str) -> Any | None:
         val = await self._redis.get(key)
         if val:
             self._stats["hits"] += 1
@@ -15,7 +17,7 @@ class CacheManager:
         self._stats["misses"] += 1
         return None
 
-    async def set(self, key: str, value: Any, ttl: Optional[int] = 3600):
+    async def set(self, key: str, value: Any, ttl: int | None = 3600):
         await self._redis.set(key, json.dumps(value), ttl)
 
     async def invalidate(self, key: str):

@@ -24,6 +24,10 @@ class TwinContextProvider(AbstractContextProvider):
 
         self._twin_service = twin_service
 
+    @property
+    def source(self) -> ContextSource:
+        return ContextSource.TWIN
+
     async def provide(self, ctx, twin_id: UUID, policy) -> ContextSection:
 
         items = []

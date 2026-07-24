@@ -11,32 +11,31 @@ Registered subsystems:
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.bootstrap.container import get_container
 from app.infrastructure.ai.kernel import AbstractAIKernel
-from app.interfaces.http.v1.dependencies_ai import get_ai_kernel
-
-# ── Milestone 1 ──────────────────────────────────────────────────────────────
-from app.interfaces.http.v1.entities import router as entities_router
-from app.interfaces.http.v1.twins import router as twins_router
-
-# ── Milestone 2 ──────────────────────────────────────────────────────────────
-from app.interfaces.http.v1.memories import router as memories_router
-
-# ── Milestone 3 ──────────────────────────────────────────────────────────────
-from app.interfaces.http.v1.intents import router as intents_router
-from app.interfaces.http.v1.goals import router as goals_router
 
 # ── Milestone 4 ──────────────────────────────────────────────────────────────
 from app.interfaces.http.v1.context import router as context_router
 from app.interfaces.http.v1.conversations import router as conversations_router
+from app.interfaces.http.v1.dependencies_ai import get_ai_kernel
+
+# ── Milestone 1 ──────────────────────────────────────────────────────────────
+from app.interfaces.http.v1.entities import router as entities_router
+from app.interfaces.http.v1.goals import router as goals_router
+
+# ── Milestone 3 ──────────────────────────────────────────────────────────────
+from app.interfaces.http.v1.intents import router as intents_router
+
+# ── Milestone 2 ──────────────────────────────────────────────────────────────
+from app.interfaces.http.v1.memories import router as memories_router
 
 # ── Milestone 5 ──────────────────────────────────────────────────────────────
 from app.interfaces.http.v1.plans import router as plans_router
 from app.interfaces.http.v1.recommendations import router as recommendations_router
+from app.interfaces.http.v1.system import router as system_router
 
 # ── Milestone 6 ──────────────────────────────────────────────────────────────
 from app.interfaces.http.v1.traces import router as traces_router
-from app.interfaces.http.v1.system import router as system_router
+from app.interfaces.http.v1.twins import router as twins_router
 
 api_router = APIRouter()
 
@@ -76,4 +75,6 @@ async def ai_health_check(kernel: AbstractAIKernel = Depends(get_ai_kernel)):
             raise HTTPException(status_code=503, detail=status)
         return status
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        import structlog
+        structlog.get_logger(__name__).error("AI Health check failed", error=str(e))
+        raise HTTPException(status_code=500, detail="AI Service is currently unavailable")

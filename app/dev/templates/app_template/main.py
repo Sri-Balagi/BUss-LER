@@ -1,7 +1,9 @@
 import json
 from pathlib import Path
+
 from app.sdk.core.app_base import BizOSApp
 from app.sdk.manifest.app_manifest import AppManifest
+
 
 class MyApp(BizOSApp):
     def run(self) -> None:
@@ -11,9 +13,9 @@ class MyApp(BizOSApp):
 
 if __name__ == "__main__":
     manifest_path = Path(__file__).parent / "manifest.json"
-    with open(manifest_path, "r") as f:
+    with open(manifest_path) as f:
         data = json.load(f)
-    
+
     manifest = AppManifest.model_validate(data)
     app = MyApp(manifest=manifest)
     try:

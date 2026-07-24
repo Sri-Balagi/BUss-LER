@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -17,5 +17,5 @@ class WorkflowRegistry(BaseRegistry[WorkflowMetadata]):
     Registry for managing Workflows.
     """
 
-    def _deserialize_item(self, data: Dict[str, Any]) -> WorkflowMetadata:
+    def _deserialize_item(self, data: dict[str, Any]) -> WorkflowMetadata:
         return WorkflowMetadata.model_validate(data)

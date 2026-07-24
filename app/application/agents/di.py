@@ -1,30 +1,28 @@
+from app.application.agents.behaviors.executor import ExecutorBehavior
+from app.application.agents.behaviors.planner import PlannerBehavior
+from app.application.agents.behaviors.reasoning import ReasoningBehavior
+from app.application.agents.behaviors.research import ResearchBehavior
+from app.application.agents.registry import InMemoryAgentRegistry
+from app.application.agents.runtime import AgentRuntime
+from app.application.decisions.platform import DecisionPlatform
+from app.application.memory.context import ContextBuilder
+from app.application.memory.retriever import MemoryRetriever
 from app.bootstrap.container import Container
 from app.domain.agents.interfaces import IAgentRegistry
-from app.application.agents.registry import InMemoryAgentRegistry
-
-from app.application.agents.runtime import AgentRuntime
-from app.application.agents.behaviors.planner import PlannerBehavior
-from app.application.agents.behaviors.research import ResearchBehavior
-from app.application.agents.behaviors.reasoning import ReasoningBehavior
-from app.application.agents.behaviors.executor import ExecutorBehavior
+from app.domain.intelligence.platform import IIntelligencePlatform
+from app.domain.memory.platform import IMemoryPlatform
+from app.domain.session.repository import ISessionRepository
+from app.domain.tasks.repository import InMemoryTaskRepository, ITaskRepository
+from app.infrastructure.knowledge.repository import InMemoryKnowledgeRepository
+from app.infrastructure.session.memory import InMemorySessionRepository
 from app.shared.enums import AgentType
 from app.shared.events.bus import EventBus
-from app.domain.session.repository import ISessionRepository
-from app.infrastructure.session.memory import InMemorySessionRepository
-from app.domain.tasks.repository import ITaskRepository, InMemoryTaskRepository
-from app.domain.intelligence.platform import IIntelligencePlatform
-from app.application.memory.retriever import MemoryRetriever
-from app.application.memory.context import ContextBuilder
-from app.domain.memory.platform import IMemoryPlatform
-from app.domain.decisions.platform import IDecisionPlatform
-from app.application.decisions.platform import DecisionPlatform
-from app.domain.knowledge.repository import IKnowledgeRepository
-from app.infrastructure.knowledge.repository import InMemoryKnowledgeRepository
+
 
 def register_agent_dependencies(container: Container) -> None:
     registry = InMemoryAgentRegistry()
     container.register_singleton(IAgentRegistry, registry)
-    
+
     # We will instantiate AgentRuntime dynamically or register a factory that pulls event_bus and session_repo
     def build_agent_runtime(c: Container) -> AgentRuntime:
         event_bus = c.resolve(EventBus)
@@ -34,20 +32,20 @@ def register_agent_dependencies(container: Container) -> None:
         retriever = c.resolve(MemoryRetriever)
         context_builder = c.resolve(ContextBuilder)
         memory_platform = c.resolve(IMemoryPlatform)
-        
+
         # Decision platform
         knowledge_repo = InMemoryKnowledgeRepository()
         decision_platform = DecisionPlatform(platform, memory_platform, knowledge_repo)
-        
-        runtime = AgentRuntime(registry, event_bus, session_repo, task_repo)
-        
+
+        runtime = AgentRuntime(event_bus, registry, task_repo, session_repo)
+
         # Register behaviors
         runtime.register_behavior(AgentType.PLANNER, PlannerBehavior(event_bus, registry, task_repo, platform, decision_platform, memory_platform))
         runtime.register_behavior(AgentType.RESEARCH, ResearchBehavior(platform, retriever, context_builder, memory_platform))
         runtime.register_behavior(AgentType.REASONING, ReasoningBehavior(platform, retriever, context_builder, memory_platform))
         runtime.register_behavior(AgentType.EXECUTOR, ExecutorBehavior())
         return runtime
-        
+
     # Add ITaskRepository registration
     container.register_singleton(ITaskRepository, InMemoryTaskRepository())
     # Add ISessionRepository registration

@@ -10,24 +10,14 @@ from app.shared.exceptions.errors import (
     DomainValidationError,
     DuplicateMemoryError,
     DuplicateTwinError,
-    EntityNotFoundError,
-    MemoryNotFoundError,
     NotFoundError,
     RepositoryError,
     ServiceError,
-    TwinNotFoundError,
     VersionConflictError,
 )
 
 logger = structlog.get_logger()
 
-
-async def entity_not_found_handler(request: Request, exc: EntityNotFoundError) -> JSONResponse:
-    logger.warning("Entity not found", url=str(request.url), detail=exc.detail)
-    return JSONResponse(
-        status_code=status.HTTP_404_NOT_FOUND,
-        content={"detail": exc.message},
-    )
 
 
 async def generic_not_found_handler(request: Request, exc: NotFoundError) -> JSONResponse:
@@ -42,22 +32,6 @@ async def generic_bizos_error_handler(request: Request, exc: BizOSError) -> JSON
     logger.warning("BizOS domain error", url=str(request.url), detail=exc.detail)
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
-        content={"detail": exc.message},
-    )
-
-
-async def memory_not_found_handler(request: Request, exc: MemoryNotFoundError) -> JSONResponse:
-    logger.warning("Memory not found", url=str(request.url), detail=exc.detail)
-    return JSONResponse(
-        status_code=status.HTTP_404_NOT_FOUND,
-        content={"detail": exc.message},
-    )
-
-
-async def twin_not_found_handler(request: Request, exc: TwinNotFoundError) -> JSONResponse:
-    logger.warning("Twin not found", url=str(request.url), detail=exc.detail)
-    return JSONResponse(
-        status_code=status.HTTP_404_NOT_FOUND,
         content={"detail": exc.message},
     )
 
@@ -120,9 +94,7 @@ async def ai_kernel_error_handler(request: Request, exc: AIKernelError) -> JSONR
 
 def register_exception_handlers(app: FastAPI) -> None:
     """Register all domain exception handlers to the FastAPI app."""
-    app.add_exception_handler(EntityNotFoundError, entity_not_found_handler)
-    app.add_exception_handler(TwinNotFoundError, twin_not_found_handler)
-    app.add_exception_handler(MemoryNotFoundError, memory_not_found_handler)
+    app.add_exception_handler(NotFoundError, generic_not_found_handler)
     app.add_exception_handler(VersionConflictError, version_conflict_handler)
     app.add_exception_handler(DuplicateTwinError, duplicate_twin_handler)
     app.add_exception_handler(DuplicateMemoryError, duplicate_memory_handler)
@@ -130,5 +102,4 @@ def register_exception_handlers(app: FastAPI) -> None:
     app.add_exception_handler(RepositoryError, repository_error_handler)
     app.add_exception_handler(ServiceError, service_error_handler)
     app.add_exception_handler(AIKernelError, ai_kernel_error_handler)
-    app.add_exception_handler(NotFoundError, generic_not_found_handler)
     app.add_exception_handler(BizOSError, generic_bizos_error_handler)

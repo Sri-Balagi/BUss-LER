@@ -1,5 +1,7 @@
+
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException, Request
-from typing import List
 
 from app.bootstrap.container import get_container
 from app.domain.applications.registry.interfaces import IApplicationRegistry
@@ -11,7 +13,7 @@ def get_registry() -> IApplicationRegistry:
     container = get_container()
     return container.resolve(IApplicationRegistry)
 
-@router.get("/", response_model=List[ApplicationMetadata])
+@router.get("/", response_model=list[ApplicationMetadata])
 async def list_applications(registry: IApplicationRegistry = Depends(get_registry)):
     """Discover all registered cognitive applications."""
     return registry.get_all_metadata()
@@ -30,20 +32,21 @@ async def submit_job(app_id: str, context_data: dict, request: Request, registry
     app = registry.resolve(app_id)
     if not app:
         raise HTTPException(status_code=404, detail=f"Application {app_id} not found")
-        
+
     if not hasattr(app, 'submit_job'):
         raise HTTPException(status_code=400, detail=f"Application {app_id} does not support background jobs")
-        
+
     # Inject tracing and tenant from request state
     context_data['trace_id'] = getattr(request.state, 'trace_id', None)
     context_data['span_id'] = getattr(request.state, 'span_id', None)
-    
+
     if 'user_id' not in context_data:
         context_data['user_id'] = getattr(request.state, 'user_id', 'anonymous')
     if 'tenant_id' not in context_data:
         context_data['tenant_id'] = getattr(request.state, 'tenant_id', 'default-tenant')
 
     # Context validation based on app_id
+    context: Any
     if app_id == "bizos.worker.v1":
         from app.domain.applications.context.models import WorkerContext
         context = WorkerContext(**context_data)
@@ -56,7 +59,7 @@ async def submit_job(app_id: str, context_data: dict, request: Request, registry
     else:
         from app.domain.applications.context.models import ApplicationContext
         context = ApplicationContext(**context_data)
-    
+
     job_id = await app.submit_job(context)
     return {"job_id": job_id}
 
@@ -66,10 +69,10 @@ async def get_job_status(app_id: str, job_id: str, registry: IApplicationRegistr
     app = registry.resolve(app_id)
     if not app:
         raise HTTPException(status_code=404, detail=f"Application {app_id} not found")
-        
+
     if not hasattr(app, 'get_job_status'):
         raise HTTPException(status_code=400, detail=f"Application {app_id} does not support background jobs")
-        
+
     try:
         job_record = await app.get_job_status(job_id)
         return job_record

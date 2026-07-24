@@ -1,5 +1,0 @@
-status
-ps
-registry list ToolRegistry
-memory
-exit

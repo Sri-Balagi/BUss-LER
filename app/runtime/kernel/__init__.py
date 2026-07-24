@@ -1,15 +1,15 @@
 from .interfaces import (
     IKernel,
-    IRuntimeManager,
-    IProcessManager,
-    ISessionManager,
-    IScheduler,
-    IResourceManager,
     IPolicyEngine,
+    IProcessManager,
+    IResourceManager,
+    IRuntimeManager,
+    IScheduler,
     IServiceDiscovery,
+    ISessionManager,
 )
-from .process import ProcessType, ProcessState, ProcessControlBlock, ProcessTable
-from .syscall import KernelRing, ISyscallInterface
+from .process import ProcessControlBlock, ProcessState, ProcessTable, ProcessType
+from .syscall import ISyscallInterface, KernelRing
 
 __all__ = [
     "IKernel",

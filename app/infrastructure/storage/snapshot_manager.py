@@ -15,7 +15,7 @@ Design
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
@@ -56,7 +56,7 @@ class SnapshotManager:
         record = {
             "object_id": str(object_id),
             "version": version,
-            "captured_at": datetime.now(timezone.utc).isoformat(),
+            "captured_at": datetime.now(UTC).isoformat(),
             "payload": payload,
         }
         self._redis.set(key, json.dumps(record))

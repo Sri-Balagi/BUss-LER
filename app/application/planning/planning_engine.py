@@ -245,7 +245,7 @@ class PlanningEngine(AbstractPlanningEngine):
             step_count=len(plan.steps),
         )
 
-        await self._event_bus.publish(event, ctx)
+        self._event_bus.publish(event, ctx)
 
         log.info(
             "Plan generated",

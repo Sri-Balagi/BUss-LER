@@ -10,7 +10,7 @@ def register_knowledge_dependencies(container: Container) -> None:
 
     # Register Infrastructure
     container.register_singleton(
-        IKnowledgeRepository, 
+        IKnowledgeRepository,
         InMemoryKnowledgeRepository()
     )
 
@@ -20,5 +20,5 @@ def register_knowledge_dependencies(container: Container) -> None:
             repository=c.resolve(IKnowledgeRepository),
             event_bus=c.resolve(EventBus)
         )
-        
+
     container.register_factory(KnowledgeGraphService, _knowledge_graph_service_factory)

@@ -1,9 +1,11 @@
-from typing import Callable, Any
-from enum import Enum
 import asyncio
 import time
+from collections.abc import Callable
+from enum import StrEnum
+from typing import Any
 
-class CircuitBreakerState(str, Enum):
+
+class CircuitBreakerState(StrEnum):
     CLOSED = "CLOSED"
     OPEN = "OPEN"
     HALF_OPEN = "HALF_OPEN"
@@ -26,7 +28,7 @@ class ExecutionPolicy:
     async def execute(self, func: Callable, *args, **kwargs) -> Any:
         attempts = 0
         last_exception = None
-        
+
         while attempts <= self.retry.max_retries:
             try:
                 if self.timeout.timeout_seconds > 0:
@@ -40,7 +42,7 @@ class ExecutionPolicy:
                     break
                 delay = self.retry.base_delay * (2 ** (attempts - 1)) if self.retry.exponential else self.retry.base_delay
                 await asyncio.sleep(delay)
-                
+
         raise last_exception
 
 class CircuitBreaker:
@@ -57,7 +59,7 @@ class CircuitBreaker:
                 self.state = CircuitBreakerState.HALF_OPEN
             else:
                 raise Exception("Circuit Breaker is OPEN")
-                
+
         try:
             result = await func(*args, **kwargs)
             if self.state == CircuitBreakerState.HALF_OPEN:
@@ -74,19 +76,19 @@ class CircuitBreaker:
 class IdempotencyGuard:
     def __init__(self):
         self._processed_keys = set()
-        
+
     def is_processed(self, key: str) -> bool:
         return key in self._processed_keys
-        
+
     def mark_processed(self, key: str):
         self._processed_keys.add(key)
 
 class DeadLetterQueue:
     def __init__(self):
         self._queue = []
-        
+
     def push(self, item: Any, reason: str):
         self._queue.append({"item": item, "reason": reason, "timestamp": time.time()})
-        
+
     def count(self) -> int:
         return len(self._queue)

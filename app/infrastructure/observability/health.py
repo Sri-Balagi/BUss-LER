@@ -1,7 +1,7 @@
-from enum import Enum
-from typing import Dict
+from enum import StrEnum
 
-class HealthStatus(str, Enum):
+
+class HealthStatus(StrEnum):
     HEALTHY = "HEALTHY"
     DEGRADED = "DEGRADED"
     UNHEALTHY = "UNHEALTHY"
@@ -15,14 +15,14 @@ class HealthMonitor:
             "EventBus": HealthStatus.HEALTHY,
             "RepositoryLayer": HealthStatus.HEALTHY
         }
-    
+
     def check_liveness(self) -> bool:
         return True
-        
+
     def check_readiness(self) -> bool:
         return all(status != HealthStatus.UNHEALTHY for status in self.services.values())
-        
-    def get_dependency_health(self) -> Dict[str, HealthStatus]:
+
+    def get_dependency_health(self) -> dict[str, HealthStatus]:
         return self.services.copy()
 
     def set_service_health(self, service_name: str, status: HealthStatus):

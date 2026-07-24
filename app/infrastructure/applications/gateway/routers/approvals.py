@@ -1,18 +1,20 @@
-from fastapi import APIRouter, HTTPException, Depends
-from typing import Dict, Any, List
-from app.domain.approval.models import Approval, ApprovalState
+from typing import Any
+
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+
+from app.domain.approval.models import Approval, ApprovalState
 
 router = APIRouter(prefix="/approvals", tags=["approvals"])
 
 # For demonstration in Wave 7 (in-memory store for approvals)
-_approval_store: Dict[str, Approval] = {}
+_approval_store: dict[str, Approval] = {}
 
 class ApprovalCreateRequest(BaseModel):
     target_type: str
     target_id: str
     requested_by: str
-    metadata: Dict[str, Any] = {}
+    metadata: dict[str, Any] = {}
 
 class RejectRequest(BaseModel):
     user_id: str

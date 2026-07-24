@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict
+
 
 class SecurityContext:
     def __init__(self, user_id: str, tenant_id: str, roles: list[str]):

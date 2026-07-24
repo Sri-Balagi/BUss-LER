@@ -3,7 +3,6 @@ from typing import Any
 from uuid import UUID
 
 from app.intelligence.core.session.models import ReasoningMode
-from app.intelligence.core.session.session import CognitiveSession
 from app.intelligence.integration.models import ExecutiveIntelligenceResult
 
 
@@ -18,7 +17,7 @@ class IExecutiveController(ABC):
         mode: ReasoningMode = ReasoningMode.ANALYTICAL,
     ) -> ExecutiveIntelligenceResult:
         """Start a new autonomous cognitive loop from a raw user request.
-        
+
         This method wraps the entire session lifecycle for a given request.
         For M7, it preserves backward compatibility with the Wave-0 orchestrator
         return type, while introducing the rich CognitiveSession internally.
@@ -30,7 +29,7 @@ class IExecutiveController(ABC):
         self, session_id: str, trigger_event: Any = None
     ) -> ExecutiveIntelligenceResult:
         """Resume a suspended cognitive session.
-        
+
         Called automatically by the EventBus when external events (e.g., Goal Updated)
         occur, or manually via an API endpoint.
         """

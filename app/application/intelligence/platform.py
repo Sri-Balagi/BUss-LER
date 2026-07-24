@@ -1,28 +1,19 @@
-import uuid
 import time
-from typing import Any, Dict, List, Optional, Type
+import uuid
+from typing import Any
 from uuid import UUID
+
 from pydantic import BaseModel
 
-from app.domain.intelligence.capability import CapabilityType
-from app.domain.intelligence.events import (
-    CapabilityExecutionCompleted,
-    CapabilityExecutionStarted,
-    UnifiedExecutionCompleted,
-    UnifiedExecutionFailed,
-    UnifiedExecutionStarted,
-)
+from app.application.intelligence.kernel import IntelligenceKernel
+from app.application.intelligence.registry import ICapabilityRegistry
+from app.domain.intelligence.llm_provider import ILLMProvider
 from app.domain.intelligence.platform import (
     IIntelligencePlatform,
     UnifiedExecutionMetrics,
     UnifiedExecutionRequest,
     UnifiedExecutionResult,
 )
-from app.domain.cognition.models import AgentState, ReflectionFeedback
-from app.domain.cognition.events import LearningRequested
-from app.application.intelligence.kernel import IntelligenceKernel
-from app.application.intelligence.registry import ICapabilityRegistry
-from app.domain.intelligence.llm_provider import ILLMProvider
 
 
 class UnifiedIntelligencePlatform(IIntelligencePlatform):
@@ -32,18 +23,18 @@ class UnifiedIntelligencePlatform(IIntelligencePlatform):
         self,
         kernel: IntelligenceKernel,
         registry: ICapabilityRegistry,
-        providers: Dict[str, ILLMProvider],
+        providers: dict[str, ILLMProvider],
         default_provider: str = "simulator",
-        fallback_providers: Optional[List[str]] = None
+        fallback_providers: list[str] | None = None
     ):
         self._kernel = kernel
         self._registry = registry
-        self._executions: Dict[str, Dict[str, Any]] = {}
+        self._executions: dict[str, dict[str, Any]] = {}
         self._providers = providers
         self._default_provider = default_provider
         self._fallback_providers = fallback_providers or []
 
-    def _get_providers_chain(self) -> List[ILLMProvider]:
+    def _get_providers_chain(self) -> list[ILLMProvider]:
         chain = []
         if self._default_provider in self._providers:
             chain.append(self._providers[self._default_provider])
@@ -55,49 +46,49 @@ class UnifiedIntelligencePlatform(IIntelligencePlatform):
     async def generate_structured(
         self,
         prompt: str,
-        schema: Type[BaseModel],
-        tools: Optional[List[Any]] = None,
-        model: Optional[str] = None
+        schema: type[BaseModel],
+        tools: list[Any] | None = None,
+        model: str | None = None
     ) -> BaseModel:
         start_time = time.time()
         chain = self._get_providers_chain()
         last_error = None
-        
+
         for provider in chain:
             try:
                 # Observability metrics logic would go here
                 result = await provider.generate_structured(prompt, schema, tools, model)
-                latency = time.time() - start_time
+                time.time() - start_time
                 # We could emit an event here with provider and latency
                 return result
             except Exception as e:
                 last_error = e
                 continue
-                
+
         raise RuntimeError(f"All LLM providers failed. Last error: {last_error}")
-        
+
     async def chat_completion(
         self,
-        messages: List[Dict[str, str]],
-        tools: Optional[List[Any]] = None,
-        model: Optional[str] = None
+        messages: list[dict[str, str]],
+        tools: list[Any] | None = None,
+        model: str | None = None
     ) -> str:
         start_time = time.time()
         chain = self._get_providers_chain()
         last_error = None
-        
+
         for provider in chain:
             try:
                 result = await provider.chat_completion(messages, tools, model)
-                latency = time.time() - start_time
+                time.time() - start_time
                 return result
             except Exception as e:
                 last_error = e
                 continue
-                
+
         raise RuntimeError(f"All LLM providers failed. Last error: {last_error}")
 
-    async def generate_embeddings(self, text: str, model: Optional[str] = None) -> List[float]:
+    async def generate_embeddings(self, text: str, model: str | None = None) -> list[float]:
         chain = self._get_providers_chain()
         last_error = None
         for provider in chain:
@@ -122,11 +113,11 @@ class UnifiedIntelligencePlatform(IIntelligencePlatform):
             errors=[]
         )
 
-    async def execute_agent_goal(self, agent_id: UUID, goal: str, tenant_id: Optional[UUID] = None) -> UnifiedExecutionResult:
+    async def execute_agent_goal(self, agent_id: UUID, goal: str, tenant_id: UUID | None = None) -> UnifiedExecutionResult:
         return await self.execute_request(UnifiedExecutionRequest(request_type="agent", input_data={"goal": goal}, correlation_id=str(uuid.uuid4())))
 
-    async def optimize_workflow(self, workflow_id: UUID, tenant_id: Optional[UUID] = None) -> UnifiedExecutionResult:
+    async def optimize_workflow(self, workflow_id: UUID, tenant_id: UUID | None = None) -> UnifiedExecutionResult:
         return await self.execute_request(UnifiedExecutionRequest(request_type="workflow", input_data={"workflow_id": str(workflow_id)}, correlation_id=str(uuid.uuid4())))
 
-    async def get_execution_status(self, execution_id: str) -> Dict[str, Any]:
+    async def get_execution_status(self, execution_id: str) -> dict[str, Any]:
         return {"status": "COMPLETED"}

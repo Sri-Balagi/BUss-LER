@@ -21,6 +21,10 @@ class ExternalIntegrationContextProvider(AbstractContextProvider):
 
     """
 
+    @property
+    def source(self) -> ContextSource:
+        return ContextSource.EXTERNAL
+
     async def provide(self, ctx, twin_id: UUID, policy) -> ContextSection:
 
         # Placeholder: No integrations implemented in M4.

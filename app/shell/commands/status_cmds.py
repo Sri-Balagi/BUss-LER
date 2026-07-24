@@ -1,11 +1,10 @@
-from typing import List
 
 from app.sdk.client.sync_client import BizOSClient
 from app.shell.dispatcher import ShellDispatcher
 from app.shell.formatter import ShellFormatter
 
 
-def handle_status(client: BizOSClient, formatter: ShellFormatter, args: List[str]) -> int:
+def handle_status(client: BizOSClient, formatter: ShellFormatter, args: list[str]) -> int:
     """Check system status. Usage: status"""
     try:
         health = client.get_health()
@@ -19,7 +18,7 @@ def handle_status(client: BizOSClient, formatter: ShellFormatter, args: List[str
         formatter.print_error("Failed to fetch system status", str(e))
         return 1
 
-def handle_kill(client: BizOSClient, formatter: ShellFormatter, args: List[str]) -> int:
+def handle_kill(client: BizOSClient, formatter: ShellFormatter, args: list[str]) -> int:
     """Kill a process. Usage: kill <pid>"""
     if not args:
         formatter.print_error("Missing PID. Usage: kill <pid>")
@@ -27,7 +26,7 @@ def handle_kill(client: BizOSClient, formatter: ShellFormatter, args: List[str])
     formatter.print_error(f"Kill not implemented for {args[0]}")
     return 1
 
-def handle_memory(client: BizOSClient, formatter: ShellFormatter, args: List[str]) -> int:
+def handle_memory(client: BizOSClient, formatter: ShellFormatter, args: list[str]) -> int:
     """Show memory info. Usage: memory"""
     try:
         data = client.get_memory_status()

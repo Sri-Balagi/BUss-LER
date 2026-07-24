@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -11,7 +11,7 @@ class PluginMetadata(BaseModel):
     description: str
     version: str = "1.0.0"
     author: str = "unknown"
-    dependencies: List[str] = Field(default_factory=list)
+    dependencies: list[str] = Field(default_factory=list)
 
 
 class PluginRegistry(BaseRegistry[PluginMetadata]):
@@ -19,5 +19,5 @@ class PluginRegistry(BaseRegistry[PluginMetadata]):
     Registry for managing external Plugins.
     """
 
-    def _deserialize_item(self, data: Dict[str, Any]) -> PluginMetadata:
+    def _deserialize_item(self, data: dict[str, Any]) -> PluginMetadata:
         return PluginMetadata.model_validate(data)

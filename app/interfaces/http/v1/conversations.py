@@ -17,16 +17,14 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query, status
 
 from app.core.context import OperationContext
-from app.interfaces.http.schemas.conversation import (
-    ConversationThread,
-    ConversationTurn,
-    ConversationWithTurns,
-    PaginatedConversationThreads,
-)
 from app.interfaces.http.schemas.context_schemas import (
     ConversationThreadCreateRequest,
     ConversationTurnCreateRequest,
-    ConversationTurnResponse,
+)
+from app.interfaces.http.schemas.conversation import (
+    ConversationThread,
+    ConversationTurn,
+    PaginatedConversationThreads,
 )
 from app.interfaces.http.v1.dependencies_context import get_conversation_service
 from app.interfaces.http.v1.dependencies_core import get_operation_context

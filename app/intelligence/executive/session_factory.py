@@ -4,7 +4,6 @@ The SessionFactory bridges the gap between raw intents (Wave-0 Intake)
 and the autonomous execution environment (Wave-1 CognitiveSession).
 """
 
-from typing import Any
 from uuid import UUID
 
 from app.application.twin.get_twin import GetTwinUseCase
@@ -31,12 +30,12 @@ class SessionFactory:
         mode: ReasoningMode = ReasoningMode.ANALYTICAL,
     ) -> CognitiveSession:
         """Create a new CognitiveSession, optionally snapping twin memory state."""
-        
+
         # If twin_id provided, we would normally snapshot memory here.
         # For Milestone 7, we initialize an empty snapshot to respect the contract
         # without introducing heavy memory engine coupling prematurely.
         memory_snapshot = WorkingMemorySnapshot.empty()
-        
+
         # Define baseline autonomous permissions.
         # These will be dynamically shaped by the ContextEngine in M8.
         baseline_permissions = {
@@ -57,7 +56,7 @@ class SessionFactory:
             budget=budget,
             termination_policy=termination_policy,
         )
-        
+
         # Attach raw request as a mock active goal to kickstart the loop.
         if raw_request:
             session.add_goal({"source": "user_request", "raw": raw_request})

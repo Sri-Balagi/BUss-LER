@@ -1,12 +1,14 @@
-import pytest
 from datetime import datetime, timezone
+
+import pytest
 from fastapi import HTTPException
 
-from app.domain.security.models import ExecutionContext, DecisionSource
+from app.api.dependencies.authz import RequirePermission
+from app.application.security.authz_service import AuthorizationService
+from app.domain.security.models import DecisionSource, ExecutionContext
 from app.domain.security.permissions import SystemPermission
 from app.infrastructure.security.policy_repository import InMemoryPolicyRepository
-from app.application.security.authz_service import AuthorizationService
-from app.api.dependencies.authz import RequirePermission
+
 
 @pytest.fixture
 def policy_repo():
@@ -20,7 +22,7 @@ def authz_service(policy_repo):
 async def test_authz_anonymous_denied(authz_service):
     context = ExecutionContext.anonymous()
     decision = await authz_service.authorize(context, SystemPermission.WORKFLOW_READ)
-    
+
     assert decision.is_allowed is False
     assert decision.decision_source == DecisionSource.DEFAULT_DENY
     assert decision.evaluation_duration_ms is not None
@@ -35,7 +37,7 @@ async def test_authz_direct_permission_allowed(authz_service):
         scopes=[SystemPermission.WORKFLOW_EXECUTE.value]
     )
     decision = await authz_service.authorize(context, SystemPermission.WORKFLOW_EXECUTE)
-    
+
     assert decision.is_allowed is True
     assert decision.decision_source == DecisionSource.DIRECT_PERMISSION
     assert SystemPermission.WORKFLOW_EXECUTE.value in decision.matched_permissions
@@ -50,7 +52,7 @@ async def test_authz_role_permission_allowed(authz_service):
         roles=["viewer"] # Has WORKFLOW_READ
     )
     decision = await authz_service.authorize(context, SystemPermission.WORKFLOW_READ)
-    
+
     assert decision.is_allowed is True
     assert decision.decision_source == DecisionSource.ROLE
     assert decision.evaluation_duration_ms is not None
@@ -64,7 +66,7 @@ async def test_authz_role_permission_denied(authz_service):
         roles=["viewer"] # Lacks WORKFLOW_WRITE
     )
     decision = await authz_service.authorize(context, SystemPermission.WORKFLOW_WRITE)
-    
+
     assert decision.is_allowed is False
     assert decision.decision_source == DecisionSource.DEFAULT_DENY
     assert decision.evaluation_duration_ms is not None
@@ -74,7 +76,7 @@ async def test_authz_role_permission_denied(authz_service):
 async def test_authz_admin_allowed_everything(authz_service):
     context = ExecutionContext(
         is_authenticated=True,
-        roles=["system:admin"] 
+        roles=["system:admin"]
     )
     # Admin should be allowed any explicit permission check that exists in their set
     decision = await authz_service.authorize(context, SystemPermission.WORKFLOW_WRITE)
@@ -87,12 +89,12 @@ async def test_authz_admin_allowed_everything(authz_service):
 @pytest.mark.asyncio
 async def test_require_permission_dependency(authz_service):
     require = RequirePermission(SystemPermission.WORKFLOW_READ)
-    
+
     context = ExecutionContext(
         is_authenticated=True,
         roles=["developer"]
     )
-    
+
     # Should succeed and return context
     result = await require(context=context, engine=authz_service)
     assert result == context
@@ -101,10 +103,10 @@ async def test_require_permission_dependency(authz_service):
 async def test_require_permission_dependency_401(authz_service):
     require = RequirePermission(SystemPermission.WORKFLOW_READ)
     context = ExecutionContext.anonymous()
-    
+
     with pytest.raises(HTTPException) as exc:
         await require(context=context, engine=authz_service)
-        
+
     assert exc.value.status_code == 401
 
 @pytest.mark.asyncio
@@ -114,8 +116,8 @@ async def test_require_permission_dependency_403(authz_service):
         is_authenticated=True,
         roles=["viewer"]
     )
-    
+
     with pytest.raises(HTTPException) as exc:
         await require(context=context, engine=authz_service)
-        
+
     assert exc.value.status_code == 403

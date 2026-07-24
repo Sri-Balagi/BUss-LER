@@ -1,11 +1,12 @@
 import enum
-from typing import Any, Dict, List, Optional
-from uuid import UUID, uuid4
 from datetime import datetime
+from typing import Any
+from uuid import UUID, uuid4
+
 from pydantic import BaseModel, Field
 
 
-class TwinLifecycleStatus(str, enum.Enum):
+class TwinLifecycleStatus(enum.StrEnum):
     ACTIVE = "ACTIVE"
     INACTIVE = "INACTIVE"
     ARCHIVED = "ARCHIVED"
@@ -18,8 +19,8 @@ class TwinSnapshot(BaseModel):
     entity_id: UUID
     entity_type: str
     captured_at: datetime = Field(default_factory=datetime.utcnow)
-    state: Dict[str, Any]
-    
+    state: dict[str, Any]
+
     class Config:
         frozen = True
 
@@ -32,9 +33,9 @@ class DigitalTwinState(BaseModel):
     status: TwinLifecycleStatus = Field(default=TwinLifecycleStatus.ACTIVE)
     last_synced_at: datetime = Field(default_factory=datetime.utcnow)
     version: int = Field(default=1)
-    
+
     # The actual aggregated business data from BKG and Memory
-    properties: Dict[str, Any] = Field(default_factory=dict)
-    
+    properties: dict[str, Any] = Field(default_factory=dict)
+
     # References to related entities (graph edges projected into the twin)
-    related_entities: List[UUID] = Field(default_factory=list)
+    related_entities: list[UUID] = Field(default_factory=list)

@@ -1,10 +1,12 @@
-from enum import Enum
-from pydantic import BaseModel, Field
-from typing import Optional, Dict, Any
-from datetime import datetime, timezone
 import uuid
+from datetime import UTC, datetime
+from enum import StrEnum
+from typing import Any
 
-class ApprovalState(str, Enum):
+from pydantic import BaseModel, Field
+
+
+class ApprovalState(StrEnum):
     NONE = "NONE"
     REQUIRED = "REQUIRED"
     APPROVED = "APPROVED"
@@ -21,32 +23,32 @@ class Approval(BaseModel):
     target_id: str
     state: ApprovalState = ApprovalState.NONE
     requested_by: str
-    approved_by: Optional[str] = None
-    reason: Optional[str] = None
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    expires_at: Optional[datetime] = None
-    resolved_at: Optional[datetime] = None
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    approved_by: str | None = None
+    reason: str | None = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    expires_at: datetime | None = None
+    resolved_at: datetime | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
     def approve(self, user_id: str):
         if self.state != ApprovalState.REQUIRED:
             raise ValueError(f"Cannot approve from state {self.state}")
         self.state = ApprovalState.APPROVED
         self.approved_by = user_id
-        self.resolved_at = datetime.now(timezone.utc)
+        self.resolved_at = datetime.now(UTC)
 
-    def reject(self, user_id: str, reason: Optional[str] = None):
+    def reject(self, user_id: str, reason: str | None = None):
         if self.state != ApprovalState.REQUIRED:
             raise ValueError(f"Cannot reject from state {self.state}")
         self.state = ApprovalState.REJECTED
         self.approved_by = user_id
         if reason:
             self.reason = reason
-        self.resolved_at = datetime.now(timezone.utc)
+        self.resolved_at = datetime.now(UTC)
 
     def expire(self):
         if self.state != ApprovalState.REQUIRED:
             raise ValueError(f"Cannot expire from state {self.state}")
         self.state = ApprovalState.EXPIRED
-        self.resolved_at = datetime.now(timezone.utc)
+        self.resolved_at = datetime.now(UTC)
         self.reason = "Approval request expired due to timeout."

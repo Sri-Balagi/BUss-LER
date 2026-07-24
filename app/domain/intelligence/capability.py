@@ -1,8 +1,9 @@
 import enum
-from typing import List, Optional
+
 from pydantic import BaseModel, Field
 
-class CapabilityType(str, enum.Enum):
+
+class CapabilityType(enum.StrEnum):
     REASONING = "REASONING"
     PLANNING = "PLANNING"
     RETRIEVAL = "RETRIEVAL"
@@ -21,8 +22,8 @@ class CapabilityMetadata(BaseModel):
     provider_version: str = Field(..., description="Version of the provider implementation.")
     capability_type: CapabilityType = Field(..., description="The broad type of capability this provides.")
     priority: int = Field(default=0, description="Higher number means higher priority resolution.")
-    tags: List[str] = Field(default_factory=list, description="Filtering tags for conditional resolution.")
-    supported_features: List[str] = Field(default_factory=list, description="Advanced features supported by this implementation.")
-    
+    tags: list[str] = Field(default_factory=list, description="Filtering tags for conditional resolution.")
+    supported_features: list[str] = Field(default_factory=list, description="Advanced features supported by this implementation.")
+
     class Config:
         frozen = True

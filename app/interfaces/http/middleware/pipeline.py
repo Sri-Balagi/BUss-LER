@@ -28,7 +28,7 @@ def register_gateway_pipeline(app: FastAPI) -> None:
 
     # 5. Idempotency (Safeguards against retries)
     app.add_middleware(IdempotencyMiddleware)
-    
+
     # 4. Tenant Resolution (Runs after auth so it can extract tenant from auth claims)
     app.add_middleware(TenantResolutionMiddleware)
 
@@ -39,6 +39,6 @@ def register_gateway_pipeline(app: FastAPI) -> None:
     app.add_middleware(RateLimiterMiddleware)
 
     # 1. Request Context & Tracing (Outermost, starts the timer and traces)
-    # Note: If RequestIDMiddleware is already registered in main.py, 
+    # Note: If RequestIDMiddleware is already registered in main.py,
     # we should replace it with this one.
     app.add_middleware(RequestContextMiddleware)

@@ -65,7 +65,7 @@ class GeminiProvider(ILLMProvider):
     async def generate(self, request: AIRequest, prompt_text: str) -> AIResponse:
         model = self.settings.gemini_flash_model
 
-        config_kwargs = {"temperature": 0.7}
+        config_kwargs: dict[str, Any] = {"temperature": 0.7}
         if request.system_instruction:
             config_kwargs["system_instruction"] = request.system_instruction
 
@@ -100,7 +100,7 @@ class GeminiProvider(ILLMProvider):
                 completion_tokens=completion_tokens,
             )
 
-            return AIResponse(content=response.text, metadata=metadata)
+            return AIResponse(content=response.text or "", metadata=metadata)
 
         except Exception as e:
             lifecycle_id = request.lifecycle.lifecycle_id if request.lifecycle else None
@@ -108,10 +108,10 @@ class GeminiProvider(ILLMProvider):
                 self.provider_name, "generate", str(e), lifecycle_id=lifecycle_id
             ) from e
 
-    async def generate_structured(self, request: StructuredRequest[Any], prompt_text: str) -> Any:
+    async def generate_structured(self, request: StructuredRequest[Any], prompt_text: str = "") -> Any:
         model = self.settings.gemini_flash_model
 
-        config_kwargs = {"temperature": 0.0}
+        config_kwargs: dict[str, Any] = {"temperature": 0.0}
         if request.system_instruction:
             config_kwargs["system_instruction"] = request.system_instruction
 
@@ -135,7 +135,7 @@ class GeminiProvider(ILLMProvider):
     async def stream(self, request: AIRequest, prompt_text: str) -> AsyncIterator[StreamChunk]:
         model = self.settings.gemini_flash_model
 
-        config_kwargs = {"temperature": 0.7}
+        config_kwargs: dict[str, Any] = {"temperature": 0.7}
         if request.system_instruction:
             config_kwargs["system_instruction"] = request.system_instruction
 
@@ -169,10 +169,11 @@ class GeminiProvider(ILLMProvider):
             )
             latency = (time.time() - start_time) * 1000
 
-            if isinstance(response.embeddings, list):
-                vector = response.embeddings[0].values
+            if response.embeddings and isinstance(response.embeddings, list) and len(response.embeddings) > 0:
+                emb = response.embeddings[0]
+                vector = list(getattr(emb, "values", []) or [])
             else:
-                vector = response.embeddings.values
+                vector = []
 
             metadata = AIResponseMetadata(
                 provider=self.provider_name,
@@ -185,14 +186,14 @@ class GeminiProvider(ILLMProvider):
         except Exception as e:
             raise ProviderError(self.provider_name, "embed", str(e)) from e
 
-    async def count_tokens(self, text: str) -> int:
-        model = self.settings.gemini_flash_model
+    async def count_tokens(self, text: str, model: str | None = None) -> int:
+        target_model = model or self.settings.gemini_flash_model
         try:
             response = await self.client.aio.models.count_tokens(
-                model=model,
+                model=target_model,
                 contents=text,
             )
-            return response.total_tokens
+            return response.total_tokens or 0
         except Exception as e:
             raise ProviderError(self.provider_name, "count_tokens", str(e)) from e
 

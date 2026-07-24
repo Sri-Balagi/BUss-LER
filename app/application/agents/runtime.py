@@ -1,48 +1,53 @@
-from typing import Dict, Any, Type, Optional, Callable, Awaitable
 import logging
+from typing import Any
 
-from app.domain.agents.behavior import IAgentBehavior
-from app.domain.agents.interfaces import IAgentRegistry
-from app.domain.workflows.models import Task, TaskStatus
-from app.shared.enums import AgentType, PrincipalType, ParticipantRole
-from app.shared.events.bus import EventBus
-from app.domain.session.models import SessionParticipant
-from app.domain.session.repository import ISessionRepository
+from app.domain.agents.registry import IAgentRegistry
+from app.domain.agents.runtime import IAgentRuntime
+from app.domain.approval.models import Approval, ApprovalState
+from app.domain.events.bus import IEventBus
+from app.domain.sessions.models import ParticipantRole, PrincipalType, SessionParticipant
+from app.domain.sessions.repository import ISessionRepository
 from app.domain.tasks.repository import ITaskRepository
-
+from app.domain.workflows.models import TaskStatus
 from app.shared.events.models import (
-    TaskDelegatedEvent,
-    TaskCompletedEvent,
-    AgentStartedEvent,
+    AgentBlockedEvent,
     AgentCompletedEvent,
     AgentFailedEvent,
-    AgentBlockedEvent,
+    AgentStartedEvent,
     ApprovalApprovedEvent,
-    ApprovalRejectedEvent,
     ApprovalExpiredEvent,
-    WorkflowCompletedEvent
+    ApprovalRejectedEvent,
+    TaskCompletedEvent,
+    TaskDelegatedEvent,
+    WorkflowCompletedEvent,
 )
 
 logger = logging.getLogger(__name__)
 
-class AgentRuntime:
-    """
-    Stateless Event-Driven Agent Runtime for Wave 8.
-    """
-    def __init__(self, registry: IAgentRegistry, event_bus: EventBus, session_repo: ISessionRepository, task_repo: ITaskRepository):
-        self._registry = registry
-        self._event_bus = event_bus
-        self._session_repo = session_repo
-        self._task_repo = task_repo
-        self._behaviors: Dict[AgentType, IAgentBehavior] = {}
 
-    def register_behavior(self, agent_type: AgentType, behavior: IAgentBehavior) -> None:
+class AgentRuntime(IAgentRuntime):
+    """Runtime execution orchestrator for autonomous agent behaviors."""
+
+    def __init__(
+        self,
+        event_bus: IEventBus,
+        registry: IAgentRegistry,
+        task_repo: ITaskRepository,
+        session_repo: ISessionRepository,
+        behaviors: dict | None = None,
+    ):
+        self._event_bus = event_bus
+        self._registry = registry
+        self._task_repo = task_repo
+        self._session_repo = session_repo
+        self._behaviors = behaviors or {}
+
+    def register_behavior(self, agent_type: Any, behavior: Any) -> None:
         self._behaviors[agent_type] = behavior
 
-    async def _add_agent_to_session(self, session_id: str, agent_id: str, tenant_id: Optional[str]) -> None:
+    async def _add_agent_to_session(self, session_id: str, agent_id: str, tenant_id: str | None) -> None:
         session = await self._session_repo.get_session(session_id, tenant_id)
         if session:
-            # Check for duplicate
             if not any(p.id == agent_id and p.type == PrincipalType.AGENT for p in session.participants):
                 session.participants.append(
                     SessionParticipant(
@@ -55,6 +60,8 @@ class AgentRuntime:
 
     async def handle_task_delegated(self, event: TaskDelegatedEvent) -> None:
         """Handle execution of a newly delegated task."""
+        if not event.task_id:
+            return
         task = await self._task_repo.get_task(event.task_id)
         if not task:
             logger.error(f"Task {event.task_id} not found in runtime state.")
@@ -64,17 +71,15 @@ class AgentRuntime:
         if not agent:
             logger.error(f"Agent {task.assigned_agent_id} not found.")
             return
-            
+
         behavior = self._behaviors.get(agent.agent_type)
         if not behavior:
             logger.error(f"No behavior registered for agent type {agent.agent_type}")
             return
 
-        # Add agent to session
         await self._add_agent_to_session(task.execution_context.session_id, agent.id, task.execution_context.tenant_id)
 
-        # Publish AgentStarted
-        await self._event_bus.publish(AgentStartedEvent(
+        self._event_bus.publish(AgentStartedEvent(
             correlation_id=event.correlation_id,
             agent_id=agent.id,
             tenant_id=task.execution_context.tenant_id,
@@ -91,7 +96,7 @@ class AgentRuntime:
             await self._task_repo.save_task(task)
 
             if task.status == TaskStatus.COMPLETED:
-                await self._event_bus.publish(AgentCompletedEvent(
+                self._event_bus.publish(AgentCompletedEvent(
                     correlation_id=event.correlation_id,
                     agent_id=agent.id,
                     tenant_id=task.execution_context.tenant_id,
@@ -102,7 +107,7 @@ class AgentRuntime:
                     principal_id=task.execution_context.principal_id,
                     trace_id=task.execution_context.trace_id
                 ))
-                await self._event_bus.publish(TaskCompletedEvent(
+                self._event_bus.publish(TaskCompletedEvent(
                     correlation_id=event.correlation_id,
                     workflow_id=task.workflow_id,
                     task_id=task.task_id,
@@ -113,7 +118,7 @@ class AgentRuntime:
                     outputs=task.outputs
                 ))
             elif task.status == TaskStatus.BLOCKED_ON_APPROVAL:
-                await self._event_bus.publish(AgentBlockedEvent(
+                self._event_bus.publish(AgentBlockedEvent(
                     correlation_id=event.correlation_id,
                     agent_id=agent.id,
                     tenant_id=task.execution_context.tenant_id,
@@ -129,7 +134,7 @@ class AgentRuntime:
         except Exception as e:
             task.status = TaskStatus.FAILED
             await self._task_repo.save_task(task)
-            await self._event_bus.publish(AgentFailedEvent(
+            self._event_bus.publish(AgentFailedEvent(
                 correlation_id=event.correlation_id,
                 agent_id=agent.id,
                 tenant_id=task.execution_context.tenant_id,
@@ -143,20 +148,20 @@ class AgentRuntime:
             ))
 
     async def handle_approval_approved(self, event: ApprovalApprovedEvent) -> None:
-        # We need to find which task was blocked on this approval.
-        # Assuming target_type == "task" and target_id == task_id
         if event.target_type != "task":
             return
-            
+
         task = await self._task_repo.get_task(event.target_id)
         if not task or task.status != TaskStatus.BLOCKED_ON_APPROVAL:
             return
 
         agent = self._registry.get_agent(task.assigned_agent_id)
+        if not agent:
+            return
         behavior = self._behaviors.get(agent.agent_type)
-        
-        # We pass a dummy Approval for the interface, as the event tells us it's approved
-        from app.domain.approval.models import Approval, ApprovalState
+        if not behavior:
+            return
+
         approval = Approval(
             approval_id=event.approval_id,
             target_type=event.target_type,
@@ -168,87 +173,66 @@ class AgentRuntime:
         try:
             task = await behavior.resume(task, approval)
             await self._task_repo.save_task(task)
-            
+
             if task.status == TaskStatus.COMPLETED:
-                await self._event_bus.publish(AgentCompletedEvent(
+                self._event_bus.publish(AgentCompletedEvent(
                     correlation_id=event.correlation_id,
-                    agent_id=agent.id,
-                    tenant_id=task.execution_context.tenant_id,
-                    workflow_id=task.workflow_id,
-                    task_id=task.task_id,
-                    session_id=task.execution_context.session_id,
-                    principal_type=task.execution_context.principal_type,
-                    principal_id=task.execution_context.principal_id,
-                    trace_id=task.execution_context.trace_id
+                    agent_id=str(agent.id),
+                    tenant_id=str(task.execution_context.tenant_id) if task.execution_context and task.execution_context.tenant_id else None,
                 ))
-                await self._event_bus.publish(TaskCompletedEvent(
+                self._event_bus.publish(TaskCompletedEvent(
                     correlation_id=event.correlation_id,
                     workflow_id=task.workflow_id,
                     task_id=task.task_id,
                     session_id=task.execution_context.session_id,
                     principal_type=task.execution_context.principal_type,
                     principal_id=task.execution_context.principal_id,
-                    trace_id=task.execution_context.trace_id,
                     outputs=task.outputs
                 ))
         except Exception as e:
             task.status = TaskStatus.FAILED
             await self._task_repo.save_task(task)
-            await self._event_bus.publish(AgentFailedEvent(
+            self._event_bus.publish(AgentFailedEvent(
                 correlation_id=event.correlation_id,
-                agent_id=agent.id,
-                tenant_id=task.execution_context.tenant_id,
+                agent_id=str(agent.id) if agent else "",
+                tenant_id=str(task.execution_context.tenant_id) if task.execution_context and task.execution_context.tenant_id else None,
                 reason=str(e),
-                workflow_id=task.workflow_id,
-                task_id=task.task_id,
-                session_id=task.execution_context.session_id,
-                principal_type=task.execution_context.principal_type,
-                principal_id=task.execution_context.principal_id,
-                trace_id=task.execution_context.trace_id
             ))
 
     async def handle_approval_rejected(self, event: ApprovalRejectedEvent) -> None:
         if event.target_type != "task":
             return
-            
+
         task = await self._task_repo.get_task(event.target_id)
         if not task or task.status != TaskStatus.BLOCKED_ON_APPROVAL:
             return
 
         task.status = TaskStatus.FAILED
         await self._task_repo.save_task(task)
-        
-        await self._event_bus.publish(AgentFailedEvent(
+
+        self._event_bus.publish(AgentFailedEvent(
             correlation_id=event.correlation_id,
-            agent_id=task.assigned_agent_id,
-            tenant_id=task.execution_context.tenant_id,
+            agent_id=str(task.assigned_agent_id) if task.assigned_agent_id else "",
+            tenant_id=str(task.execution_context.tenant_id) if task.execution_context and task.execution_context.tenant_id else None,
             reason="Approval Rejected",
-            workflow_id=task.workflow_id,
-            task_id=task.task_id,
-            session_id=task.execution_context.session_id,
-            principal_type=task.execution_context.principal_type,
-            principal_id=task.execution_context.principal_id,
-            trace_id=task.execution_context.trace_id
         ))
 
     async def handle_approval_expired(self, event: ApprovalExpiredEvent) -> None:
         if event.target_type != "task":
             return
-            
+
         task = await self._task_repo.get_task(event.target_id)
         if not task:
             return
 
-        # Planner needs to be notified. The planner agent behavior might need to handle this.
-        # Since the task blocked is Executor, we need to notify the parent task (Planner).
         parent_task_id = task.parent_task_id
         if not parent_task_id:
             return
-            
+
         parent_task = await self._task_repo.get_task(parent_task_id)
         if not parent_task:
             return
-            
+
         agent = self._registry.get_agent(parent_task.assigned_agent_id)
         if agent:
             behavior = self._behaviors.get(agent.agent_type)
@@ -263,49 +247,39 @@ class AgentRuntime:
 
         parent_task_id = task.parent_task_id
         if not parent_task_id:
-            # If the root task completes, the workflow is completed
-            await self._event_bus.publish(WorkflowCompletedEvent(
+            self._event_bus.publish(WorkflowCompletedEvent(
                 correlation_id=event.correlation_id,
                 workflow_id=task.workflow_id,
                 session_id=task.execution_context.session_id,
                 principal_type=task.execution_context.principal_type,
                 principal_id=task.execution_context.principal_id,
-                trace_id=task.execution_context.trace_id,
                 final_outputs=task.outputs
             ))
             return
-            
+
         parent_task = await self._task_repo.get_task(parent_task_id)
         if not parent_task:
             return
-            
+
         agent = self._registry.get_agent(parent_task.assigned_agent_id)
         if agent:
             behavior = self._behaviors.get(agent.agent_type)
             if behavior:
-                updated_parent = await behavior.handle_subtask_completed(parent_task, event.task_id, event.outputs)
+                updated_parent = await behavior.handle_subtask_completed(parent_task, event.task_id, event.outputs or {})
                 await self._task_repo.save_task(updated_parent)
-                
-                # Check if parent is now completed
+
                 if updated_parent.status == TaskStatus.COMPLETED:
-                    await self._event_bus.publish(AgentCompletedEvent(
+                    self._event_bus.publish(AgentCompletedEvent(
                         correlation_id=event.correlation_id,
-                        agent_id=agent.id,
-                        tenant_id=updated_parent.execution_context.tenant_id,
-                        workflow_id=updated_parent.workflow_id,
-                        task_id=updated_parent.task_id,
-                        session_id=updated_parent.execution_context.session_id,
-                        principal_type=updated_parent.execution_context.principal_type,
-                        principal_id=updated_parent.execution_context.principal_id,
-                        trace_id=updated_parent.execution_context.trace_id
+                        agent_id=str(agent.id),
+                        tenant_id=str(updated_parent.execution_context.tenant_id) if updated_parent.execution_context and updated_parent.execution_context.tenant_id else None,
                     ))
-                    await self._event_bus.publish(TaskCompletedEvent(
+                    self._event_bus.publish(TaskCompletedEvent(
                         correlation_id=event.correlation_id,
                         workflow_id=updated_parent.workflow_id,
                         task_id=updated_parent.task_id,
                         session_id=updated_parent.execution_context.session_id,
                         principal_type=updated_parent.execution_context.principal_type,
                         principal_id=updated_parent.execution_context.principal_id,
-                        trace_id=updated_parent.execution_context.trace_id,
                         outputs=updated_parent.outputs
                     ))

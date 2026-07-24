@@ -1,6 +1,5 @@
-import json
-from datetime import datetime, timezone
-from typing import Any, Dict, List
+from datetime import UTC, datetime
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -12,9 +11,9 @@ class RegistrySnapshot(BaseModel):
     """
     registry_name: str = Field(..., description="Name of the registry (e.g., 'ToolRegistry').")
     version: str = Field(default="1.0", description="Schema version of the snapshot format.")
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), description="When this snapshot was taken.")
-    items: List[Dict[str, Any]] = Field(default_factory=list, description="Serialized items.")
-    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional context about the registry.")
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC), description="When this snapshot was taken.")
+    items: list[dict[str, Any]] = Field(default_factory=list, description="Serialized items.")
+    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional context about the registry.")
 
     def to_json(self) -> str:
         """Serializes the snapshot to a JSON string."""

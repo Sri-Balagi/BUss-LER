@@ -14,7 +14,7 @@ class ApprovalStatus(StrEnum):
 @dataclass
 class ApprovalRequestEvent:
     """Event emitted when a capability requires external approval before execution."""
-    
+
     session_id: str
     capability_id: str
     workflow_id: UUID
@@ -23,7 +23,7 @@ class ApprovalRequestEvent:
     payload: dict[str, Any] = field(default_factory=dict)
     event_id: UUID = field(default_factory=uuid4)
     status: ApprovalStatus = ApprovalStatus.PENDING
-    
+
     # Populated upon resolution
     resolved_by: str | None = None
     resolution_notes: str | None = None
@@ -31,14 +31,14 @@ class ApprovalRequestEvent:
 
 class IApprovalProvider(ABC):
     """Generalized provider for resolving security approvals.
-    
+
     Can be backed by a Human UI, an Organization Policy engine, or an AI Supervisor.
     """
 
     @abstractmethod
     async def request_approval(self, event: ApprovalRequestEvent) -> None:
         """Submit an approval request to this provider.
-        
+
         The provider should arrange for the request to be resolved asynchronously.
         """
         pass
@@ -64,7 +64,7 @@ class HumanApprovalProvider(IApprovalProvider):
         if not req:
             raise KeyError(f"Approval request {event_id} not found")
         return req.status
-        
+
     def resolve(self, event_id: UUID, approved: bool, notes: str = "") -> None:
         """Called by an HTTP API endpoint to resolve a pending request."""
         req = self._requests.get(event_id)

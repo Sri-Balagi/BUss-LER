@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 
 from app.bootstrap.container import get_container
 from app.interfaces.http.v1.schemas.response import BizOSResponse

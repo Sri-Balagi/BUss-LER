@@ -83,6 +83,9 @@ CREATE INDEX IF NOT EXISTS idx_memories_embedding_status ON memories(embedding_s
 -- JSONB indexing for metadata filtering
 CREATE INDEX IF NOT EXISTS idx_memories_metadata ON memories USING GIN (metadata);
 
+-- Filter for soft-deleted memories
+CREATE INDEX IF NOT EXISTS idx_memories_deleted_at ON memories(deleted_at) WHERE deleted_at IS NULL;
+
 -- =============================================================================
 -- 4. TRIGGERS
 -- =============================================================================

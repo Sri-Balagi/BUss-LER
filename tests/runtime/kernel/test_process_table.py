@@ -1,14 +1,17 @@
-import pytest
 from uuid import uuid4
-from app.runtime.kernel.process import ProcessControlBlock, ProcessTable, ProcessType, ProcessState
+
+import pytest
+
+from app.runtime.kernel.process import ProcessControlBlock, ProcessState, ProcessTable, ProcessType
+
 
 def test_process_table_registration():
     table = ProcessTable()
     pid = uuid4()
     pcb = ProcessControlBlock(pid=pid, process_type=ProcessType.AGENT)
-    
+
     table.register_process(pcb)
-    
+
     retrieved = table.get_process(pid)
     assert retrieved is not None
     assert retrieved.pid == pid
@@ -20,9 +23,9 @@ def test_process_table_update_state():
     pid = uuid4()
     pcb = ProcessControlBlock(pid=pid, process_type=ProcessType.WORKFLOW)
     table.register_process(pcb)
-    
+
     table.update_state(pid, ProcessState.RUNNING)
-    
+
     retrieved = table.get_process(pid)
     assert retrieved.state == ProcessState.RUNNING
 
@@ -31,7 +34,7 @@ def test_process_table_removal():
     pid = uuid4()
     pcb = ProcessControlBlock(pid=pid, process_type=ProcessType.CAPABILITY)
     table.register_process(pcb)
-    
+
     table.remove_process(pid)
-    
+
     assert table.get_process(pid) is None

@@ -1,5 +1,6 @@
 from app.sdk.manifest.app_manifest import AppManifest
 
+
 def get_dummy_manifest() -> AppManifest:
     return AppManifest(
         name="dummy_app",

@@ -30,7 +30,7 @@ class MockPipeline(ICognitivePipeline):
     ) -> ExecutiveIntelligenceResult:
         if raw_request == "fail":
             raise ValueError("Pipeline forced failure")
-            
+
         summary = IntegrationSummary(
             state=CognitivePipelineState.COMPLETED,
             metrics=PipelineMetrics(),
@@ -65,18 +65,18 @@ def controller(mock_pipeline, session_factory):
 def test_cognitive_session_transitions():
     session = CognitiveSession()
     assert session.lifecycle_state == SessionLifecycleState.CREATED
-    
+
     session.transition(SessionLifecycleState.RUNNING)
     assert session.lifecycle_state == SessionLifecycleState.RUNNING
-    
+
     session.transition(SessionLifecycleState.SUSPENDED)
     assert session.lifecycle_state == SessionLifecycleState.SUSPENDED
-    
+
     session.transition(SessionLifecycleState.RUNNING)
-    
+
     session.transition(SessionLifecycleState.COMPLETED)
     assert session.lifecycle_state == SessionLifecycleState.COMPLETED
-    
+
     with pytest.raises(InvalidSessionTransitionError):
         session.transition(SessionLifecycleState.RUNNING)
 
@@ -85,10 +85,10 @@ def test_cognitive_session_transitions():
 async def test_executive_controller_success(controller):
     twin_id = uuid.uuid4()
     result = await controller.process_request("Optimize the business", twin_id=twin_id)
-    
+
     assert isinstance(result, ExecutiveIntelligenceResult)
     assert result.summary.state == CognitivePipelineState.COMPLETED
-    
+
     # In M7, the session is created, executes, and completes synchronously inside process_request.
     # The active_sessions dict should be empty because it cleans up in the finally block.
     assert len(controller._active_sessions) == 0

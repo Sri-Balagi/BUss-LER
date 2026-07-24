@@ -1,5 +1,4 @@
 import abc
-from typing import List, Optional
 from uuid import UUID
 
 from app.domain.knowledge.models import KnowledgeEdge, KnowledgeNode, RelationshipType
@@ -31,19 +30,19 @@ class IKnowledgeRepository(abc.ABC):
         pass
 
     @abc.abstractmethod
-    async def get_node(self, node_id: UUID) -> Optional[KnowledgeNode]:
+    async def get_node(self, node_id: UUID) -> KnowledgeNode | None:
         """Retrieve a specific node by its ID."""
         pass
 
     @abc.abstractmethod
-    async def find_nodes(self, **filters) -> List[KnowledgeNode]:
+    async def find_nodes(self, **filters) -> list[KnowledgeNode]:
         """
         Find nodes matching specific criteria (e.g., entity_type, exact name matches).
         """
         pass
 
     @abc.abstractmethod
-    async def search(self, query: str) -> List[KnowledgeNode]:
+    async def search(self, query: str, limit: int = 10) -> list[KnowledgeNode]:
         """
         Search for nodes using unstructured text matching or semantic search (future proofing).
         """
@@ -63,19 +62,19 @@ class IKnowledgeRepository(abc.ABC):
         pass
 
     @abc.abstractmethod
-    async def get_edge(self, edge_id: UUID) -> Optional[KnowledgeEdge]:
+    async def get_edge(self, edge_id: UUID) -> KnowledgeEdge | None:
         """Retrieve a specific edge by its ID."""
         pass
 
     @abc.abstractmethod
-    async def find_edges(self, source_id: Optional[UUID] = None, target_id: Optional[UUID] = None, relationship_type: Optional[RelationshipType] = None) -> List[KnowledgeEdge]:
+    async def find_edges(self, source_id: UUID | None = None, target_id: UUID | None = None, relationship_type: RelationshipType | None = None) -> list[KnowledgeEdge]:
         """
         Find edges matching given criteria. Useful for finding all children or all parents.
         """
         pass
 
     @abc.abstractmethod
-    async def traverse(self, start_node_id: UUID, max_depth: int = 1, edge_types: Optional[List[RelationshipType]] = None) -> List[KnowledgeNode]:
+    async def traverse(self, start_node_id: UUID, max_depth: int = 1, edge_types: list[RelationshipType] | None = None) -> list[KnowledgeNode]:
         """
         Traverse the graph starting from `start_node_id` up to `max_depth`.
         Optionally filter traversal along specific edge types.
@@ -85,11 +84,11 @@ class IKnowledgeRepository(abc.ABC):
         pass
 
     @abc.abstractmethod
-    async def batch_add_nodes(self, nodes: List[KnowledgeNode]) -> None:
+    async def batch_add_nodes(self, nodes: list[KnowledgeNode]) -> None:
         """Add multiple nodes to the graph efficiently."""
         pass
 
     @abc.abstractmethod
-    async def batch_add_edges(self, edges: List[KnowledgeEdge]) -> None:
+    async def batch_add_edges(self, edges: list[KnowledgeEdge]) -> None:
         """Add multiple edges to the graph efficiently."""
         pass

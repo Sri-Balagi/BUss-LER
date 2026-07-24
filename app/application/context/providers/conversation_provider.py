@@ -31,6 +31,10 @@ class ConversationContextProvider(AbstractContextProvider):
 
         self._conversation_service = conversation_service
 
+    @property
+    def source(self) -> ContextSource:
+        return ContextSource.CONVERSATION
+
     async def provide(self, ctx, twin_id: UUID, policy) -> ContextSection:
 
         items = []

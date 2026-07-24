@@ -1,12 +1,13 @@
+
 from fastapi import APIRouter, HTTPException
-from typing import Dict, List
-from app.domain.session.models import Session, SessionStatus
 from pydantic import BaseModel
+
+from app.domain.session.models import Session
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
 
 # For demonstration in Wave 7 (in-memory store for sessions)
-_session_store: Dict[str, Session] = {}
+_session_store: dict[str, Session] = {}
 
 class SessionCreateRequest(BaseModel):
     tenant_id: str

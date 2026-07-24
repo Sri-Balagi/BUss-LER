@@ -1,8 +1,9 @@
 import os
-from typing import Any, Dict
+from typing import Any
+
 
 class ConfigurationManager:
-    def __init__(self, defaults: Dict[str, Any] = None):
+    def __init__(self, defaults: dict[str, Any] = None):
         self._config = defaults or {}
 
     def get(self, key: str, default: Any = None) -> Any:

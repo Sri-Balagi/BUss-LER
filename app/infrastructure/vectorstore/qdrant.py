@@ -30,7 +30,7 @@ class QdrantService:
                 cls._instance = AsyncQdrantClient(
                     host=settings.qdrant_host,
                     port=settings.qdrant_port,
-                    timeout=10.0,
+                    timeout=10,
                 )
         return cls._instance
 
@@ -117,7 +117,8 @@ class QdrantService:
             collection_names = [c.name for c in collections.collections]
             if collection_name in collection_names:
                 info = await client.get_collection(collection_name)
-                config_size = info.config.params.vectors.size
+                vectors = info.config.params.vectors if info and info.config and info.config.params else None
+                config_size = vectors.size if isinstance(vectors, models.VectorParams) else settings.qdrant_vector_size
 
                 if config_size == settings.qdrant_vector_size:
                     status["collection"] = True

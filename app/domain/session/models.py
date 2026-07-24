@@ -1,12 +1,14 @@
-from pydantic import BaseModel, Field, model_validator
-from typing import Optional, List
-from datetime import datetime, timezone
 import uuid
-from enum import Enum
-from typing import Optional, List, Dict, Any
+from datetime import UTC, datetime
+from enum import StrEnum
+from typing import Any
 
-from app.shared.enums import PrincipalType, ParticipantRole
-class SessionStatus(str, Enum):
+from pydantic import BaseModel, Field, model_validator
+
+from app.shared.enums import ParticipantRole, PrincipalType
+
+
+class SessionStatus(StrEnum):
     ACTIVE = "ACTIVE"
     CLOSED = "CLOSED"
 
@@ -15,7 +17,7 @@ class SessionParticipant(BaseModel):
     id: str
     type: PrincipalType
     role: ParticipantRole = ParticipantRole.CONTRIBUTOR
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 class Session(BaseModel):
     """
@@ -24,10 +26,10 @@ class Session(BaseModel):
     """
     session_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     tenant_id: str
-    participants: List[SessionParticipant] = Field(default_factory=list)
-    conversation_ids: List[str] = Field(default_factory=list)  # Future-proofing for multiple conversations
+    participants: list[SessionParticipant] = Field(default_factory=list)
+    conversation_ids: list[str] = Field(default_factory=list)  # Future-proofing for multiple conversations
     status: SessionStatus = SessionStatus.ACTIVE
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
     @model_validator(mode='before')
     @classmethod
@@ -44,7 +46,7 @@ class Session(BaseModel):
         return data
 
     @property
-    def user_id(self) -> Optional[str]:
+    def user_id(self) -> str | None:
         """Backward compatibility for Wave 6/7 apps expecting user_id."""
         for p in self.participants:
             if p.type == PrincipalType.HUMAN:

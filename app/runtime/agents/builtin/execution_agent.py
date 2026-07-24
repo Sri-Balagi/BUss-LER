@@ -20,10 +20,10 @@ class ExecutionAgent(BaseAgent):
 
     async def execute(self) -> AgentResult:
         logger.info("ExecutionAgent executing capability", identity=self.specification.identity)
-        
+
         # M9 Stub execution
         await asyncio.sleep(0.1)
-        
+
         return AgentResult(
             status=AgentResultStatus.SUCCESS,
             output={"execution_status": "Step executed successfully"},

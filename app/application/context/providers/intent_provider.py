@@ -23,6 +23,10 @@ class IntentContextProvider(AbstractContextProvider):
 
         self._intent_service = intent_service
 
+    @property
+    def source(self) -> ContextSource:
+        return ContextSource.INTENT
+
     async def provide(self, ctx, twin_id: UUID, policy) -> ContextSection:
 
         items = []

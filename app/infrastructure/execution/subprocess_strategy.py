@@ -28,20 +28,20 @@ class SubprocessExecutionStrategy(IExecutionStrategy):
         self, callable_fn: Callable[..., Any], context: ExecutionContext, *args: Any, **kwargs: Any
     ) -> ExecutionResult:
         loop = asyncio.get_running_loop()
-        
+
         try:
             # Run in a separate process pool
             with concurrent.futures.ProcessPoolExecutor(max_workers=1) as pool:
                 # Use asyncio.wait_for to apply the timeout from context
                 future = loop.run_in_executor(pool, _execute_wrapper, callable_fn, args, kwargs)
                 result = await asyncio.wait_for(future, timeout=context.timeout_seconds)
-                
+
             return ExecutionResult(
                 success=True,
                 result=result,
                 lifecycle_id=context.lifecycle_id
             )
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return ExecutionResult(
                 success=False,
                 error=f"Execution timed out after {context.timeout_seconds}s",

@@ -124,7 +124,7 @@ class SessionEventBus:
             try:
                 event = await self._queue.get()
                 handlers = self._handlers.get(event.event_type, [])
-                
+
                 for handler in handlers:
                     try:
                         await handler(event)
@@ -136,7 +136,7 @@ class SessionEventBus:
                             error=str(e),
                             exc_info=True,
                         )
-                
+
                 self._queue.task_done()
             except asyncio.CancelledError:
                 break

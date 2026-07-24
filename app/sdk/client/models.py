@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -8,9 +8,9 @@ class SDKResponse(BaseModel):
     Standardized response envelope mapped from BizOSResponse.
     """
     success: bool
-    data: Optional[Any] = None
-    error: Optional[Dict[str, Any]] = None
-    meta: Optional[Dict[str, Any]] = None
+    data: Any | None = None
+    error: dict[str, Any] | None = None
+    meta: dict[str, Any] | None = None
 
 
 class RegistryItemModel(BaseModel):
@@ -20,7 +20,7 @@ class RegistryItemModel(BaseModel):
     id: str
     name: str
     type: str
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 class ToolExecutionRequest(BaseModel):
@@ -28,4 +28,4 @@ class ToolExecutionRequest(BaseModel):
     Model for invoking a tool via the SDK.
     """
     tool_name: str
-    arguments: Dict[str, Any]
+    arguments: dict[str, Any]

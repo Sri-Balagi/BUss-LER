@@ -79,7 +79,7 @@ ignore = ["E501", "B008"]
 
 [tool.coverage.report]
 show_missing = true
-fail_under = 70
+fail_under = 85
 
 [tool.mypy]
 python_version = "3.12"

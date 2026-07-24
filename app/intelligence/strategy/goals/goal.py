@@ -52,13 +52,14 @@ class GoalCreate(GoalBase):
 class GoalUpdate(DomainBaseModel):
     """Schema for partially updating a goal."""
 
-    title: str | None = Field(None, min_length=1, max_length=500)
-    description: str | None = Field(None, max_length=5000)
+    title: str | None = Field(default=None, min_length=1, max_length=500)
+    description: str | None = Field(default=None, max_length=5000)
     goal_type: GoalType | None = None
     status: GoalStatus | None = None
-    priority: int | None = Field(None, ge=1, le=10)
-    progress: float | None = Field(None, ge=0.0, le=100.0)
+    priority: int | None = Field(default=None, ge=1, le=10)
+    progress: float | None = Field(default=None, ge=0.0, le=100.0)
     target_date: datetime | None = None
+    completed_at: datetime | None = None
     success_criteria: list[str] | None = None
     metadata: dict[str, Any] | None = None
 

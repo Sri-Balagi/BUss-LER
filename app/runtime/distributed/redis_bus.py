@@ -13,7 +13,8 @@ from __future__ import annotations
 
 import json
 import os
-from typing import Any, Generator
+from collections.abc import Generator
+from typing import Any
 
 import redis  # type: ignore[import]
 

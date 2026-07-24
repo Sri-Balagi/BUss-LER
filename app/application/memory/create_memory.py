@@ -2,14 +2,10 @@ import uuid
 
 import structlog
 
+from app.domain.memory.repository import AbstractMemoryRepository
+from app.domain.memory.vector_repository import AbstractVectorRepository
 from app.infrastructure.ai.kernel import AbstractAIKernel
 from app.infrastructure.ai.models import EmbeddingRequest
-from app.infrastructure.persistence.postgres.repositories.memory_repository import (
-    AbstractMemoryRepository,
-)
-from app.infrastructure.persistence.postgres.repositories.vector_repository import (
-    AbstractVectorRepository,
-)
 from app.infrastructure.vectorstore.models import MemoryVectorPayload, MemoryVectorPoint
 from app.intelligence.learning.repository.memory import Memory, MemoryCreate
 from app.shared.enums import EmbeddingStatus
@@ -93,7 +89,7 @@ class CreateMemoryUseCase:
             twin_id=twin_id,
             event_type=EventType.CREATED,
         )
-        await self._event_bus.publish(event)
+        self._event_bus.publish(event)
 
         logger.info("Memory creation orchestration completed", memory_id=str(memory.id))
         return memory

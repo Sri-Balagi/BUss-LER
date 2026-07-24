@@ -1,6 +1,7 @@
 from uuid import UUID
-from typing import Dict
+
 from app.runtime.lifecycle.interfaces import ILifecycleManager, InvalidStateTransitionError
+
 
 class WorkflowLifecycleManager(ILifecycleManager):
     """
@@ -8,7 +9,7 @@ class WorkflowLifecycleManager(ILifecycleManager):
     States: QUEUED -> SCHEDULED -> EXECUTING -> COMPLETED | FAILED_RETRYABLE | FAILED_TERMINAL
     """
     def __init__(self):
-        self._states: Dict[UUID, str] = {}
+        self._states: dict[UUID, str] = {}
         self._valid_transitions = {
             "QUEUED": ["SCHEDULED", "FAILED_TERMINAL"],
             "SCHEDULED": ["EXECUTING", "FAILED_TERMINAL", "FAILED_RETRYABLE"],

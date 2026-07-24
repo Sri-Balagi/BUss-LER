@@ -2,15 +2,12 @@ import uuid
 
 import structlog
 
+from app.domain.memory.repository import AbstractMemoryRepository
+from app.domain.memory.vector_repository import AbstractVectorRepository
 from app.infrastructure.ai.kernel import AbstractAIKernel
 from app.infrastructure.ai.models import EmbeddingRequest
-from app.infrastructure.persistence.postgres.repositories.memory_repository import (
-    AbstractMemoryRepository,
-)
-from app.infrastructure.persistence.postgres.repositories.vector_repository import (
-    AbstractVectorRepository,
-)
-from app.infrastructure.vectorstore.models import MemoryVectorPoint
+from app.infrastructure.vectorstore.models import MemoryVectorPayload, MemoryVectorPoint
+from app.intelligence.learning.repository.memory import Memory
 from app.shared.enums import EmbeddingStatus
 
 logger = structlog.get_logger(__name__)
@@ -24,18 +21,12 @@ class RestoreMemoryUseCase:
         metadata_repo: AbstractMemoryRepository,
         vector_repo: AbstractVectorRepository,
         ai_kernel: AbstractAIKernel,
-    ):
+    ) -> None:
         self._metadata_repo = metadata_repo
         self._vector_repo = vector_repo
         self._ai_kernel = ai_kernel
 
-    async def execute(self, memory_id: uuid.UUID, correlation_id: str) -> None:
-        logger.info(
-            "Starting memory restore orchestration",
-            memory_id=str(memory_id),
-            correlation_id=correlation_id,
-        )
-
+    async def execute(self, memory_id: uuid.UUID) -> Memory:
         # 1. Restore metadata
         await self._metadata_repo.restore(memory_id)
 
@@ -44,10 +35,19 @@ class RestoreMemoryUseCase:
 
         # 3. Regenerate embedding (because it was deleted from vector store upon soft-delete)
         try:
-            embed_req = EmbeddingRequest(content=memory.content)
+            embed_req = EmbeddingRequest(text=memory.content)
             embed_res = await self._ai_kernel.embed(embed_req)
 
-            point = MemoryVectorPoint(id=memory.id, vector=embed_res.vector, payload=memory)
+            payload_data = MemoryVectorPayload(
+                memory_id=memory.id,
+                twin_id=memory.twin_id,
+                memory_category=memory.memory_category,
+                source=memory.source,
+                importance=memory.importance,
+                created_at=memory.created_at,
+                updated_at=memory.updated_at,
+            )
+            point = MemoryVectorPoint(id=memory.id, vector=embed_res.vector, payload=payload_data)
             await self._vector_repo.upsert(point)
             await self._metadata_repo.update_embedding_status(memory_id, EmbeddingStatus.COMPLETED)
         except Exception as e:
@@ -60,3 +60,4 @@ class RestoreMemoryUseCase:
 
         # Note: No RESTORED event exists in EventType currently.
         logger.info("Memory restore orchestration completed", memory_id=str(memory_id))
+        return memory

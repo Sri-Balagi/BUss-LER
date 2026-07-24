@@ -72,11 +72,11 @@ class AIRequestLifecycle(DomainBaseModel):
         description="Globally unique ID for this AI request lifecycle (UUID v4).",
     )
     entity_id: str | None = Field(
-        None,
+        default=None,
         description="Entity that originated the request. None for system-internal calls.",
     )
     session_id: str | None = Field(
-        None,
+        default=None,
         description="Cognitive or agent session ID, if applicable.",
     )
     operation: str = Field(
@@ -91,11 +91,11 @@ class AIRequestLifecycle(DomainBaseModel):
         description="UTC timestamp at lifecycle creation.",
     )
     prompt_id: str | None = Field(
-        None,
+        default=None,
         description="Prompt ID resolved for this request. Set after PromptRegistry resolution.",
     )
     provider_name: str | None = Field(
-        None,
+        default=None,
         description="Provider selected by ProviderRouter. Set after routing.",
     )
     phase: str = Field(
@@ -124,10 +124,10 @@ class AIRequest(DomainBaseModel):
         default_factory=dict,
         description="Variables to interpolate into the prompt template.",
     )
-    system_instruction: str | None = Field(None, description="Optional system-level instructions.")
+    system_instruction: str | None = Field(default=None, description="Optional system-level instructions.")
     # Wave 0: lifecycle propagation — optional for backward compatibility
     lifecycle: AIRequestLifecycle | None = Field(
-        None,
+        default=None,
         description=(
             "AI Request Lifecycle ID carrier. "
             "If None, AIKernel creates a lifecycle at method entry. "
@@ -147,7 +147,7 @@ class EmbeddingRequest(DomainBaseModel):
     """Domain model for requesting AI vector embeddings."""
 
     text: str = Field(..., description="The content to embed.")
-    model: str | None = Field(None, description="Specific model to use (if overriding default).")
+    model: str | None = Field(default=None, description="Specific model to use (if overriding default).")
 
 
 class EmbeddingResponse(DomainBaseModel):
@@ -173,7 +173,7 @@ class ClassifyRequest(DomainBaseModel):
         description="Additional context variables for prompt interpolation.",
     )
     system_instruction: str | None = Field(
-        None,
+        default=None,
         description="Optional system-level instructions for the classification task.",
     )
 
@@ -224,15 +224,15 @@ class StreamChunk(DomainBaseModel):
         description="True on the last chunk only. Signals end of stream.",
     )
     prompt_tokens: int | None = Field(
-        None,
+        default=None,
         description="Input token count. Populated only on the final chunk.",
     )
     completion_tokens: int | None = Field(
-        None,
+        default=None,
         description="Output token count. Populated only on the final chunk.",
     )
     error: str | None = Field(
-        None,
+        default=None,
         description=(
             "Set on the final chunk if the stream failed mid-way. "
             "Non-None error on a final chunk indicates partial output only."

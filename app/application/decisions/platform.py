@@ -1,12 +1,12 @@
-from typing import Any, Dict, List
+from typing import Any
 from uuid import UUID
-import json
 
+from app.domain.decisions.models import Decision
 from app.domain.decisions.platform import IDecisionPlatform
-from app.domain.decisions.models import Decision, DecisionPolicy
 from app.domain.intelligence.platform import IIntelligencePlatform
-from app.domain.memory.platform import IMemoryPlatform
 from app.domain.knowledge.repository import IKnowledgeRepository
+from app.domain.memory.platform import IMemoryPlatform
+
 
 class DecisionPlatform(IDecisionPlatform):
     def __init__(self, intelligence: IIntelligencePlatform, memory: IMemoryPlatform, knowledge: IKnowledgeRepository):
@@ -14,7 +14,7 @@ class DecisionPlatform(IDecisionPlatform):
         self._memory = memory
         self._knowledge = knowledge
 
-    async def evaluate_options(self, goal_id: UUID, context: Dict[str, Any], options: List[Dict[str, Any]]) -> Decision:
+    async def evaluate_options(self, goal_id: UUID, context: dict[str, Any], options: list[dict[str, Any]]) -> Decision:
         decision = Decision(goal_id=goal_id, context=context, options=options)
         decision = await self.score_options(decision)
         decision.confidence = await self.estimate_confidence(decision)
@@ -36,11 +36,11 @@ class DecisionPlatform(IDecisionPlatform):
             return 0.0
         return max(decision.option_scores.values())
 
-    async def assess_risks(self, decision: Decision) -> List[str]:
+    async def assess_risks(self, decision: Decision) -> list[str]:
         # (Mock) Risk assessment
         return ["Potential latency in execution", "Resource unavailability"]
 
-    async def recommend_action(self, decision: Decision) -> Dict[str, Any]:
+    async def recommend_action(self, decision: Decision) -> dict[str, Any]:
         if not decision.options:
             return {}
         # Return option with highest score

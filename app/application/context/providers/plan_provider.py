@@ -23,6 +23,10 @@ class PlanContextProvider(AbstractContextProvider):
 
         self._plan_service = plan_service
 
+    @property
+    def source(self) -> ContextSource:
+        return ContextSource.PLAN
+
     async def provide(self, ctx, twin_id: UUID, policy) -> ContextSection:
 
         items = []

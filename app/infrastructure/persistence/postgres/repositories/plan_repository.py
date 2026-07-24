@@ -7,9 +7,11 @@ Plans are created once; only their lifecycle status can be updated.
 
 import time
 from abc import ABC, abstractmethod
+from typing import Any
 from uuid import UUID
 
 import structlog
+from postgrest.types import CountMethod
 from supabase import AsyncClient
 
 from app.intelligence.decision.planning.plan import PaginatedPlans, Plan, PlanCreate
@@ -24,9 +26,9 @@ class AbstractPlanRepository(ABC):
     async def create(
         self,
         twin_id: UUID,
-        goal_id: UUID | None,
-        intent_id: UUID | None,
         data: PlanCreate,
+        goal_id: UUID | None = None,
+        intent_id: UUID | None = None,
     ) -> Plan:
         pass
 
@@ -55,6 +57,8 @@ class AbstractPlanRepository(ABC):
 
 
 class PlanRepository(AbstractPlanRepository):
+    """Data access layer for the ``plans`` table."""
+
     _table = "plans"
 
     def __init__(self, client: AsyncClient) -> None:
@@ -63,12 +67,12 @@ class PlanRepository(AbstractPlanRepository):
     async def create(
         self,
         twin_id: UUID,
-        goal_id: UUID | None,
-        intent_id: UUID | None,
         data: PlanCreate,
+        goal_id: UUID | None = None,
+        intent_id: UUID | None = None,
     ) -> Plan:
         start = time.time()
-        insert_data = {
+        insert_data: dict[str, Any] = {
             "twin_id": str(twin_id),
             "rationale": data.rationale,
             "steps": [step.model_dump() for step in data.steps],
@@ -90,12 +94,14 @@ class PlanRepository(AbstractPlanRepository):
         except Exception as exc:
             raise RepositoryError("plan.create", str(exc)) from exc
 
+        first_row = response.data[0] if response.data and isinstance(response.data, list) else {}
+        plan_id = first_row.get("id") if isinstance(first_row, dict) else ""
         logger.info(
             "Created plan",
-            plan_id=response.data[0]["id"],
+            plan_id=str(plan_id),
             latency_ms=(time.time() - start) * 1000,
         )
-        return self._deserialize(response.data[0])
+        return self._deserialize(first_row)
 
     async def get_by_id(self, plan_id: UUID) -> Plan:
         try:
@@ -120,7 +126,7 @@ class PlanRepository(AbstractPlanRepository):
         try:
             query = (
                 self._client.table(self._table)
-                .select("*", count="exact")
+                .select("*", count=CountMethod.exact)
                 .eq("twin_id", str(twin_id))
             )
             if goal_id:
@@ -164,9 +170,10 @@ class PlanRepository(AbstractPlanRepository):
         return status
 
     @staticmethod
-    def _deserialize(row: dict) -> Plan:
+    def _deserialize(row: Any) -> Plan:
         from app.intelligence.decision.planning.plan import PlanStep
 
-        if row.get("steps") and isinstance(row["steps"], list):
-            row["steps"] = [PlanStep.model_validate(s) for s in row["steps"]]
-        return Plan.model_validate(row)
+        row_dict = dict(row) if isinstance(row, dict) else {}
+        if row_dict.get("steps") and isinstance(row_dict["steps"], list):
+            row_dict["steps"] = [PlanStep.model_validate(s) for s in row_dict["steps"]]
+        return Plan.model_validate(row_dict)

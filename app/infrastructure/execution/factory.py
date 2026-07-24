@@ -1,15 +1,15 @@
-from typing import Optional
+
+from app.domain.security.interfaces import IAuditPublisher
 from app.infrastructure.execution.in_process import InProcessExecutionStrategy
+from app.infrastructure.execution.sandboxed_strategy import SandboxedExecutionStrategy
 from app.infrastructure.execution.strategy import ExecutionStrategy, IExecutionStrategy
 from app.infrastructure.execution.subprocess_strategy import SubprocessExecutionStrategy
-from app.infrastructure.execution.sandboxed_strategy import SandboxedExecutionStrategy
-from app.domain.security.interfaces import IAuditPublisher
 
 
 class ExecutionStrategyFactory:
     """Factory for creating execution strategies based on the strategy enum."""
 
-    def __init__(self, audit_publisher: Optional[IAuditPublisher] = None):
+    def __init__(self, audit_publisher: IAuditPublisher | None = None):
         self._audit_publisher = audit_publisher
 
     def get_strategy(self, strategy_type: ExecutionStrategy) -> IExecutionStrategy:

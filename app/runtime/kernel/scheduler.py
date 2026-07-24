@@ -1,7 +1,7 @@
-from uuid import UUID
 from app.runtime.kernel.interfaces import IScheduler
-from app.runtime.kernel.process import ProcessControlBlock, ProcessState
 from app.runtime.kernel.manager import ProcessManager
+from app.runtime.kernel.process import ProcessControlBlock, ProcessState
+
 
 class LocalScheduler(IScheduler):
     """
@@ -15,6 +15,6 @@ class LocalScheduler(IScheduler):
         """Schedules a process for execution locally."""
         self.process_manager.spawn(pcb)
         self.process_manager.process_table.update_state(pcb.pid, ProcessState.READY)
-        
+
         # Simulating immediate dispatch in a local environment
         self.process_manager.process_table.update_state(pcb.pid, ProcessState.RUNNING)

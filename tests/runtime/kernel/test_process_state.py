@@ -1,5 +1,7 @@
 import pytest
+
 from app.runtime.kernel.process import ProcessState, ProcessType
+
 
 def test_process_states_exist():
     assert hasattr(ProcessState, "CREATED")

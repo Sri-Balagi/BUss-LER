@@ -1,7 +1,6 @@
-import json
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Generic, List, Optional, TypeVar
+from typing import Any, TypeVar
 
 from pydantic import BaseModel
 
@@ -14,24 +13,24 @@ logger = logging.getLogger(__name__)
 T = TypeVar("T")
 
 
-class BaseRegistry(ABC, Generic[T]):
+class BaseRegistry[T](ABC):
     """
     Advanced foundation for all BizOS Registries.
     Provides standardized storage, broadcasting, lifecycle hooks, and synchronization.
     """
 
     def __init__(
-        self, 
-        name: str, 
-        store: IRegistryStore[T], 
-        bus: Optional[IRegistryBus] = None
+        self,
+        name: str,
+        store: IRegistryStore[T],
+        bus: IRegistryBus | None = None
     ) -> None:
         self.name = name
         self.store = store
         self.bus = bus
 
     # ── Hooks & Validation ───────────────────────────────────────────────────
-    
+
     def validate_item(self, item: T) -> None:
         """
         Validates the item before registration.
@@ -52,12 +51,12 @@ class BaseRegistry(ABC, Generic[T]):
     async def register(self, item_id: str, item: T) -> None:
         """Registers a new item in the registry."""
         self.validate_item(item)
-        
+
         await self.store.set(item_id, item)
         logger.info(f"[{self.name}] Registered item: {item_id}")
-        
+
         await self.on_register(item_id, item)
-        
+
         if self.bus:
             await self.bus.publish_event(
                 topic=f"registry.{self.name}.registered",
@@ -69,12 +68,12 @@ class BaseRegistry(ABC, Generic[T]):
         item = await self.store.get(item_id)
         if not item:
             return False
-            
+
         success = await self.store.delete(item_id)
         if success:
             logger.info(f"[{self.name}] Unregistered item: {item_id}")
             await self.on_unregister(item_id, item)
-            
+
             if self.bus:
                 await self.bus.publish_event(
                     topic=f"registry.{self.name}.unregistered",
@@ -82,17 +81,17 @@ class BaseRegistry(ABC, Generic[T]):
                 )
         return success
 
-    async def get(self, item_id: str) -> Optional[T]:
+    async def get(self, item_id: str) -> T | None:
         """Retrieves an item by ID."""
         return await self.store.get(item_id)
 
-    async def list_all(self) -> List[T]:
+    async def list_all(self) -> list[T]:
         """Retrieves all registered items."""
         return await self.store.list_all()
 
     # ── Synchronization ──────────────────────────────────────────────────────
 
-    def _serialize_item(self, item: T) -> Dict[str, Any]:
+    def _serialize_item(self, item: T) -> dict[str, Any]:
         """Serializes an item for snapshotting. Default assumes Pydantic BaseModel."""
         if isinstance(item, BaseModel):
             return item.model_dump(mode="json")
@@ -102,7 +101,7 @@ class BaseRegistry(ABC, Generic[T]):
             raise NotImplementedError(f"[{self.name}] Cannot serialize item: {type(item)}")
 
     @abstractmethod
-    def _deserialize_item(self, data: Dict[str, Any]) -> T:
+    def _deserialize_item(self, data: dict[str, Any]) -> T:
         """Deserializes an item from a snapshot. Subclasses must implement."""
         pass
 
@@ -110,7 +109,7 @@ class BaseRegistry(ABC, Generic[T]):
         """Creates a point-in-time snapshot of the entire registry."""
         items = await self.list_all()
         serialized_items = [self._serialize_item(i) for i in items]
-        
+
         return RegistrySnapshot(
             registry_name=self.name,
             items=serialized_items
@@ -120,10 +119,10 @@ class BaseRegistry(ABC, Generic[T]):
         """Imports a snapshot into the registry."""
         if snapshot.registry_name != self.name:
             raise ValueError(f"Snapshot registry name mismatch: {snapshot.registry_name} != {self.name}")
-            
+
         if clear_existing:
             await self.store.clear()
-            
+
         for idx, item_data in enumerate(snapshot.items):
             try:
                 item = self._deserialize_item(item_data)

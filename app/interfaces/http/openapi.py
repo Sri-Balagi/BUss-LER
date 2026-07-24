@@ -18,7 +18,7 @@ def custom_openapi(app: FastAPI) -> dict:
     )
 
     # Inject Security Schemes for the API Gateway
-    openapi_schema["components"]["securitySchemes"] = {
+    openapi_schema.setdefault("components", {})["securitySchemes"] = {
         "ApiKeyAuth": {
             "type": "apiKey",
             "in": "header",
@@ -32,7 +32,7 @@ def custom_openapi(app: FastAPI) -> dict:
             "description": "JWT Bearer authentication for users and internal services."
         }
     }
-    
+
     # Require authentication globally
     openapi_schema["security"] = [{"ApiKeyAuth": []}, {"BearerAuth": []}]
 

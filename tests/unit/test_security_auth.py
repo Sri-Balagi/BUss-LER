@@ -1,15 +1,17 @@
-import pytest
-from datetime import datetime, timedelta, timezone
-import jwt
+from datetime import UTC, datetime, timedelta, timezone
 
-from app.domain.security.models import ExecutionContext, AuthenticationStatus
-from app.domain.security.config import SecurityConfig
-from app.infrastructure.security.providers.jwt_provider import JWTIdentityProvider
-from app.infrastructure.security.providers.api_key_provider import APIKeyIdentityProvider
+import jwt
+import pytest
+
 from app.application.security.auth_service import AuthenticationService
 from app.domain.identity.api_key import APIKey, APIKeyStatus
-from app.infrastructure.security.hashers import BcryptHasher
+from app.domain.security.config import SecurityConfig
+from app.domain.security.models import AuthenticationStatus, ExecutionContext
 from app.infrastructure.persistence.memory.api_key_repository import InMemoryAPIKeyRepository
+from app.infrastructure.security.hashers import BcryptHasher
+from app.infrastructure.security.providers.api_key_provider import APIKeyIdentityProvider
+from app.infrastructure.security.providers.jwt_provider import JWTIdentityProvider
+
 
 @pytest.fixture
 def security_config():
@@ -44,12 +46,12 @@ def auth_service(jwt_provider, api_key_provider):
 @pytest.mark.asyncio
 async def test_jwt_provider_success(jwt_provider):
     token = jwt.encode(
-        {"sub": "user_123", "tenant_id": "tenant_1", "exp": datetime.now(timezone.utc) + timedelta(minutes=15)},
+        {"sub": "user_123", "tenant_id": "tenant_1", "exp": datetime.now(UTC) + timedelta(minutes=15)},
         "secret_key",
         algorithm="HS256",
         headers={"kid": "default"}
     )
-    
+
     result = await jwt_provider.authenticate(token)
     assert result.status == AuthenticationStatus.SUCCESS
     assert result.context is not None
@@ -73,7 +75,7 @@ async def test_jwt_provider_invalid_signature(jwt_provider):
 @pytest.mark.asyncio
 async def test_jwt_provider_expired(jwt_provider):
     token = jwt.encode(
-        {"sub": "user_123", "exp": datetime.now(timezone.utc) - timedelta(minutes=15)},
+        {"sub": "user_123", "exp": datetime.now(UTC) - timedelta(minutes=15)},
         "secret_key",
         algorithm="HS256",
         headers={"kid": "default"}
@@ -81,7 +83,7 @@ async def test_jwt_provider_expired(jwt_provider):
     result = await jwt_provider.authenticate(token)
     assert result.status == AuthenticationStatus.TOKEN_EXPIRED
     assert result.context is None
-    
+
 @pytest.mark.asyncio
 async def test_jwt_provider_unknown_kid(jwt_provider):
     token = jwt.encode(
@@ -98,7 +100,7 @@ async def test_jwt_provider_unknown_kid(jwt_provider):
 async def test_api_key_provider_success(api_key_provider, api_key_repo, hasher):
     raw_key = "abc12345.restofkey"
     hashed_key = hasher.hash(raw_key)
-    
+
     key_record = APIKey(
         name="Test Key",
         key_hash=hashed_key,
@@ -106,7 +108,7 @@ async def test_api_key_provider_success(api_key_provider, api_key_repo, hasher):
         status=APIKeyStatus.ACTIVE
     )
     await api_key_repo.save(key_record)
-    
+
     result = await api_key_provider.authenticate(raw_key)
     assert result.status == AuthenticationStatus.SUCCESS
     assert result.context is not None
@@ -118,7 +120,7 @@ async def test_api_key_provider_success(api_key_provider, api_key_repo, hasher):
 async def test_api_key_provider_wrong_hash(api_key_provider, api_key_repo, hasher):
     raw_key = "abc12345.wrong"
     hashed_key = hasher.hash("abc12345.correct")
-    
+
     key_record = APIKey(
         name="Test Key",
         key_hash=hashed_key,
@@ -126,7 +128,7 @@ async def test_api_key_provider_wrong_hash(api_key_provider, api_key_repo, hashe
         status=APIKeyStatus.ACTIVE
     )
     await api_key_repo.save(key_record)
-    
+
     result = await api_key_provider.authenticate(raw_key)
     assert result.status == AuthenticationStatus.INVALID_TOKEN
     assert result.context is None
@@ -135,7 +137,7 @@ async def test_api_key_provider_wrong_hash(api_key_provider, api_key_repo, hashe
 async def test_api_key_provider_revoked(api_key_provider, api_key_repo, hasher):
     raw_key = "abc12345.restofkey"
     hashed_key = hasher.hash(raw_key)
-    
+
     key_record = APIKey(
         name="Test Key",
         key_hash=hashed_key,
@@ -143,7 +145,7 @@ async def test_api_key_provider_revoked(api_key_provider, api_key_repo, hasher):
         status=APIKeyStatus.REVOKED
     )
     await api_key_repo.save(key_record)
-    
+
     result = await api_key_provider.authenticate(raw_key)
     assert result.status == AuthenticationStatus.REVOKED
     assert result.context is None
@@ -152,17 +154,17 @@ async def test_api_key_provider_revoked(api_key_provider, api_key_repo, hasher):
 async def test_auth_service_routing(auth_service, api_key_repo, hasher):
     # Test JWT route
     token = jwt.encode(
-        {"sub": "user_123", "exp": datetime.now(timezone.utc) + timedelta(minutes=15)},
+        {"sub": "user_123", "exp": datetime.now(UTC) + timedelta(minutes=15)},
         "secret_key",
         algorithm="HS256",
         headers={"kid": "default"}
     )
-    
+
     result = await auth_service.authenticate("Bearer", token)
     assert result.status == AuthenticationStatus.SUCCESS
     assert result.context.is_authenticated is True
     assert result.context.user_id == "user_123"
-    
+
     # Test API Key route
     raw_key = "abc12345.restofkey"
     hashed_key = hasher.hash(raw_key)
@@ -171,12 +173,12 @@ async def test_auth_service_routing(auth_service, api_key_repo, hasher):
         key_hash=hashed_key,
         prefix="abc12345"
     ))
-    
+
     result2 = await auth_service.authenticate("ApiKey", raw_key)
     assert result2.status == AuthenticationStatus.SUCCESS
     assert result2.context.is_authenticated is True
     assert result2.context.authentication_method == "api_key"
-    
+
     # Test unknown scheme
     result3 = await auth_service.authenticate("Unknown", "token")
     assert result3.status == AuthenticationStatus.UNSUPPORTED_SCHEME

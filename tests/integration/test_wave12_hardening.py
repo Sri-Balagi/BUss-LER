@@ -1,38 +1,49 @@
-import pytest
 import asyncio
 from typing import Optional
 from uuid import UUID, uuid4
+
+import pytest
+
 from app.domain.infrastructure.repositories import IRepository
-from app.infrastructure.resilience.policies import ExecutionPolicy, RetryPolicy, TimeoutPolicy, CircuitBreaker, CircuitBreakerState, IdempotencyGuard, DeadLetterQueue
 from app.infrastructure.audit.logger import AuditLogger
-from app.infrastructure.security.abstractions import SecurityContext
 from app.infrastructure.config.manager import ConfigurationManager
 from app.infrastructure.observability.health import HealthMonitor, HealthStatus
+from app.infrastructure.resilience.policies import (
+    CircuitBreaker,
+    CircuitBreakerState,
+    DeadLetterQueue,
+    ExecutionPolicy,
+    IdempotencyGuard,
+    RetryPolicy,
+    TimeoutPolicy,
+)
+from app.infrastructure.security.abstractions import SecurityContext
+
 
 # Mock repo for test
 class MockRepository(IRepository[dict]):
     def __init__(self):
         self.store = {}
-        
+
     async def create(self, entity: dict) -> dict:
         entity_id = entity.get("id", str(uuid4()))
         entity["id"] = entity_id
         self.store[entity_id] = entity
         return entity
-        
+
     async def update(self, entity: dict) -> dict:
         self.store[entity["id"]] = entity
         return entity
-        
+
     async def delete(self, entity_id: UUID | str) -> bool:
         if entity_id in self.store:
             del self.store[entity_id]
             return True
         return False
-        
-    async def get_by_id(self, entity_id: UUID | str) -> Optional[dict]:
+
+    async def get_by_id(self, entity_id: UUID | str) -> dict | None:
         return self.store.get(entity_id)
-        
+
     async def list(self, limit: int = 100, offset: int = 0) -> list[dict]:
         return list(self.store.values())[offset:offset+limit]
 
@@ -42,19 +53,19 @@ async def test_repository_crud():
     item = await repo.create({"name": "test"})
     assert item["id"] is not None
     assert item["name"] == "test"
-    
+
     fetched = await repo.get_by_id(item["id"])
     assert fetched["name"] == "test"
-    
+
     item["name"] = "updated"
     await repo.update(item)
-    
+
     fetched = await repo.get_by_id(item["id"])
     assert fetched["name"] == "updated"
-    
+
     items = await repo.list()
     assert len(items) == 1
-    
+
     deleted = await repo.delete(item["id"])
     assert deleted is True
     assert await repo.get_by_id(item["id"]) is None
@@ -62,46 +73,46 @@ async def test_repository_crud():
 @pytest.mark.asyncio
 async def test_execution_policy():
     policy = ExecutionPolicy(retry=RetryPolicy(max_retries=2, base_delay=0.01), timeout=TimeoutPolicy(timeout_seconds=0.1))
-    
+
     attempts = 0
     async def failing_func():
         nonlocal attempts
         attempts += 1
         raise ValueError("Fail")
-        
+
     with pytest.raises(ValueError):
         await policy.execute(failing_func)
-        
+
     assert attempts == 3  # Initial + 2 retries
 
 @pytest.mark.asyncio
 async def test_circuit_breaker():
     cb = CircuitBreaker(failure_threshold=2, recovery_timeout=0.1)
-    
+
     async def failing_func():
         raise ValueError("Fail")
-        
+
     # Attempt 1
     with pytest.raises(ValueError):
         await cb.execute(failing_func)
     assert cb.state == CircuitBreakerState.CLOSED
-    
+
     # Attempt 2
     with pytest.raises(ValueError):
         await cb.execute(failing_func)
     assert cb.state == CircuitBreakerState.OPEN
-    
+
     # Attempt 3 (Should fail fast)
     with pytest.raises(Exception, match="Circuit Breaker is OPEN"):
         await cb.execute(failing_func)
-        
+
     # Wait for recovery
     await asyncio.sleep(0.2)
-    
+
     # Attempt 4 (Half open -> success -> closed)
     async def success_func():
         return "OK"
-        
+
     res = await cb.execute(success_func)
     assert res == "OK"
     assert cb.state == CircuitBreakerState.CLOSED

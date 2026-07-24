@@ -1,7 +1,6 @@
 import argparse
 import cmd
 import sys
-from typing import List, Optional
 
 from app.sdk.client.config import SDKConfig
 from app.sdk.client.sync_client import BizOSClient
@@ -16,7 +15,7 @@ class BizShell(cmd.Cmd):
     """
     prompt = "bizos> "
 
-    def __init__(self, use_json: bool = False, config: Optional[SDKConfig] = None):
+    def __init__(self, use_json: bool = False, config: SDKConfig | None = None):
         super().__init__()
         self.formatter = ShellFormatter(use_json=use_json)
         self.client = BizOSClient(config=config)
@@ -24,11 +23,11 @@ class BizShell(cmd.Cmd):
         self._register_default_commands()
 
     def _register_default_commands(self) -> None:
-        from app.shell.commands.registry_cmds import register_registry_commands
-        from app.shell.commands.workflow_cmds import register_workflow_commands
-        from app.shell.commands.status_cmds import register_status_commands
         from app.shell.commands.devex_cmds import register_devex_commands
-        
+        from app.shell.commands.registry_cmds import register_registry_commands
+        from app.shell.commands.status_cmds import register_status_commands
+        from app.shell.commands.workflow_cmds import register_workflow_commands
+
         register_registry_commands(self.dispatcher)
         register_workflow_commands(self.dispatcher)
         register_status_commands(self.dispatcher)
@@ -41,13 +40,13 @@ class BizShell(cmd.Cmd):
             return 0
         command = parts[0]
         args = parts[1:]
-        
+
         if command in ("exit", "quit"):
             sys.exit(0)
         elif command == "help":
             self.do_help(" ".join(args))
             return 0
-            
+
         return self.dispatcher.dispatch(command, args)
 
     def default(self, line: str) -> bool:
@@ -61,7 +60,7 @@ class BizShell(cmd.Cmd):
     def do_exit(self, arg: str) -> bool:
         """Exit the shell."""
         sys.exit(0)
-        
+
     def do_quit(self, arg: str) -> bool:
         """Exit the shell."""
         sys.exit(0)
@@ -74,11 +73,11 @@ class BizShell(cmd.Cmd):
     def do_ps(self, arg: str) -> None:
         """List active workflows."""
         self.execute_command(f"ps {arg}")
-        
+
     def do_kill(self, arg: str) -> None:
         """Kill a running workflow or process."""
         self.execute_command(f"kill {arg}")
-        
+
     def do_memory(self, arg: str) -> None:
         """Display memory/context information."""
         self.execute_command(f"memory {arg}")
@@ -118,9 +117,9 @@ class BizShell(cmd.Cmd):
     def run_script(self, filepath: str) -> int:
         """Executes commands from a script file."""
         try:
-            with open(filepath, "r") as f:
+            with open(filepath) as f:
                 lines = f.readlines()
-                
+
             for line in lines:
                 line = line.strip()
                 if line and not line.startswith("#"):
@@ -137,11 +136,11 @@ def main():
     parser = argparse.ArgumentParser(description="BizOS Shell")
     parser.add_argument("script", nargs="?", help="Optional script file to execute")
     parser.add_argument("--json", action="store_true", help="Output in machine-readable JSON format")
-    
+
     args = parser.parse_args()
-    
+
     shell = BizShell(use_json=args.json)
-    
+
     if args.script:
         sys.exit(shell.run_script(args.script))
     else:

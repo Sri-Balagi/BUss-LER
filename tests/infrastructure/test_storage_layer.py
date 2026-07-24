@@ -11,14 +11,13 @@ from __future__ import annotations
 
 import json
 from unittest.mock import MagicMock, patch
-from uuid import uuid4, UUID
+from uuid import UUID, uuid4
 
 import pytest
 
 # ---------------------------------------------------------------------------
 # PostgresMount
 # ---------------------------------------------------------------------------
-
 from app.infrastructure.vfs.postgres_mount import PostgresMount, PostgresNode
 
 
@@ -50,7 +49,7 @@ def test_postgres_node_read_without_client():
 # QdrantMount
 # ---------------------------------------------------------------------------
 
-from app.infrastructure.vfs.qdrant_mount import QdrantMount, QdrantNode
+from app.infrastructure.vfs.qdrant_mount import QdrantMount, QdrantNode  # noqa: E402
 
 
 def test_qdrant_mount_scheme():
@@ -80,7 +79,7 @@ def test_qdrant_node_read_without_client():
 # RedisMount
 # ---------------------------------------------------------------------------
 
-from app.infrastructure.vfs.redis_mount import RedisMount, RedisNode
+from app.infrastructure.vfs.redis_mount import RedisMount, RedisNode  # noqa: E402
 
 
 def test_redis_mount_scheme():
@@ -136,7 +135,7 @@ def test_redis_node_read_returns_none_for_missing_key():
 # SnapshotManager
 # ---------------------------------------------------------------------------
 
-from app.infrastructure.storage.snapshot_manager import SnapshotManager
+from app.infrastructure.storage.snapshot_manager import SnapshotManager  # noqa: E402
 
 
 def _make_redis_mock():
@@ -205,7 +204,7 @@ def test_snapshot_manager_delete():
 # BackupManager
 # ---------------------------------------------------------------------------
 
-from app.infrastructure.storage.backup_manager import BackupManager
+from app.infrastructure.storage.backup_manager import BackupManager  # noqa: E402
 
 
 def test_backup_manager_create_and_list():
@@ -268,9 +267,9 @@ def test_backup_manager_restore_missing_raises():
 # ConcreteStorageManager
 # ---------------------------------------------------------------------------
 
-from app.infrastructure.storage.concrete_storage_manager import ConcreteStorageManager
-from app.infrastructure.vfs.mount_registry import MountRegistry
-from app.infrastructure.vfs.redis_mount import RedisMount
+from app.infrastructure.storage.concrete_storage_manager import ConcreteStorageManager  # noqa: E402
+from app.infrastructure.vfs.mount_registry import MountRegistry  # noqa: E402
+from app.infrastructure.vfs.redis_mount import RedisMount  # noqa: E402
 
 
 def test_concrete_storage_manager_ping_no_mounts():

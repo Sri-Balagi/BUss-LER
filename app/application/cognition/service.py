@@ -1,14 +1,14 @@
-from app.domain.intelligence.pipeline import PipelineContext
-from app.domain.cognition.models import AgentState
-from app.application.intelligence.kernel import IntelligenceKernel
 from app.application.cognition.pipeline import CognitivePipeline
+from app.application.intelligence.kernel import IntelligenceKernel
+from app.domain.cognition.models import AgentState
+from app.domain.intelligence.pipeline import PipelineContext
 
 
 class CognitiveEngineService:
     """
     Coordinates cognitive execution through the Intelligence Kernel.
     """
-    
+
     def __init__(
         self,
         kernel: IntelligenceKernel,
@@ -18,7 +18,7 @@ class CognitiveEngineService:
         self._pipeline = pipeline
 
     async def execute_agent_loop(
-        self, 
+        self,
         context: AgentState
     ) -> AgentState:
         """
@@ -28,10 +28,12 @@ class CognitiveEngineService:
             execution_context=context,
             payload=context
         )
-        
+
         result = await self._kernel.pipeline_manager.run_pipeline(
             self._pipeline,
             pipeline_context
         )
-        
+
+        if not isinstance(result.payload, AgentState):
+            raise RuntimeError("Cognitive pipeline did not return a valid AgentState")
         return result.payload

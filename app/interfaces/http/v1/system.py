@@ -13,7 +13,11 @@ import time
 from typing import Any
 
 import structlog
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+
+from app.application.system.query_service import SystemQueryService
+from app.interfaces.http.v1.dependencies_system import get_system_query_service
+from app.interfaces.http.v1.schemas.response import BizOSResponse
 
 logger = structlog.get_logger()
 
@@ -72,10 +76,6 @@ async def readiness_probe() -> dict[str, Any]:
     }
 
 
-from fastapi import Depends
-from app.interfaces.http.v1.dependencies_system import get_system_query_service
-from app.application.system.query_service import SystemQueryService
-from app.interfaces.http.v1.schemas.response import BizOSResponse
 
 
 @router.get(

@@ -299,7 +299,7 @@ async def test_update_embedding_status(repo, mock_supabase_client):
     assert updated.embedding_status == EmbeddingStatus.COMPLETED
 
 
-from app.models.exceptions import RepositoryError
+from app.models.exceptions import RepositoryError  # noqa: E402
 
 
 @pytest.mark.asyncio

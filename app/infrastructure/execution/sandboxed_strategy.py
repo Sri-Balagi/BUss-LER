@@ -1,21 +1,23 @@
 import asyncio
 import concurrent.futures
 import logging
+import uuid
 from collections.abc import Callable
+from dataclasses import asdict
 from typing import Any
 
+from app.domain.security.interfaces import IAuditPublisher
+from app.domain.security.models import SandboxPolicy
 from app.infrastructure.execution.strategy import (
     ExecutionContext as StrategyExecutionContext,
+)
+from app.infrastructure.execution.strategy import (
     ExecutionResult,
     ExecutionStrategy,
     IExecutionStrategy,
 )
-from app.domain.security.models import SandboxPolicy
-from app.domain.security.interfaces import ISandboxPolicyEnforcer, IAuditPublisher
-from app.shared.events.models import SecurityEvent, AuditCategory
 from app.infrastructure.security.sandbox import PythonAuditHookEnforcer
-from dataclasses import asdict
-import uuid
+from app.shared.events.models import AuditCategory, SecurityEvent
 
 logger = logging.getLogger(__name__)
 
@@ -24,11 +26,11 @@ def _sandboxed_execute_wrapper(policy: SandboxPolicy | None, callable_fn: Callab
     Wrapper to enforce sandbox policies before executing the callable inside the subprocess.
     """
     if policy is not None:
-        # We instantiate the default enforcer if a policy is provided. 
+        # We instantiate the default enforcer if a policy is provided.
         # (This is kept decoupled; stronger implementations could replace the strategy entirely)
         enforcer = PythonAuditHookEnforcer()
         enforcer.enforce(policy)
-        
+
     return callable_fn(*args, **kwargs)
 
 class SandboxedExecutionStrategy(IExecutionStrategy):
@@ -37,19 +39,19 @@ class SandboxedExecutionStrategy(IExecutionStrategy):
     Serves as the foundational 'Sandboxed Execution Environment' combining
     process isolation and runtime policy enforcement.
     """
-    
+
     def __init__(self, audit_publisher: IAuditPublisher | None = None):
         self._audit_publisher = audit_publisher
-        
+
     def _emit_audit(self, context: StrategyExecutionContext, action: str, result: str, metadata: dict | None = None, severity: str = "INFO") -> None:
         if not self._audit_publisher:
             return
-            
+
         ctx_dict = None
         # We try to extract info from the generic ExecutionContext if it's there
         if hasattr(context, "sandbox_policy") and context.sandbox_policy:
             ctx_dict = {"sandbox_policy": asdict(context.sandbox_policy)}
-            
+
         event = SecurityEvent(
             correlation_id=str(context.lifecycle_id) if getattr(context, "lifecycle_id", None) else str(uuid.uuid4()),
             category=AuditCategory.SANDBOX,
@@ -60,7 +62,7 @@ class SandboxedExecutionStrategy(IExecutionStrategy):
             severity=severity
         )
         self._audit_publisher.publish_audit(event)
-    
+
     @property
     def strategy_type(self) -> ExecutionStrategy:
         return ExecutionStrategy.SANDBOXED
@@ -70,10 +72,10 @@ class SandboxedExecutionStrategy(IExecutionStrategy):
     ) -> ExecutionResult:
         loop = asyncio.get_running_loop()
         policy = context.sandbox_policy
-        
+
         logger.info("sandbox_execution_started", extra={"strategy": "subprocess_sandbox", "lifecycle_id": context.lifecycle_id})
         self._emit_audit(context, "EXECUTION_STARTED", "SUCCESS")
-        
+
         try:
             # We use max_workers=1 to ensure each callable gets a fresh isolated process if we were to recreate the pool
             # For concurrent.futures, ProcessPoolExecutor creates a fresh pool here.
@@ -82,10 +84,10 @@ class SandboxedExecutionStrategy(IExecutionStrategy):
                 timeout_s = context.timeout_seconds
                 if policy and policy.max_execution_time_seconds:
                     timeout_s = min(timeout_s, float(policy.max_execution_time_seconds))
-                    
+
                 future = loop.run_in_executor(pool, _sandboxed_execute_wrapper, policy, callable_fn, args, kwargs)
                 result = await asyncio.wait_for(future, timeout=timeout_s)
-                
+
             logger.info("sandbox_execution_completed", extra={"lifecycle_id": context.lifecycle_id})
             self._emit_audit(context, "EXECUTION_COMPLETED", "SUCCESS")
             return ExecutionResult(
@@ -93,8 +95,8 @@ class SandboxedExecutionStrategy(IExecutionStrategy):
                 result=result,
                 lifecycle_id=context.lifecycle_id
             )
-            
-        except asyncio.TimeoutError:
+
+        except TimeoutError:
             logger.warning("sandbox_execution_timeout", extra={"lifecycle_id": context.lifecycle_id, "timeout_s": context.timeout_seconds})
             self._emit_audit(context, "EXECUTION_TIMEOUT", "FAILURE", metadata={"timeout_s": context.timeout_seconds}, severity="WARNING")
             return ExecutionResult(
@@ -120,7 +122,7 @@ class SandboxedExecutionStrategy(IExecutionStrategy):
             else:
                 logger.warning("sandbox_execution_blocked", extra={"lifecycle_id": context.lifecycle_id, "error": error_msg})
                 self._emit_audit(context, "EXECUTION_BLOCKED", "FAILURE", metadata={"error": error_msg}, severity="WARNING")
-                
+
             return ExecutionResult(
                 success=False,
                 error=error_msg,

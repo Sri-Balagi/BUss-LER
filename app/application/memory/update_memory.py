@@ -2,14 +2,10 @@ import uuid
 
 import structlog
 
+from app.domain.memory.repository import AbstractMemoryRepository
+from app.domain.memory.vector_repository import AbstractVectorRepository
 from app.infrastructure.ai.kernel import AbstractAIKernel
 from app.infrastructure.ai.models import EmbeddingRequest
-from app.infrastructure.persistence.postgres.repositories.memory_repository import (
-    AbstractMemoryRepository,
-)
-from app.infrastructure.persistence.postgres.repositories.vector_repository import (
-    AbstractVectorRepository,
-)
 from app.infrastructure.vectorstore.models import MemoryVectorPoint
 from app.intelligence.learning.repository.memory import Memory, MemoryUpdate
 from app.shared.enums import EmbeddingStatus
@@ -69,10 +65,20 @@ class UpdateMemoryUseCase:
                     )
 
             try:
-                embed_req = EmbeddingRequest(content=memory.content)
+                embed_req = EmbeddingRequest(text=memory.content)
                 embed_res = await self._ai_kernel.embed(embed_req)
 
-                point = MemoryVectorPoint(id=memory.id, vector=embed_res.vector, payload=memory)
+                from app.infrastructure.vectorstore.models import MemoryVectorPayload
+                payload_data = MemoryVectorPayload(
+                    memory_id=memory.id,
+                    twin_id=memory.twin_id,
+                    memory_category=memory.memory_category,
+                    source=memory.source,
+                    importance=memory.importance,
+                    created_at=memory.created_at,
+                    updated_at=memory.updated_at,
+                )
+                point = MemoryVectorPoint(id=memory.id, vector=embed_res.vector, payload=payload_data)
                 await self._vector_repo.upsert(point)
                 memory = await self._metadata_repo.update_embedding_status(
                     memory.id, EmbeddingStatus.COMPLETED

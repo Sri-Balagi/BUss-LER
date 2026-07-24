@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict
+from typing import Any
 
 
 class IRegistryBus(ABC):
@@ -9,7 +9,7 @@ class IRegistryBus(ABC):
     """
 
     @abstractmethod
-    async def publish_event(self, topic: str, payload: Dict[str, Any]) -> None:
+    async def publish_event(self, topic: str, payload: dict[str, Any]) -> None:
         """
         Publishes an event to the underlying bus.
         Topics generally follow the format: 'registry.{registry_name}.{event_type}'

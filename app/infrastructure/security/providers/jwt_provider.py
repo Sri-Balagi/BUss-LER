@@ -1,11 +1,11 @@
-import jwt
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 
-from app.domain.security.interfaces import IIdentityProvider
-from app.domain.security.models import ExecutionContext, AuthenticationResult, AuthenticationStatus
-from app.domain.security.config import SecurityConfig
+import jwt
 import structlog
+
+from app.domain.security.config import SecurityConfig
+from app.domain.security.interfaces import IIdentityProvider
+from app.domain.security.models import AuthenticationResult, AuthenticationStatus, ExecutionContext
 
 logger = structlog.get_logger()
 
@@ -14,7 +14,7 @@ class JWTIdentityProvider(IIdentityProvider):
     Identity Provider that parses and validates JSON Web Tokens (JWT).
     Supports Key ID (kid) resolution for signing keys.
     """
-    
+
     def __init__(self, config: SecurityConfig):
         self._config = config
 
@@ -27,20 +27,20 @@ class JWTIdentityProvider(IIdentityProvider):
             # First decode the unverified headers to get the 'kid' (Key ID)
             unverified_headers = jwt.get_unverified_header(credentials)
             kid = unverified_headers.get("kid", "default")
-            
+
             # Resolve the signing key
             secret = self._config.jwt_keys.get(kid)
             if not secret:
                 logger.warning("jwt_kid_not_found", kid=kid)
                 return AuthenticationResult.failure(AuthenticationStatus.AUTHENTICATION_FAILED, f"Unknown key ID: {kid}")
-                
+
             # Decode and verify the JWT payload
             payload = jwt.decode(
-                credentials, 
-                secret, 
+                credentials,
+                secret,
                 algorithms=["HS256"]
             )
-            
+
             # Build the ExecutionContext
             context = ExecutionContext(
                 is_authenticated=True,
@@ -50,10 +50,10 @@ class JWTIdentityProvider(IIdentityProvider):
                 scopes=payload.get("scopes", []),
                 session_id=payload.get("session_id"),
                 authentication_method="jwt",
-                authenticated_at=datetime.now(timezone.utc)
+                authenticated_at=datetime.now(UTC)
             )
             return AuthenticationResult.success(context)
-            
+
         except jwt.ExpiredSignatureError:
             logger.warning("jwt_expired")
             return AuthenticationResult.failure(AuthenticationStatus.TOKEN_EXPIRED, "Token has expired")

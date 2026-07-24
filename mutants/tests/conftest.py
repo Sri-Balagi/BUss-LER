@@ -35,7 +35,7 @@ def mock_qdrant_init(monkeypatch):
     monkeypatch.setattr(QdrantService, "initialize_collections", mock_init)
 
 
-from unittest.mock import Mock
+from unittest.mock import Mock  # noqa: E402
 
 
 @pytest.fixture

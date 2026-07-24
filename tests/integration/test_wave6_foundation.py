@@ -1,17 +1,18 @@
-import pytest
-from fastapi.testclient import TestClient
 import uuid
 
-from app.bootstrap.container import build_container, reset_container_for_testing, get_container
-from app.infrastructure.applications.gateway.app import create_gateway_app
-from app.domain.applications.registry.interfaces import IApplicationRegistry
+import pytest
+from fastapi.testclient import TestClient
+
+from app.bootstrap.container import build_container, get_container, reset_container_for_testing
+from app.domain.applications.base import ApplicationResponse, ICognitiveApplication
+from app.domain.applications.context.models import ApplicationContext
 from app.domain.applications.policy.interfaces import IApplicationPolicyEngine
 from app.domain.applications.prompt.interfaces import IPromptBuilder
-
-from app.domain.applications.base import ICognitiveApplication, ApplicationResponse
-from app.domain.applications.context.models import ApplicationContext
+from app.domain.applications.registry.interfaces import IApplicationRegistry
 from app.domain.applications.registry.models import ApplicationMetadata
 from app.domain.intelligence.capability import CapabilityType
+from app.infrastructure.applications.gateway.app import create_gateway_app
+
 
 class MockCopilotApp(ICognitiveApplication):
     def metadata(self) -> ApplicationMetadata:
@@ -36,11 +37,11 @@ class MockCopilotApp(ICognitiveApplication):
 def test_container():
     reset_container_for_testing()
     container = build_container()
-    
+
     # Register a mock app for testing registry
     registry = container.resolve(IApplicationRegistry)
     registry.register(MockCopilotApp())
-    
+
     yield container
     reset_container_for_testing()
 
@@ -54,7 +55,7 @@ def test_di_resolution(test_container):
     registry = test_container.resolve(IApplicationRegistry)
     policy = test_container.resolve(IApplicationPolicyEngine)
     prompt = test_container.resolve(IPromptBuilder)
-    
+
     assert registry is not None
     assert policy is not None
     assert prompt is not None
@@ -76,7 +77,7 @@ def test_gateway_auth_required(test_client):
     """Validate auth middleware protects apps routes."""
     response = test_client.get("/apps/")
     assert response.status_code == 401
-    
+
 def test_gateway_trace_propagation(test_client):
     """Validate OpenTelemetry trace propagation."""
     headers = {
