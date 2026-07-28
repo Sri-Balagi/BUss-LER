@@ -58,8 +58,10 @@ api_router.include_router(conversations_router)
 api_router.include_router(plans_router)
 api_router.include_router(recommendations_router)
 
-# Milestone 6 — Observability
+# Milestone 6 — Observability & Autonomous AI OS
+from app.interfaces.http.v1.autonomous import router as autonomous_router
 api_router.include_router(traces_router)
+api_router.include_router(autonomous_router)
 
 # System
 api_router.include_router(system_router)

@@ -17,7 +17,7 @@ Responsibilities:
 """
 
 from abc import ABC, abstractmethod
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from uuid import UUID
 
 import structlog
@@ -219,7 +219,7 @@ class GoalService(AbstractGoalService):
         update_data = GoalUpdate(status=new_status)
 
         if new_status == GoalStatus.COMPLETED:
-            update_data = GoalUpdate(status=new_status, completed_at=datetime.now(UTC))
+            update_data = GoalUpdate(status=new_status, completed_at=datetime.now(timezone.utc))
 
         elif previous_status == GoalStatus.COMPLETED and new_status != GoalStatus.COMPLETED:
             # Clear completed_at if transitioning back out of completed

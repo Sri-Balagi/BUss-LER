@@ -1,4 +1,4 @@
-from enum import StrEnum
+from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 from app.domain.applications.context.models import ApplicationContext
 
 
-class TriggerType(StrEnum):
+class TriggerType(str, Enum):
     """The type of a cognitive trigger."""
     EVENT = "EVENT"
     SCHEDULE = "SCHEDULE"
@@ -14,7 +14,7 @@ class TriggerType(StrEnum):
     MANUAL = "MANUAL"
 
 
-class TriggerPriority(StrEnum):
+class TriggerPriority(str, Enum):
     """Execution priority of the dispatched trigger."""
     LOW = "LOW"
     NORMAL = "NORMAL"
@@ -22,7 +22,7 @@ class TriggerPriority(StrEnum):
     CRITICAL = "CRITICAL"
 
 
-class ExecutionMode(StrEnum):
+class ExecutionMode(str, Enum):
     """How the target application should be executed."""
     IMMEDIATE = "IMMEDIATE"
     QUEUE = "QUEUE"

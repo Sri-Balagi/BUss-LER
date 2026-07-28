@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 import jwt
 import structlog
@@ -50,7 +50,7 @@ class JWTIdentityProvider(IIdentityProvider):
                 scopes=payload.get("scopes", []),
                 session_id=payload.get("session_id"),
                 authentication_method="jwt",
-                authenticated_at=datetime.now(UTC)
+                authenticated_at=datetime.now(timezone.utc)
             )
             return AuthenticationResult.success(context)
 

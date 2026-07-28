@@ -1,7 +1,7 @@
 """Tests for the Mock LLM Provider."""
 
 import asyncio
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 import pytest
 from pydantic import BaseModel
@@ -133,9 +133,9 @@ async def test_latency_simulation(mock_provider: MockLLMProvider) -> None:
     )
     request = AIRequest(prompt_id="test_prompt")
 
-    start_time = datetime.now(UTC)
+    start_time = datetime.now(timezone.utc)
     await mock_provider.generate(request, "test")
-    end_time = datetime.now(UTC)
+    end_time = datetime.now(timezone.utc)
 
     delta_ms = (end_time - start_time).total_seconds() * 1000
     # Allow some jitter, but it should be around 100ms

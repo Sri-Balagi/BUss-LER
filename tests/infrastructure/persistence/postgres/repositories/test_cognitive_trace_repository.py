@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, timezone
+from datetime import datetime, timezone, timezone
 from uuid import uuid4
 
 import pytest
@@ -49,7 +49,7 @@ async def test_create_success(repo, mock_supabase, mocker):
             "memory_ids_used": [],
             "goal_ids_used": [],
             "metadata": {},
-            "created_at": datetime.now(UTC).isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
         }
     ]
     mock_supabase.table.return_value.insert.return_value.execute = mock_execute
@@ -127,7 +127,7 @@ async def test_get_by_id_success(repo, mock_supabase, mocker):
             "memory_ids_used": [str(uuid4())],
             "goal_ids_used": [str(uuid4())],
             "metadata": {},
-            "created_at": datetime.now(UTC).isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
         }
     ]
     mock_supabase.table.return_value.select.return_value.eq.return_value.execute = mock_execute

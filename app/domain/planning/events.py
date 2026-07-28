@@ -36,3 +36,24 @@ class PlanExecutionRequested(DomainEvent):
     plan_id: UUID
     goal_id: UUID
     tenant_id: UUID | None = None
+
+
+class PolicyApplied(DomainEvent):
+    """Event emitted when a business policy is successfully applied to a plan."""
+    plan_id: UUID
+    policy_id: str
+    tenant_id: UUID | None = None
+
+
+class ConstraintEvaluated(DomainEvent):
+    """Event emitted when a domain constraint is evaluated against a plan."""
+    plan_id: UUID
+    constraint_id: str
+    tenant_id: UUID | None = None
+
+
+class ProcessEvaluated(DomainEvent):
+    """Event emitted when a business process guides plan generation."""
+    plan_id: UUID
+    process_id: str
+    tenant_id: UUID | None = None

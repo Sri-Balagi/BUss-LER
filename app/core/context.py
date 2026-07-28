@@ -1,5 +1,5 @@
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from pydantic import Field
 
@@ -17,7 +17,7 @@ class OperationContext(DomainBaseModel):
     twin_id: uuid.UUID | None = Field(default=None)
     user_id: uuid.UUID | None = Field(default=None)
     provider: str | None = Field(default=None)
-    started_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    started_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     def bind_to_logger(self, logger):
         """Returns a logger bound with this context."""

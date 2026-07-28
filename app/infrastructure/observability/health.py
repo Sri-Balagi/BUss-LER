@@ -1,7 +1,7 @@
-from enum import StrEnum
+from enum import Enum
 
 
-class HealthStatus(StrEnum):
+class HealthStatus(str, Enum):
     HEALTHY = "HEALTHY"
     DEGRADED = "DEGRADED"
     UNHEALTHY = "UNHEALTHY"

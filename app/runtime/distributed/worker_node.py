@@ -4,7 +4,7 @@ Worker node definition for the BizOS distributed swarm.
 from __future__ import annotations
 
 import socket
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
 from app.runtime.distributed.interfaces import IWorkerNode
@@ -48,7 +48,7 @@ class BizOSWorkerNode(IWorkerNode):
         In a production system this would write to a Redis key with a TTL
         so dead nodes are detected automatically by the registry.
         """
-        self._last_heartbeat = datetime.now(UTC)
+        self._last_heartbeat = datetime.now(timezone.utc)
         self._healthy = True
 
     def mark_unhealthy(self) -> None:

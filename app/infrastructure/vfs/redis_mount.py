@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import json
 import os
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import PrivateAttr
 
@@ -36,7 +36,7 @@ class RedisNode(IVirtualNode):
 
     # Private attributes resolved from URI at init time
     _key: str = PrivateAttr(default="")
-    _ttl: Optional[int] = PrivateAttr(default=None)
+    _ttl: int | None = PrivateAttr(default=None)
     _client: Any = PrivateAttr(default=None)
 
     def model_post_init(self, __context: Any) -> None:

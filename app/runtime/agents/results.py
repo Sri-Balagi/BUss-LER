@@ -1,10 +1,10 @@
-from enum import StrEnum
+from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, Field
 
 
-class AgentStatus(StrEnum):
+class AgentStatus(str, Enum):
     """Status of an agent's execution outcome."""
 
     SUCCESS = "SUCCESS"

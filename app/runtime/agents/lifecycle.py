@@ -1,5 +1,5 @@
 import logging
-from enum import StrEnum
+from enum import Enum
 from typing import Any
 
 from app.runtime.agents.context import AgentContext
@@ -18,7 +18,7 @@ from app.runtime.agents.results import AgentResult, AgentStatus
 logger = logging.getLogger(__name__)
 
 
-class AgentState(StrEnum):
+class AgentState(str, Enum):
     CREATED = "CREATED"
     INITIALIZED = "INITIALIZED"
     READY = "READY"

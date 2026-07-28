@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
-from app.domain.planning.models import Plan
+from app.domain.planning.models import Plan, PlanningContext, Goal
+from app.domain.intelligence.trace import CognitiveTrace
 
 
 class IPlanValidator(ABC):
@@ -9,7 +10,7 @@ class IPlanValidator(ABC):
     """
 
     @abstractmethod
-    def validate_plan(self, plan: Plan) -> list[str]:
+    def validate_plan(self, context: PlanningContext, goal: Goal, plan: Plan, trace: CognitiveTrace) -> list[str]:
         """
         Validates the given plan.
         Returns a list of error messages if invalid, or an empty list if valid.

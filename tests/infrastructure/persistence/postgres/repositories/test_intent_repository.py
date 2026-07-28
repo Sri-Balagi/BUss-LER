@@ -1,5 +1,5 @@
 import uuid
-from datetime import UTC, datetime, timezone
+from datetime import datetime, timezone, timezone
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -33,8 +33,8 @@ def test_deserialize():
             "confidence": "high",
             "entities": [],
         },
-        "created_at": datetime.now(UTC).isoformat(),
-        "updated_at": datetime.now(UTC).isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat(),
     }
     intent = IntentRepository._deserialize(row)
     assert isinstance(intent, Intent)
@@ -63,8 +63,8 @@ async def test_create_success(repository, mock_supabase_client):
                     "entities": [],
                 },
                 "metadata": {"test": True},
-                "created_at": datetime.now(UTC).isoformat(),
-                "updated_at": datetime.now(UTC).isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat(),
             }
         ]
     )
@@ -116,8 +116,8 @@ async def test_get_by_id_success(repository, mock_supabase_client):
                 "raw_text": "Test",
                 "intent_type": IntentType.GENERAL.value,
                 "status": IntentStatus.PENDING.value,
-                "created_at": datetime.now(UTC).isoformat(),
-                "updated_at": datetime.now(UTC).isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat(),
             }
         ]
     )
@@ -157,8 +157,8 @@ async def test_list_by_twin_success(repository, mock_supabase_client):
                 "raw_text": "Test",
                 "intent_type": IntentType.GENERAL.value,
                 "status": IntentStatus.FULFILLED.value,
-                "created_at": datetime.now(UTC).isoformat(),
-                "updated_at": datetime.now(UTC).isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat(),
             }
         ],
         count=1,
@@ -204,14 +204,14 @@ async def test_update_success(repository, mock_supabase_client):
                 "raw_text": "Updated",
                 "intent_type": IntentType.GENERAL.value,
                 "status": IntentStatus.FULFILLED.value,
-                "created_at": datetime.now(UTC).isoformat(),
-                "updated_at": datetime.now(UTC).isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat(),
             }
         ]
     )
     mock_supabase_client.table().update().eq().execute = mock_execute
 
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     update = IntentUpdate(
         status=IntentStatus.FULFILLED,
         intent_type=IntentType.GENERAL,
@@ -241,8 +241,8 @@ async def test_update_empty(repository, mock_supabase_client):
                 "raw_text": "Test",
                 "intent_type": IntentType.GENERAL.value,
                 "status": IntentStatus.PENDING.value,
-                "created_at": datetime.now(UTC).isoformat(),
-                "updated_at": datetime.now(UTC).isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat(),
             }
         ]
     )

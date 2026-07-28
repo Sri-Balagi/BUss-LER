@@ -23,6 +23,8 @@ class MockKnowledgeRepository:
                 self.id = id
                 self.properties = props
                 self.entity_type = entity_type
+                self.name = props.get("name", "GraphMatch")
+                self.description = None
         return [MockNode(uuid4(), {"name": "GraphMatch"}, "Employee")]
 
 class MockMemoryRepository:
@@ -98,6 +100,8 @@ async def test_rrf_ranking_merges_same_entity(retrieval_service):
                     self.id = shared_id
                     self.properties = {"val": "1"}
                     self.entity_type = "Shared"
+                    self.name = "SharedEntity"
+                    self.description = None
             return [MockNode()]
 
     class MockSharedMemoryRepository:

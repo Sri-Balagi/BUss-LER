@@ -1,5 +1,5 @@
 import uuid
-from datetime import UTC, datetime, timezone
+from datetime import datetime, timezone, timezone
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -35,8 +35,8 @@ async def test_create_goal(service, mock_repository, ctx):
         twin_id=twin_id,
         title="test",
         status=GoalStatus.DRAFT,
-        created_at=datetime.now(UTC),
-        updated_at=datetime.now(UTC)
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
     )
     mock_repository.create.return_value = goal
     cmd = CreateGoalCommand(twin_id=twin_id, title="test", description="test")
@@ -54,8 +54,8 @@ async def test_get_goal(service, mock_repository, ctx):
         twin_id=uuid.uuid4(),
         title="test",
         status=GoalStatus.DRAFT,
-        created_at=datetime.now(UTC),
-        updated_at=datetime.now(UTC)
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
     )
     mock_repository.get_by_id.return_value = goal
 
@@ -72,8 +72,8 @@ async def test_update_goal(service, mock_repository, ctx):
         twin_id=uuid.uuid4(),
         title="test",
         status=GoalStatus.DRAFT,
-        created_at=datetime.now(UTC),
-        updated_at=datetime.now(UTC)
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
     )
     mock_repository.get_by_id.return_value = goal
     mock_repository.update.return_value = goal
@@ -92,8 +92,8 @@ async def test_delete_goal(service, mock_repository, ctx):
         twin_id=uuid.uuid4(),
         title="test",
         status=GoalStatus.DRAFT,
-        created_at=datetime.now(UTC),
-        updated_at=datetime.now(UTC)
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
     )
     mock_repository.get_by_id.return_value = goal
 

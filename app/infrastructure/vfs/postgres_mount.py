@@ -15,8 +15,9 @@ from __future__ import annotations
 
 from typing import Any
 
-from app.infrastructure.vfs.vfs import IVirtualMount, IVirtualNode
 from pydantic import PrivateAttr
+
+from app.infrastructure.vfs.vfs import IVirtualMount, IVirtualNode
 
 
 class PostgresNode(IVirtualNode):

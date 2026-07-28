@@ -1,6 +1,6 @@
 """External Integration Context Provider — Placeholder for M5+ integrations."""
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
 import structlog
@@ -35,7 +35,7 @@ class ExternalIntegrationContextProvider(AbstractContextProvider):
             priority=ContextPriority.BACKGROUND,
             items=[],
             token_estimate=0,
-            retrieved_at=datetime.now(UTC),
+            retrieved_at=datetime.now(timezone.utc),
         )
 
     async def health_check(self) -> dict:

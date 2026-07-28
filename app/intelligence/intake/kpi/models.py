@@ -1,9 +1,9 @@
-from enum import StrEnum
+from enum import Enum
 
 from pydantic import BaseModel
 
 
-class KPIStatus(StrEnum):
+class KPIStatus(str, Enum):
     HEALTHY = "HEALTHY"
     WARNING = "WARNING"
     CRITICAL = "CRITICAL"

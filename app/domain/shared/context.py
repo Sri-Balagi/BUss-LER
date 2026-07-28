@@ -24,6 +24,7 @@ class ExecutionContext(BaseModel):
     memory_metrics: dict[str, Any] | None = Field(default_factory=dict)
     decision_metrics: dict[str, Any] | None = Field(default_factory=dict)
     reliability_metrics: dict[str, Any] | None = Field(default_factory=dict)
+    execution_mode: Any = None
 
     @model_validator(mode='before')
     @classmethod

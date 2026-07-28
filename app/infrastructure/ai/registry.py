@@ -1,25 +1,48 @@
-from app.infrastructure.ai.providers.base import ILLMProvider
-from app.shared.exceptions.errors import ProviderConfigurationError
+"""LLM Provider Registry for dynamic provider resolution and fallback routing."""
+
+from typing import Dict, List, Optional
+from app.domain.intelligence.llm_provider import ILLMProvider
+from app.infrastructure.ai.providers.gemini_live_provider import GeminiLiveProvider
+from app.application.intelligence.providers import CognitiveSimulatorProvider
 
 
-class ProviderRegistry:
-    """
-    Holds registered AI Providers.
-    """
+class LLMProviderRegistry:
+    """Central registry for LLM providers."""
 
-    def __init__(self):
-        self._providers: dict[str, ILLMProvider] = {}
+    def __init__(self, default_provider: str = "gemini-flash"):
+        self._providers: Dict[str, ILLMProvider] = {}
+        self._default_name = default_provider
 
     def register(self, provider: ILLMProvider) -> None:
-        """Register a provider instance."""
         self._providers[provider.provider_name] = provider
 
-    def get_provider(self, name: str) -> ILLMProvider:
-        """Retrieve a registered provider by name."""
-        if name not in self._providers:
-            raise ProviderConfigurationError(name, f"Provider '{name}' is not registered.")
-        return self._providers[name]
+    def get_provider(self, name: Optional[str] = None) -> ILLMProvider:
+        target = name or self._default_name
+        if target in self._providers:
+            return self._providers[target]
+        if "gemini-flash" in self._providers:
+            return self._providers["gemini-flash"]
+        if self._providers:
+            return next(iter(self._providers.values()))
+        
+        # Fallback initializer
+        fallback = GeminiLiveProvider()
+        self.register(fallback)
+        return fallback
 
-    def list_providers(self) -> list[ILLMProvider]:
-        """Return all registered providers."""
-        return list(self._providers.values())
+    def get_providers_chain(self, primary: Optional[str] = None) -> List[ILLMProvider]:
+        chain = []
+        target = primary or self._default_name
+        if target in self._providers:
+            chain.append(self._providers[target])
+        for name, p in self._providers.items():
+            if name != target:
+                chain.append(p)
+        if not chain:
+            fallback = GeminiLiveProvider()
+            self.register(fallback)
+            chain.append(fallback)
+        return chain
+
+
+ProviderRegistry = LLMProviderRegistry

@@ -13,7 +13,7 @@ All tests are pure unit tests — no I/O, no network, no external dependencies.
 """
 
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 import pytest
 from pydantic import BaseModel, ValidationError
@@ -64,9 +64,9 @@ class TestAIRequestLifecycle:
         assert len(ids) == 50, "All lifecycle IDs must be unique"
 
     def test_created_at_defaults_to_utc_now(self) -> None:
-        before = datetime.now(UTC)
+        before = datetime.now(timezone.utc)
         lc = AIRequestLifecycle(operation="stream")
-        after = datetime.now(UTC)
+        after = datetime.now(timezone.utc)
         assert before <= lc.created_at <= after
 
     def test_phase_defaults_to_created(self) -> None:

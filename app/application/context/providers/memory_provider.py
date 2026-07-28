@@ -1,6 +1,6 @@
 """Memory Context Provider — fetches semantically relevant memories for the current intent."""
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
 import structlog
@@ -53,7 +53,7 @@ class MemoryContextProvider(AbstractContextProvider):
                 prov = ContextProvenance(
                     provider=ContextSource.MEMORY,
                     service_name="MemoryService",
-                    retrieval_timestamp=datetime.now(UTC),
+                    retrieval_timestamp=datetime.now(timezone.utc),
                     confidence=float(item.similarity_score),
                     citations=[str(item.memory.id)],
                 )
@@ -81,7 +81,7 @@ class MemoryContextProvider(AbstractContextProvider):
             priority=ContextPriority.MEDIUM,
             items=items,
             token_estimate=token_total,
-            retrieved_at=datetime.now(UTC),
+            retrieved_at=datetime.now(timezone.utc),
         )
 
     async def health_check(self) -> dict:

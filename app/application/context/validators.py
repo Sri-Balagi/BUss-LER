@@ -5,7 +5,7 @@ Prevents malformed EnterpriseContexts from progressing through the pipeline.
 """
 
 from abc import ABC, abstractmethod
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from app.application.context.foundation.context_policies import ContextPolicy
 from app.intelligence.intake.situation.enterprise_context import ContextSection
@@ -94,7 +94,7 @@ class DefaultContextValidator(AbstractContextValidator):
                             )
 
         # 5. Metadata validation — assembled_at must not be in the future
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         for section in sections:
             if section.retrieved_at > now:
                 errors.append(

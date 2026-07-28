@@ -1,5 +1,5 @@
 import enum
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any
 from uuid import UUID
 
@@ -71,4 +71,4 @@ class RetrievalResult(BaseModel):
     context: RetrievalContext = Field(..., description="The original context used for retrieval.")
     items: list[RetrievalResultItem] = Field(default_factory=list, description="The ranked result items.")
     metrics: RetrievalMetrics = Field(default_factory=RetrievalMetrics, description="Execution diagnostics.")
-    timestamp: str = Field(default_factory=lambda: datetime.now(UTC).isoformat(), description="ISO-8601 timestamp.")
+    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat(), description="ISO-8601 timestamp.")

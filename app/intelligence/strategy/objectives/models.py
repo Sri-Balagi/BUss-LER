@@ -1,9 +1,9 @@
-from enum import StrEnum
+from enum import Enum
 
 from pydantic import BaseModel, Field
 
 
-class ObjectiveStatus(StrEnum):
+class ObjectiveStatus(str, Enum):
     PROPOSED = "PROPOSED"
     ACTIVE = "ACTIVE"
     ON_HOLD = "ON_HOLD"
@@ -11,14 +11,14 @@ class ObjectiveStatus(StrEnum):
     ABANDONED = "ABANDONED"
 
 
-class ObjectivePriority(StrEnum):
+class ObjectivePriority(str, Enum):
     LOW = "LOW"
     MEDIUM = "MEDIUM"
     HIGH = "HIGH"
     CRITICAL = "CRITICAL"
 
 
-class BusinessHorizon(StrEnum):
+class BusinessHorizon(str, Enum):
     IMMEDIATE = "IMMEDIATE"  # Days/Weeks
     SHORT_TERM = "SHORT_TERM"  # Months (Q1)
     MEDIUM_TERM = "MEDIUM_TERM"  # Quarters (H1/H2)

@@ -1,5 +1,6 @@
+import abc
 from dataclasses import dataclass
-from enum import StrEnum
+from enum import Enum
 
 from pydantic import Field
 
@@ -9,7 +10,7 @@ from app.domain.intelligence.telemetry import IntelligenceMetrics
 from app.intelligence.executive.workflow import Workflow
 
 
-class WorkflowState(StrEnum):
+class WorkflowState(str, Enum):
     """Execution state of the workflow intelligence evaluation."""
     ANALYZING = "ANALYZING"
     OPTIMIZING = "OPTIMIZING"
@@ -41,8 +42,6 @@ class WorkflowOptimizationResult:
     metrics: WorkflowOptimizationMetrics
     error_message: str | None = None
 
-
-import abc
 
 class IWorkflowIntelligenceProvider(IIntelligenceProvider, abc.ABC):
     """Abstract interface for capabilities that can optimize a workflow."""

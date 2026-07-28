@@ -50,4 +50,8 @@ def register_agent_dependencies(container: Container) -> None:
     container.register_singleton(ITaskRepository, InMemoryTaskRepository())
     # Add ISessionRepository registration
     container.register_singleton(ISessionRepository, InMemorySessionRepository())
-    container.register_singleton(AgentRuntime, build_agent_runtime(container))
+    
+    runtime = build_agent_runtime(container)
+    container.register_singleton(AgentRuntime, runtime)
+    from app.domain.agents.interfaces import IAgentRuntime
+    container.register_singleton(IAgentRuntime, runtime)

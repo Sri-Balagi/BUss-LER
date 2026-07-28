@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
 from collections.abc import Callable
-from enum import StrEnum
+from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel
 
 
-class ExecutionStrategy(StrEnum):
+class ExecutionStrategy(str, Enum):
     """Supported execution strategies for tools/operations."""
 
     IN_PROCESS = "in_process"

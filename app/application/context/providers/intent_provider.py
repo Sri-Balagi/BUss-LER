@@ -1,6 +1,6 @@
 """Intent Context Provider — fetches the current active intent for the twin."""
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
 import structlog
@@ -51,7 +51,7 @@ class IntentContextProvider(AbstractContextProvider):
                 prov = ContextProvenance(
                     provider=ContextSource.INTENT,
                     service_name="IntentService",
-                    retrieval_timestamp=datetime.now(UTC),
+                    retrieval_timestamp=datetime.now(timezone.utc),
                     confidence=1.0,
                     citations=[str(intent.id)],
                 )
@@ -77,7 +77,7 @@ class IntentContextProvider(AbstractContextProvider):
             priority=ContextPriority.CRITICAL,
             items=items,
             token_estimate=sum(i.token_estimate for i in items),
-            retrieved_at=datetime.now(UTC),
+            retrieved_at=datetime.now(timezone.utc),
         )
 
     async def health_check(self) -> dict:

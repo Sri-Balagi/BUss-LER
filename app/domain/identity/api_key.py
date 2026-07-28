@@ -1,12 +1,12 @@
-from datetime import UTC, datetime
-from enum import StrEnum
+from datetime import datetime, timezone
+from enum import Enum
 
 from pydantic import Field
 
 from app.domain.common.biz_object import BizObject
 
 
-class APIKeyStatus(StrEnum):
+class APIKeyStatus(str, Enum):
     ACTIVE = "ACTIVE"
     REVOKED = "REVOKED"
     EXPIRED = "EXPIRED"
@@ -33,9 +33,9 @@ class APIKey(BizObject):
         if self.status != APIKeyStatus.ACTIVE:
             return False
 
-        # We need timezone-aware datetime comparison. BizObject uses UTC.
+        # We need timezone-aware datetime comparison. BizObject uses timezone.utc.
         if self.expires_at is not None:
-            now = datetime.now(UTC)
+            now = datetime.now(timezone.utc)
             if now > self.expires_at:
                 return False
 

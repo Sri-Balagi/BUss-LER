@@ -1,5 +1,5 @@
 import uuid
-from datetime import UTC, datetime, timezone
+from datetime import datetime, timezone, timezone
 
 import pytest
 from pydantic import ValidationError
@@ -65,7 +65,7 @@ def test_enterprise_context_lifecycle():
     context_id = uuid.uuid4()
 
     metadata = ContextMetadata(
-        policy_id="default", generated_at=datetime.now(UTC), total_tokens=100
+        policy_id="default", generated_at=datetime.now(timezone.utc), total_tokens=100
     )
 
     ctx = EnterpriseContext(

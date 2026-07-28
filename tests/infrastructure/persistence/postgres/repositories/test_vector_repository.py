@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, timezone
+from datetime import datetime, timezone, timezone
 from decimal import Decimal
 from uuid import uuid4
 
@@ -52,8 +52,8 @@ async def test_upsert_and_retrieve(vector_repo):
         memory_category=MemoryCategory.EVENT,
         source=MemorySource.OBSERVATION,
         importance=Decimal("0.50"),
-        created_at=datetime.now(UTC),
-        updated_at=datetime.now(UTC),
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
     )
 
     vector = [0.1, 0.2, 0.3, 0.4]
@@ -90,8 +90,8 @@ async def test_search_vectors(vector_repo):
             memory_category=MemoryCategory.TASK,
             source=MemorySource.EXECUTION,
             importance=Decimal("0.80"),
-            created_at=datetime.now(UTC),
-            updated_at=datetime.now(UTC),
+            created_at=datetime.now(timezone.utc),
+            updated_at=datetime.now(timezone.utc),
         )
         point = MemoryVectorPoint(id=point_id, vector=[1.0, 0.0, 0.0, 0.0], payload=payload)
         await vector_repo.upsert(point)
@@ -104,8 +104,8 @@ async def test_search_vectors(vector_repo):
         memory_category=MemoryCategory.TASK,
         source=MemorySource.EXECUTION,
         importance=Decimal("0.80"),
-        created_at=datetime.now(UTC),
-        updated_at=datetime.now(UTC),
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
     )
     point_2 = MemoryVectorPoint(id=point_id_2, vector=[1.0, 0.0, 0.0, 0.0], payload=payload_2)
     await vector_repo.upsert(point_2)
@@ -131,8 +131,8 @@ async def test_delete_vector(vector_repo):
         memory_category=MemoryCategory.EVENT,
         source=MemorySource.OBSERVATION,
         importance=Decimal("0.50"),
-        created_at=datetime.now(UTC),
-        updated_at=datetime.now(UTC),
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
     )
     point = MemoryVectorPoint(id=point_id, vector=[0.0, 1.0, 0.0, 0.0], payload=payload)
 

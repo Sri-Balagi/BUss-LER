@@ -3,6 +3,8 @@ from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
+from app.core.modules.ai.cognition import BusinessKnowledgeModel
+
 
 class IntelligenceContext(BaseModel):
     """
@@ -20,6 +22,8 @@ class IntelligenceContext(BaseModel):
 
     permissions: list[str] = Field(default_factory=list, description="Scoping or RBAC permissions.")
     metadata: dict[str, Any] = Field(default_factory=dict, description="Additional arbitrary execution metadata.")
+    
+    active_knowledge_model: BusinessKnowledgeModel | None = Field(default=None, description="The dynamically loaded cognitive domain model.")
 
     class Config:
         frozen = True

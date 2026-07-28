@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from enum import StrEnum
+from enum import Enum
 from typing import Any
 
 from app.infrastructure.ai.models import ProviderError
@@ -8,7 +8,7 @@ from app.infrastructure.ai.providers.base import ILLMProvider
 from app.infrastructure.ai.registry import ProviderRegistry
 
 
-class RoutingPolicy(StrEnum):
+class RoutingPolicy(str, Enum):
     PRIMARY_WITH_FALLBACK = "primary_with_fallback"
     COST_FIRST = "cost_first"
     LATENCY_FIRST = "latency_first"

@@ -1,9 +1,9 @@
-from enum import StrEnum
+from enum import Enum
 
 from pydantic import BaseModel, Field
 
 
-class ConflictType(StrEnum):
+class ConflictType(str, Enum):
     RESOURCE_CONTENTION = "RESOURCE_CONTENTION"
     MUTUALLY_EXCLUSIVE = "MUTUALLY_EXCLUSIVE"
     TIMELINE_OVERLAP = "TIMELINE_OVERLAP"

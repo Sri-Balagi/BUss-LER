@@ -38,5 +38,32 @@ def register_reasoning_dependencies(container: Container) -> None:
 
     container.register_factory(MockReasoningProvider, _register_mock_provider)
 
+    # Register Semantic Provider
+    from app.infrastructure.reasoning.semantic_provider import SemanticReasoningProvider
+    def _register_semantic_provider(c: Container) -> SemanticReasoningProvider:
+        provider = SemanticReasoningProvider(priority=2, name="SemanticReasoningProvider")
+        registry = c.resolve(ICapabilityRegistry)
+        registry.register_provider(provider)
+        return provider
+
+    container.register_factory(SemanticReasoningProvider, _register_semantic_provider)
+
+    # Register Gemini LLM Provider
+    from app.infrastructure.reasoning.gemini_provider import GeminiReasoningProvider
+    from app.config import get_settings
+    
+    def _register_gemini_provider(c: Container) -> GeminiReasoningProvider:
+        provider = GeminiReasoningProvider(priority=3, name="GeminiReasoningProvider")
+        # Only register if it initialized successfully (e.g. API key present)
+        from app.domain.intelligence.provider import ProviderLifecycleStatus
+        if provider.get_status() != ProviderLifecycleStatus.UNAVAILABLE:
+            registry = c.resolve(ICapabilityRegistry)
+            registry.register_provider(provider)
+        return provider
+        
+    container.register_factory(GeminiReasoningProvider, _register_gemini_provider)
+
     # Eagerly instantiate to register
     _register_mock_provider(container)
+    _register_semantic_provider(container)
+    _register_gemini_provider(container)

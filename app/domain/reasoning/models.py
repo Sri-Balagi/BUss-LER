@@ -2,6 +2,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from app.core.modules.ai.cognition import BusinessPolicy, DomainConstraint, BusinessProcess
 from app.domain.intelligence.context import IntelligenceContext
 
 
@@ -25,9 +26,19 @@ class ReasoningQuery(BaseModel):
     context_data: dict[str, Any] = Field(default_factory=dict, description="Extraneous data outside the Twin needed for this reasoning step.")
 
 
+class CognitiveEvaluationPayload(BaseModel):
+    """
+    The canonical contract between the Reasoning Engine and downstream engines.
+    Carries the explicitly resolved cognitive artifacts that apply to the user's intent.
+    """
+    applicable_policies: list[BusinessPolicy] = Field(default_factory=list)
+    applicable_constraints: list[DomainConstraint] = Field(default_factory=list)
+    applicable_processes: list[BusinessProcess] = Field(default_factory=list)
+
+
 class ReasoningResponse(BaseModel):
     """Canonical reasoning result."""
-    payload: Any = Field(..., description="The parsed output from the provider (string or dict).")
+    payload: CognitiveEvaluationPayload | Any = Field(..., description="The parsed output from the provider (string or dict).")
     confidence: float = Field(default=1.0, description="Confidence score [0.0 - 1.0].")
     evidence: list[str] = Field(default_factory=list, description="Citations or logical steps used to derive the answer.")
     reasoning_trace: str | None = Field(default=None, description="Detailed trace or Chain of Thought if provided.")

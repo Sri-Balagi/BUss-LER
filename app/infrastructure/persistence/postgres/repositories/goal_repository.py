@@ -13,7 +13,7 @@ Table: goals, intent_goal_links
 
 import time
 from abc import ABC, abstractmethod
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any
 from uuid import UUID
 
@@ -233,7 +233,7 @@ class GoalRepository(AbstractGoalRepository):
         try:
             response = (
                 await self._client.table(self._table)
-                .update({"deleted_at": datetime.now(UTC).isoformat()})
+                .update({"deleted_at": datetime.now(timezone.utc).isoformat()})
                 .eq("id", str(goal_id))
                 .is_("deleted_at", "null")
                 .execute()

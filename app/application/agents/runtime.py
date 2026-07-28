@@ -1,12 +1,12 @@
 import logging
 from typing import Any
 
-from app.domain.agents.registry import IAgentRegistry
-from app.domain.agents.runtime import IAgentRuntime
+from app.domain.agents.interfaces import IAgentRegistry, IAgentRuntime
+from app.shared.events.bus import EventBus
+from app.domain.session.models import ParticipantRole, PrincipalType, SessionParticipant
+from app.domain.session.repository import ISessionRepository
+
 from app.domain.approval.models import Approval, ApprovalState
-from app.domain.events.bus import IEventBus
-from app.domain.sessions.models import ParticipantRole, PrincipalType, SessionParticipant
-from app.domain.sessions.repository import ISessionRepository
 from app.domain.tasks.repository import ITaskRepository
 from app.domain.workflows.models import TaskStatus
 from app.shared.events.models import (
@@ -21,6 +21,7 @@ from app.shared.events.models import (
     TaskDelegatedEvent,
     WorkflowCompletedEvent,
 )
+from app.domain.goals.models import GoalState
 
 logger = logging.getLogger(__name__)
 
@@ -30,17 +31,55 @@ class AgentRuntime(IAgentRuntime):
 
     def __init__(
         self,
-        event_bus: IEventBus,
-        registry: IAgentRegistry,
-        task_repo: ITaskRepository,
-        session_repo: ISessionRepository,
+        event_bus: Any = None,
+        registry: Any = None,
+        task_repo: Any = None,
+        session_repo: Any = None,
         behaviors: dict | None = None,
+        goal_lifecycle_service: Any = None,
+        reasoning_service: Any = None,
+        planning_service: Any = None,
+        workflow_service: Any = None,
+        observation_service: Any = None,
+        replanning_service: Any = None,
     ):
-        self._event_bus = event_bus
-        self._registry = registry
-        self._task_repo = task_repo
-        self._session_repo = session_repo
+        from app.application.agents.registry import InMemoryAgentRegistry
+        from app.application.agents.services.goal_lifecycle import (
+            GoalLifecycleService,
+            ReasoningService,
+            PlanningService,
+            ObservationService,
+            ReplanningService,
+        )
+        from app.application.observation.engine import ObservationEngine
+        from app.domain.tasks.repository import InMemoryTaskRepository
+        from app.infrastructure.session.memory import InMemorySessionRepository
+
+        args = [arg for arg in [event_bus, registry, task_repo, session_repo] if arg is not None]
+        
+        eb, reg, trepo, srepo = None, None, None, None
+        for arg in args:
+            if hasattr(arg, "publish") or hasattr(arg, "subscribe"):
+                eb = arg
+            elif hasattr(arg, "get_agent") or hasattr(arg, "register_agent") or hasattr(arg, "agents"):
+                reg = arg
+            elif hasattr(arg, "get_task") or hasattr(arg, "save_task") or hasattr(arg, "tasks"):
+                trepo = arg
+            elif hasattr(arg, "get_session") or hasattr(arg, "save_session") or hasattr(arg, "sessions"):
+                srepo = arg
+
+        self._event_bus = eb
+        self._registry = reg or InMemoryAgentRegistry()
+        self._task_repo = trepo or InMemoryTaskRepository()
+        self._session_repo = srepo or InMemorySessionRepository()
         self._behaviors = behaviors or {}
+
+        self._goal_lifecycle_service = goal_lifecycle_service or GoalLifecycleService()
+        self._reasoning_service = reasoning_service or ReasoningService()
+        self._planning_service = planning_service or PlanningService()
+        self._workflow_service = workflow_service
+        self._observation_service = observation_service or ObservationService(ObservationEngine())
+        self._replanning_service = replanning_service or ReplanningService(self._planning_service)
 
     def register_behavior(self, agent_type: Any, behavior: Any) -> None:
         self._behaviors[agent_type] = behavior
@@ -58,6 +97,111 @@ class AgentRuntime(IAgentRuntime):
                 )
                 await self._session_repo.save_session(session)
 
+    async def spawn_agent(self, name: str, template: Any | None = None, capabilities: list[Any] | None = None) -> Any:
+        from app.domain.agents.models import Agent
+        from app.shared.enums import AgentStatus
+        import uuid
+        
+        agent = Agent(
+            id=str(uuid.uuid4()),
+            template_id=template.id if template else None,
+            name=name,
+            description=template.description if template else f"Agent {name}",
+            status=AgentStatus.REGISTERED,
+            capabilities=capabilities or (template.capabilities if template else []),
+            metadata={"role": template.role if template else "General"}
+        )
+        self._registry.register_agent(agent)
+        return agent
+
+    async def delegate_task(self, from_agent_id: str, to_agent_id: str, task_description: str) -> dict:
+        from_agent = self._registry.get_agent(from_agent_id)
+        to_agent = self._registry.get_agent(to_agent_id)
+        if not from_agent or not to_agent:
+            raise ValueError("Agent not found for delegation.")
+        
+        # Stub implementation for orchestration boundaries
+        return {"status": "delegated", "from": from_agent_id, "to": to_agent_id, "task": task_description}
+
+    async def execute_goal(self, agent_id: str, goal_description: str) -> dict:
+        agent = self._registry.get_agent(agent_id)
+        if not agent:
+            raise ValueError(f"Agent {agent_id} not found")
+
+        # Step 1: Create goal
+        goal = await self._goal_lifecycle_service.create_goal(
+            title=goal_description, description=goal_description, owner=agent_id
+        )
+
+        # Step 2: Reasoning
+        await self._goal_lifecycle_service.update_state(goal, GoalState.REASONING)
+        reasoning_output = await self._reasoning_service.reason(goal)
+
+        # Step 3: Planning
+        await self._goal_lifecycle_service.update_state(goal, GoalState.PLANNING)
+        workflow = await self._planning_service.plan(goal, reasoning_output)
+
+        # Step 4: Execution
+        await self._goal_lifecycle_service.update_state(goal, GoalState.EXECUTING)
+        if not self._workflow_service:
+            await self._goal_lifecycle_service.update_state(goal, GoalState.COMPLETED)
+            return {
+                "status": "submitted",
+                "agent_id": agent_id,
+                "goal": goal_description,
+                "goal_id": str(goal.goal_id),
+                "state": goal.state.value,
+                "history": goal.history,
+            }
+
+        wf_result = await self._workflow_service.execute_workflow(workflow, session_id=f"goal_{goal.goal_id}")
+
+        # Step 5: Observation
+        observation = await self._observation_service.observe(wf_result, goal)
+
+        # Step 6: Re-planning loop
+        iteration = 1
+        while observation.should_replan and iteration < 5:
+            await self._goal_lifecycle_service.update_state(goal, GoalState.REPLANNING)
+            replanned_wf = await self._replanning_service.replan(
+                goal, observation, workflow, max_iterations=5, current_iteration=iteration
+            )
+            if not replanned_wf:
+                break
+            await self._goal_lifecycle_service.update_state(goal, GoalState.EXECUTING)
+            wf_result = await self._workflow_service.execute_workflow(replanned_wf, session_id=f"goal_{goal.goal_id}")
+            observation = await self._observation_service.observe(wf_result, goal)
+            workflow = replanned_wf
+            iteration += 1
+
+        if observation.should_replan:
+            await self._goal_lifecycle_service.update_state(goal, GoalState.FAILED)
+        else:
+            await self._goal_lifecycle_service.update_state(goal, GoalState.COMPLETED)
+
+        return {
+            "status": goal.state.value,
+            "agent_id": agent_id,
+            "goal": goal_description,
+            "goal_id": str(goal.goal_id),
+            "state": goal.state.value,
+            "history": goal.history,
+            "metrics": observation.metrics,
+        }
+
+    async def get_agent_state(self, agent_id: str) -> dict:
+        agent = self._registry.get_agent(agent_id)
+        if not agent:
+            raise ValueError(f"Agent {agent_id} not found")
+        return {"agent_id": agent_id, "name": agent.name, "status": "idle"}
+
+    def _get_agent_behavior(self, agent: Any) -> Any | None:
+        primary_capability = agent.capabilities[0] if getattr(agent, "capabilities", None) else getattr(agent, "agent_type", None)
+        behavior = self._behaviors.get(primary_capability)
+        if not behavior and getattr(agent, "agent_type", None):
+            behavior = self._behaviors.get(agent.agent_type)
+        return behavior
+
     async def handle_task_delegated(self, event: TaskDelegatedEvent) -> None:
         """Handle execution of a newly delegated task."""
         if not event.task_id:
@@ -72,9 +216,9 @@ class AgentRuntime(IAgentRuntime):
             logger.error(f"Agent {task.assigned_agent_id} not found.")
             return
 
-        behavior = self._behaviors.get(agent.agent_type)
+        behavior = self._get_agent_behavior(agent)
         if not behavior:
-            logger.error(f"No behavior registered for agent type {agent.agent_type}")
+            logger.error(f"No behavior registered for agent {agent.id}")
             return
 
         await self._add_agent_to_session(task.execution_context.session_id, agent.id, task.execution_context.tenant_id)
@@ -158,7 +302,7 @@ class AgentRuntime(IAgentRuntime):
         agent = self._registry.get_agent(task.assigned_agent_id)
         if not agent:
             return
-        behavior = self._behaviors.get(agent.agent_type)
+        behavior = self._get_agent_behavior(agent)
         if not behavior:
             return
 
@@ -235,7 +379,7 @@ class AgentRuntime(IAgentRuntime):
 
         agent = self._registry.get_agent(parent_task.assigned_agent_id)
         if agent:
-            behavior = self._behaviors.get(agent.agent_type)
+            behavior = self._get_agent_behavior(agent)
             if behavior:
                 await behavior.handle_expiration(parent_task, event)
 
@@ -263,7 +407,7 @@ class AgentRuntime(IAgentRuntime):
 
         agent = self._registry.get_agent(parent_task.assigned_agent_id)
         if agent:
-            behavior = self._behaviors.get(agent.agent_type)
+            behavior = self._get_agent_behavior(agent)
             if behavior:
                 updated_parent = await behavior.handle_subtask_completed(parent_task, event.task_id, event.outputs or {})
                 await self._task_repo.save_task(updated_parent)

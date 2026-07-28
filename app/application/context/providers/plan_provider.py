@@ -1,6 +1,6 @@
 """Plan Context Provider — fetches recent plans for the twin."""
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
 import structlog
@@ -44,7 +44,7 @@ class PlanContextProvider(AbstractContextProvider):
                 prov = ContextProvenance(
                     provider=ContextSource.PLAN,
                     service_name="PlanService",
-                    retrieval_timestamp=datetime.now(UTC),
+                    retrieval_timestamp=datetime.now(timezone.utc),
                     confidence=1.0,
                     citations=[str(plan.id)],
                 )
@@ -70,7 +70,7 @@ class PlanContextProvider(AbstractContextProvider):
             priority=ContextPriority.HIGH,
             items=items,
             token_estimate=sum(i.token_estimate for i in items),
-            retrieved_at=datetime.now(UTC),
+            retrieved_at=datetime.now(timezone.utc),
         )
 
     async def health_check(self) -> dict:

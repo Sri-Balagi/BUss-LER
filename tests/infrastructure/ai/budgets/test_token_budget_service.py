@@ -1,6 +1,6 @@
 """Tests for the Resource Budget System — WP-02."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timezone, timedelta
 
 import pytest
 import structlog
@@ -109,7 +109,7 @@ async def test_daily_reset_logic(budget_service: TokenBudgetService) -> None:
     assert budget.current_day_usage == 100
 
     # Backdate the last_reset_date to yesterday
-    yesterday = datetime.now(UTC) - timedelta(days=1)
+    yesterday = datetime.now(timezone.utc) - timedelta(days=1)
     budget.last_reset_date = yesterday
 
     # Now when we query or update, it should reset to 0

@@ -30,7 +30,7 @@ try:
         task_serializer="json",
         result_serializer="json",
         accept_content=["json"],
-        timezone="UTC",
+        timezone="timezone.utc",
         enable_utc=True,
         worker_prefetch_multiplier=1,
         task_acks_late=True,  # Ensures at-least-once delivery

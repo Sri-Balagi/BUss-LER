@@ -2,6 +2,7 @@ from app.domain.intelligence.capability import CapabilityMetadata, CapabilityTyp
 from app.domain.intelligence.provider import ProviderLifecycleStatus
 from app.domain.planning.models import Goal, Plan, PlanningContext, PlanStep
 from app.domain.planning.provider import IPlanningProvider
+from app.domain.intelligence.trace import CognitiveTrace
 
 
 class DeterministicPlanningProvider(IPlanningProvider):
@@ -31,21 +32,26 @@ class DeterministicPlanningProvider(IPlanningProvider):
     def get_status(self) -> ProviderLifecycleStatus:
         return self._status
 
-    async def generate_plan(self, context: PlanningContext, goal: Goal) -> Plan:
+    async def generate_plan(self, context: PlanningContext, goal: Goal, trace: CognitiveTrace) -> Plan:
         """
         Generates a deterministic plan based on the goal description.
         """
         plan = Plan(goal_id=goal.goal_id)
 
-        if "invalid" in goal.description.lower():
-            # Generate a plan with a cycle to test validation
+        desc_lower = goal.description.lower()
+        if "policy violations" in desc_lower:
+            plan.add_step(PlanStep(action="VIOLATE_POLICY"))
+        elif "constraint violations" in desc_lower:
+            plan.add_step(PlanStep(action="VIOLATE_CONSTRAINT"))
+        elif "edge cases" in desc_lower or "cycle" in desc_lower:
+            # Generate a plan with a cycle to test structural validation
             step1 = PlanStep(action="Step 1")
             step2 = PlanStep(action="Step 2")
             plan.add_step(step1)
             plan.add_step(step2)
             plan.add_dependency(step1.step_id, step2.step_id)
             plan.add_dependency(step2.step_id, step1.step_id)  # Cycle!
-        elif "orphan" in goal.description.lower():
+        elif "orphan" in desc_lower:
             # Generate an orphan dependency
             import uuid
             step1 = PlanStep(action="Step 1")

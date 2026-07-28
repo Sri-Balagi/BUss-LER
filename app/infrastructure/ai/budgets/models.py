@@ -5,23 +5,15 @@ including the fundamental TokenBudget and TokenUsageRecord models,
 as well as the BudgetPolicy enum for enforcement rules.
 """
 
-import enum
-import sys
-from datetime import UTC, datetime
-
-if sys.version_info >= (3, 11):
-    from enum import StrEnum
-else:
-    class StrEnum(str, enum.Enum):
-        pass
-
+from datetime import datetime, timezone
+from enum import Enum
 
 from pydantic import Field
 
 from app.interfaces.http.schemas.base import DomainBaseModel
 
 
-class BudgetPolicy(StrEnum):
+class BudgetPolicy(str, Enum):
     """Enforcement policy when a budget limit is reached."""
 
     HARD_STOP = "HARD_STOP"
@@ -45,7 +37,7 @@ class TokenBudget(DomainBaseModel):
     )
     current_day_usage: int = Field(default=0, description="Tokens consumed so far today.")
     last_reset_date: datetime = Field(
-        default_factory=lambda: datetime.now(UTC),
+        default_factory=lambda: datetime.now(timezone.utc),
         description="The date this budget's daily usage was last reset to 0.",
     )
 
@@ -62,6 +54,6 @@ class TokenUsageRecord(DomainBaseModel):
     total_tokens: int = Field(default=0, description="Total tokens consumed.")
     session_id: str | None = Field(None, description="Cognitive session ID, if applicable.")
     timestamp: datetime = Field(
-        default_factory=lambda: datetime.now(UTC),
+        default_factory=lambda: datetime.now(timezone.utc),
         description="When the tokens were consumed.",
     )

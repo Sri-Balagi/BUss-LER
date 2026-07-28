@@ -1,8 +1,7 @@
 import time
-from datetime import UTC, datetime
-from uuid import UUID
-
+from datetime import datetime, timezone
 from typing import Any
+from uuid import UUID
 
 import structlog
 from postgrest.types import CountMethod
@@ -170,7 +169,7 @@ class MemoryMetadataRepository(AbstractMemoryRepository):
         try:
             response = (
                 await self._client.table(self._table_name)
-                .update({"deleted_at": datetime.now(UTC).isoformat()})
+                .update({"deleted_at": datetime.now(timezone.utc).isoformat()})
                 .eq("id", str(memory_id))
                 .is_("deleted_at", "null")
                 .execute()
