@@ -1,5 +1,5 @@
 import abc
-from typing import TypeVar
+from typing import Generic, TypeVar
 
 from pydantic import BaseModel
 
@@ -10,7 +10,7 @@ T_Input = TypeVar('T_Input')
 T_Output = TypeVar('T_Output')
 
 
-class PipelineContext[T_Input](BaseModel):
+class PipelineContext(BaseModel, Generic[T_Input]):
     """Wraps the IntelligenceContext securely for pipeline execution."""
     execution_context: IntelligenceContext
     payload: T_Input
@@ -19,7 +19,7 @@ class PipelineContext[T_Input](BaseModel):
         arbitrary_types_allowed = True
 
 
-class PipelineResult[T_Output](BaseModel):
+class PipelineResult(BaseModel, Generic[T_Output]):
     """Standardized output for all pipeline executions."""
     context: IntelligenceContext
     payload: T_Output | None = None
@@ -31,7 +31,7 @@ class PipelineResult[T_Output](BaseModel):
         arbitrary_types_allowed = True
 
 
-class IPipelineStep[T_Input, T_Output](abc.ABC):
+class IPipelineStep(abc.ABC, Generic[T_Input, T_Output]):
     """A discrete, reusable operation inside an intelligence pipeline."""
 
     @abc.abstractmethod
@@ -39,9 +39,10 @@ class IPipelineStep[T_Input, T_Output](abc.ABC):
         pass
 
 
-class IIntelligencePipeline[T_Input, T_Output](abc.ABC):
+class IIntelligencePipeline(abc.ABC, Generic[T_Input, T_Output]):
     """The canonical interface for composed intelligence execution (e.g., RetrievalPipeline)."""
 
     @abc.abstractmethod
     async def execute(self, context: PipelineContext[T_Input]) -> PipelineResult[T_Output]:
         pass
+
