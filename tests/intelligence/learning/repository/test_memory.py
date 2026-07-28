@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, timezone
+from datetime import datetime, timezone, timezone
 from decimal import Decimal
 from uuid import uuid4
 
@@ -81,8 +81,8 @@ def test_memory_valid():
         "importance": Decimal("0.50"),
         "embedding_status": EmbeddingStatus.FAILED,
         "metadata": {},
-        "created_at": datetime.now(UTC),
-        "updated_at": datetime.now(UTC),
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc),
         "deleted_at": None,
     }
     model = Memory(**data)

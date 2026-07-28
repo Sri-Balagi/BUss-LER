@@ -1,5 +1,5 @@
 import enum
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any
 from uuid import UUID, uuid4
 
@@ -49,8 +49,8 @@ class MemoryRecord(BaseModel):
     tenant_id: str | None = Field(default=None)
     provenance: str | None = Field(default=None)
 
-    created_at: str = Field(default_factory=lambda: datetime.now(UTC).isoformat())
-    updated_at: str = Field(default_factory=lambda: datetime.now(UTC).isoformat())
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    updated_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
     @property
     def id(self) -> UUID:

@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
-from enum import StrEnum
+from datetime import datetime, timezone
+from enum import Enum
 
 
 @dataclass(frozen=True)
@@ -36,7 +36,7 @@ class ExecutionContext:
         return cls(is_authenticated=False)
 
 
-class AuthenticationStatus(StrEnum):
+class AuthenticationStatus(str, Enum):
     SUCCESS = "SUCCESS"
     NO_CREDENTIALS = "NO_CREDENTIALS"
     INVALID_TOKEN = "INVALID_TOKEN"
@@ -64,7 +64,7 @@ class AuthenticationResult:
         return cls(status=status, message=message, context=None)
 
 
-class DecisionSource(StrEnum):
+class DecisionSource(str, Enum):
     ROLE = "ROLE"
     DIRECT_PERMISSION = "DIRECT_PERMISSION"
     POLICY = "POLICY"
@@ -82,7 +82,7 @@ class AuthorizationDecision:
     required_permission: str
     matched_permissions: list[str]
     decision_source: DecisionSource
-    evaluated_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+    evaluated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
     # Optional metadata for detailed auditing and observability
     evaluated_roles: list[str] | None = None

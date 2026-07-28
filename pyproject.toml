@@ -3,7 +3,7 @@ name = "bizos"
 version = "6.0.0"
 description = "BizOS - The AI Operating System for Entities"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.10"
 license = { text = "MIT" }
 
 dependencies = [
@@ -34,6 +34,9 @@ dev = [
     "pytest-asyncio>=0.24.0",
     "pytest-cov>=5.0.0",
 ]
+
+[project.scripts]
+bizos = "app.cli.main:main"
 
 [build-system]
 requires = ["hatchling"]

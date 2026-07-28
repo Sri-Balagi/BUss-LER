@@ -5,8 +5,8 @@ are untouched. Wave-1 adds SessionLifecycleState, WorkingMemorySnapshot, and
 CycleRecord as first-class domain value objects.
 """
 
-from datetime import UTC, datetime
-from enum import StrEnum
+from datetime import datetime, timezone
+from enum import Enum
 from typing import Any
 from uuid import UUID, uuid4
 
@@ -14,7 +14,7 @@ from pydantic import BaseModel, Field
 
 # ── Wave-0 models (unchanged) ─────────────────────────────────────────────────
 
-class ReasoningMode(StrEnum):
+class ReasoningMode(str, Enum):
     """Declarative reasoning modes that affect controller behavior."""
 
     FAST = "FAST"
@@ -58,7 +58,7 @@ class TerminationPolicy(BaseModel):
 
 # ── Wave-1 value objects ──────────────────────────────────────────────────────
 
-class SessionLifecycleState(StrEnum):
+class SessionLifecycleState(str, Enum):
     """Lifecycle states of a CognitiveSession.
 
     State machine:
@@ -93,7 +93,7 @@ class WorkingMemorySnapshot(BaseModel):
     Value Object — created once, never mutated.
     """
 
-    captured_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    captured_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     entries: dict[str, Any] = Field(default_factory=dict)
     entry_count: int = 0
 
@@ -114,7 +114,7 @@ class CycleRecord(BaseModel):
 
     cycle_index: int
     cycle_id: UUID = Field(default_factory=uuid4)
-    started_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    started_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     completed_at: datetime | None = None
     duration_ms: float = 0.0
 

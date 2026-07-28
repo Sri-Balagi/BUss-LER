@@ -1,4 +1,4 @@
-from enum import StrEnum
+from enum import Enum
 
 from pydantic import BaseModel, Field
 
@@ -14,7 +14,7 @@ from app.intelligence.oversight.validation.models import ValidationAssessment
 from app.intelligence.strategy.objectives.models import ExecutiveObjective
 
 
-class CognitivePipelineState(StrEnum):
+class CognitivePipelineState(str, Enum):
     INITIALIZED = "INITIALIZED"
     OBSERVING = "OBSERVING"
     STRATEGIZING = "STRATEGIZING"

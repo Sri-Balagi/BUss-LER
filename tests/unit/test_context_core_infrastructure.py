@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 if "structlog" not in sys.modules:
     sys.modules["structlog"] = MagicMock()
 
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import datetime, timezone, timedelta, timezone
 from uuid import uuid4
 
 import pytest
@@ -88,7 +88,7 @@ def test_context_validators():
         provenance=prov,
     )
     section = ContextSection(
-        source=ContextSource.GOAL, items=[item], token_estimate=10, retrieved_at=datetime.now(UTC)
+        source=ContextSource.GOAL, items=[item], token_estimate=10, retrieved_at=datetime.now(timezone.utc)
     )
 
     prov2 = ContextProvenance(
@@ -107,7 +107,7 @@ def test_context_validators():
         source=ContextSource.INTENT,
         items=[item2],
         token_estimate=10,
-        retrieved_at=datetime.now(UTC),
+        retrieved_at=datetime.now(timezone.utc),
     )
 
     res = validator.validate([section, section2], policy)
@@ -129,7 +129,7 @@ def test_context_strategies_ranker():
         provenance=prov,
     )
     section = ContextSection(
-        source=ContextSource.MEMORY, items=[item], token_estimate=10, retrieved_at=datetime.now(UTC)
+        source=ContextSource.MEMORY, items=[item], token_estimate=10, retrieved_at=datetime.now(timezone.utc)
     )
 
     policy = ContextPolicy.agent()
@@ -185,7 +185,7 @@ def test_context_strategies_compressor():
         source=ContextSource.MEMORY,
         items=[item1, item2, item3, item4],
         token_estimate=40,
-        retrieved_at=datetime.now(UTC),
+        retrieved_at=datetime.now(timezone.utc),
     )
     compressed = compressor.compress([section], budget=100)
     assert len(compressed[0].items) == 1
@@ -206,7 +206,7 @@ def test_context_strategies_window_builder():
         provenance=prov,
     )
     section = ContextSection(
-        source=ContextSource.GOAL, items=[item], token_estimate=10, retrieved_at=datetime.now(UTC)
+        source=ContextSource.GOAL, items=[item], token_estimate=10, retrieved_at=datetime.now(timezone.utc)
     )
 
     window = builder.build_window([section], budget=5)

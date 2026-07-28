@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from enum import StrEnum
+from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel
@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from app.intelligence.core.session.session import CognitiveSession
 
 
-class PipelinePhase(StrEnum):
+class PipelinePhase(str, Enum):
     """The ordered phases of the continuous cognitive loop."""
 
     OBSERVE = "OBSERVE"
@@ -20,7 +20,7 @@ class PipelinePhase(StrEnum):
     LEARN = "LEARN"
 
 
-class PhaseResultStatus(StrEnum):
+class PhaseResultStatus(str, Enum):
     SUCCESS = "SUCCESS"
     SKIPPED = "SKIPPED"
     FAILED = "FAILED"

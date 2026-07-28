@@ -13,7 +13,7 @@ Responsibilities:
 """
 
 from abc import ABC, abstractmethod
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from uuid import UUID
 
 import structlog
@@ -113,7 +113,7 @@ class RecommendationService(AbstractRecommendationService):
             RecommendationStatus.ACCEPTED,
             RecommendationStatus.REJECTED,
         ]:
-            ack_time = datetime.now(UTC).isoformat()
+            ack_time = datetime.now(timezone.utc).isoformat()
 
         updated = await self._repository.update_status(
             recommendation_id=rec.id, status=cmd.target_status, acknowledged_at=ack_time

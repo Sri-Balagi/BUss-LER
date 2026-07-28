@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 import structlog
 
@@ -53,6 +53,6 @@ class APIKeyIdentityProvider(IIdentityProvider):
             roles=[], # Usually API Keys act on behalf of a system or have roles assigned, handled by AuthZ
             scopes=api_key.scopes,
             authentication_method="api_key",
-            authenticated_at=datetime.now(UTC)
+            authenticated_at=datetime.now(timezone.utc)
         )
         return AuthenticationResult.success(context)

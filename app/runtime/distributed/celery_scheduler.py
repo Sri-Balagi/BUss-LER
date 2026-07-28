@@ -41,7 +41,7 @@ class CeleryDistributedScheduler(IDistributedScheduler):
         self._app.conf.task_serializer = "json"
         self._app.conf.result_serializer = "json"
         self._app.conf.accept_content = ["json"]
-        self._app.conf.timezone = "UTC"
+        self._app.conf.timezone = "timezone.utc"
 
     @property
     def celery_app(self) -> Celery:

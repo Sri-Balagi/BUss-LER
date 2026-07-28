@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 sys.modules["structlog"] = MagicMock()
 
 import asyncio  # noqa: E402
-from datetime import UTC, datetime, timezone  # noqa: E402
+from datetime import datetime, timezone, timezone  # noqa: E402
 from uuid import uuid4  # noqa: E402
 
 import pytest  # noqa: E402
@@ -34,7 +34,7 @@ def test_context_freshness_import_and_logic():
         refresh_strategy=RefreshStrategy.LAZY,
     )
 
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     # Shouldn't be stale immediately
     assert not policy.is_stale(now)
 

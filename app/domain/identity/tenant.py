@@ -1,17 +1,17 @@
-from enum import StrEnum
+from enum import Enum
 
 from pydantic import Field
 
 from app.domain.common.biz_object import BizObject
 
 
-class TenantStatus(StrEnum):
+class TenantStatus(str, Enum):
     ACTIVE = "ACTIVE"
     SUSPENDED = "SUSPENDED"
     DELETED = "DELETED"
 
 
-class TenantTier(StrEnum):
+class TenantTier(str, Enum):
     FREE = "FREE"
     PRO = "PRO"
     ENTERPRISE = "ENTERPRISE"

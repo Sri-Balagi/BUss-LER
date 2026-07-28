@@ -29,8 +29,8 @@ Design
 """
 
 import uuid
-from datetime import UTC, datetime
-from enum import StrEnum
+from datetime import datetime, timezone
+from enum import Enum
 from typing import Any
 from uuid import UUID
 
@@ -50,7 +50,7 @@ from app.runtime.agents.permissions import AgentPermission
 logger = structlog.get_logger(__name__)
 
 
-class ConvergenceStatus(StrEnum):
+class ConvergenceStatus(str, Enum):
     """Wave-0 convergence status — preserved unchanged."""
 
     CONVERGED = "CONVERGED"
@@ -103,7 +103,7 @@ class CognitiveSession:
         # ── Identity ──────────────────────────────────────────────────────────
         self.session_id: str = str(uuid.uuid4())
         self.twin_id: UUID | None = twin_id
-        self.created_at: datetime = datetime.now(UTC)
+        self.created_at: datetime = datetime.now(timezone.utc)
 
         # ── Lifecycle ─────────────────────────────────────────────────────────
         self._lifecycle_state: SessionLifecycleState = SessionLifecycleState.CREATED
@@ -174,7 +174,7 @@ class CognitiveSession:
 
         from_state = self._lifecycle_state
         self._lifecycle_state = to_state
-        self._state_transitions.append((to_state, datetime.now(UTC)))
+        self._state_transitions.append((to_state, datetime.now(timezone.utc)))
 
         logger.info(
             "Session lifecycle transition",

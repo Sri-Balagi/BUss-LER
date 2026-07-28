@@ -3,7 +3,7 @@ from typing import Any
 
 from app.domain.intelligence.context import IntelligenceContext
 from app.domain.intelligence.execution import IExecutionPolicy
-from app.domain.intelligence.pipeline import IIntelligencePipeline, PipelineContext, PipelineResult
+from app.domain.intelligence.pipeline import PipelineContext, PipelineResult
 from app.shared.events.bus import EventBus
 from app.shared.events.models import DomainEvent
 

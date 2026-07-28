@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any
 from uuid import UUID, uuid4
 
@@ -6,8 +6,8 @@ from pydantic import BaseModel, Field
 
 
 def _now_utc() -> datetime:
-    """Returns the current UTC time in a Python 3.10+ compatible way."""
-    return datetime.now(UTC)
+    """Returns the current timezone.utc time in a Python 3.10+ compatible way."""
+    return datetime.now(timezone.utc)
 
 class BizObject(BaseModel):
     """
@@ -27,8 +27,8 @@ class BizObject(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict, description="Arbitrary key-value dictionary for extensibility.")
     tags: list[str] = Field(default_factory=list, description="List of string labels for filtering and categorization.")
 
-    created_at: datetime = Field(default_factory=_now_utc, description="UTC timestamp of creation.")
-    updated_at: datetime = Field(default_factory=_now_utc, description="UTC timestamp of the last modification.")
+    created_at: datetime = Field(default_factory=_now_utc, description="timezone.utc timestamp of creation.")
+    updated_at: datetime = Field(default_factory=_now_utc, description="timezone.utc timestamp of the last modification.")
 
     def update(self, **kwargs: Any) -> None:
         """

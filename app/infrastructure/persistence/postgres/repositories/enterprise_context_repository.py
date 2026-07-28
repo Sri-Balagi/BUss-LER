@@ -7,7 +7,7 @@ Table: enterprise_contexts
 """
 
 from abc import ABC, abstractmethod
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any
 from uuid import UUID
 
@@ -15,7 +15,7 @@ import structlog
 from postgrest.types import CountMethod
 from supabase import AsyncClient
 
-from app.application.context.models import (
+from app.intelligence.intake.situation.enterprise_context import (
     ContextLifecycleCreate,
     ContextLifecycleMetadata,
     ContextLifecycleUpdate,
@@ -83,7 +83,7 @@ class EnterpriseContextRepository(AbstractEnterpriseContextRepository):
         return ContextLifecycleMetadata.model_validate(row_dict)
 
     async def create(self, data: ContextLifecycleCreate) -> ContextLifecycleMetadata:
-        now = datetime.now(UTC).isoformat()
+        now = datetime.now(timezone.utc).isoformat()
         payload: dict[str, Any] = {
             "id": str(data.context_id),
             "twin_id": str(data.twin_id),
@@ -124,7 +124,7 @@ class EnterpriseContextRepository(AbstractEnterpriseContextRepository):
         context_id: UUID,
         update: ContextLifecycleUpdate,
     ) -> ContextLifecycleMetadata:
-        now = datetime.now(UTC).isoformat()
+        now = datetime.now(timezone.utc).isoformat()
         payload: dict[str, Any] = {"status": update.status.value, "updated_at": now}
         if update.assembled_at is not None:
             payload["assembled_at"] = update.assembled_at.isoformat()

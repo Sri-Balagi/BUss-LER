@@ -1,9 +1,9 @@
-from enum import StrEnum
+from enum import Enum
 
 from pydantic import BaseModel, Field
 
 
-class IntentClassification(StrEnum):
+class IntentClassification(str, Enum):
     STRATEGIC_OBJECTIVE = "STRATEGIC_OBJECTIVE"
     OPERATIONAL_ADJUSTMENT = "OPERATIONAL_ADJUSTMENT"
     INFORMATION_RETRIEVAL = "INFORMATION_RETRIEVAL"

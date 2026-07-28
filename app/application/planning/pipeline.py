@@ -52,21 +52,25 @@ class PlanningPipeline(IIntelligencePipeline):
         if not provider:
             raise RuntimeError("No available PLANNING provider found in capability registry.")
 
+        # Initialize CognitiveTrace
+        from app.domain.intelligence.trace import CognitiveTrace
+        trace = CognitiveTrace()
+
         # Generate Plan
-        plan = await provider.generate_plan(planning_context, goal)
+        plan = await provider.generate_plan(planning_context, goal, trace)
 
         # Validation
         plan.transition_status(PlanStatus.VALIDATING)
-        errors = self._validator.validate_plan(plan)
+        validation_result = self._validator.validate_plan(planning_context, goal, plan, trace)
 
-        if errors:
-            plan.transition_status(PlanStatus.INVALID, errors=errors)
+        if validation_result:
+            plan.transition_status(PlanStatus.INVALID, errors=validation_result)
             await self._event_router.publish(
                 PlanValidationFailed(
                     plan_id=plan.plan_id,
                     goal_id=goal.goal_id,
                     tenant_id=planning_context.tenant_id,
-                    errors=errors,
+                    errors=validation_result,
                     correlation_id=planning_context.correlation_id,
                 )
             )
@@ -89,6 +93,32 @@ class PlanningPipeline(IIntelligencePipeline):
                     correlation_id=planning_context.correlation_id,
                 )
             )
+            
+        from app.domain.planning.events import PolicyApplied, ConstraintEvaluated, ProcessEvaluated
+        
+        # Publish specific evaluation events from trace
+        for policy in trace.evaluated_policies:
+            await self._event_router.publish(PolicyApplied(
+                plan_id=plan.plan_id,
+                policy_id=policy.artifact_id,
+                tenant_id=planning_context.tenant_id,
+                correlation_id=planning_context.correlation_id
+            ))
+        for constraint in trace.evaluated_constraints:
+            await self._event_router.publish(ConstraintEvaluated(
+                plan_id=plan.plan_id,
+                constraint_id=constraint.artifact_id,
+                tenant_id=planning_context.tenant_id,
+                correlation_id=planning_context.correlation_id,
+                result=not validation_result
+            ))
+        for process in trace.evaluated_processes:
+            await self._event_router.publish(ProcessEvaluated(
+                plan_id=plan.plan_id,
+                process_id=process.artifact_id,
+                tenant_id=planning_context.tenant_id,
+                correlation_id=planning_context.correlation_id
+            ))
 
         duration = time.perf_counter() - start_time
         metrics = IntelligenceMetrics(

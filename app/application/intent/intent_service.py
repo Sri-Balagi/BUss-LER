@@ -17,7 +17,7 @@ Responsibilities:
 """
 
 from abc import ABC, abstractmethod
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from uuid import UUID
 
 import structlog
@@ -195,7 +195,7 @@ class IntentService(AbstractIntentService):
             title=self._derive_title(classify_result.analysis),
             status=new_status,
             analysis=classify_result.analysis,
-            classified_at=datetime.now(UTC),
+            classified_at=datetime.now(timezone.utc),
         )
 
         updated_intent = await self._repository.update(intent.id, update_data)

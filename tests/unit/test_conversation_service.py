@@ -1,5 +1,5 @@
 import uuid
-from datetime import UTC, datetime, timezone
+from datetime import datetime, timezone, timezone
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -38,8 +38,8 @@ async def test_create_thread(service, mock_repository, ctx):
         title="test",
         status=ConversationStatus.ACTIVE,
         metadata={},
-        created_at=datetime.now(UTC),
-        updated_at=datetime.now(UTC)
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
     )
     mock_repository.create_thread.return_value = thread
 
@@ -59,8 +59,8 @@ async def test_get_thread(service, mock_repository, ctx):
         twin_id=uuid.uuid4(),
         status=ConversationStatus.ACTIVE,
         metadata={},
-        created_at=datetime.now(UTC),
-        updated_at=datetime.now(UTC)
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
     )
     mock_repository.get_thread.return_value = thread
 
@@ -77,8 +77,8 @@ async def test_add_turn(service, mock_repository, mock_event_bus, ctx):
         twin_id=uuid.uuid4(),
         status=ConversationStatus.ACTIVE,
         metadata={},
-        created_at=datetime.now(UTC),
-        updated_at=datetime.now(UTC)
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
     )
     mock_repository.get_thread.return_value = thread
 
@@ -88,7 +88,7 @@ async def test_add_turn(service, mock_repository, mock_event_bus, ctx):
         role=ConversationRole.USER,
         turn_index=0,
         content="test content",
-        created_at=datetime.now(UTC)
+        created_at=datetime.now(timezone.utc)
     )
     mock_repository.add_turn.return_value = turn
 

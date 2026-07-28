@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, timezone
+from datetime import datetime, timezone, timezone
 from uuid import UUID
 
 import pytest
@@ -38,7 +38,7 @@ def test_biz_object_cannot_update_id_or_created_at():
     old_id = obj.id
     old_created_at = obj.created_at
 
-    obj.update(id="new-id", created_at=datetime.now(UTC))
+    obj.update(id="new-id", created_at=datetime.now(timezone.utc))
 
     assert obj.id == old_id
     assert obj.created_at == old_created_at

@@ -1,6 +1,6 @@
 import uuid
-from datetime import UTC, datetime
-from enum import StrEnum
+from datetime import datetime, timezone
+from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, Field, model_validator
@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field, model_validator
 from app.shared.enums import ParticipantRole, PrincipalType
 
 
-class SessionStatus(StrEnum):
+class SessionStatus(str, Enum):
     ACTIVE = "ACTIVE"
     CLOSED = "CLOSED"
 
@@ -29,7 +29,7 @@ class Session(BaseModel):
     participants: list[SessionParticipant] = Field(default_factory=list)
     conversation_ids: list[str] = Field(default_factory=list)  # Future-proofing for multiple conversations
     status: SessionStatus = SessionStatus.ACTIVE
-    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     @model_validator(mode='before')
     @classmethod

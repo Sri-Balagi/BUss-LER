@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import datetime, timezone, timedelta, timezone
 
 import jwt
 import pytest
@@ -46,7 +46,7 @@ def auth_service(jwt_provider, api_key_provider):
 @pytest.mark.asyncio
 async def test_jwt_provider_success(jwt_provider):
     token = jwt.encode(
-        {"sub": "user_123", "tenant_id": "tenant_1", "exp": datetime.now(UTC) + timedelta(minutes=15)},
+        {"sub": "user_123", "tenant_id": "tenant_1", "exp": datetime.now(timezone.utc) + timedelta(minutes=15)},
         "secret_key",
         algorithm="HS256",
         headers={"kid": "default"}
@@ -75,7 +75,7 @@ async def test_jwt_provider_invalid_signature(jwt_provider):
 @pytest.mark.asyncio
 async def test_jwt_provider_expired(jwt_provider):
     token = jwt.encode(
-        {"sub": "user_123", "exp": datetime.now(UTC) - timedelta(minutes=15)},
+        {"sub": "user_123", "exp": datetime.now(timezone.utc) - timedelta(minutes=15)},
         "secret_key",
         algorithm="HS256",
         headers={"kid": "default"}
@@ -154,7 +154,7 @@ async def test_api_key_provider_revoked(api_key_provider, api_key_repo, hasher):
 async def test_auth_service_routing(auth_service, api_key_repo, hasher):
     # Test JWT route
     token = jwt.encode(
-        {"sub": "user_123", "exp": datetime.now(UTC) + timedelta(minutes=15)},
+        {"sub": "user_123", "exp": datetime.now(timezone.utc) + timedelta(minutes=15)},
         "secret_key",
         algorithm="HS256",
         headers={"kid": "default"}

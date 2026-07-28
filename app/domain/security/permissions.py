@@ -1,7 +1,7 @@
-from enum import StrEnum
+from enum import Enum
 
 
-class SystemPermission(StrEnum):
+class SystemPermission(str, Enum):
     """
     Centralized enumeration of all valid permissions in the system.
     Using an Enum prevents typos and provides compile-time consistency.

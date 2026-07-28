@@ -1,9 +1,9 @@
-from enum import StrEnum
+from enum import Enum
 
 from pydantic import BaseModel, Field
 
 
-class ConvergenceStatus(StrEnum):
+class ConvergenceStatus(str, Enum):
     CONVERGED = "CONVERGED"
     OSCILLATING = "OSCILLATING"
     STAGNANT = "STAGNANT"

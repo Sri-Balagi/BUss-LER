@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, timezone
+from datetime import datetime, timezone, timezone
 from uuid import UUID, uuid4
 
 import pytest
@@ -37,8 +37,8 @@ def sample_rec_data():
         "supporting_memory_ids": [str(uuid4())],
         "supporting_goal_ids": [str(uuid4())],
         "status": "new",
-        "created_at": datetime.now(UTC).isoformat(),
-        "updated_at": datetime.now(UTC).isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat(),
     }
 
 

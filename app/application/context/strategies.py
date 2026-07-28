@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import hashlib
 from abc import ABC, abstractmethod
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from math import exp
 from uuid import uuid4
 
@@ -128,7 +128,7 @@ class DefaultContextRanker(AbstractContextRanker):
         intent_relevance = prov.confidence
 
         # recency: exponential decay on age in hours
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         age_hours = max(
             0.0,
             (now - prov.retrieval_timestamp).total_seconds() / 3600,

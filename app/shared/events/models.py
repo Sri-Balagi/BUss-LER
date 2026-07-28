@@ -1,13 +1,13 @@
 import uuid
-from datetime import UTC, datetime
-from enum import StrEnum
+from datetime import datetime, timezone
+from enum import Enum
 
 from pydantic import Field
 
 from app.interfaces.http.schemas.base import DomainBaseModel
 
 
-class EventType(StrEnum):
+class EventType(str, Enum):
     """Lifecycle event types."""
 
     CREATED = "CREATED"
@@ -36,7 +36,7 @@ class DomainEvent(DomainBaseModel):
     """Base class for all BizOS events."""
 
     event_id: uuid.UUID = Field(default_factory=uuid.uuid4)
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     correlation_id: str = Field(..., description="Trace ID linking operations together.")
     causation_id: str | None = Field(
         default=None, description="The ID of the event that caused this event."
@@ -254,7 +254,7 @@ class ConversationUpdatedEvent(DomainEvent):
 # Audit & Security Events (Wave 4 - Milestone 5)
 # =============================================================================
 
-class AuditCategory(StrEnum):
+class AuditCategory(str, Enum):
     AUTHENTICATION = "AUTHENTICATION"
     AUTHORIZATION = "AUTHORIZATION"
     SANDBOX = "SANDBOX"

@@ -1,0 +1,46 @@
+{
+  "scenario": "ret_edge_cases_030",
+  "overall_pass": true,
+  "root_cause": "None",
+  "coverage": {
+    "processes_covered": [],
+    "policies_exercised": [],
+    "constraints_exercised": [],
+    "regulations_evaluated": [],
+    "personas_invoked": [],
+    "decisions_used": [],
+    "actions_executed": [],
+    "transitions_tested": [],
+    "events_triggered": []
+  },
+  "validator_results": {
+    "retrieval": {
+      "passed": true,
+      "message": []
+    },
+    "planning": {
+      "passed": true,
+      "message": "Planning trace passed"
+    },
+    "reasoning": {
+      "passed": true,
+      "message": []
+    },
+    "workflow": {
+      "passed": true,
+      "message": []
+    },
+    "memory": {
+      "passed": true,
+      "message": []
+    },
+    "digital_twin": {
+      "passed": true,
+      "message": []
+    },
+    "multi_agent": {
+      "passed": true,
+      "message": []
+    }
+  }
+}

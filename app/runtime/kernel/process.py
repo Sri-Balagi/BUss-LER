@@ -1,17 +1,17 @@
-from enum import StrEnum
+from enum import Enum
 from uuid import UUID
 
 from pydantic import BaseModel, Field
 
 
-class ProcessType(StrEnum):
+class ProcessType(str, Enum):
     APPLICATION = "APPLICATION"
     WORKFLOW = "WORKFLOW"
     AGENT = "AGENT"
     CAPABILITY = "CAPABILITY"
     SYSTEM = "SYSTEM"
 
-class ProcessState(StrEnum):
+class ProcessState(str, Enum):
     CREATED = "CREATED"
     READY = "READY"
     RUNNING = "RUNNING"

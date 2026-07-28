@@ -6,7 +6,7 @@ In Wave 1, this service will be replaced or extended to persist
 TokenUsageRecord entries to the database for true accounting.
 """
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any
 
 import structlog
@@ -48,7 +48,7 @@ class TokenBudgetService(IResourceBudget):
         budget = self._budgets[entity_id]
 
         # Handle daily reset logic
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         if budget.last_reset_date.date() < now.date():
             budget.current_day_usage = 0
             budget.last_reset_date = now

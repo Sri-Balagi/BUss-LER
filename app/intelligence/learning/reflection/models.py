@@ -1,9 +1,9 @@
-from enum import StrEnum
+from enum import Enum
 
 from pydantic import BaseModel, Field
 
 
-class ReflectionSeverity(StrEnum):
+class ReflectionSeverity(str, Enum):
     MINOR = "MINOR"
     MODERATE = "MODERATE"
     SIGNIFICANT = "SIGNIFICANT"

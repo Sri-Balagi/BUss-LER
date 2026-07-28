@@ -1,12 +1,12 @@
-from datetime import UTC, datetime
-from enum import StrEnum
+from datetime import datetime, timezone
+from enum import Enum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class ReplanReason(StrEnum):
+class ReplanReason(str, Enum):
     APPROVAL_REJECTED = "APPROVAL_REJECTED"
     EXECUTION_FAILURE = "EXECUTION_FAILURE"
     NEW_INFORMATION = "NEW_INFORMATION"
@@ -31,4 +31,4 @@ class Decision(BaseModel):
     justification: str = Field(default="")
     risks: list[str] = Field(default_factory=list)
     assumptions: list[str] = Field(default_factory=list)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

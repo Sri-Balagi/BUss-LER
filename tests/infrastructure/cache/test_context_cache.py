@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from unittest.mock import AsyncMock
 from uuid import uuid4
 
@@ -103,7 +103,7 @@ async def test_redis_cache_get_and_set(sample_context, mocker):
     mocker.patch('redis.asyncio.from_url', return_value=mock_redis)
 
     import pickle
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     entry = (sample_context, now)
 
     mock_redis.get = AsyncMock(return_value=pickle.dumps(entry))
@@ -136,7 +136,7 @@ async def test_redis_cache_is_fresh(sample_context, mocker):
     mocker.patch('redis.asyncio.from_url', return_value=mock_redis)
 
     import pickle
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     entry = (sample_context, now)
     mock_redis.get = AsyncMock(return_value=pickle.dumps(entry))
 

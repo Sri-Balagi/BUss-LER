@@ -8,8 +8,8 @@ low-latency coordination within the continuous cognitive loop.
 import asyncio
 from collections.abc import Callable, Coroutine
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
-from enum import StrEnum
+from datetime import datetime, timezone
+from enum import Enum
 from typing import Any
 from uuid import UUID, uuid4
 
@@ -18,7 +18,7 @@ import structlog
 logger = structlog.get_logger(__name__)
 
 
-class SessionEventType(StrEnum):
+class SessionEventType(str, Enum):
     """Event types strictly scoped to a CognitiveSession's lifecycle."""
 
     CYCLE_STARTED = "CYCLE_STARTED"
@@ -40,7 +40,7 @@ class SessionEvent:
     event_type: SessionEventType
     payload: dict[str, Any] = field(default_factory=dict)
     event_id: UUID = field(default_factory=uuid4)
-    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
+    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 SessionEventHandler = Callable[[SessionEvent], Coroutine[Any, Any, None]]

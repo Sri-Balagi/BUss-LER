@@ -1,9 +1,9 @@
-from enum import StrEnum
+from enum import Enum
 
 from pydantic import BaseModel, Field
 
 
-class ConstraintType(StrEnum):
+class ConstraintType(str, Enum):
     FINANCIAL = "FINANCIAL"
     OPERATIONAL = "OPERATIONAL"
     REGULATORY = "REGULATORY"

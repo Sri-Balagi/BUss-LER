@@ -1,6 +1,7 @@
 from uuid import UUID
 
-from app.domain.planning.models import Plan
+from app.domain.planning.models import Plan, PlanningContext, Goal
+from app.domain.intelligence.trace import CognitiveTrace
 from app.domain.planning.validator import IPlanValidator
 
 
@@ -10,8 +11,27 @@ class DefaultPlanValidator(IPlanValidator):
     Validates duplicates, orphans, and cyclic dependencies.
     """
 
-    def validate_plan(self, plan: Plan) -> list[str]:
+    def validate_plan(self, context: PlanningContext, goal: Goal, plan: Plan, trace: CognitiveTrace) -> list[str]:
         errors = []
+
+        # Simulated Cognitive Validation
+        if context.reasoning_result and hasattr(context.reasoning_result.payload, 'applicable_policies'):
+            payload = context.reasoning_result.payload
+            
+            # Transfer explicitly determined applicable rules into the execution trace
+            for policy in payload.applicable_policies:
+                trace.record_policy(policy)
+            for constraint in payload.applicable_constraints:
+                trace.record_constraint(constraint)
+            for process in payload.applicable_processes:
+                trace.record_process(process)
+                
+            # Simulate a cognitive validation failure based on deterministic provider cues
+            for step in plan.steps:
+                if step.action == "VIOLATE_POLICY" and payload.applicable_policies:
+                    errors.append(f"Cognitive Validation Error: Plan step violates Policy {payload.applicable_policies[0].name}")
+                if step.action == "VIOLATE_CONSTRAINT" and payload.applicable_constraints:
+                    errors.append(f"Cognitive Validation Error: Plan step violates Constraint {payload.applicable_constraints[0].rule_description}")
 
         # 1. Check for duplicates
         step_ids = []

@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, timezone
+from datetime import datetime, timezone, timezone
 from decimal import Decimal
 from uuid import uuid4
 
@@ -16,8 +16,8 @@ def test_memory_vector_payload_valid():
     }
 
     data["importance"] = Decimal("0.75")
-    data["created_at"] = datetime.now(UTC)
-    data["updated_at"] = datetime.now(UTC)
+    data["created_at"] = datetime.now(timezone.utc)
+    data["updated_at"] = datetime.now(timezone.utc)
 
     payload = MemoryVectorPayload(**data)
     assert payload.memory_category == MemoryCategory.OBSERVATION
@@ -33,8 +33,8 @@ def test_memory_vector_point_valid():
         memory_category=MemoryCategory.EVENT,
         source=MemorySource.OBSERVATION,
         importance=Decimal("0.50"),
-        created_at=datetime.now(UTC),
-        updated_at=datetime.now(UTC),
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
     )
 
     vector = [0.1, 0.2, -0.3, 0.5]

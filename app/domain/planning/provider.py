@@ -1,20 +1,19 @@
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 
 from app.domain.intelligence.provider import IIntelligenceProvider
 from app.domain.planning.models import Goal, Plan, PlanningContext
+from app.domain.intelligence.trace import CognitiveTrace
 
 
-class IPlanningProvider(IIntelligenceProvider):
+class IPlanningProvider(IIntelligenceProvider, ABC):
     """
-    Interface for planning capabilities.
-    Extends the intelligence provider to ensure registration via CapabilityRegistry.
-    Provider implementations must remain LLM/execution agnostic at the domain level.
+    Contract for Cognitive Planning Engines (e.g. OpenAI, Anthropic, or specialized MCTS engines).
     """
 
     @abstractmethod
-    async def generate_plan(self, context: PlanningContext, goal: Goal) -> Plan:
+    async def generate_plan(self, context: PlanningContext, goal: Goal, trace: CognitiveTrace) -> Plan:
         """
-        Generates a plan for the given goal using the provided context.
+        Synthesizes a Goal and PlanningContext into a multi-step Plan graph.
         The plan returned will be in DRAFT status and subjected to validation.
         """
         pass

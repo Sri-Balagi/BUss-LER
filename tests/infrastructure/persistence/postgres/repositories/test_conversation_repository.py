@@ -1,5 +1,5 @@
 import uuid
-from datetime import UTC, datetime, timezone
+from datetime import datetime, timezone, timezone
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -43,8 +43,8 @@ async def test_create_thread_success(repository, mock_supabase_client):
                 "status": ConversationStatus.ACTIVE.value,
                 "turn_count": 0,
                 "metadata": {},
-                "created_at": datetime.now(UTC).isoformat(),
-                "updated_at": datetime.now(UTC).isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat(),
             }
         ]
     )
@@ -73,8 +73,8 @@ async def test_get_thread_success(repository, mock_supabase_client):
             "status": ConversationStatus.ACTIVE.value,
             "turn_count": 5,
             "metadata": {},
-            "created_at": datetime.now(UTC).isoformat(),
-            "updated_at": datetime.now(UTC).isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat(),
         }
     )
 
@@ -116,7 +116,7 @@ async def test_add_turn_success(repository, mock_supabase_client):
                 "role": ConversationRole.USER.value,
                 "content": "Hello",
                 "turn_index": 2,
-                "created_at": datetime.now(UTC).isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
             }
         ]
     )
@@ -183,7 +183,7 @@ async def test_add_turn_count_failure(repository, mock_supabase_client):
                 "role": ConversationRole.USER.value,
                 "content": "Hello",
                 "turn_index": 0,
-                "created_at": datetime.now(UTC).isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
             }
         ]
     )
@@ -240,7 +240,7 @@ async def test_get_recent_turns_success(repository, mock_supabase_client):
                 "role": ConversationRole.USER.value,
                 "content": "Hi",
                 "turn_index": 0,
-                "created_at": datetime.now(UTC).isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
             }
         ]
     )
@@ -272,8 +272,8 @@ async def test_list_threads_success(repository, mock_supabase_client):
                 "status": ConversationStatus.ACTIVE.value,
                 "turn_count": 1,
                 "metadata": {},
-                "created_at": datetime.now(UTC).isoformat(),
-                "updated_at": datetime.now(UTC).isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat(),
             }
         ],
         count=1,
@@ -313,8 +313,8 @@ async def test_archive_thread_success(repository, mock_supabase_client):
                 "status": ConversationStatus.ARCHIVED.value,
                 "turn_count": 1,
                 "metadata": {},
-                "created_at": datetime.now(UTC).isoformat(),
-                "updated_at": datetime.now(UTC).isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat(),
             }
         ]
     )

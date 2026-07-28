@@ -10,7 +10,7 @@ AIRequest.lifecycle is the only field addition, and it defaults to None (backwar
 """
 
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any, TypeVar
 
 from pydantic import BaseModel as PydanticBaseModel
@@ -87,8 +87,8 @@ class AIRequestLifecycle(DomainBaseModel):
         ),
     )
     created_at: datetime = Field(
-        default_factory=lambda: datetime.now(UTC),
-        description="UTC timestamp at lifecycle creation.",
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="timezone.utc timestamp at lifecycle creation.",
     )
     prompt_id: str | None = Field(
         default=None,

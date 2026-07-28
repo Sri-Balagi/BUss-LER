@@ -3,11 +3,9 @@ import uuid
 from typing import Any
 
 from app.application.applications.trigger.evaluators import ConditionEvaluatorRegistry
-from app.application.applications.trigger.evaluators import ConditionEvaluatorRegistry
 from app.domain.applications.base import (
     ApplicationResponse,
     IAsynchronousCognitiveApplication,
-    ICognitiveOrchestrator,
 )
 from app.domain.applications.context.models import ApplicationContext
 from app.domain.applications.registry.interfaces import IApplicationRegistry
@@ -196,7 +194,11 @@ class CognitiveTriggerEngine(IAsynchronousCognitiveApplication):
                     variables=dict(target_context_data.get("variables") or {})
                 )
             elif target_app_id == "bizos.insights.v1":
-                from app.domain.applications.insights.models import InsightContext, InsightExecutionRequest, InsightType
+                from app.domain.applications.insights.models import (
+                    InsightContext,
+                    InsightExecutionRequest,
+                    InsightType,
+                )
                 target_context = InsightContext(
                     insight_type=InsightType.ANOMALY,
                     execution_request=InsightExecutionRequest(required_capabilities=[CapabilityType.REASONING]),

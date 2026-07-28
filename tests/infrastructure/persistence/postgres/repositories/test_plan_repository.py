@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, timezone
+from datetime import datetime, timezone, timezone
 from uuid import UUID, uuid4
 
 import pytest
@@ -44,8 +44,8 @@ def sample_plan_data():
         "confidence": 0.9,
         "estimated_effort": "low",
         "metadata": {},
-        "created_at": datetime.now(UTC).isoformat(),
-        "updated_at": datetime.now(UTC).isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat(),
     }
 
 

@@ -1,7 +1,7 @@
 """Twin Context Provider — fetches the Digital Twin profile."""
 
 import json
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
 import structlog
@@ -51,7 +51,7 @@ class TwinContextProvider(AbstractContextProvider):
             prov = ContextProvenance(
                 provider=ContextSource.TWIN,
                 service_name="TwinService",
-                retrieval_timestamp=datetime.now(UTC),
+                retrieval_timestamp=datetime.now(timezone.utc),
                 confidence=1.0,
                 citations=[str(twin.id)],
             )
@@ -77,7 +77,7 @@ class TwinContextProvider(AbstractContextProvider):
             priority=ContextPriority.HIGH,
             items=items,
             token_estimate=sum(i.token_estimate for i in items),
-            retrieved_at=datetime.now(UTC),
+            retrieved_at=datetime.now(timezone.utc),
         )
 
     async def health_check(self) -> dict:

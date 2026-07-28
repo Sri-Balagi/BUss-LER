@@ -1,7 +1,7 @@
 """Scenario definitions for the Mock Provider."""
 
-from datetime import UTC, datetime
-from enum import StrEnum
+from datetime import datetime, timezone
+from enum import Enum
 from typing import Any
 
 from pydantic import Field
@@ -10,7 +10,7 @@ from app.infrastructure.ai.models import AIRequest
 from app.interfaces.http.schemas.base import DomainBaseModel
 
 
-class MockScenarioMode(StrEnum):
+class MockScenarioMode(str, Enum):
     """Execution modes for the mock provider to simulate various edge cases."""
 
     FIXED_RESPONSE = "FIXED_RESPONSE"
@@ -57,4 +57,4 @@ class ProviderCall(DomainBaseModel):
     structured_request: Any | None = None
     embedding_request: Any | None = None
     lifecycle_id: str | None = None
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

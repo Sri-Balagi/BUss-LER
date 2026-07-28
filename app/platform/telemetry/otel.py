@@ -52,7 +52,7 @@ def setup_tracing(service_name: str = "bizos", version: str = "6.0.0") -> bool:
         provider = TracerProvider(resource=resource)
 
         otlp_endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
-        from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter, SpanExporter
+        from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SpanExporter
 
         exporter: SpanExporter
         if otlp_endpoint:

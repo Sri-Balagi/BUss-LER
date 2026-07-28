@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from app.runtime.agents.permissions import AgentPermission
 
@@ -10,8 +10,11 @@ class Capability(BaseModel):
     """
 
     capability_id: str = Field(
+        default="default",
         description="Unique identifier for the capability (e.g., 'revenue-forecaster')"
     )
+    name: str | None = None
+    description: str | None = None
     version: str = Field(default="1.0.0", description="Semantic version of this capability")
     category: str = Field(default="general", description="Category for grouping capabilities")
     required_permissions: list[AgentPermission] = Field(
@@ -23,6 +26,14 @@ class Capability(BaseModel):
     cost: float = Field(default=0.0, description="Estimated cost per execution token/unit")
     timeout_ms: int = Field(default=30000, description="Maximum allowed execution time in ms")
     priority: int = Field(default=10, description="Routing priority (lower is higher priority)")
+
+    @model_validator(mode="after")
+    def sync_id_and_name(self) -> "Capability":
+        if self.capability_id == "default" and self.name:
+            self.capability_id = self.name.lower().replace(" ", "-")
+        elif not self.name and self.capability_id != "default":
+            self.name = self.capability_id
+        return self
 
     def __hash__(self):
         return hash((self.capability_id, self.version))

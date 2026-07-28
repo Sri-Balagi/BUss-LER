@@ -4,14 +4,14 @@ All enum types used across the Business Foundation Model.
 These are the categorical values that constrain the domain objects.
 """
 
-from enum import StrEnum
+from enum import Enum
 
 # =============================================================================
 # Entity Enums
 # =============================================================================
 
 
-class EntityType(StrEnum):
+class EntityType(str, Enum):
     """Type of entity that BizOS manages."""
 
     INDIVIDUAL = "individual"
@@ -20,14 +20,14 @@ class EntityType(StrEnum):
     STUDENT = "student"
     ORGANIZATION = "organization"
 
-class PrincipalType(StrEnum):
+class PrincipalType(str, Enum):
     """Type of execution principal."""
 
     HUMAN = "HUMAN"
     AGENT = "AGENT"
     SYSTEM = "SYSTEM"
 
-class ParticipantRole(StrEnum):
+class ParticipantRole(str, Enum):
     """Role of a session participant."""
 
     OWNER = "OWNER"
@@ -35,8 +35,8 @@ class ParticipantRole(StrEnum):
     CONTRIBUTOR = "CONTRIBUTOR"
     COORDINATOR = "COORDINATOR"
 
-class AgentType(StrEnum):
-    """Type of autonomous agent."""
+class AgentType(str, Enum):
+    """Type of autonomous agent (Legacy hardcoded roles, transitioning to templates)."""
 
     PLANNER = "PLANNER"
     RESEARCH = "RESEARCH"
@@ -45,7 +45,18 @@ class AgentType(StrEnum):
     MEMORY = "MEMORY"
     CUSTOM = "CUSTOM"
 
-class AgentStatus(StrEnum):
+class AgentCapability(str, Enum):
+    """Atomic capabilities an agent can possess."""
+
+    PLANNING = "planning"
+    RESEARCH = "research"
+    REASONING = "reasoning"
+    EXECUTION = "execution"
+    MEMORY_MANAGEMENT = "memory_management"
+    COMPLIANCE = "compliance"
+    COMMUNICATION = "communication"
+
+class AgentStatus(str, Enum):
     """Lifecycle status of an agent."""
 
     REGISTERED = "REGISTERED"
@@ -61,7 +72,7 @@ class AgentStatus(StrEnum):
 # =============================================================================
 
 
-class GoalType(StrEnum):
+class GoalType(str, Enum):
     """Hierarchical level of a goal."""
 
     STRATEGIC = "strategic"
@@ -70,7 +81,7 @@ class GoalType(StrEnum):
     HABIT = "habit"
 
 
-class GoalPriority(StrEnum):
+class GoalPriority(str, Enum):
     """Priority level of a goal."""
 
     LOW = "low"
@@ -79,7 +90,7 @@ class GoalPriority(StrEnum):
     CRITICAL = "critical"
 
 
-class GoalStatus(StrEnum):
+class GoalStatus(str, Enum):
     """Lifecycle status of a goal."""
 
     DRAFT = "draft"
@@ -96,7 +107,7 @@ class GoalStatus(StrEnum):
 # =============================================================================
 
 
-class ResourceType(StrEnum):
+class ResourceType(str, Enum):
     """Category of resource available to an entity."""
 
     FINANCIAL = "financial"
@@ -112,7 +123,7 @@ class ResourceType(StrEnum):
 # =============================================================================
 
 
-class ConstraintType(StrEnum):
+class ConstraintType(str, Enum):
     """Category of constraint limiting an entity."""
 
     FINANCIAL = "financial"
@@ -122,7 +133,7 @@ class ConstraintType(StrEnum):
     TECHNICAL = "technical"
 
 
-class ConstraintSeverity(StrEnum):
+class ConstraintSeverity(str, Enum):
     """How strict a constraint is."""
 
     HARD = "hard"
@@ -134,7 +145,14 @@ class ConstraintSeverity(StrEnum):
 # =============================================================================
 
 
-class MemoryCategory(StrEnum):
+class MemoryScope(str, Enum):
+    """Scope or hierarchy of a memory."""
+
+    PRIVATE = "private"     # Accessible only by the agent
+    TEAM = "team"           # Accessible by the agent's team/supervisor
+    BUSINESS = "business"   # Accessible globally within the tenant
+
+class MemoryCategory(str, Enum):
     """Business-oriented classification of a memory."""
 
     OBSERVATION = "observation"
@@ -148,7 +166,7 @@ class MemoryCategory(StrEnum):
     SYSTEM = "system"
 
 
-class EmbeddingStatus(StrEnum):
+class EmbeddingStatus(str, Enum):
     """Lifecycle status of a memory embedding process."""
 
     PENDING = "pending"
@@ -157,7 +175,7 @@ class EmbeddingStatus(StrEnum):
     FAILED = "failed"
 
 
-class MemorySource(StrEnum):
+class MemorySource(str, Enum):
     """Origin of a memory."""
 
     CONVERSATION = "conversation"
@@ -172,7 +190,7 @@ class MemorySource(StrEnum):
 # =============================================================================
 
 
-class ActionType(StrEnum):
+class ActionType(str, Enum):
     """Type of action performed by an agent or the system."""
 
     LLM_INFERENCE = "llm_inference"
@@ -182,7 +200,7 @@ class ActionType(StrEnum):
     MEMORY_WRITE = "memory_write"
 
 
-class ActionStatus(StrEnum):
+class ActionStatus(str, Enum):
     """Lifecycle status of an action."""
 
     PENDING = "pending"
@@ -198,7 +216,7 @@ class ActionStatus(StrEnum):
 # =============================================================================
 
 
-class OutcomeVerdict(StrEnum):
+class OutcomeVerdict(str, Enum):
     """Evaluation verdict for an action's result."""
 
     AS_EXPECTED = "as_expected"
@@ -213,14 +231,14 @@ class OutcomeVerdict(StrEnum):
 # =============================================================================
 
 
-class ConversationStatus(StrEnum):
+class ConversationStatus(str, Enum):
     """Status of a conversation."""
 
     ACTIVE = "active"
     ARCHIVED = "archived"
 
 
-class ConversationRole(StrEnum):
+class ConversationRole(str, Enum):
     """Role of a conversation turn participant."""
 
     USER = "user"
@@ -234,7 +252,7 @@ class ConversationRole(StrEnum):
 # =============================================================================
 
 
-class IntentType(StrEnum):
+class IntentType(str, Enum):
     """Business-domain classification of a user intent."""
 
     INVENTORY = "inventory"
@@ -248,7 +266,7 @@ class IntentType(StrEnum):
     GENERAL = "general"
 
 
-class IntentStatus(StrEnum):
+class IntentStatus(str, Enum):
     """Lifecycle status of an intent."""
 
     PENDING = "pending"
@@ -259,7 +277,7 @@ class IntentStatus(StrEnum):
     EXPIRED = "expired"
 
 
-class IntentConfidence(StrEnum):
+class IntentConfidence(str, Enum):
     """AI classification confidence band for an intent."""
 
     HIGH = "high"
@@ -272,7 +290,7 @@ class IntentConfidence(StrEnum):
 # =============================================================================
 
 
-class PlanStatus(StrEnum):
+class PlanStatus(str, Enum):
     """Lifecycle status of a generated plan."""
 
     DRAFT = "draft"
@@ -287,7 +305,7 @@ class PlanStatus(StrEnum):
 # =============================================================================
 
 
-class RecommendationStatus(StrEnum):
+class RecommendationStatus(str, Enum):
     """Lifecycle status of a proactive recommendation."""
 
     NEW = "new"
@@ -297,7 +315,7 @@ class RecommendationStatus(StrEnum):
     EXPIRED = "expired"
 
 
-class RecommendationConfidence(StrEnum):
+class RecommendationConfidence(str, Enum):
     """AI confidence band for a generated recommendation."""
 
     HIGH = "high"
@@ -310,7 +328,7 @@ class RecommendationConfidence(StrEnum):
 # =============================================================================
 
 
-class ContextSource(StrEnum):
+class ContextSource(str, Enum):
     """Identifies which cognitive subsystem contributed a context section."""
 
     MEMORY = "memory"
@@ -325,7 +343,7 @@ class ContextSource(StrEnum):
     EXTERNAL = "external"
 
 
-class ContextStatus(StrEnum):
+class ContextStatus(str, Enum):
     """Lifecycle status of an EnterpriseContext assembly."""
 
     BUILDING = "building"
@@ -336,7 +354,7 @@ class ContextStatus(StrEnum):
     ARCHIVED = "archived"
 
 
-class ContextPriority(StrEnum):
+class ContextPriority(str, Enum):
     """Priority tier for a context section or item."""
 
     CRITICAL = "critical"
@@ -346,7 +364,7 @@ class ContextPriority(StrEnum):
     BACKGROUND = "background"
 
 
-class RefreshStrategy(StrEnum):
+class RefreshStrategy(str, Enum):
     """Cache refresh strategy for a context provider."""
 
     LAZY = "lazy"  # Refresh only on cache miss

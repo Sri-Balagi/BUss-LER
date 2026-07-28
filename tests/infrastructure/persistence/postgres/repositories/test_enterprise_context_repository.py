@@ -1,5 +1,5 @@
 import uuid
-from datetime import UTC, datetime, timezone
+from datetime import datetime, timezone, timezone
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -44,8 +44,8 @@ async def test_create_success(repository, mock_supabase_client):
                 "schema_version": "1.0",
                 "status": ContextStatus.BUILDING.value,
                 "is_partial": False,
-                "created_at": datetime.now(UTC).isoformat(),
-                "updated_at": datetime.now(UTC).isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat(),
             }
         ]
     )
@@ -163,7 +163,7 @@ async def test_update_status_failure(repository, mock_supabase_client):
 @pytest.mark.asyncio
 async def test_update_status_full_fields(repository, mock_supabase_client):
     context_id = uuid.uuid4()
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     mock_execute = AsyncMock()
     mock_execute.return_value = MagicMock(
         data=[
@@ -202,7 +202,7 @@ async def test_update_status_full_fields(repository, mock_supabase_client):
 @pytest.mark.asyncio
 async def test_list_by_twin_success(repository, mock_supabase_client):
     twin_id = uuid.uuid4()
-    now = datetime.now(UTC).isoformat()
+    now = datetime.now(timezone.utc).isoformat()
     mock_execute = AsyncMock()
     mock_execute.return_value = MagicMock(
         data=[

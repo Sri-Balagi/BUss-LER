@@ -1,7 +1,7 @@
-from enum import StrEnum
+from enum import Enum
 
 
-class ErrorCode(StrEnum):
+class ErrorCode(str, Enum):
     """
     Standardized, machine-readable error codes for the BizOS API.
     These codes are returned in the 'code' field of the ErrorDetail schema.

@@ -50,18 +50,19 @@ def test_registry_failover(container: Container):
     from app.domain.intelligence.provider import ICapabilityRegistry
     registry = container.resolve(ICapabilityRegistry)
 
-    # Register priority 2 (healthy)
-    p2 = MockProvider("Healthy-P2", priority=2, status=ProviderLifecycleStatus.READY)
-    registry.register_provider(p2)
+    # Use very high priorities to dominate any pre-registered providers (Gemini, Mock, etc.)
+    # Register priority 500 (healthy)
+    p500 = MockProvider("Healthy-P500", priority=500, status=ProviderLifecycleStatus.READY)
+    registry.register_provider(p500)
 
-    # Register priority 5 (degraded/unavailable)
-    p5 = MockProvider("Broken-P5", priority=5, status=ProviderLifecycleStatus.UNAVAILABLE)
-    registry.register_provider(p5)
+    # Register priority 1000 (unavailable) — higher number but unavailable so should be skipped
+    p1000 = MockProvider("Broken-P1000", priority=1000, status=ProviderLifecycleStatus.UNAVAILABLE)
+    registry.register_provider(p1000)
 
-    # Resolve should skip P5 and return P2
+    # Resolve should skip P1000 (UNAVAILABLE) and return P500 (READY)
     resolved = registry.resolve_provider(CapabilityType.REASONING)
     assert resolved is not None
-    assert resolved.get_metadata().provider_name == "Healthy-P2"
+    assert resolved.get_metadata().provider_name == "Healthy-P500"
 
 
 @pytest.mark.asyncio

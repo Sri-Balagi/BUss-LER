@@ -1,7 +1,7 @@
 """Business State Context Provider — extracts structured business state from the Digital Twin."""
 
 import json
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
 import structlog
@@ -55,7 +55,7 @@ class BusinessStateContextProvider(AbstractContextProvider):
                 prov = ContextProvenance(
                     provider=ContextSource.BUSINESS_STATE,
                     service_name="TwinService[state]",
-                    retrieval_timestamp=datetime.now(UTC),
+                    retrieval_timestamp=datetime.now(timezone.utc),
                     confidence=1.0,
                     citations=[str(twin.id)],
                 )
@@ -81,7 +81,7 @@ class BusinessStateContextProvider(AbstractContextProvider):
             priority=ContextPriority.MEDIUM,
             items=items,
             token_estimate=sum(i.token_estimate for i in items),
-            retrieved_at=datetime.now(UTC),
+            retrieved_at=datetime.now(timezone.utc),
         )
 
     async def health_check(self) -> dict:

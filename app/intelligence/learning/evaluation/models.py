@@ -1,9 +1,9 @@
-from enum import StrEnum
+from enum import Enum
 
 from pydantic import BaseModel, Field
 
 
-class SuccessScore(StrEnum):
+class SuccessScore(str, Enum):
     ACHIEVED = "ACHIEVED"
     PARTIAL = "PARTIAL"
     FAILED = "FAILED"

@@ -33,7 +33,7 @@ This service does NOT own retrieval logic — it always delegates.
 """
 
 from abc import ABC, abstractmethod
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from uuid import UUID
 
 import structlog
@@ -134,7 +134,7 @@ class ContextBuilder(AbstractContextBuilder):
 
             context = CognitiveContext(
                 twin_id=twin_id,
-                assembled_at=datetime.now(UTC),
+                assembled_at=datetime.now(timezone.utc),
                 current_intent=intent,
                 active_goals=active_goals,
                 relevant_memories=relevant_memories,

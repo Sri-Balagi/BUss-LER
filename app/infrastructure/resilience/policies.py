@@ -1,11 +1,11 @@
 import asyncio
 import time
 from collections.abc import Callable
-from enum import StrEnum
+from enum import Enum
 from typing import Any
 
 
-class CircuitBreakerState(StrEnum):
+class CircuitBreakerState(str, Enum):
     CLOSED = "CLOSED"
     OPEN = "OPEN"
     HALF_OPEN = "HALF_OPEN"

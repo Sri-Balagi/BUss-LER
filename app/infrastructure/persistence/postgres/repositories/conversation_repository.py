@@ -4,7 +4,7 @@ Tables: conversation_threads, conversation_turns
 """
 
 from abc import ABC, abstractmethod
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any
 from uuid import UUID
 
@@ -71,7 +71,7 @@ class ConversationRepository(AbstractConversationRepository):
         self._client = client
 
     async def create_thread(self, data: ConversationThreadCreate) -> ConversationThread:
-        now = datetime.now(UTC).isoformat()
+        now = datetime.now(timezone.utc).isoformat()
         payload = {
             "twin_id": str(data.twin_id),
             "title": data.title,
@@ -108,7 +108,7 @@ class ConversationRepository(AbstractConversationRepository):
             raise RepositoryError(operation="conversation.get_thread", detail=str(exc)) from exc
 
     async def add_turn(self, data: ConversationTurnCreate) -> ConversationTurn:
-        now = datetime.now(UTC).isoformat()
+        now = datetime.now(timezone.utc).isoformat()
         # Determine turn_index
         try:
             count_result = (
@@ -194,7 +194,7 @@ class ConversationRepository(AbstractConversationRepository):
             raise RepositoryError(operation="conversation.list_threads", detail=str(exc)) from exc
 
     async def archive_thread(self, thread_id: UUID) -> ConversationThread:
-        now = datetime.now(UTC).isoformat()
+        now = datetime.now(timezone.utc).isoformat()
         try:
             result = (
                 await self._client.table(_THREADS_TABLE)
