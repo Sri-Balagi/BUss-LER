@@ -1,4 +1,4 @@
-from typing import Any, TypeVar
+from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel, Field
 
@@ -13,7 +13,7 @@ class ErrorDetail(BaseModel):
     details: list[Any] | None = Field(default=None, description="Additional context or validation errors.")
 
 
-class BizOSResponse[DataT](BaseModel):
+class BizOSResponse(BaseModel, Generic[DataT]):
     """
     Standard envelope for all BizOS API responses.
     Ensures that every API endpoint returns a consistent JSON structure.

@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar
+from typing import Generic, TypeVar
 from uuid import UUID
 
 T = TypeVar('T')
 
-class IRepository[T](ABC):
+class IRepository(ABC, Generic[T]):
     @abstractmethod
     async def create(self, entity: T) -> T:
         pass

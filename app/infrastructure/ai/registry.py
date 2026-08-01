@@ -43,3 +43,6 @@ class LLMProviderRegistry:
             self.register(fallback)
             chain.append(fallback)
         return chain
+
+
+ProviderRegistry = LLMProviderRegistry

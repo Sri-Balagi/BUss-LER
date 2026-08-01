@@ -1,6 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, TypeVar
+from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel
 
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 T = TypeVar("T")
 
 
-class BaseRegistry[T](ABC):
+class BaseRegistry(ABC, Generic[T]):
     """
     Advanced foundation for all BizOS Registries.
     Provides standardized storage, broadcasting, lifecycle hooks, and synchronization.

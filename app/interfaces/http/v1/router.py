@@ -66,6 +66,10 @@ api_router.include_router(autonomous_router)
 # System
 api_router.include_router(system_router)
 
+# Connectors System
+from app.interfaces.http.v1.connectors import router as connectors_router
+api_router.include_router(connectors_router)
+
 
 
 @api_router.get("/health/ai", tags=["System"])

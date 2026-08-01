@@ -1,0 +1,14 @@
+apiVersion: v2
+name: bizos
+description: Helm chart for BizOS - The Autonomous AI Operating System for Entities
+type: application
+version: 1.0.0
+appVersion: "6.0.0"
+keywords:
+  - ai
+  - autonomous-agents
+  - enterprise-operating-system
+  - multi-agent
+maintainers:
+  - name: BizOS Core Team
+    email: dev@bizos.ai

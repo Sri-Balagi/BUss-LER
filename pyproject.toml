@@ -3,7 +3,7 @@ name = "bizos"
 version = "6.0.0"
 description = "BizOS - The AI Operating System for Entities"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 license = { text = "MIT" }
 
 dependencies = [

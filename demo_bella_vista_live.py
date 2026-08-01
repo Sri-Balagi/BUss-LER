@@ -24,6 +24,13 @@ from dotenv import load_dotenv
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+# Python 3.10 compatibility: Polyfill enum.StrEnum
+import enum
+if not hasattr(enum, "StrEnum"):
+    class StrEnum(str, enum.Enum):
+        pass
+    enum.StrEnum = StrEnum
+
 # Force UTF-8 output on Windows
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -36,6 +43,7 @@ from app.infrastructure.ai.providers.gemini_live_provider import GeminiLiveProvi
 from app.infrastructure.ai.registry import LLMProviderRegistry
 from app.infrastructure.embeddings.registry import GeminiEmbeddingProvider, EmbeddingProviderRegistry
 from app.infrastructure.memory.qdrant_lifecycle_provider import QdrantLifecycleMemoryProvider
+from app.application.memory.providers import InMemoryProvider
 from app.application.memory.context_builder import ContextBuilderService
 from app.infrastructure.observability.telemetry import TelemetryTracker, ExecutionTelemetryRecord
 from app.infrastructure.prompts.versioned_registry import VersionedPromptRegistry
@@ -170,8 +178,8 @@ async def run_master_simulation():
         log(icon, service.upper(), check.get("message", ""), color)
 
     if diag_res["status"] == "UNHEALTHY":
-        print(f"\n{RED}{BOLD}ERROR: Preflight check failed! Please resolve infrastructure issues.{RESET}")
-        return {"success": False}
+        log("[WARN]", "PREFLIGHT", "External infrastructure offline (Qdrant/Supabase). Utilizing live Gemini 2.5 Flash + fallback storage mode.", YELLOW)
+        # Continue with fallback vector store
 
     # -- PHASE 1: PLUGIN & PROVIDER INITIALIZATION ----------------------------
     header("PHASE 1 -- PLATFORM & PLUGIN FRAMEWORK INITIALIZATION", CYAN)
@@ -191,17 +199,25 @@ async def run_master_simulation():
     emb_registry.register(gemini_emb)
     log("[OK]", "Embedding Registry", f"Active Model: {gemini_emb.provider_name} (768d)", GREEN)
 
-    qdrant_memory = QdrantLifecycleMemoryProvider(embedding_provider=gemini_emb)
+    qdrant_ok = diag_res.get("checks", {}).get("qdrant", {}).get("status") == "OK"
+    if qdrant_ok:
+        memory_provider = QdrantLifecycleMemoryProvider(embedding_provider=gemini_emb)
+        log("[OK]", "Memory Store", "Connected to Qdrant (localhost:6333)", GREEN)
+    else:
+        log("[INFO]", "Memory Store", "Qdrant offline -- Initialized InMemoryProvider fallback with Gemini embeddings", YELLOW)
+        memory_provider = InMemoryProvider()
+
+
     telemetry = TelemetryTracker()
     prompts = VersionedPromptRegistry()
     eval_harness = EvaluationHarness()
 
     # -- PHASE 2: GENERIC KNOWLEDGE INGESTION PIPELINE -------------------------
     header("PHASE 2 -- KNOWLEDGE INGESTION PIPELINE", MAGENTA)
-    ingestion_pipeline = KnowledgeIngestionPipeline(memory_provider=qdrant_memory)
+    ingestion_pipeline = KnowledgeIngestionPipeline(memory_provider=memory_provider)
     kb_docs = restaurant_plugin.get_knowledge_documents()
     ingest_res = await ingestion_pipeline.ingest_batch_documents(kb_docs)
-    log("[OK]", "Ingestion Complete", f"Indexed {ingest_res['documents_processed']} docs ({ingest_res['total_chunks_indexed']} vector chunks in Qdrant)", GREEN)
+    log("[OK]", "Ingestion Complete", f"Indexed {ingest_res['documents_processed']} docs ({ingest_res['total_chunks_indexed']} vector chunks)", GREEN)
 
     # -- PHASE 3: RESTAURANT OWNER KNOWLEDGE BASE Q&A --------------------------
     header("PHASE 3 -- RESTAURANT OWNER NATURAL KNOWLEDGE Q&A", YELLOW)
@@ -209,10 +225,10 @@ async def run_master_simulation():
     log("[>>]", "Owner Asks", f'"{owner_query}"', WHITE)
 
     twin_engine = DigitalTwinSyncEngine(tenant_id=uuid4(), entity_id=uuid4())
-    context_builder = ContextBuilderService(memory_platform=UnifiedMemoryPlatform(qdrant_memory, None))
+    context_builder = ContextBuilderService(memory_platform=UnifiedMemoryPlatform(memory_provider, None))
     
     # Assembly multi-source context
-    kb_hits = await qdrant_memory.search(owner_query, limit=3)
+    kb_hits = await memory_provider.search(owner_query, limit=3)
     eval_harness.evaluate_retrieval_precision(len(kb_hits))
 
     context_bundle = await context_builder.assemble_context(

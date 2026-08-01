@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar
+from typing import Generic, TypeVar
 
 T = TypeVar("T")
 
 
-class IRegistryStore[T](ABC):
+class IRegistryStore(ABC, Generic[T]):
     """
     Decouples the persistence layer from the Registry logic.
     Provides fundamental CRUD operations for registry items.

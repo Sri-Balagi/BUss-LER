@@ -20,14 +20,16 @@ class InMemoryProvider(IMemoryProvider):
 
     async def search(self, query: str, limit: int = 10, **filters) -> list[MemoryRecord]:
         results = []
+        q_lower = query.lower()
+        q_tokens = [t for t in q_lower.replace("?", "").replace(",", "").split() if len(t) > 3]
         for record in self._store.values():
-            # Mock keyword search
-            if query.lower() in record.content.lower() or query.lower() in record.title.lower():
-                # Apply filters mock
+            rec_text = (record.title + " " + record.content).lower()
+            if q_lower in rec_text or any(token in rec_text for token in q_tokens):
                 if filters.get("memory_types") and record.memory_type not in filters["memory_types"]:
                     continue
                 results.append(record)
         return results[:limit]
+
 
     async def delete(self, memory_id: UUID) -> None:
         if memory_id in self._store:

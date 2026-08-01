@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BizOS Studio — Executive Operations Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/studio/styles.css">
+</head>
+<body class="dark-theme">
+  <div class="studio-app">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo-icon">⚡</div>
+        <div class="brand-text">
+          <span class="brand-name">BizOS Studio</span>
+          <span class="brand-badge">PROD v2.5</span>
+        </div>
+      </div>
+
+      <nav class="nav-menu">
+        <button class="nav-item active" data-tab="overview">
+          <span class="nav-icon">📊</span> Overview & SLA
+        </button>
+        <button class="nav-item" data-tab="workflows">
+          <span class="nav-icon">🔀</span> Workflow DAGs
+        </button>
+        <button class="nav-item" data-tab="fleet">
+          <span class="nav-icon">🤖</span> Multi-Agent Fleet
+        </button>
+        <button class="nav-item" data-tab="twin">
+          <span class="nav-icon">🧠</span> Digital Twin & Memory
+        </button>
+        <button class="nav-item" data-tab="timetravel">
+          <span class="nav-icon">⏪</span> Time-Travel Inspector
+        </button>
+        <button class="nav-item" data-tab="onboarding">
+          <span class="nav-icon">🔌</span> Connector Vault
+        </button>
+      </nav>
+
+      <div class="mode-selector-card">
+        <div class="mode-header">Execution Mode</div>
+        <div class="mode-toggles">
+          <button class="mode-btn active" id="btnModeSim">SIM</button>
+          <button class="mode-btn" id="btnModeDry">DRY</button>
+          <button class="mode-btn" id="btnModeProd">PROD</button>
+        </div>
+      </div>
+
+      <div class="system-status">
+        <div class="status-indicator online"></div>
+        <div class="status-info">
+          <span class="status-title">System Status</span>
+          <span class="status-sub">All Systems Operational</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Navbar -->
+      <header class="topbar">
+        <div class="page-title-box">
+          <h1 id="pageTitle">Executive Operations Dashboard</h1>
+          <p id="pageSub">Real-time system telemetry, active goals, SLA, and cost accounting</p>
+        </div>
+        <div class="topbar-actions">
+          <div class="live-clock" id="liveClock">11:15:00 UTC</div>
+          <button class="action-btn primary" id="btnNewGoal">+ Launch New Goal</button>
+        </div>
+      </header>
+
+      <!-- TAB 1: OVERVIEW -->
+      <section class="tab-content active" id="tabOverview">
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-label">System SLA</span>
+              <span class="metric-badge green">99.98%</span>
+            </div>
+            <div class="metric-value">99.98%</div>
+            <div class="metric-footer">Target: 99.90% | Zero downtime</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-label">Active Goals</span>
+              <span class="metric-icon">🎯</span>
+            </div>
+            <div class="metric-value" id="valActiveGoals">12</div>
+            <div class="metric-footer">100% execution pass rate</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-label">Avg Execution Latency</span>
+              <span class="metric-icon">⚡</span>
+            </div>
+            <div class="metric-value" id="valLatency">142 ms</div>
+            <div class="metric-footer">p95: 210ms | p99: 380ms</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-label">Token Cost Accounting</span>
+              <span class="metric-icon">💎</span>
+            </div>
+            <div class="metric-value">$0.042 / hr</div>
+            <div class="metric-footer">Gemini 2.5 Flash Optimized</div>
+          </div>
+        </div>
+
+        <div class="dashboard-split">
+          <div class="panel glass">
+            <div class="panel-header">
+              <h3>Active Enterprise Goals</h3>
+              <span class="panel-badge">Live Stream</span>
+            </div>
+            <div class="goals-list" id="goalsList">
+              <div class="goal-item">
+                <div class="goal-icon">🎯</div>
+                <div class="goal-details">
+                  <span class="goal-name">Bella Vista Daily Financial Optimization & Inventory Balancing</span>
+                  <span class="goal-meta">Tenant: Bella Vista Restaurant | Priority: HIGH</span>
+                </div>
+                <span class="goal-status active">RUNNING</span>
+              </div>
+              <div class="goal-item">
+                <div class="goal-icon">🎯</div>
+                <div class="goal-details">
+                  <span class="goal-name">Automated Customer Inquiry Resolution & Gmail Dispatch</span>
+                  <span class="goal-meta">Tenant: Global Retail | Priority: NORMAL</span>
+                </div>
+                <span class="goal-status done">COMPLETED</span>
+              </div>
+              <div class="goal-item">
+                <div class="goal-icon">🎯</div>
+                <div class="goal-details">
+                  <span class="goal-name">Weekly Healthcare Appointment Scheduling & Patient Reminders</span>
+                  <span class="goal-meta">Tenant: Apex Health | Priority: URGENT</span>
+                </div>
+                <span class="goal-status done">COMPLETED</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel glass">
+            <div class="panel-header">
+              <h3>Live Telemetry Stream</h3>
+              <span class="panel-badge blue">Real-time</span>
+            </div>
+            <div class="log-stream" id="telemetryStream">
+              <div class="log-line"><span class="log-time">11:14:02</span> <span class="log-tag info">INFO</span> [Planner] Graph node 'balance_inventory' state set to RUNNING</div>
+              <div class="log-line"><span class="log-time">11:14:05</span> <span class="log-tag success">SUCCESS</span> [GmailConnector] Email dispatched to rsribalagi@gmail.com</div>
+              <div class="log-line"><span class="log-time">11:14:08</span> <span class="log-tag success">SUCCESS</span> [WhatsAppConnector] Message delivered to 7338909974</div>
+              <div class="log-line"><span class="log-time">11:14:12</span> <span class="log-tag info">INFO</span> [OpenBanking] Read-only financial statement generated for account ****8165</div>
+              <div class="log-line"><span class="log-time">11:14:15</span> <span class="log-tag info">INFO</span> [AuditLogger] Trajectory trace saved to TimeTravelInspector</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: WORKFLOW DAGS -->
+      <section class="tab-content" id="tabWorkflows">
+        <div class="panel glass dag-panel">
+          <div class="panel-header">
+            <h3>Interactive Workflow DAG Visualizer</h3>
+            <div class="dag-controls">
+              <button class="small-btn" id="btnZoomIn">Zoom In (+)</button>
+              <button class="small-btn" id="btnZoomOut">Zoom Out (-)</button>
+              <button class="small-btn primary" id="btnRunDag">Execute DAG</button>
+            </div>
+          </div>
+          <div class="canvas-container">
+            <canvas id="dagCanvas" width="1000" height="500"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: MULTI-AGENT FLEET -->
+      <section class="tab-content" id="tabFleet">
+        <div class="fleet-grid">
+          <div class="agent-card glass">
+            <div class="agent-header">
+              <div class="agent-avatar">🤖</div>
+              <div class="agent-info">
+                <h4>Executive Orchestrator Agent</h4>
+                <span class="agent-role">Goal Decomposition & Delegation</span>
+              </div>
+              <span class="agent-badge active">ACTIVE</span>
+            </div>
+            <div class="agent-body">
+              <p>Orchestrates enterprise goals, resolves dependencies across sub-agents, and delegates execution steps.</p>
+              <div class="agent-caps">
+                <span class="cap-tag">PLANNING</span>
+                <span class="cap-tag">DELEGATION</span>
+                <span class="cap-tag">GOAL_ALIGNMENT</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="agent-card glass">
+            <div class="agent-avatar">📈</div>
+            <div class="agent-header">
+              <div class="agent-info">
+                <h4>Financial Operations Agent</h4>
+                <span class="agent-role">Accounting & Read-Only Insights</span>
+              </div>
+              <span class="agent-badge active">ACTIVE</span>
+            </div>
+            <div class="agent-body">
+              <p>Monitors cash flow, generates spending summaries, and interfaces with Open Banking / Razorpay / Stripe.</p>
+              <div class="agent-caps">
+                <span class="cap-tag">BANKING_READ</span>
+                <span class="cap-tag">SPENDING_ANALYSIS</span>
+                <span class="cap-tag">RECONCILIATION</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="agent-card glass">
+            <div class="agent-avatar">💬</div>
+            <div class="agent-header">
+              <div class="agent-info">
+                <h4>Customer Communication Agent</h4>
+                <span class="agent-role">Gmail & WhatsApp Messaging</span>
+              </div>
+              <span class="agent-badge active">ACTIVE</span>
+            </div>
+            <div class="agent-body">
+              <p>Manages automated emails, patient reminders, customer support tickets, and WhatsApp broadcasts.</p>
+              <div class="agent-caps">
+                <span class="cap-tag">GMAIL_API</span>
+                <span class="cap-tag">WHATSAPP_META</span>
+                <span class="cap-tag">CRM_SYNC</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: DIGITAL TWIN & MEMORY -->
+      <section class="tab-content" id="tabTwin">
+        <div class="twin-split">
+          <div class="panel glass">
+            <div class="panel-header">
+              <h3>Digital Twin Enterprise State Tree</h3>
+              <span class="panel-badge">Live State Snapshot</span>
+            </div>
+            <div class="code-tree" id="twinStateTree">
+              <pre>{
+  "company_id": "bella_vista_restaurant",
+  "name": "Bella Vista Ristorante",
+  "operational_status": "OPEN",
+  "active_staff": 14,
+  "current_table_occupancy": 0.82,
+  "daily_revenue": 250000.00,
+  "inventory": {
+    "fresh_produce_pct": 88,
+    "beverage_stock_pct": 94,
+    "low_stock_alerts": []
+  },
+  "connected_accounts": [
+    { "provider": "open_banking", "masked_id": "****8165", "status": "ACTIVE_READ_ONLY" },
+    { "provider": "gmail", "user": "iamlnavdeeep@gmail.com", "status": "CONNECTED" },
+    { "provider": "whatsapp", "phone": "7338909974", "status": "VERIFIED" }
+  ]
+}</pre>
+            </div>
+          </div>
+
+          <div class="panel glass">
+            <div class="panel-header">
+              <h3>Vector Memory Search Inspector</h3>
+              <div class="search-box">
+                <input type="text" id="inputMemorySearch" placeholder="Search vector memory embeddings..." value="supplier invoices and recent revenue">
+                <button class="small-btn primary" id="btnSearchMemory">Search</button>
+              </div>
+            </div>
+            <div class="memory-results" id="memoryResults">
+              <div class="memory-card">
+                <span class="mem-score">Similarity: 0.94</span>
+                <p><strong>Document ID:</strong> doc_inv_8871</p>
+                <p><strong>Content:</strong> Fresh produce vendor invoice #8871 cleared via Open Banking on 2026-07-28 for ₹42,000.</p>
+              </div>
+              <div class="memory-card">
+                <span class="mem-score">Similarity: 0.89</span>
+                <p><strong>Document ID:</strong> doc_rev_9902</p>
+                <p><strong>Content:</strong> Customer catering retainer credited via Open Banking on 2026-07-22 for ₹1,00,000.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: TIME-TRAVEL INSPECTOR -->
+      <section class="tab-content" id="tabTimetravel">
+        <div class="panel glass">
+          <div class="panel-header">
+            <h3>Time-Travel Trajectory Replayer</h3>
+            <div class="replay-controls">
+              <button class="small-btn" id="btnStepBack">⏮ Previous Step</button>
+              <button class="small-btn primary" id="btnPlayReplay">▶ Play Trajectory</button>
+              <button class="small-btn" id="btnStepForward">⏭ Next Step</button>
+            </div>
+          </div>
+
+          <div class="trajectory-viewer">
+            <div class="step-card active">
+              <div class="step-num">Step 1</div>
+              <div class="step-content">
+                <h4>API Gateway Ingestion</h4>
+                <p>User Request: "Send email, WhatsApp message, and generate financial report"</p>
+                <span class="step-tag">APIGateway</span>
+              </div>
+            </div>
+            <div class="step-card active">
+              <div class="step-num">Step 2</div>
+              <div class="step-content">
+                <h4>Planner Goal Decomposition</h4>
+                <p>Selected Connectors: GmailConnector, WhatsAppConnector, BankingUPIConnector</p>
+                <span class="step-tag">Planner</span>
+              </div>
+            </div>
+            <div class="step-card active">
+              <div class="step-num">Step 3</div>
+              <div class="step-content">
+                <h4>Connector Execution & Audit Trace</h4>
+                <p>Email dispatched to rsribalagi@gmail.com, WhatsApp sent to 7338909974, Read-Only report generated for IPPB ****8165</p>
+                <span class="step-tag">AuditLogger</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 6: CONNECTOR VAULT -->
+      <section class="tab-content" id="tabOnboarding">
+        <div class="connector-cards-grid">
+          <div class="connector-card glass">
+            <div class="conn-icon">📧</div>
+            <h3>Google Gmail & Drive</h3>
+            <p>Unified OAuth 2.0 single consent connection for Gmail API & Drive file operations.</p>
+            <span class="conn-status connected">CONNECTED</span>
+          </div>
+
+          <div class="connector-card glass">
+            <div class="conn-icon">💬</div>
+            <h3>WhatsApp Business API</h3>
+            <p>Phone OTP verification & Meta Cloud API messaging activation.</p>
+            <span class="conn-status connected">CONNECTED</span>
+          </div>
+
+          <div class="connector-card glass">
+            <div class="conn-icon">🏦</div>
+            <h3>Unified Banking & UPI Gateway</h3>
+            <p>Open Banking, Account Aggregator, Stripe, and Razorpay read-only accounts.</p>
+            <span class="conn-status connected">CONNECTED (READ-ONLY)</span>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/studio/app.js"></script>
+</body>
+</html>

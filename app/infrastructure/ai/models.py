@@ -11,7 +11,7 @@ AIRequest.lifecycle is the only field addition, and it defaults to None (backwar
 
 import uuid
 from datetime import datetime, timezone
-from typing import Any, TypeVar
+from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel as PydanticBaseModel
 from pydantic import ConfigDict, Field
@@ -240,7 +240,7 @@ class StreamChunk(DomainBaseModel):
     )
 
 
-class StructuredRequest[T](DomainBaseModel):
+class StructuredRequest(DomainBaseModel, Generic[T]):
     """Request for provider-native schema-enforced structured output.
 
     Used by AIKernel.generate_structured() and ILLMProvider.generate_structured().

@@ -55,23 +55,10 @@ class AgentRuntime(IAgentRuntime):
         from app.domain.tasks.repository import InMemoryTaskRepository
         from app.infrastructure.session.memory import InMemorySessionRepository
 
-        args = [arg for arg in [event_bus, registry, task_repo, session_repo] if arg is not None]
-        
-        eb, reg, trepo, srepo = None, None, None, None
-        for arg in args:
-            if hasattr(arg, "publish") or hasattr(arg, "subscribe"):
-                eb = arg
-            elif hasattr(arg, "get_agent") or hasattr(arg, "register_agent") or hasattr(arg, "agents"):
-                reg = arg
-            elif hasattr(arg, "get_task") or hasattr(arg, "save_task") or hasattr(arg, "tasks"):
-                trepo = arg
-            elif hasattr(arg, "get_session") or hasattr(arg, "save_session") or hasattr(arg, "sessions"):
-                srepo = arg
-
-        self._event_bus = eb
-        self._registry = reg or InMemoryAgentRegistry()
-        self._task_repo = trepo or InMemoryTaskRepository()
-        self._session_repo = srepo or InMemorySessionRepository()
+        self._event_bus = event_bus
+        self._registry = registry or InMemoryAgentRegistry()
+        self._task_repo = task_repo or InMemoryTaskRepository()
+        self._session_repo = session_repo or InMemorySessionRepository()
         self._behaviors = behaviors or {}
 
         self._goal_lifecycle_service = goal_lifecycle_service or GoalLifecycleService()

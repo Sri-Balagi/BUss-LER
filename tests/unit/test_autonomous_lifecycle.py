@@ -86,8 +86,7 @@ async def test_observation_and_replanning_services():
 async def test_agent_runtime_execute_goal_closed_loop():
     mock_registry = MagicMock()
     mock_agent = MagicMock()
-    mock_agent.name = "Sales Agent"
-    mock_registry.get_agent.return_value = mock_agent
+    mock_registry.get_agent.side_effect = lambda agent_id: mock_agent
 
     mock_wf_service = AsyncMock()
     mock_wf_service.execute_workflow.return_value = WorkflowResult(success=True, task_results={})

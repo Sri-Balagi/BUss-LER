@@ -6,7 +6,7 @@ from uuid import UUID, uuid4
 from pydantic import BaseModel, Field
 
 
-class MemoryType(enum.StrEnum):
+class MemoryType(str, enum.Enum):
     CONVERSATION = "CONVERSATION"
     WORKFLOW = "WORKFLOW"
     BUSINESS = "BUSINESS"
@@ -15,7 +15,7 @@ class MemoryType(enum.StrEnum):
     SEMANTIC = "SEMANTIC"
     TASK = "TASK"
 
-class MemorySource(enum.StrEnum):
+class MemorySource(str, enum.Enum):
     USER = "USER"
     SYSTEM = "SYSTEM"
     AGENT = "AGENT"

@@ -5,14 +5,14 @@ list endpoints across the API. Every endpoint that returns a
 collection uses this structure.
 """
 
-from typing import TypeVar
+from typing import Generic, TypeVar
 
 from pydantic import BaseModel, Field
 
 T = TypeVar("T")
 
 
-class PaginatedResponse[T](BaseModel):
+class PaginatedResponse(BaseModel, Generic[T]):
     """A generic paginated response wrapper.
 
     Attributes:

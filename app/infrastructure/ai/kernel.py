@@ -1,9 +1,8 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from collections.abc import AsyncIterator
-from typing import TYPE_CHECKING, Any
-
-if TYPE_CHECKING:
-    from app.infrastructure.ai.prompts.registry import PromptRegistry
+from typing import Any
 
 import structlog
 from pydantic import BaseModel as PydanticBaseModel
@@ -21,7 +20,7 @@ from app.infrastructure.ai.models import (
     StreamChunk,
     StructuredRequest,
 )
-from app.infrastructure.ai.prompts import PromptManager
+from app.infrastructure.ai.prompts import PromptManager, PromptRegistry
 from app.infrastructure.ai.router import ProviderRouter
 
 logger = structlog.get_logger(__name__)

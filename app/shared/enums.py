@@ -373,3 +373,10 @@ class RefreshStrategy(str, Enum):
 
 
 # =============================================================================
+
+class ExecutionMode(str, Enum):
+    """Runtime execution mode for safety and side-effect control."""
+
+    SIMULATION = "SIMULATION"
+    DRY_RUN = "DRY_RUN"
+    PRODUCTION = "PRODUCTION"

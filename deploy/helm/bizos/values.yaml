@@ -1,0 +1,62 @@
+# Default values for BizOS Helm Deployment
+
+replicaCount:
+  api: 2
+  worker: 2
+
+image:
+  repository: bizos/platform
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 8000
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+  hosts:
+    - host: bizos.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources:
+  api:
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+  worker:
+    limits:
+      cpu: 4000m
+      memory: 4Gi
+    requests:
+      cpu: 1000m
+      memory: 1Gi
+
+env:
+  appEnv: production
+  logLevel: INFO
+  qdrantHost: "vector-db"
+  qdrantPort: 6333
+  qdrantCollection: "memories"
+  qdrantVectorSize: 768
+  geminiProModel: "gemini-2.5-pro"
+  geminiFlashModel: "gemini-2.5-flash"
+  geminiEmbeddingModel: "gemini-embedding-001"
+
+secrets:
+  geminiApiKey: ""
+  supabaseUrl: ""
+  supabaseKey: ""
+  databaseUrl: ""
+  redisUrl: ""
