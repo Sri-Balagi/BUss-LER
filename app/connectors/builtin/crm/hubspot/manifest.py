@@ -1,0 +1,40 @@
+from app.connectors.sdk.manifest import ConnectorManifest, ConnectorComplianceLevel
+from app.connectors.sdk.permissions import ConnectorPermission
+
+MANIFEST = ConnectorManifest(
+    connector_id="hubspot",
+    display_name="HubSpot",
+    version="4.0.0",
+    provider="hubspot",
+    description="Production-grade HubSpot CRM connector. Provides bidirectional sync for contacts, companies, deals, tickets, and engagement activities.",
+    compliance_level=ConnectorComplianceLevel.ENTERPRISE_CERTIFIED,
+    family="crm",
+    capabilities=[
+        "crm.contacts.read",
+        "crm.contacts.write",
+        "crm.companies.read",
+        "crm.companies.write",
+        "crm.deals.read",
+        "crm.deals.write",
+        "crm.tickets.read",
+        "crm.tickets.write",
+        "crm.associations.read",
+        "crm.associations.write",
+        "crm.engagements.read",
+        "crm.engagements.write",
+        "crm.owners.read",
+        "crm.sync.delta",
+    ],
+    permissions=[
+        ConnectorPermission.READ_CONTACTS,
+        ConnectorPermission.WRITE_CONTACTS,
+        ConnectorPermission.READ_ACCOUNTS,
+        ConnectorPermission.WRITE_ACCOUNTS,
+        ConnectorPermission.READ_DEALS,
+        ConnectorPermission.WRITE_DEALS,
+    ],
+    supported_execution_modes=["SIMULATION", "DRY_RUN", "PRODUCTION"],
+    auth_type="oauth2",
+    webhook_support=True,
+    multi_account_support=True,
+)

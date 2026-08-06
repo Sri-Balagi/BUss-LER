@@ -1,0 +1,154 @@
+[
+  {
+    "id": "C0BMCLAEQJ1",
+    "created": 1785681992,
+    "creator": "U0BMKM6RDHA",
+    "is_org_shared": false,
+    "is_im": false,
+    "context_team_id": "T0BMG0T5TBL",
+    "updated": 1785682009629,
+    "name": "all-bizos",
+    "name_normalized": "all-bizos",
+    "is_channel": true,
+    "is_group": false,
+    "is_mpim": false,
+    "is_private": false,
+    "is_archived": false,
+    "is_general": true,
+    "is_shared": false,
+    "is_ext_shared": false,
+    "unlinked": 0,
+    "is_pending_ext_shared": false,
+    "pending_shared": [],
+    "parent_conversation": null,
+    "purpose": {
+      "value": "Share announcements and updates about company news, upcoming events, or teammates who deserve some kudos. \u2b50",
+      "creator": "U0BMKM6RDHA",
+      "last_set": 1785681992
+    },
+    "topic": {
+      "value": "",
+      "creator": "",
+      "last_set": 0
+    },
+    "shared_team_ids": [
+      "T0BMG0T5TBL"
+    ],
+    "pending_connected_team_ids": [],
+    "is_member": false,
+    "num_members": 2,
+    "properties": {
+      "use_case": "welcome"
+    },
+    "previous_names": [
+      "all-new-workspace"
+    ]
+  },
+  {
+    "id": "C0BMKM6UWUC",
+    "created": 1785681992,
+    "creator": "U0BMKM6RDHA",
+    "is_org_shared": false,
+    "is_im": false,
+    "context_team_id": "T0BMG0T5TBL",
+    "updated": 1785681996920,
+    "name": "social",
+    "name_normalized": "social",
+    "is_channel": true,
+    "is_group": false,
+    "is_mpim": false,
+    "is_private": false,
+    "is_archived": false,
+    "is_general": false,
+    "is_shared": false,
+    "is_ext_shared": false,
+    "unlinked": 0,
+    "is_pending_ext_shared": false,
+    "pending_shared": [],
+    "parent_conversation": null,
+    "purpose": {
+      "value": "Other channels are for work. This one\u2019s just for fun. Get to know your teammates and show your lighter side. \ud83c\udf88",
+      "creator": "U0BMKM6RDHA",
+      "last_set": 1785681992
+    },
+    "topic": {
+      "value": "",
+      "creator": "",
+      "last_set": 0
+    },
+    "shared_team_ids": [
+      "T0BMG0T5TBL"
+    ],
+    "pending_connected_team_ids": [],
+    "is_member": true,
+    "num_members": 3,
+    "properties": {
+      "tabs": [
+        {
+          "id": "Ct0BMKM5SD0U",
+          "type": "canvas",
+          "data": {
+            "file_id": "F0BMHU5GK5X",
+            "shared_ts": "1785681996.853549"
+          },
+          "label": ""
+        }
+      ],
+      "tabz": [
+        {
+          "id": "Ct0BMKM5SD0U",
+          "type": "canvas",
+          "data": {
+            "file_id": "F0BMHU5GK5X",
+            "shared_ts": "1785681996.853549"
+          }
+        }
+      ],
+      "use_case": "random"
+    },
+    "previous_names": []
+  },
+  {
+    "id": "C0BNAAWAQ56",
+    "created": 1785682031,
+    "creator": "U0BMKM6RDHA",
+    "is_org_shared": false,
+    "is_im": false,
+    "context_team_id": "T0BMG0T5TBL",
+    "updated": 1785682031118,
+    "name": "new-channel",
+    "name_normalized": "new-channel",
+    "is_channel": true,
+    "is_group": false,
+    "is_mpim": false,
+    "is_private": false,
+    "is_archived": false,
+    "is_general": false,
+    "is_shared": false,
+    "is_ext_shared": false,
+    "unlinked": 0,
+    "is_pending_ext_shared": false,
+    "pending_shared": [],
+    "parent_conversation": null,
+    "purpose": {
+      "value": "This channel is for everything #new-channel. Hold meetings, share docs, and make decisions together with your team.",
+      "creator": "U0BMKM6RDHA",
+      "last_set": 1785682031
+    },
+    "topic": {
+      "value": "",
+      "creator": "",
+      "last_set": 0
+    },
+    "shared_team_ids": [
+      "T0BMG0T5TBL"
+    ],
+    "pending_connected_team_ids": [],
+    "is_member": false,
+    "num_members": 2,
+    "properties": {
+      "use_case": "project"
+    },
+    "previous_names": []
+  }
+]

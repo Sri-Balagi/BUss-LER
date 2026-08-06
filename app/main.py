@@ -98,6 +98,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
         from app.infrastructure.security.audit import AuditSubscriber
         logger.info("Initializing Audit & Security Observability")
+        
+        from app.connectors.bootstrap import bootstrap_connectors
+        bootstrap_connectors()
         container.resolve(AuditSubscriber)
 
         logger.info("Startup complete — BizOS is ready to serve requests")
