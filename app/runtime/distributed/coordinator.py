@@ -5,7 +5,12 @@ Establishes worker roles, dynamic capability discovery, task leases, and transpo
 from __future__ import annotations
 import asyncio
 from datetime import datetime, timezone
-from enum import StrEnum
+try:
+    from enum import StrEnum
+except ImportError:
+    from enum import Enum
+    class StrEnum(str, Enum):
+        pass
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 

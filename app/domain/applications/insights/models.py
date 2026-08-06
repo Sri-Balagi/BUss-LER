@@ -1,3 +1,10 @@
+try:
+    from enum import StrEnum
+except ImportError:
+    from enum import Enum
+    class StrEnum(str, Enum):
+        pass
+
 import enum
 from typing import Any
 
@@ -8,7 +15,7 @@ from app.domain.intelligence.capability import CapabilityType
 from app.shared.events.models import DomainEvent
 
 
-class InsightType(enum.StrEnum):
+class InsightType(StrEnum):
     ANOMALY = "ANOMALY"
     STRATEGIC_FORESIGHT = "STRATEGIC_FORESIGHT"
     PERFORMANCE_SUMMARY = "PERFORMANCE_SUMMARY"

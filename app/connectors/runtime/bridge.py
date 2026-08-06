@@ -56,7 +56,15 @@ class UniversalConnectorRuntimeBridge:
                 raise PermissionError(f"Permission Denied for action '{action}': {perm_result.reason}")
 
         # Determine effective execution mode
-        effective_mode = session.execution_mode if session else ExecutionMode.PRODUCTION
+        effective_mode = (
+            session.execution_mode
+            if session
+            else (
+                context.execution_mode
+                if context and getattr(context, "execution_mode", None)
+                else ExecutionMode.PRODUCTION
+            )
+        )
 
         logger.info(
             "Executing ConnectorAction via Universal Runtime Bridge",

@@ -7,7 +7,7 @@ from pydantic import Field
 from app.domain.common.biz_object import BizObject
 
 
-class EntityType(enum.StrEnum):
+class EntityType(str, enum.Enum):
     EMPLOYEE = "Employee"
     DEPARTMENT = "Department"
     ORGANIZATION = "Organization"
@@ -18,9 +18,11 @@ class EntityType(enum.StrEnum):
     ASSET = "Asset"
     DOCUMENT = "Document"
     WORKFLOW = "Workflow"
+    EMAIL = "Email"
+    EVENT = "Event"
 
 
-class RelationshipType(enum.StrEnum):
+class RelationshipType(str, enum.Enum):
     REPORTS_TO = "REPORTS_TO"
     BELONGS_TO = "BELONGS_TO"
     MANAGES = "MANAGES"
@@ -30,6 +32,8 @@ class RelationshipType(enum.StrEnum):
     DEPENDS_ON = "DEPENDS_ON"
     RELATED_TO = "RELATED_TO"
     PART_OF = "PART_OF"
+    APPROVED_BY = "APPROVED_BY"
+    REFERENCES = "REFERENCES"
 
 
 class KnowledgeNode(BizObject):
@@ -103,3 +107,13 @@ class Document(KnowledgeNode):
 class WorkflowEntity(KnowledgeNode):
     entity_type: EntityType = Field(default=EntityType.WORKFLOW, frozen=True)
     status: str = Field(default="IDLE")
+
+class EmailEntity(KnowledgeNode):
+    entity_type: EntityType = Field(default=EntityType.EMAIL, frozen=True)
+    sender: str | None = None
+    subject: str | None = None
+
+class EventEntity(KnowledgeNode):
+    entity_type: EntityType = Field(default=EntityType.EVENT, frozen=True)
+    start_time: str | None = None
+    end_time: str | None = None

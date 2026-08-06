@@ -9,7 +9,7 @@ from app.domain.intelligence.provider import IIntelligenceProvider
 from app.domain.planning.models import Goal, Plan
 
 
-class AgentStatus(enum.StrEnum):
+class AgentStatus(str, enum.Enum):
     """Lifecycle status of the cognitive agent execution."""
     IDLE = "IDLE"
     OBSERVING = "OBSERVING"
@@ -22,7 +22,7 @@ class AgentStatus(enum.StrEnum):
     FAILED = "FAILED"
 
 
-class ReflectionFeedback(enum.StrEnum):
+class ReflectionFeedback(str, enum.Enum):
     """Immediate evaluation feedback emitted by the reflection step."""
     IS_COMPLETE = "IS_COMPLETE"
     NEEDS_REPLAN = "NEEDS_REPLAN"

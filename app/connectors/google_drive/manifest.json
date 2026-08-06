@@ -1,0 +1,100 @@
+{
+  "connector_id": "google_drive",
+  "display_name": "Google Drive",
+  "version": "4.0.0",
+  "sdk_version_compatibility": ">=4.0.0",
+  "provider": "Google",
+  "description": "Production-grade Google Drive connector. Provides full access to Google Drive API v3 including files, folders, shared drives, permissions, revisions, comments, labels, activity tracking, delta sync, and push notifications.",
+  "compliance_level": "ENTERPRISE_CERTIFIED",
+  "family": "google_workspace",
+  "parent_connector_id": "google_workspace",
+  "documentation_url": "https://developers.google.com/drive/api/v3/reference",
+  "authentication_methods": ["oauth2"],
+  "auth_type": "oauth2",
+  "required_scopes": [
+    "https://www.googleapis.com/auth/drive",
+    "https://www.googleapis.com/auth/drive.activity.readonly",
+    "https://www.googleapis.com/auth/documents",
+    "https://www.googleapis.com/auth/spreadsheets",
+    "openid",
+    "https://www.googleapis.com/auth/userinfo.email"
+  ],
+  "required_env_vars": [
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "GOOGLE_REDIRECT_URI"
+  ],
+  "supported_resources": [
+    "file", "folder", "drive", "shared_drive", "permission",
+    "revision", "comment", "shortcut", "label", "delta_change",
+    "webhook_subscription"
+  ],
+  "supported_events": [
+    "file.created", "file.modified", "file.deleted",
+    "file.moved", "file.shared", "permission.changed", "comment.added"
+  ],
+  "capabilities": [
+    "list_files", "search_files", "get_file", "get_file_metadata",
+    "upload_file", "download_file", "export_file", "import_file",
+    "update_file", "update_metadata", "delete_file", "trash_file",
+    "restore_file", "empty_trash", "copy_file", "move_file",
+    "create_shortcut", "list_trash",
+    "create_folder", "list_folder", "get_folder",
+    "list_shared_drives", "get_shared_drive", "create_shared_drive",
+    "list_permissions", "get_permission", "add_permission",
+    "update_permission", "remove_permission", "share_publicly",
+    "list_revisions", "get_revision", "update_revision", "delete_revision",
+    "list_comments", "get_comment", "add_comment", "update_comment",
+    "delete_comment", "resolve_comment",
+    "list_labels", "modify_labels",
+    "watch_file", "watch_changes", "list_changes", "get_start_page_token",
+    "batch"
+  ],
+  "rate_limits": {
+    "requests_per_second": null,
+    "requests_per_minute": null,
+    "requests_per_hour": null,
+    "requests_per_day": 1000000000,
+    "concurrent_requests": 10,
+    "upload_bytes_per_second": null
+  },
+  "feature_flags": {
+    "enable_shared_drives": true,
+    "enable_labels_api": true,
+    "enable_drive_activity": true,
+    "enable_push_notifications": true,
+    "enable_delta_sync": true,
+    "enable_mime_export": true,
+    "enable_chunked_upload": true,
+    "enable_streaming_download": true
+  },
+  "config_schema": {
+    "type": "object",
+    "properties": {
+      "default_export_format": {
+        "type": "string",
+        "default": "pdf",
+        "enum": ["pdf", "docx", "xlsx", "pptx", "csv", "txt", "html", "md"],
+        "description": "Default export format for Google Workspace documents"
+      },
+      "include_shared_drives": {
+        "type": "boolean",
+        "default": true,
+        "description": "Include shared drive files in list and search operations"
+      },
+      "default_page_size": {
+        "type": "integer",
+        "default": 100,
+        "minimum": 1,
+        "maximum": 1000
+      }
+    }
+  },
+  "supported_execution_modes": ["SIMULATION", "DRY_RUN", "PRODUCTION"],
+  "webhook_support": true,
+  "multi_account_support": true,
+  "supports_delta_sync": true,
+  "supports_streaming": true,
+  "supports_batch": true,
+  "supports_provider_sandbox": false
+}

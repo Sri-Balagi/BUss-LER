@@ -13,6 +13,9 @@ All kernel access is via app.bootstrap or app.interfaces.http.v1.dependencies.
 
 from __future__ import annotations
 
+from dotenv import load_dotenv
+load_dotenv()
+
 import time
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
@@ -99,6 +102,19 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         from app.infrastructure.security.audit import AuditSubscriber
         logger.info("Initializing Audit & Security Observability")
         container.resolve(AuditSubscriber)
+
+        # ── Phase 2: Register Productivity Connectors ─────────────────────────
+        logger.info("Registering Phase 2 Productivity Connectors")
+        from app.connectors.sdk.registry.capability_registry import ConnectorCapabilityRegistry
+        from app.connectors.google_drive.connector import GoogleDriveConnector
+        from app.connectors.google_calendar.connector import GoogleCalendarConnector
+
+        ConnectorCapabilityRegistry.register_connector(GoogleDriveConnector())
+        ConnectorCapabilityRegistry.register_connector(GoogleCalendarConnector())
+        logger.info(
+            "Productivity connectors registered",
+            connectors=[c["connector_id"] for c in ConnectorCapabilityRegistry.list_all_connectors()],
+        )
 
         logger.info("Startup complete — BizOS is ready to serve requests")
         yield

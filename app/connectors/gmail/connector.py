@@ -18,13 +18,64 @@ from app.connectors.auth.vault import ConnectorAuthVault
 from app.domain.shared.context import ExecutionContext
 
 
-class GmailConnector(BaseConnector):
+import hashlib
+from app.perception.sources.interface import IObservationSource, PerceptionContext
+from app.perception.models.observation import ExternalObservation, ObservationSourceType, UnifiedKnowledgeObject
+
+
+class GmailConnector(BaseConnector, IObservationSource):
     def __init__(self, auth_vault: ConnectorAuthVault | None = None):
         self.auth_vault = auth_vault or ConnectorAuthVault()
 
     @property
     def connector_id(self) -> str:
         return "gmail"
+
+    @property
+    def source_id(self) -> str:
+        return "gmail"
+
+    @property
+    def source_type(self) -> ObservationSourceType:
+        return ObservationSourceType.CONNECTOR
+
+    async def observe(self, context: PerceptionContext) -> list[ExternalObservation]:
+        exec_ctx = ExecutionContext(tenant_id=context.tenant_id or "default")
+        result = await self.execute_action("read_inbox", {"limit": context.limit}, exec_ctx)
+        emails = result.get("emails", result.get("messages", [])) if isinstance(result, dict) else []
+        observations = []
+        for idx, email_data in enumerate(emails):
+            msg_id = str(email_data.get("id", f"msg_{idx}"))
+            obs = ExternalObservation(
+                observation_id=msg_id,
+                source_id=self.connector_id,
+                source_type=ObservationSourceType.CONNECTOR,
+                resource_type="email",
+                raw_payload=email_data if isinstance(email_data, dict) else {"content": str(email_data)},
+                tenant_id=str(context.tenant_id) if context.tenant_id else None,
+            )
+            observations.append(obs)
+        return observations
+
+    def normalize(self, observation: ExternalObservation) -> UnifiedKnowledgeObject:
+        payload = observation.raw_payload
+        msg_id = str(payload.get("id", observation.observation_id))
+        uko_id = hashlib.sha256(f"{self.connector_id}:{msg_id}".encode("utf-8")).hexdigest()
+
+        subject = str(payload.get("subject", payload.get("title", "Untitled Email")))
+        sender = payload.get("sender") or payload.get("from")
+        body = str(payload.get("body", payload.get("snippet", payload.get("content", ""))))
+
+        return UnifiedKnowledgeObject(
+            uko_id=uko_id,
+            source_connector=self.connector_id,
+            resource_type="email",
+            title=subject,
+            content=body,
+            author=str(sender) if sender else None,
+            metadata={"message_id": msg_id, "thread_id": payload.get("threadId")},
+        )
+
 
     @property
     def capabilities(self) -> ConnectorCapabilities:
@@ -54,7 +105,7 @@ class GmailConnector(BaseConnector):
         body = params.get("body") or params.get("message", "Hello from BizOS Platform!")
 
         # Retrieve OAuth tokens from parent workspace vault
-        stored = ConnectorAuthVault.get_tokens("google_workspace")
+        stored = ConnectorAuthVault.get_tokens("google") or ConnectorAuthVault.get_tokens("google_workspace")
         access_token = stored.get("access_token") if stored else os.getenv("GOOGLE_OAUTH_TOKEN")
 
         if action == "send_email" and access_token:

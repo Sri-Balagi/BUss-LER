@@ -45,6 +45,16 @@ class QdrantService:
 
         try:
             exists = await client.collection_exists(collection_name=collection_name)
+        except Exception as conn_err:
+            logger.warning(
+                "Qdrant server unreachable — falling back to in-memory Qdrant instance",
+                error=str(conn_err),
+            )
+            cls._instance = AsyncQdrantClient(location=":memory:")
+            client = cls._instance
+            exists = await client.collection_exists(collection_name=collection_name)
+
+        try:
             if not exists:
                 logger.info(
                     "Initializing Qdrant collection",

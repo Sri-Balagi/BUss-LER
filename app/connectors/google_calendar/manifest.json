@@ -1,0 +1,94 @@
+{
+  "connector_id": "google_calendar",
+  "display_name": "Google Calendar",
+  "version": "4.0.0",
+  "sdk_version_compatibility": ">=4.0.0",
+  "provider": "Google",
+  "description": "Production-grade Google Calendar connector. Full access to calendars, events, recurring events, attendees, Google Meet integration, free/busy queries, ACL management, delta sync, and push notifications.",
+  "compliance_level": "ENTERPRISE_CERTIFIED",
+  "family": "google_workspace",
+  "parent_connector_id": "google_workspace",
+  "documentation_url": "https://developers.google.com/calendar/api/v3/reference",
+  "authentication_methods": ["oauth2"],
+  "auth_type": "oauth2",
+  "required_scopes": [
+    "https://www.googleapis.com/auth/calendar",
+    "https://www.googleapis.com/auth/calendar.events",
+    "openid",
+    "https://www.googleapis.com/auth/userinfo.email"
+  ],
+  "required_env_vars": [
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "GOOGLE_REDIRECT_URI"
+  ],
+  "supported_resources": [
+    "calendar", "event", "attendee", "free_busy",
+    "acl", "webhook_subscription"
+  ],
+  "supported_events": [
+    "event.created", "event.modified", "event.deleted"
+  ],
+  "capabilities": [
+    "list_calendars", "get_calendar", "create_calendar", "update_calendar",
+    "delete_calendar", "clear_calendar",
+    "list_acl", "create_acl", "delete_acl",
+    "list_events", "get_event", "create_event", "create_event_with_meet",
+    "update_event", "delete_event", "move_event", "import_event",
+    "quick_add_event", "list_instances",
+    "get_freebusy",
+    "watch_events", "watch_calendar_list",
+    "list_settings", "get_setting",
+    "sync_events", "batch"
+  ],
+  "rate_limits": {
+    "requests_per_second": null,
+    "requests_per_minute": null,
+    "requests_per_hour": null,
+    "requests_per_day": 1000000,
+    "concurrent_requests": 10,
+    "upload_bytes_per_second": null
+  },
+  "feature_flags": {
+    "enable_google_meet_integration": true,
+    "enable_recurring_events": true,
+    "enable_freebusy_query": true,
+    "enable_push_notifications": true,
+    "enable_delta_sync": true,
+    "enable_acl_management": true,
+    "enable_ical_export": true
+  },
+  "config_schema": {
+    "type": "object",
+    "properties": {
+      "default_calendar_id": {
+        "type": "string",
+        "default": "primary",
+        "description": "Default calendar to use for operations when not specified"
+      },
+      "default_timezone": {
+        "type": "string",
+        "default": "Asia/Kolkata",
+        "description": "Default timezone for event creation"
+      },
+      "auto_create_meet_links": {
+        "type": "boolean",
+        "default": false,
+        "description": "Automatically create Google Meet links for new events"
+      },
+      "send_update_notifications": {
+        "type": "string",
+        "default": "all",
+        "enum": ["all", "externalOnly", "none"],
+        "description": "Control who receives email notifications on event changes"
+      }
+    }
+  },
+  "supported_execution_modes": ["SIMULATION", "DRY_RUN", "PRODUCTION"],
+  "webhook_support": true,
+  "multi_account_support": true,
+  "supports_delta_sync": true,
+  "supports_streaming": false,
+  "supports_batch": true,
+  "supports_provider_sandbox": false
+}

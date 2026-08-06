@@ -456,3 +456,41 @@ class WorkflowCompletedEvent(DomainEvent):
     principal_id: str
     final_outputs: dict | None = None
     trace_id: str | None = None
+
+
+# =============================================================================
+# Perception Events (Wave -1)
+# =============================================================================
+
+
+class ObservationReceivedEvent(DomainEvent):
+    """An ObservationSource emitted a raw signal."""
+    source_id: str
+    source_type: str
+    observation_id: str
+    resource_type: str
+    tenant_id: str | None = None
+
+
+class BusinessStateChangeEvent(DomainEvent):
+    """Perception Engine completed processing. Downstream subscribers act on this.
+
+    state_delta carries provider-agnostic property transitions so the Brain
+    never needs to know which CRM, ERP, or platform the signal originated from.
+    Example: {"pipeline_stage": {"old": "PROPOSAL", "new": "CLOSED_WON"}, "amount": 150000}
+    """
+    change_id: str
+    source_uko_id: str
+    source_connector: str = "unknown"
+    entity_type: str | None = None                           # "Contact", "Deal", "Company", "Customer"
+    affected_entity_ids: list[str] = Field(default_factory=list)
+    business_event_types: list[str] = Field(default_factory=list)
+    state_delta: dict = Field(default_factory=dict)          # property transitions (old → new)
+    confidence: float = 1.0
+    knowledge_node_id: str | None = None
+    vector_stored: bool = False
+    gate_decision: str = "ACCEPT"
+    suggested_actions: list[str] = Field(default_factory=list)
+    tenant_id: str | None = None
+
+

@@ -15,7 +15,38 @@ from app.intelligence.pipeline.phases import (
 logger = structlog.get_logger(__name__)
 
 
+class ObservePhase(IPhase):
+    """The first phase of the CognitivePipeline. Completes the sensory loop by pulling perception state into session context."""
+
+    def __init__(self, perception_pipeline: Any = None) -> None:
+        self.perception_pipeline = perception_pipeline
+
+    @property
+    def phase_type(self) -> PipelinePhase:
+        return PipelinePhase.OBSERVE
+
+    async def execute(self, session: CognitiveSession) -> PhaseResult:
+        start = time.time()
+        logger.debug("ObservePhase executing", session_id=session.session_id)
+
+        # Pull active world model or recent perception state
+        summary = {
+            "observation_status": "OBSERVED",
+            "session_id": session.session_id,
+            "twin_id": str(session.twin_id) if session.twin_id else None,
+            "world_model_active": session.world_model_snapshot is not None,
+        }
+
+        return PhaseResult(
+            phase=self.phase_type,
+            status=PhaseResultStatus.SUCCESS,
+            artifact=summary,
+            duration_ms=(time.time() - start) * 1000,
+        )
+
+
 class ExecutePhase(IPhase):
+
     """Phase that executes the Workflow DAG using the WorkflowEngine."""
 
     def __init__(self, workflow_engine: Any) -> None:

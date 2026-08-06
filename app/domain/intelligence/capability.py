@@ -1,9 +1,16 @@
+try:
+    from enum import StrEnum
+except ImportError:
+    from enum import Enum
+    class StrEnum(str, Enum):
+        pass
+
 import enum
 
 from pydantic import BaseModel, Field
 
 
-class CapabilityType(enum.StrEnum):
+class CapabilityType(StrEnum):
     REASONING = "REASONING"
     PLANNING = "PLANNING"
     RETRIEVAL = "RETRIEVAL"

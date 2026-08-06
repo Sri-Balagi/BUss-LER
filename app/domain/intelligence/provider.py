@@ -1,10 +1,17 @@
+try:
+    from enum import StrEnum
+except ImportError:
+    from enum import Enum
+    class StrEnum(str, Enum):
+        pass
+
 import abc
 import enum
 
 from app.domain.intelligence.capability import CapabilityMetadata, CapabilityType
 
 
-class ProviderLifecycleStatus(enum.StrEnum):
+class ProviderLifecycleStatus(StrEnum):
     INITIALIZING = "INITIALIZING"
     READY = "READY"
     DEGRADED = "DEGRADED"

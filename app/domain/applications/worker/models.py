@@ -1,10 +1,17 @@
+try:
+    from enum import StrEnum
+except ImportError:
+    from enum import Enum
+    class StrEnum(str, Enum):
+        pass
+
 import enum
 from typing import Any
 
 from pydantic import BaseModel, Field
 
 
-class JobStatus(enum.StrEnum):
+class JobStatus(StrEnum):
     PENDING = "PENDING"
     RUNNING = "RUNNING"
     COMPLETED = "COMPLETED"

@@ -1,3 +1,10 @@
+try:
+    from enum import StrEnum
+except ImportError:
+    from enum import Enum
+    class StrEnum(str, Enum):
+        pass
+
 """Goal Lifecycle State Machine for BizOS Core.
 
 Enforces valid goal state transitions:
@@ -10,7 +17,7 @@ from typing import Dict, Set
 from uuid import UUID, uuid4
 
 
-class GoalState(enum.StrEnum):
+class GoalState(StrEnum):
     CREATED = "CREATED"
     PLANNED = "PLANNED"
     ACTIVE = "ACTIVE"
