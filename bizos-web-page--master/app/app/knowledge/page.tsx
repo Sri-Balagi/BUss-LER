@@ -4,7 +4,15 @@ import { KnowledgeUniverseVisualizer } from "@/components/knowledge-universe";
 import { motion } from "framer-motion";
 import { Hexagon } from "lucide-react";
 
+import { useBusiness } from "@/lib/business-context";
+import { NewAccountPage } from "@/components/NewAccountPage";
+
 export default function KnowledgeLayer() {
+  const { isPrimaryAccount } = useBusiness();
+
+  if (!isPrimaryAccount) {
+    return <NewAccountPage />;
+  }
   return (
     <main className="w-full min-h-screen relative bg-deep-space overflow-hidden">
       <KnowledgeUniverseVisualizer />

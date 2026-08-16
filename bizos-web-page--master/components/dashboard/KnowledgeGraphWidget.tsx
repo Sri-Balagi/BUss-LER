@@ -5,10 +5,10 @@ import { motion } from "framer-motion";
 import { useCognitiveState } from "@/lib/dashboard/state";
 
 const GROUP_COLOR: Record<string, string> = {
-  policy: "rgb(47,111,255)",
-  product: "rgb(76,224,224)",
-  customer: "rgb(139,92,246)",
-  runbook: "rgb(52,211,153)",
+  policy: "#0EA5E9",
+  product: "#38BDF8",
+  customer: "#8B5CF6",
+  runbook: "#10B981",
 };
 
 export default function KnowledgeGraphWidget() {
@@ -26,11 +26,11 @@ export default function KnowledgeGraphWidget() {
   const [activeFrom, activeTo] = state.knowledgeEdges[state.activeEdge];
 
   return (
-    <div className="glass-panel p-7">
-      <p className="eyebrow mb-2">Knowledge Graph · live</p>
-      <h2 className="mb-4 font-display text-[19px] font-medium text-ink">What agents are reading</h2>
+    <div className="glass-card p-7 backdrop-blur-xl bg-[#FAF7F2]/95 dark:bg-zinc-900/95 border-2 border-[#E6DFD3] dark:border-zinc-800 shadow-[0_8px_32px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_28px_rgba(0,0,0,0.06)] hover:border-[#38BDF8] hover:-translate-y-0.5 rounded-[28px] transition-all duration-200 ease-[0.16,1,0.3,1]">
+      <p className="eyebrow mb-2 text-accent">Knowledge Graph · live</p>
+      <h2 className="mb-4 font-display text-[20px] font-semibold text-ink tracking-tight">What agents are reading</h2>
 
-      <svg viewBox="0 0 300 260" className="w-full">
+      <svg viewBox="0 0 300 260" className="w-full h-auto rounded-2xl border border-[#E2DAD0] dark:border-zinc-800 bg-white/60 dark:bg-zinc-950/60 p-2">
         {state.knowledgeEdges.map(([a, b], i) => {
           const na = state.knowledgeNodes.find((n) => n.id === a)!;
           const nb = state.knowledgeNodes.find((n) => n.id === b)!;
@@ -43,7 +43,7 @@ export default function KnowledgeGraphWidget() {
               y1={na.y}
               x2={nb.x}
               y2={nb.y}
-              stroke={isActive ? "rgba(76,224,224,0.8)" : "rgba(124,135,152,0.25)"}
+              stroke={isActive ? "#0EA5E9" : "rgba(161,161,170,0.3)"}
               strokeWidth={isActive ? 2 : 1}
               opacity={dim ? 0.15 : 1}
             />
@@ -52,8 +52,8 @@ export default function KnowledgeGraphWidget() {
 
         <motion.circle
           key={state.activeEdge}
-          r={3}
-          fill="rgb(76,224,224)"
+          r={3.5}
+          fill="#0EA5E9"
           initial={{
             cx: state.knowledgeNodes.find((n) => n.id === activeFrom)!.x,
             cy: state.knowledgeNodes.find((n) => n.id === activeFrom)!.y,
@@ -62,8 +62,7 @@ export default function KnowledgeGraphWidget() {
             cx: state.knowledgeNodes.find((n) => n.id === activeTo)!.x,
             cy: state.knowledgeNodes.find((n) => n.id === activeTo)!.y,
           }}
-          transition={{ duration: 1.4, ease: "easeInOut" }}
-          style={{ filter: "drop-shadow(0 0 4px rgba(76,224,224,0.9))" }}
+          transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
         />
 
         {state.knowledgeNodes.map((n) => {
@@ -80,7 +79,7 @@ export default function KnowledgeGraphWidget() {
                 cy={n.y}
                 r={hovered === n.id ? 7 : 5}
                 fill={GROUP_COLOR[n.group]}
-                opacity={dim ? 0.2 : 0.9}
+                opacity={dim ? 0.2 : 0.95}
                 style={{ transition: "r 0.15s ease, opacity 0.15s ease" }}
               />
               <text
@@ -88,7 +87,8 @@ export default function KnowledgeGraphWidget() {
                 y={n.y - 11}
                 textAnchor="middle"
                 fontSize="8.5"
-                fill={dim ? "rgba(231,236,243,0.25)" : "rgba(231,236,243,0.85)"}
+                fill={dim ? "rgba(113,113,122,0.4)" : "currentColor"}
+                className="text-ink font-semibold"
                 fontFamily="var(--font-mono)"
               >
                 {n.label}
@@ -98,9 +98,9 @@ export default function KnowledgeGraphWidget() {
         })}
       </svg>
 
-      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 font-mono text-[10px] uppercase tracking-wide text-ink-faint">
+      <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 font-mono text-[10.5px] font-semibold uppercase tracking-wider text-ink-muted">
         {Object.entries(GROUP_COLOR).map(([group, color]) => (
-          <span key={group} className="flex items-center gap-1.5">
+          <span key={group} className="flex items-center gap-1.5 rounded-full border border-[#E2DAD0] dark:border-zinc-800 bg-white/80 dark:bg-zinc-800/80 px-2.5 py-0.5 shadow-sm">
             <span className="h-1.5 w-1.5 rounded-full" style={{ background: color }} />
             {group}
           </span>

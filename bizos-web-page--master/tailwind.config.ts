@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: "class",
   content: [
     "./app/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
@@ -17,6 +18,12 @@ const config: Config = {
         tertiary: "var(--text-muted)",
         accent: "var(--accent-primary)",
         "accent-hover": "var(--accent-hover)",
+        ink: "var(--text-primary)",
+        "ink-muted": "var(--text-secondary)",
+        "ink-faint": "var(--text-muted)",
+        void: "var(--bg-main)",
+        "section-alt": "var(--bg-section-alt)",
+        "hover-beige": "var(--bg-hover-beige)",
         cognition: {
           thought: "var(--accent-primary)",
           memory: "var(--accent-primary)",
@@ -27,8 +34,8 @@ const config: Config = {
         },
       },
       fontFamily: {
-        display: ["var(--font-display)", "sans-serif"],
-        body: ["var(--font-body)", "sans-serif"],
+        display: ["var(--font-poppins)", "sans-serif"],
+        body: ["var(--font-poppins)", "sans-serif"],
         mono: ["var(--font-mono)", "monospace"],
       },
       boxShadow: {

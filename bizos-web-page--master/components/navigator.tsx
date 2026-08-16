@@ -5,6 +5,8 @@ import { Circle, Globe, Hexagon, Layers, Cpu, Settings, Activity } from "lucide-
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { useBusiness } from "@/lib/business-context";
+
 const NAV_ITEMS = [
   { href: "/app/core", icon: Circle, label: "Core Runtime", state: "thought" },
   { href: "/app/memory", icon: Globe, label: "Memory Layer", state: "memory" },
@@ -16,16 +18,25 @@ const NAV_ITEMS = [
 
 export function Navigator() {
   const pathname = usePathname();
+  const { isPrimaryAccount } = useBusiness();
 
-  // Don't show navigator on the public landing page or boot sequence
-  if (pathname === "/" || pathname === "/boot") return null;
+  // Hide navigator completely for general users (only show contact details)
+  if (!isPrimaryAccount) {
+    return null;
+  }
+
+  // Only show navigator on dashboard and app routes
+  const isDashboardOrApp = pathname === "/dashboard" || pathname.startsWith("/dashboard/") || pathname.startsWith("/app/");
+  if (!isDashboardOrApp) {
+    return null;
+  }
 
   return (
     <motion.nav
-      initial={{ x: -100, opacity: 0 }}
+      initial={{ x: 100, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 250, damping: 25 }}
-      className="fixed left-6 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-4 p-3 glass-panel rounded-full"
+      className="fixed right-6 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-4 p-3 glass-panel rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-white/50 dark:border-white/10 backdrop-blur-2xl bg-white/75 dark:bg-[#1C1C1C]/75"
     >
       {NAV_ITEMS.map((item) => {
         const isActive = pathname.startsWith(item.href);

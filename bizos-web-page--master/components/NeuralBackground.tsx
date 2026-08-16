@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 
 // Ambient background only — kept faint on purpose so it reads as atmosphere,
-// not as the main event. The Cognitive Core (hero) carries the "alive" signature.
+// not as the main event. Warm beige / neutral enterprise identity.
 export default function NeuralBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -41,6 +41,11 @@ export default function NeuralBackground() {
 
     let raf = 0;
     function render() {
+      if (document.hidden) {
+        raf = requestAnimationFrame(render);
+        return;
+      }
+
       if (!ctx) return;
       ctx.clearRect(0, 0, width, height);
       points.forEach((p) => {
@@ -52,7 +57,7 @@ export default function NeuralBackground() {
         }
         ctx.beginPath();
         ctx.arc(p.x, p.y, 1, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(124,135,152,0.35)";
+        ctx.fillStyle = "rgba(161,161,170,0.3)";
         ctx.fill();
       });
 
@@ -62,7 +67,7 @@ export default function NeuralBackground() {
           const dy = points[i].y - points[j].y;
           const d = Math.hypot(dx, dy);
           if (d < 130) {
-            ctx.strokeStyle = `rgba(76,224,224,${0.06 * (1 - d / 130)})`;
+            ctx.strokeStyle = `rgba(14,165,233,${0.06 * (1 - d / 130)})`;
             ctx.beginPath();
             ctx.moveTo(points[i].x, points[i].y);
             ctx.lineTo(points[j].x, points[j].y);
@@ -84,7 +89,7 @@ export default function NeuralBackground() {
     <canvas
       ref={canvasRef}
       aria-hidden="true"
-      className="fixed inset-0 -z-10 opacity-60"
+      className="fixed inset-0 -z-10 opacity-50 pointer-events-none will-change-transform"
     />
   );
 }

@@ -1,30 +1,60 @@
+/* Poppins is loaded via next/font/google in layout.tsx as --font-poppins */
+/* Map display and body font families to Poppins */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  /* LIGHT THEME (Default) */
-  --bg-main: #F7F7F7;
-  --bg-surface: rgba(255, 255, 255, 0.65);
-  --text-primary: #141414;
-  --text-secondary: #41423A;
-  --text-muted: rgba(65, 66, 58, 0.4);
-  --accent-primary: #ED7D27;
-  --accent-hover: #D9641E;
-  --border-color: rgba(65, 66, 58, 0.15);
-  --glow-color: transparent;
+  /* LIGHT THEME (Default) - Warm Editorial Beige */
+  --bg-main: #F5F1E8;
+  --bg-surface: #F5F1E8;
+  --text-primary: #171717;
+  --text-secondary: #66635F;
+  --text-muted: #8E8A83;
+  --accent-primary: #E87B2A;
+  --accent-hover: #D06920;
+  --border-color: #E2DAD0;
+  --bg-section-alt: #F5F1E8;
+  --bg-hover-beige: #EBE4D8;
+
+  /* Dropdown & Select Theme Variables - Light Mode */
+  --dropdown-trigger-bg: #FFFFFF;
+  --dropdown-trigger-border: #E2DAD0;
+  --dropdown-trigger-text: #171717;
+  --dropdown-placeholder: #66635F;
+  --dropdown-panel-bg: #FFFFFF;
+  --dropdown-panel-border: #E2DAD0;
+  --dropdown-option-text: #171717;
+  --dropdown-option-hover: #F4EFE8;
+  --dropdown-option-selected-bg: rgba(56, 189, 248, 0.15);
+  --dropdown-option-selected-text: #0EA5E9;
 }
 
 .dark {
-  /* DARK THEME */
-  --bg-main: #141414;
-  --bg-surface: rgba(26, 26, 26, 0.65);
-  --text-primary: #ECE2D2;
-  --text-secondary: rgba(236, 226, 210, 0.7);
-  --text-muted: #41423A;
-  --accent-primary: #ED7D27;
-  --accent-hover: #D9641E;
-  --border-color: rgba(236, 226, 210, 0.12);
+  /* DARK THEME - Luxurious Dark Bronze/Gold */
+  --bg-main: #12110F;
+  --bg-surface: #1C1B18;
+  --text-primary: #FFFFFF;
+  --text-secondary: #A09C96;
+  --text-muted: #66635F;
+  --accent-primary: #E87B2A;
+  --accent-hover: #D06920;
+  --border-color: #2D2A26;
+  --bg-section-alt: #161513;
+  --bg-hover-beige: #24221F;
+
+  /* Dropdown & Select Theme Variables - Dark Mode */
+  --dropdown-trigger-bg: #1E1E1E;
+  --dropdown-trigger-border: #3A3A3A;
+  --dropdown-trigger-text: #FFFFFF;
+  --dropdown-placeholder: #A3A3A3;
+  --dropdown-panel-bg: #232323;
+  --dropdown-panel-border: #3A3A3A;
+  --dropdown-option-text: #FFFFFF;
+  --dropdown-option-hover: #2A2A2A;
+  --dropdown-option-selected-bg: rgba(56, 189, 248, 0.2);
+  --dropdown-option-selected-text: #38BDF8;
 }
 
 body {
@@ -35,7 +65,7 @@ body {
 
 ::selection {
   background: var(--accent-primary);
-  color: var(--bg-surface);
+  color: #FFFFFF;
 }
 
 ::-webkit-scrollbar {
@@ -52,12 +82,120 @@ body {
 
 @layer components {
   .glass-panel {
-    @apply relative rounded-2xl border border-[color:var(--border-color)] bg-[color:var(--bg-surface)] shadow-panel backdrop-blur-2xl transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-2xl hover:border-[#ED7D27]/30;
+    @apply relative rounded-[24px] border border-[color:var(--border-color)] bg-[color:var(--bg-surface)] shadow-[0_4px_20px_rgba(0,0,0,0.04)] transition-all duration-300 ease-out hover:-translate-y-[3px] hover:shadow-[0_16px_36px_rgba(0,0,0,0.08)];
+  }
+  .glass-panel:hover {
+    border-color: #38BDF8 !important;
+  }
+  .dark .glass-panel:hover {
+    border-color: #38BDF8 !important;
+  }
+
+  .glass-card {
+    position: relative;
+    border-radius: 24px;
+    border: 1px solid rgba(226, 218, 208, 0.9);
+    background-color: #F5F1E8;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .dark .glass-card {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(28, 28, 28, 0.8);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+  }
+
+  .glass-card:hover {
+    transform: translateY(-3px);
+    border-color: #38BDF8 !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.08) !important;
+  }
+  .dark .glass-card:hover {
+    border-color: #38BDF8 !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  .glass-floating {
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    background: #F5F1E8;
+    border: 1px solid rgba(226, 218, 208, 0.9);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+    border-radius: 24px;
+  }
+
+  .dark .glass-floating {
+    background: rgba(28, 28, 28, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
   }
 
   .eyebrow {
-    @apply font-mono text-[11px] uppercase tracking-[0.28em] text-secondary;
+    @apply font-mono text-[11px] uppercase tracking-[0.3em] font-semibold;
+    color: var(--text-secondary);
+    opacity: 0.85;
   }
+}
+
+/* Global Input Text Box Dark & Light Mode Theme Rules */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="search"],
+textarea {
+  background-color: #FFFFFF;
+  color: #171717;
+}
+
+.dark input[type="text"],
+.dark input[type="email"],
+.dark input[type="password"],
+.dark input[type="number"],
+.dark input[type="search"],
+.dark textarea,
+html.dark input[type="text"],
+html.dark input[type="email"],
+html.dark input[type="password"],
+html.dark input[type="number"],
+html.dark input[type="search"],
+html.dark textarea {
+  background-color: #1E1E1E !important;
+  color: #FFFFFF !important;
+  border-color: #3A3A3A !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder,
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #A3A3A3 !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #66635F;
+}
+
+/* Global Select & Option Dark/Light Theme Visibility Rules */
+select {
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+option {
+  background-color: #FFFFFF !important;
+  color: #171717 !important;
+}
+
+.dark option,
+html.dark option,
+body.dark option {
+  background-color: #1C1C1C !important;
+  color: #FFFFFF !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

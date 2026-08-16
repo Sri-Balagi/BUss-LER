@@ -117,14 +117,14 @@ const AGENT_SEED: Omit<Agent, "stage" | "status" | "confidence">[] = [
 ];
 
 const KNOWLEDGE_NODE_SEED: Omit<KnowledgeNode, "x" | "y">[] = [
-  { id: "k1", label: "Refund policy", group: "policy" },
-  { id: "k2", label: "Pricing tiers", group: "product" },
-  { id: "k3", label: "Onboarding runbook", group: "runbook" },
-  { id: "k4", label: "Enterprise SLA", group: "policy" },
-  { id: "k5", label: "Churn signals", group: "customer" },
-  { id: "k6", label: "API changelog", group: "product" },
-  { id: "k7", label: "Escalation runbook", group: "runbook" },
-  { id: "k8", label: "Top accounts", group: "customer" },
+  { id: "k1", label: "Aavin Milk & Ghee SLA", group: "policy" },
+  { id: "k2", label: "South Indian Thali Recipe Standard", group: "product" },
+  { id: "k3", label: "Kitchen Shift & Roster Runbook", group: "runbook" },
+  { id: "k4", label: "FSSAI Food Safety Protocol", group: "policy" },
+  { id: "k5", label: "Table 12 VIP Guest Profile", group: "customer" },
+  { id: "k6", label: "Swiggy & Zomato POS API", group: "product" },
+  { id: "k7", label: "Banquet Hall A Escalation SOP", group: "runbook" },
+  { id: "k8", label: "Koyambedu Fresh Vegetables", group: "customer" },
 ];
 
 const KNOWLEDGE_EDGE_SEED: [string, string][] = [
@@ -169,25 +169,25 @@ function seedState(): CognitiveState {
   const decisions: Decision[] = [
     {
       id: "d1",
-      title: "Approve refund for order #48213",
-      reasoning: "Customer is within the 30-day window and the item arrived damaged per the attached photo.",
-      confidence: 0.91,
+      title: "Auto-Reorder 150L Aavin Milk & 45kg Ghee",
+      reasoning: "Stock dropped below 15% threshold ahead of Friday dinner service peak.",
+      confidence: 0.96,
       status: "pending",
       ts: Date.now() - 1000 * 60 * 4,
     },
     {
       id: "d2",
-      title: "Escalate account 'Meridian Foods' to CSM",
-      reasoning: "Usage dropped 42% over two weeks after a failed API migration.",
-      confidence: 0.78,
+      title: "Approve Banquet Hall A Menu (Dr. Radhakrishnan — 65 Guests)",
+      reasoning: "Mini Tiffin + Sweet combo verified with Kitchen Head chef Chef Subbu.",
+      confidence: 0.92,
       status: "pending",
       ts: Date.now() - 1000 * 60 * 11,
     },
     {
       id: "d3",
-      title: "Waive overage fee for 'Northwind Labs'",
-      reasoning: "Overage was caused by a billing-side metering bug, confirmed in the changelog.",
-      confidence: 0.86,
+      title: "Swiggy POS Order Batching Auto-Compensation Triggered",
+      reasoning: "Prep time surpassed 25m during peak hours, ₹50 discount coupon dispatched to customer.",
+      confidence: 0.88,
       status: "approved",
       ts: Date.now() - 1000 * 60 * 26,
     },
@@ -196,29 +196,29 @@ function seedState(): CognitiveState {
   const goals: Goal[] = [
     {
       id: "g1",
-      label: "Reduce first-response time to under 2 minutes",
-      progress: 0.64,
+      label: "Maintain 100% daily Aavin Milk delivery before 5:00 AM",
+      progress: 0.95,
       children: [
-        { id: "g1a", label: "Route routine tickets without a human", progress: 0.8 },
-        { id: "g1b", label: "Pre-fetch account context before reply", progress: 0.52 },
+        { id: "g1a", label: "Auto-verify dairy temperature log on arrival", progress: 0.98 },
+        { id: "g1b", label: "Notify shift manager if delivery delayed by 10 mins", progress: 0.92 },
       ],
     },
     {
       id: "g2",
-      label: "Cut refund review time by half",
-      progress: 0.41,
+      label: "Zero customer wait time > 15m for South Indian Thali",
+      progress: 0.88,
       children: [
-        { id: "g2a", label: "Auto-approve under-$50 refunds with photo evidence", progress: 0.7 },
-        { id: "g2b", label: "Flag high-risk refunds for human review", progress: 0.3 },
+        { id: "g2a", label: "Auto-prep sambar & rasam batches at 11:30 AM", progress: 0.9 },
+        { id: "g2b", label: "Batch kitchen display orders during lunch peak", progress: 0.86 },
       ],
     },
-    { id: "g3", label: "Keep escalation false-positive rate under 5%", progress: 0.88 },
+    { id: "g3", label: "Banquet Hall A weekend occupancy rate > 90%", progress: 0.92 },
   ];
 
   const auditLog: AuditEntry[] = [
-    { id: "l1", ts: Date.now() - 5000, type: "infra", text: "worker pool scaled to 12 nodes" },
-    { id: "l2", ts: Date.now() - 15000, type: "decision", text: "decision d3 approved by Halo" },
-    { id: "l3", ts: Date.now() - 32000, type: "memory", text: "Vega wrote 3 new memories from ticket #4821" },
+    { id: "l1", ts: Date.now() - 5000, type: "infra", text: "KDS Kitchen Display server synchronized 4 terminals" },
+    { id: "l2", ts: Date.now() - 15000, type: "decision", text: "Swiggy POS surge batching approved by System" },
+    { id: "l3", ts: Date.now() - 32000, type: "memory", text: "Recorded Aavin Milk SLA delivery log for Hotel Balagi Bhavan" },
   ];
 
   return {

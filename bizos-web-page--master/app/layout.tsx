@@ -1,21 +1,18 @@
 import type { Metadata } from "next";
-import { Outfit, Plus_Jakarta_Sans, Space_Mono } from "next/font/google";
+import { Geist_Mono, Poppins } from "next/font/google";
 import "./globals.css";
 
-const display = Outfit({
+const mono = Geist_Mono({
   subsets: ["latin"],
-  variable: "--font-display",
-});
-
-const body = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  variable: "--font-body",
-});
-
-const mono = Space_Mono({
-  subsets: ["latin"],
-  weight: ["400", "700"],
+  weight: ["400", "500", "700"],
   variable: "--font-mono",
+});
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
+  variable: "--font-poppins",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -25,8 +22,12 @@ export const metadata: Metadata = {
 };
 
 import { AmbientBackground } from "@/components/ambient-background";
+import Sidebar from "@/components/dashboard/Sidebar";
 import { Navigator } from "@/components/navigator";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { AuthProvider } from "@/lib/auth-context";
+import { OnboardingProvider } from "@/lib/onboarding-context";
+import { BusinessProvider } from "@/lib/business-context";
 
 export default function RootLayout({
   children,
@@ -34,12 +35,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${display.variable} ${body.variable} ${mono.variable}`}>
+    <html lang="en" className={`${mono.variable} ${poppins.variable}`}>
       <body className="font-body antialiased bg-deep-space text-primary min-h-screen">
-        <AmbientBackground />
-        <Navigator />
-        {children}
-        <ThemeToggle />
+        <AuthProvider>
+          <BusinessProvider>
+            <OnboardingProvider>
+              <AmbientBackground />
+              <Sidebar />
+              <Navigator />
+              {children}
+              <ThemeToggle />
+            </OnboardingProvider>
+          </BusinessProvider>
+        </AuthProvider>
       </body>
     </html>
   );

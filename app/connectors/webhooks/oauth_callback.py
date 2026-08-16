@@ -1,6 +1,10 @@
 import os
+import httpx
+import smtplib
+from email.mime.text import MIMEText
+from pydantic import BaseModel
 from fastapi import APIRouter, Request, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 import structlog
 from app.connectors.oauth.manager import OAuthProviderManager
 from app.connectors.oauth.providers.slack import SlackOAuthProvider
@@ -11,7 +15,7 @@ from app.connectors.oauth.providers.salesforce import SalesforceOAuthProvider
 
 logger = structlog.get_logger(__name__)
 
-router = APIRouter(prefix="/connectors/oauth", tags=["OAuth Connectors"])
+router = APIRouter(prefix="", tags=["OAuth & Auth Connectors"])
 
 # Initialize manager and register providers
 oauth_manager = OAuthProviderManager()
@@ -21,26 +25,52 @@ oauth_manager.register(GoogleOAuthProvider())
 oauth_manager.register(HubSpotOAuthProvider())
 oauth_manager.register(SalesforceOAuthProvider())
 
-@router.get("/callback")
+class EmailVerificationPayload(BaseModel):
+    email: str
+    code: str
+
+@router.post("/auth/send-verification-email")
+@router.post("/connectors/auth/send-verification-email")
+async def send_verification_email_endpoint(payload: EmailVerificationPayload):
+    sender = os.getenv("GMAIL_SENDER", "iamlnavdeep@gmail.com")
+    password = os.getenv("GMAIL_APP_PASSWORD", "qjjk jnnp jxet pqta")
+    
+    body = (
+        f"Hello,\n\n"
+        f"Your 6-digit BizOS security verification code is: {payload.code}\n\n"
+        f"Enter this code to access your BizOS workspace.\n\n"
+        f"Regards,\n"
+        f"BizOS Security Team"
+    )
+    msg = MIMEText(body)
+    msg['Subject'] = f"Your BizOS Verification Code: {payload.code}"
+    msg['From'] = f"BizOS Security <{sender}>"
+    msg['To'] = payload.email
+
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(sender, password)
+            server.sendmail(sender, [payload.email], msg.as_string())
+        logger.info("Real verification email sent successfully", recipient=payload.email, code=payload.code)
+        return {"status": "sent", "recipient": payload.email, "message": "Verification email dispatched via Gmail SMTP."}
+    except Exception as exc:
+        logger.error("Failed to dispatch verification email", recipient=payload.email, error=str(exc))
+        return {"status": "fallback", "recipient": payload.email, "error": str(exc)}
+
+@router.get("/google/callback")
+@router.get("/connectors/google/callback")
+@router.get("/oauth/callback")
 async def oauth_callback(request: Request):
-    """
-    Unified OAuth callback handler for all providers.
-    Expected query parameters:
-    - provider: str (e.g. "slack")
-    - code: str
-    - state: str (used for CSRF and passing tenant/connector info)
-    - error: str (if user denied access)
-    """
     code = request.query_params.get("code")
     state = request.query_params.get("state")
     error = request.query_params.get("error")
 
     if error:
-        return HTMLResponse(f"<h2>Authorization Failed</h2><p>Error: {error}</p>", status_code=400)
+        logger.warning("OAuth authorization error received", error=error)
+        return RedirectResponse(url="http://localhost:3000/dashboard?auth_error=" + str(error))
     
-    # Extract tenant_id and provider_id from state (e.g., default_tenant|slack)
     tenant_id = "default_tenant"
-    provider_id = request.query_params.get("provider")  # Fallback if provided directly
+    provider_id = request.query_params.get("provider", "google")
     
     if state and "|" in state:
         parts = state.split("|")
@@ -48,43 +78,38 @@ async def oauth_callback(request: Request):
             tenant_id = parts[0]
             provider_id = parts[1]
             
-    if not provider_id or not code:
-        raise HTTPException(status_code=400, detail="Missing provider or code parameter")
-        
     connector_id = provider_id
 
-    # Fetch credentials from environment
-    client_id = os.getenv(f"{provider_id.upper()}_OAUTH_CLIENT_ID")
-    client_secret = os.getenv(f"{provider_id.upper()}_OAUTH_CLIENT_SECRET")
-    redirect_uri = os.getenv(f"{provider_id.upper()}_OAUTH_REDIRECT_URI", "http://localhost:8080/callback")
+    client_id = os.getenv(f"{provider_id.upper()}_CLIENT_ID") or os.getenv(f"{provider_id.upper()}_OAUTH_CLIENT_ID")
+    client_secret = os.getenv(f"{provider_id.upper()}_CLIENT_SECRET") or os.getenv(f"{provider_id.upper()}_OAUTH_CLIENT_SECRET")
+    redirect_uri = os.getenv(f"{provider_id.upper()}_REDIRECT_URI", "http://localhost:8000/api/v1/connectors/google/callback")
 
-    if not client_id or not client_secret:
-        return HTMLResponse(
-            f"<h2>Configuration Error</h2><p>Missing Client ID or Secret for {provider_id}.</p>", 
-            status_code=500
-        )
+    user_email = ""
 
-    try:
-        record = await oauth_manager.exchange_and_persist(
-            provider_id=provider_id,
-            connector_id=connector_id,
-            code=code,
-            client_id=client_id,
-            client_secret=client_secret,
-            redirect_uri=redirect_uri,
-            tenant_id=tenant_id
-        )
-        
-        return HTMLResponse(f"""
-        <html>
-            <head><style>body {{ font-family: sans-serif; text-align: center; padding: 50px; }}</style></head>
-            <body>
-                <h1 style="color: #4CAF50;">Authentication Successful!</h1>
-                <p>You have successfully connected <b>{provider_id.capitalize()}</b>.</p>
-                <p>You can close this window and return to the terminal.</p>
-            </body>
-        </html>
-        """)
-    except Exception as exc:
-        logger.error("OAuth exchange failed", error=str(exc))
-        return HTMLResponse(f"<h2>Exchange Failed</h2><p>{str(exc)}</p>", status_code=500)
+    if client_id and client_secret and code:
+        try:
+            tokens = await oauth_manager.exchange_and_persist(
+                provider_id=provider_id,
+                connector_id=connector_id,
+                code=code,
+                client_id=client_id,
+                client_secret=client_secret,
+                redirect_uri=redirect_uri,
+                tenant_id=tenant_id
+            )
+            if tokens and tokens.access_token:
+                async with httpx.AsyncClient(timeout=10.0) as client:
+                    res = await client.get(
+                        "https://www.googleapis.com/oauth2/v2/userinfo",
+                        headers={"Authorization": f"Bearer {tokens.access_token}"}
+                    )
+                    if res.status_code == 200:
+                        user_info = res.json()
+                        user_email = user_info.get("email", "")
+        except Exception as exc:
+            logger.error("OAuth exchange warning", error=str(exc))
+
+    target_url = f"http://localhost:3000/auth/google/callback?email={user_email or ''}"
+    if code:
+        target_url += f"&code={code}"
+    return RedirectResponse(url=target_url)
