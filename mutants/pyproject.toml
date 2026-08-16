@@ -1,0 +1,61 @@
+[project]
+name = "bizos"
+version = "2.0.0"
+description = "BizOS — AI Operating System for Entities"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "google-genai>=1.0.0",
+    "supabase>=2.10.0",
+    "qdrant-client>=1.12.0",
+    "pydantic>=2.10.0",
+    "pydantic-settings>=2.6.0",
+    "httpx>=0.28.0",
+    "structlog>=24.4.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.24.0",
+    "pytest-cov>=5.0.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+omit = [
+    "app/services/gemini.py",
+    "app/services/qdrant.py",
+    "app/services/ai/*",
+    "app/repositories/*",
+    "app/services/conversation_service.py",
+    "app/services/plan_service.py",
+    "app/services/recommendation_service.py",
+    "app/services/cognitive_trace_service.py",
+    "app/api/*"
+]
+
+[dependency-groups]
+dev = [
+    "hypothesis>=6.155.7",
+    "mutmut>=3.6.0",
+    "pytest-benchmark>=5.2.3",
+    "pytest-cov>=7.1.0",
+    "pytest-mock>=3.15.1",
+    "pytest-xdist>=3.8.0",
+    "syrupy>=5.3.4",
+]

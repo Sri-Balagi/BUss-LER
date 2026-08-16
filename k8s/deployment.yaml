@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bizos-api
+  namespace: bizos-prod
+  labels:
+    app: bizos
+    component: api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: bizos
+      component: api
+  template:
+    metadata:
+      labels:
+        app: bizos
+        component: api
+    spec:
+      containers:
+      - name: api
+        image: bizos/api:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+        envFrom:
+        - configMapRef:
+            name: bizos-config
+        - secretRef:
+            name: bizos-secrets
+        livenessProbe:
+          httpGet:
+            path: /health/liveness
+            port: 8000
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health/readiness
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bizos-worker
+  namespace: bizos-prod
+  labels:
+    app: bizos
+    component: worker
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: bizos
+      component: worker
+  template:
+    metadata:
+      labels:
+        app: bizos
+        component: worker
+    spec:
+      containers:
+      - name: worker
+        image: bizos/api:latest
+        command: ["python", "-m", "app.infrastructure.workers.runner"]
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: bizos-config
+        - secretRef:
+            name: bizos-secrets
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 1Gi
+          limits:
+            cpu: 2000m
+            memory: 2Gi

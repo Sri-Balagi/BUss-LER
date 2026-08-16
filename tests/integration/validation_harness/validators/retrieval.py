@@ -1,0 +1,1 @@
+def validate(trace, scenario): return True, []

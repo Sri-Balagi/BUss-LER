@@ -1,0 +1,50 @@
+﻿# BizOS Production Compose
+# Supabase is external (cloud). Qdrant is managed separately.
+# Usage: docker-compose -f docker-compose.prod.yml up -d
+version: "3.9"
+
+services:
+  api:
+    image: bizos:prod
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: bizos-api
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env.production
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - LOG_LEVEL=INFO
+    restart: always
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health')"]
+      interval: 30s
+      timeout: 10s
+      start_period: 40s
+      retries: 3
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: bizos-qdrant-prod
+    # NOTE: In production, bind to internal network only (no public port exposure)
+    expose:
+      - "6333"
+      - "6334"
+    volumes:
+      - qdrant_prod_data:/qdrant/storage
+    environment:
+      - QDRANT__SERVICE__GRPC_PORT=6334
+    restart: always
+
+networks:
+  default:
+    name: bizos-network
+
+volumes:
+  qdrant_prod_data:
+    driver: local

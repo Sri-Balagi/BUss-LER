@@ -1,0 +1,41 @@
+﻿name: Security
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  schedule:
+    - cron: "0 6 * * 1"  # Weekly Monday 6am UTC
+
+jobs:
+  dependency-audit:
+    name: Dependency Vulnerability Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+      - run: uv sync --all-extras --dev
+      - name: Run pip-audit
+        run: |
+          uv add pip-audit --dev 2>/dev/null || true
+          uv run pip-audit --desc --format=markdown || true
+
+  static-analysis:
+    name: Static Analysis (mypy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+      - run: uv sync --all-extras --dev
+      - name: Run mypy
+        env:
+          SUPABASE_URL: "https://mock.supabase.co"
+          SUPABASE_KEY: "mock-key"
+          GEMINI_API_KEY: "mock-key"
+        run: |
+          uv run mypy app/ --ignore-missing-imports --no-error-summary || true

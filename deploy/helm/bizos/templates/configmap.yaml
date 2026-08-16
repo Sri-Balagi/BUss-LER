@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "bizos.fullname" . }}-config
+  labels:
+    app.kubernetes.io/name: bizos
+    app.kubernetes.io/instance: {{ .Release.Name }}
+data:
+  APP_ENV: {{ .Values.env.appEnv | quote }}
+  LOG_LEVEL: {{ .Values.env.logLevel | quote }}
+  QDRANT_HOST: {{ .Values.env.qdrantHost | quote }}
+  QDRANT_PORT: {{ .Values.env.qdrantPort | quote }}
+  QDRANT_COLLECTION: {{ .Values.env.qdrantCollection | quote }}
+  QDRANT_VECTOR_SIZE: {{ .Values.env.qdrantVectorSize | quote }}
+  GEMINI_PRO_MODEL: {{ .Values.env.geminiProModel | quote }}
+  GEMINI_FLASH_MODEL: {{ .Values.env.geminiFlashModel | quote }}
+  GEMINI_EMBEDDING_MODEL: {{ .Values.env.geminiEmbeddingModel | quote }}

@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bizos-config
+  namespace: bizos-prod
+data:
+  LOG_LEVEL: "INFO"
+  ENVIRONMENT: "production"
+  CACHE_TYPE: "redis"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: bizos-secrets
+  namespace: bizos-prod
+type: Opaque
+data:
+  # Base64 encoded values (placeholders)
+  DATABASE_URL: cG9zdGdyZXNxbDovL2Jpem9zOmJpem9zQHBvc3RncmVzOjU0MzIvYml6b3M=
+  REDIS_URL: cmVkaXM6Ly9yZWRpczo2Mzc5LzA=
+  API_KEYS: c2VjcmV0LWtleXM=

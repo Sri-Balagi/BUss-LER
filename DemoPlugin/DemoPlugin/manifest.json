@@ -1,0 +1,9 @@
+{
+    "name": "my_new_plugin",
+    "version": "0.1.0",
+    "description": "A new BizOS plugin",
+    "author": "developer",
+    "dependencies": [],
+    "permissions": [],
+    "entrypoint": "plugin.py"
+}

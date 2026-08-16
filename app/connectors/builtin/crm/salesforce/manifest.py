@@ -1,0 +1,41 @@
+from app.connectors.sdk.manifest import ConnectorManifest, ConnectorComplianceLevel
+from app.connectors.sdk.permissions import ConnectorPermission
+
+MANIFEST = ConnectorManifest(
+    connector_id="salesforce",
+    display_name="Salesforce",
+    version="4.0.0",
+    provider="salesforce",
+    description="Production-grade Salesforce CRM connector. Provides bidirectional sync for leads, contacts, accounts, opportunities, tasks, events, and custom objects via REST API and SOQL.",
+    compliance_level=ConnectorComplianceLevel.ENTERPRISE_CERTIFIED,
+    family="crm",
+    capabilities=[
+        "crm.contacts.read",
+        "crm.contacts.write",
+        "crm.accounts.read",
+        "crm.accounts.write",
+        "crm.opportunities.read",
+        "crm.opportunities.write",
+        "crm.leads.read",
+        "crm.leads.write",
+        "crm.tasks.read",
+        "crm.tasks.write",
+        "crm.events.read",
+        "crm.events.write",
+        "crm.custom_objects.read",
+        "crm.custom_objects.write",
+        "crm.sync.delta",
+    ],
+    permissions=[
+        ConnectorPermission.READ_CONTACTS,
+        ConnectorPermission.WRITE_CONTACTS,
+        ConnectorPermission.READ_ACCOUNTS,
+        ConnectorPermission.WRITE_ACCOUNTS,
+        ConnectorPermission.READ_DEALS,
+        ConnectorPermission.WRITE_DEALS,
+    ],
+    supported_execution_modes=["SIMULATION", "DRY_RUN", "PRODUCTION"],
+    auth_type="oauth2",
+    webhook_support=True,
+    multi_account_support=True,
+)

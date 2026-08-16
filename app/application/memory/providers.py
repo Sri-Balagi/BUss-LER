@@ -1,0 +1,51 @@
+from uuid import UUID
+
+from app.domain.memory.models import MemoryRecord
+from app.domain.memory.provider import IMemoryProvider
+
+
+class InMemoryProvider(IMemoryProvider):
+    def __init__(self):
+        self._store: dict[UUID, MemoryRecord] = {}
+
+    @property
+    def provider_name(self) -> str:
+        return "in_memory"
+
+    async def store(self, record: MemoryRecord) -> None:
+        self._store[record.memory_id] = record
+
+    async def retrieve(self, memory_id: UUID) -> MemoryRecord | None:
+        return self._store.get(memory_id)
+
+    async def search(self, query: str, limit: int = 10, **filters) -> list[MemoryRecord]:
+        results = []
+        q_lower = query.lower()
+        q_tokens = [t for t in q_lower.replace("?", "").replace(",", "").split() if len(t) > 3]
+        for record in self._store.values():
+            rec_text = (record.title + " " + record.content).lower()
+            if q_lower in rec_text or any(token in rec_text for token in q_tokens):
+                if filters.get("memory_types") and record.memory_type not in filters["memory_types"]:
+                    continue
+                results.append(record)
+        return results[:limit]
+
+
+    async def delete(self, memory_id: UUID) -> None:
+        if memory_id in self._store:
+            del self._store[memory_id]
+
+class VectorMemoryProvider(InMemoryProvider):
+    @property
+    def provider_name(self) -> str:
+        return "vector"
+
+class SQLMemoryProvider(InMemoryProvider):
+    @property
+    def provider_name(self) -> str:
+        return "sql"
+
+class HybridMemoryProvider(InMemoryProvider):
+    @property
+    def provider_name(self) -> str:
+        return "hybrid"
