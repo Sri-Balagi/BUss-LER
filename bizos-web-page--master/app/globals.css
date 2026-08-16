@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* LIGHT THEME (Default) */
+  --bg-main: #F7F7F7;
+  --bg-surface: rgba(255, 255, 255, 0.65);
+  --text-primary: #141414;
+  --text-secondary: #41423A;
+  --text-muted: rgba(65, 66, 58, 0.4);
+  --accent-primary: #ED7D27;
+  --accent-hover: #D9641E;
+  --border-color: rgba(65, 66, 58, 0.15);
+  --glow-color: transparent;
+}
+
+.dark {
+  /* DARK THEME */
+  --bg-main: #141414;
+  --bg-surface: rgba(26, 26, 26, 0.65);
+  --text-primary: #ECE2D2;
+  --text-secondary: rgba(236, 226, 210, 0.7);
+  --text-muted: #41423A;
+  --accent-primary: #ED7D27;
+  --accent-hover: #D9641E;
+  --border-color: rgba(236, 226, 210, 0.12);
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+::selection {
+  background: var(--accent-primary);
+  color: var(--bg-surface);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--text-muted);
+  border-radius: 999px;
+  border: 2px solid var(--bg-main);
+}
+
+@layer components {
+  .glass-panel {
+    @apply relative rounded-2xl border border-[color:var(--border-color)] bg-[color:var(--bg-surface)] shadow-panel backdrop-blur-2xl transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-2xl hover:border-[#ED7D27]/30;
+  }
+
+  .eyebrow {
+    @apply font-mono text-[11px] uppercase tracking-[0.28em] text-secondary;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
