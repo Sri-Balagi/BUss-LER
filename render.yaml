@@ -1,0 +1,15 @@
+# Render Blueprint Configuration for BizOS FastAPI Backend
+
+services:
+  - type: web
+    name: bizos-backend
+    runtime: python
+    buildCommand: pip install -e .
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: GMAIL_SENDER
+        value: iamlnavdeep@gmail.com
+      - key: GMAIL_APP_PASSWORD
+        value: qjjk jnnp jxet pqta
+      - key: APP_ENV
+        value: production
