@@ -27,7 +27,6 @@ import { Navigator } from "@/components/navigator";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { AuthProvider } from "@/lib/auth-context";
 import { OnboardingProvider } from "@/lib/onboarding-context";
-import { BusinessProvider } from "@/lib/business-context";
 
 export default function RootLayout({
   children,
@@ -38,15 +37,13 @@ export default function RootLayout({
     <html lang="en" className={`${mono.variable} ${poppins.variable}`}>
       <body className="font-body antialiased bg-deep-space text-primary min-h-screen">
         <AuthProvider>
-          <BusinessProvider>
-            <OnboardingProvider>
-              <AmbientBackground />
-              <Sidebar />
-              <Navigator />
-              {children}
-              <ThemeToggle />
-            </OnboardingProvider>
-          </BusinessProvider>
+          <OnboardingProvider>
+            <AmbientBackground />
+            <Sidebar />
+            <Navigator />
+            {children}
+            <ThemeToggle />
+          </OnboardingProvider>
         </AuthProvider>
       </body>
     </html>

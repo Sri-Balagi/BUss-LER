@@ -6,7 +6,12 @@ from __future__ import annotations
 import asyncio
 import random
 from datetime import datetime, timezone
-from enum import StrEnum
+import sys
+try:
+    from enum import StrEnum
+except ImportError:
+    import enum as _enum
+    class StrEnum(str, _enum.Enum): pass
 from typing import Any, Callable, Dict, List, Optional
 from pydantic import BaseModel, Field
 

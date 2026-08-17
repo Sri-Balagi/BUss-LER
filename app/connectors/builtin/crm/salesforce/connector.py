@@ -375,7 +375,6 @@ class SalesforceConnector(BaseConnector):
                 "create_task", "complete_task",
                 "add_note", "list_notes",
             ],
-            supported_resources=[ConnectorResourceType.USER],
         )
 
     # ── Authentication ────────────────────────────────────────────────────────

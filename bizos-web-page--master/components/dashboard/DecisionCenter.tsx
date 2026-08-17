@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, X, Clock } from "lucide-react";
 import { useCognitiveState, useCognitiveActions } from "@/lib/dashboard/state";
@@ -15,11 +14,6 @@ function timeAgo(ts: number) {
 export default function DecisionCenter() {
   const state = useCognitiveState();
   const { decide } = useCognitiveActions();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   return (
     <div className="glass-card p-7 backdrop-blur-xl bg-[#FAF7F2]/95 dark:bg-zinc-900/95 border-2 border-[#E6DFD3] dark:border-zinc-800 shadow-[0_8px_32px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_28px_rgba(0,0,0,0.06)] hover:border-[#38BDF8] hover:-translate-y-0.5 rounded-[28px] transition-all duration-200 ease-[0.16,1,0.3,1]">
@@ -46,8 +40,8 @@ export default function DecisionCenter() {
               <p className="mb-3 text-[12px] leading-relaxed text-ink-muted font-light">{d.reasoning}</p>
 
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1 font-mono text-[10px] text-ink-muted font-medium" suppressHydrationWarning>
-                  <Clock className="h-3 w-3" /> {mounted ? timeAgo(d.ts) : "just now"}
+                <span className="flex items-center gap-1 font-mono text-[10px] text-ink-muted font-medium">
+                  <Clock className="h-3 w-3" /> {timeAgo(d.ts)}
                 </span>
 
                 {d.status === "pending" ? (

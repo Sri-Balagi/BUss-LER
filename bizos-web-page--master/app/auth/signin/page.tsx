@@ -14,6 +14,7 @@ export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -27,8 +28,7 @@ export default function SignInPage() {
     setLoading(true);
     try {
       await signIn(email, password);
-      // Navigate to 6-digit email verification page
-      router.push("/auth/verify-email");
+      router.push("/dashboard");
     } catch (err: any) {
       setError(err?.message || "Failed to sign in. Please try again.");
     } finally {
@@ -89,50 +89,71 @@ export default function SignInPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••••••"
-              className="h-11 w-full rounded-xl border border-white/10 bg-white/[0.04] pl-10 pr-10 text-sm text-primary placeholder:text-tertiary focus:border-accent focus:bg-white/[0.06] focus:outline-none transition-all"
+              className="h-11 w-full rounded-xl border border-white/10 bg-white/[0.04] pl-10 pr-12 text-sm text-primary placeholder:text-tertiary focus:border-accent focus:bg-white/[0.06] focus:outline-none transition-all"
             />
             <button
               type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-tertiary hover:text-primary transition-colors"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setShowPassword((prev) => !prev);
+              }}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-tertiary hover:text-primary transition-colors z-10 cursor-pointer p-1.5 focus:outline-none"
+              aria-label={showPassword ? "Hide password" : "Show password"}
             >
-              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {showPassword ? <EyeOff className="h-4 w-4 text-accent" /> : <Eye className="h-4 w-4 text-tertiary" />}
             </button>
           </div>
         </div>
 
-        {/* Submit */}
+        {/* Remember me */}
+        <div className="flex items-center justify-between pt-1">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="h-4 w-4 rounded border-white/20 bg-white/5 text-accent focus:ring-0 accent-accent"
+            />
+            <span className="text-xs text-secondary">Remember this device</span>
+          </label>
+        </div>
+
+        {/* Submit Button */}
         <button
           type="submit"
           disabled={loading}
-          className="mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-accent text-sm font-semibold text-white transition-all hover:bg-accent-hover active:scale-[0.99] disabled:opacity-50 shadow-md shadow-accent/20"
+          className="mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-accent text-sm font-medium text-white shadow-lg shadow-accent/20 transition-all hover:bg-accent-hover active:scale-[0.99] disabled:opacity-50"
         >
           {loading ? (
-            <Loader2 className="h-4 w-4 animate-spin text-white" />
+            <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
             <>
-              <span>Sign In with Verification</span>
+              Sign In
               <ArrowRight className="h-4 w-4" />
             </>
           )}
         </button>
       </form>
 
-      <div className="relative my-1 flex items-center justify-center">
+      {/* Divider */}
+      <div className="relative flex items-center justify-center">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-white/10" />
         </div>
-        <div className="relative bg-zinc-950 px-3 text-[11px] uppercase tracking-wider text-tertiary">
-          Or continue with
-        </div>
+        <span className="relative bg-[#E0F2FE] px-3.5 py-1 rounded-full font-mono text-[11px] font-semibold uppercase tracking-wider text-[#171717]">
+          OR CONTINUE WITH
+        </span>
       </div>
 
-      <OAuthButtons redirectOnSuccess="/dashboard" />
+      {/* Social Logins */}
+      <OAuthButtons redirectOnSuccess="/onboarding" />
 
+      {/* Sign up prompt */}
       <p className="text-center text-xs text-secondary">
         Don&apos;t have an account?{" "}
-        <Link href="/auth/signup" className="text-accent font-medium hover:underline">
-          Sign up
+        <Link href="/auth/signup" className="font-medium text-accent hover:underline">
+          Sign up for free
         </Link>
       </p>
     </div>

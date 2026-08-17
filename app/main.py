@@ -77,12 +77,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         container.register_singleton(AsyncClient, supabase_client)
 
         logger.info("Initializing Qdrant client and collections")
-        try:
-            await QdrantService.initialize_collections(settings)
-            qdrant_client = QdrantService.get_client(settings)
-            container.register_singleton(AsyncQdrantClient, qdrant_client)
-        except Exception as qdrant_err:
-            logger.warning(f"Qdrant initialization bypassed: {qdrant_err}")
+        await QdrantService.initialize_collections(settings)
+        qdrant_client = QdrantService.get_client(settings)
+        container.register_singleton(AsyncQdrantClient, qdrant_client)
 
         logger.info("Validating Dependency Graph")
         from app.infrastructure.ai.budgets.interfaces import IResourceBudget
@@ -203,11 +200,9 @@ def create_app() -> FastAPI:
 
     # ── API Routers ───────────────────────────────────────────────────────────
     from app.interfaces.http.v1.routers.mcp import mcp_router
-    from app.connectors.webhooks.oauth_callback import router as oauth_webhooks_router
     app.include_router(gateway_router, prefix="/api/v1")
     app.include_router(mcp_router, prefix="/api/v1/mcp")
     app.include_router(api_router, prefix="/api/v1")
-    app.include_router(oauth_webhooks_router, prefix="/api/v1")
 
     # ── OpenAPI Customization ─────────────────────────────────────────────────
     app.openapi = lambda: custom_openapi(app)  # type: ignore[method-assign]  # FastAPI openapi is overridden for custom schema generation.

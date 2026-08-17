@@ -4,7 +4,7 @@ import enum
 from app.domain.intelligence.capability import CapabilityMetadata, CapabilityType
 
 
-class ProviderLifecycleStatus(enum.StrEnum):
+class ProviderLifecycleStatus(str, enum.Enum):
     INITIALIZING = "INITIALIZING"
     READY = "READY"
     DEGRADED = "DEGRADED"

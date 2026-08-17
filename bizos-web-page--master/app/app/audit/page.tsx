@@ -3,15 +3,7 @@
 import { motion } from "framer-motion";
 import { Activity, Clock } from "lucide-react";
 
-import { useBusiness } from "@/lib/business-context";
-import { NewAccountPage } from "@/components/NewAccountPage";
-
 export default function AuditLayer() {
-  const { isPrimaryAccount } = useBusiness();
-
-  if (!isPrimaryAccount) {
-    return <NewAccountPage />;
-  }
   return (
     <main className="pl-24 pr-8 py-8 w-full min-h-screen flex items-center justify-center relative z-10">
       <motion.div 

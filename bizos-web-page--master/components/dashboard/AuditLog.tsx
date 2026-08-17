@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCognitiveState, type AuditEntry } from "@/lib/dashboard/state";
 
@@ -17,11 +16,6 @@ function formatTime(ts: number) {
 
 export default function AuditLog() {
   const state = useCognitiveState();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   return (
     <div className="glass-card col-span-1 md:col-span-2 lg:col-span-4 p-7 backdrop-blur-xl bg-[#FAF7F2]/95 dark:bg-zinc-900/95 border-2 border-[#E6DFD3] dark:border-zinc-800 shadow-[0_8px_32px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_28px_rgba(0,0,0,0.06)] hover:border-[#38BDF8] hover:-translate-y-0.5 rounded-[28px] transition-all duration-200 ease-[0.16,1,0.3,1]">
@@ -45,9 +39,7 @@ export default function AuditLog() {
               animate={{ opacity: 1, y: 0 }}
               className="flex gap-3 py-0.5"
             >
-              <span className="shrink-0 text-ink-muted font-medium" suppressHydrationWarning>
-                {mounted ? formatTime(entry.ts) : "--:--:--"}
-              </span>
+              <span className="shrink-0 text-ink-muted font-medium">{formatTime(entry.ts)}</span>
               <span className={`shrink-0 font-bold ${TYPE_COLOR[entry.type]}`}>[{entry.type}]</span>
               <span className="text-ink font-light">{entry.text}</span>
             </motion.div>

@@ -5,8 +5,6 @@ import { Circle, Globe, Hexagon, Layers, Cpu, Settings, Activity } from "lucide-
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { useBusiness } from "@/lib/business-context";
-
 const NAV_ITEMS = [
   { href: "/app/core", icon: Circle, label: "Core Runtime", state: "thought" },
   { href: "/app/memory", icon: Globe, label: "Memory Layer", state: "memory" },
@@ -18,12 +16,6 @@ const NAV_ITEMS = [
 
 export function Navigator() {
   const pathname = usePathname();
-  const { isPrimaryAccount } = useBusiness();
-
-  // Hide navigator completely for general users (only show contact details)
-  if (!isPrimaryAccount) {
-    return null;
-  }
 
   // Only show navigator on dashboard and app routes
   const isDashboardOrApp = pathname === "/dashboard" || pathname.startsWith("/dashboard/") || pathname.startsWith("/app/");

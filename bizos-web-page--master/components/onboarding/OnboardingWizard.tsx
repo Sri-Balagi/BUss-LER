@@ -30,8 +30,8 @@ export function OnboardingWizard() {
   const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
 
   const handleComplete = () => {
-    // Redirect user to the Digital Twin Creation Boot sequence
-    router.push("/boot");
+    // Redirect user to the dashboard with welcome card flag
+    router.push("/dashboard?welcome=true");
   };
 
   return (

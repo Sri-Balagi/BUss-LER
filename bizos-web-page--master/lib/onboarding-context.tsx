@@ -31,25 +31,27 @@ export interface OnboardingData {
 }
 
 const DEFAULT_ONBOARDING: OnboardingData = {
-  businessName: "",
-  industry: "Enterprise Operations",
-  businessType: "Commercial Enterprise",
-  country: "India",
-  timezone: "UTC+5:30 (India Standard Time)",
-  companySize: "10-50 Staff",
-  annualRevenue: "",
+  businessName: "Acme Dynamics",
+  industry: "Technology & Software",
+  businessType: "B2B SaaS",
+  country: "United States",
+  timezone: "UTC-5 (Eastern Time)",
+  companySize: "11-50 employees",
+  annualRevenue: "$1M - $5M",
   aiDescription:
-    "Enterprise AI Digital Twin setup for business operations, CRM, POS billing, inventory management, and automated workflows.",
+    "We provide enterprise AI operations and decision automation software to mid-market businesses. Our team manages customer communications, project pipelines, and billing across multiple channels.",
   selectedModules: [
     "Inventory",
     "CRM",
-    "POS Billing",
     "Finance",
+    "HR",
+    "Sales",
+    "Analytics",
     "Customer Support",
   ],
   aiPreferenceMode: "copilot",
   communicationStyle: "professional",
-  selectedIntegrations: ["Gmail", "Google Drive", "WhatsApp"],
+  selectedIntegrations: ["Gmail", "Slack", "WhatsApp", "Stripe", "GitHub"],
   completed: false,
 };
 
@@ -58,7 +60,7 @@ interface OnboardingContextType {
   updateData: (fields: Partial<OnboardingData>) => void;
   toggleModule: (moduleName: string) => void;
   toggleIntegration: (integrationName: string) => void;
-  completeOnboarding: () => Promise<void>;
+  completeOnboarding: () => void;
   resetOnboarding: () => void;
 }
 
@@ -70,19 +72,21 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     try {
-      localStorage.setItem(ONBOARDING_STORAGE_KEY, JSON.stringify(DEFAULT_ONBOARDING));
+      const saved = localStorage.getItem(ONBOARDING_STORAGE_KEY);
+      if (saved) {
+        setData(JSON.parse(saved));
+      }
     } catch (e) {
       console.error("Failed to load onboarding state", e);
     }
   }, []);
 
-  const persist = (next: OnboardingData) => {
-    localStorage.setItem(ONBOARDING_STORAGE_KEY, JSON.stringify(next));
-    return next;
-  };
-
   const updateData = (fields: Partial<OnboardingData>) => {
-    setData((prev) => persist({ ...prev, ...fields }));
+    setData((prev) => {
+      const next = { ...prev, ...fields };
+      localStorage.setItem(ONBOARDING_STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
   };
 
   const toggleModule = (moduleName: string) => {
@@ -91,7 +95,9 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       const nextModules = exists
         ? prev.selectedModules.filter((m) => m !== moduleName)
         : [...prev.selectedModules, moduleName];
-      return persist({ ...prev, selectedModules: nextModules });
+      const next = { ...prev, selectedModules: nextModules };
+      localStorage.setItem(ONBOARDING_STORAGE_KEY, JSON.stringify(next));
+      return next;
     });
   };
 
@@ -101,18 +107,23 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       const nextIntegrations = exists
         ? prev.selectedIntegrations.filter((i) => i !== integrationName)
         : [...prev.selectedIntegrations, integrationName];
-      return persist({ ...prev, selectedIntegrations: nextIntegrations });
+      const next = { ...prev, selectedIntegrations: nextIntegrations };
+      localStorage.setItem(ONBOARDING_STORAGE_KEY, JSON.stringify(next));
+      return next;
     });
   };
 
-  const completeOnboarding = async () => {
-    const completed = { ...data, completed: true, completedAt: new Date().toISOString() };
-    setData(persist(completed));
+  const completeOnboarding = () => {
+    setData((prev) => {
+      const next = { ...prev, completed: true, completedAt: new Date().toISOString() };
+      localStorage.setItem(ONBOARDING_STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
   };
 
   const resetOnboarding = () => {
     setData(DEFAULT_ONBOARDING);
-    localStorage.setItem(ONBOARDING_STORAGE_KEY, JSON.stringify(DEFAULT_ONBOARDING));
+    localStorage.removeItem(ONBOARDING_STORAGE_KEY);
   };
 
   return (

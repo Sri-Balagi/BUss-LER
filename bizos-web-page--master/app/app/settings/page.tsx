@@ -3,15 +3,7 @@
 import { motion } from "framer-motion";
 import { Settings, Wrench } from "lucide-react";
 
-import { useBusiness } from "@/lib/business-context";
-import { NewAccountPage } from "@/components/NewAccountPage";
-
 export default function SettingsLayer() {
-  const { isPrimaryAccount } = useBusiness();
-
-  if (!isPrimaryAccount) {
-    return <NewAccountPage />;
-  }
   return (
     <main className="min-h-screen pl-4 sm:pl-[92px] lg:pl-[104px] pr-4 sm:pr-8 lg:pr-12 pt-6 pb-16 transition-all duration-200 ease-[0.16,1,0.3,1]">
       <div className="mx-auto max-w-[1440px] space-y-7">

@@ -94,8 +94,11 @@ class QdrantService:
                 logger.info("Qdrant collection already exists", collection=collection_name)
 
         except Exception as e:
-            logger.error("Failed to initialize Qdrant collections", error=str(e))
-            raise
+            logger.warning(
+                "Qdrant unavailable — vector storage will be disabled. Start Qdrant to enable memory features.",
+                error=str(e),
+            )
+            # Non-fatal: API continues without vector storage
 
     @classmethod
     async def health_check(cls, settings: Settings) -> dict:

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { Loader2 } from "lucide-react";
 
@@ -8,59 +9,29 @@ interface OAuthButtonsProps {
   redirectOnSuccess?: string;
 }
 
-const GOOGLE_CLIENT_ID =
-  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
-  "741293713870-tktuajlk72vcp17f0g5ajpd2mmo38su1.apps.googleusercontent.com";
-
-const GOOGLE_REDIRECT_URI =
-  process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI ||
-  "http://localhost:8000/api/v1/connectors/google/callback";
-
-export function OAuthButtons({ redirectOnSuccess = "/dashboard" }: OAuthButtonsProps) {
+export function OAuthButtons({ redirectOnSuccess = "/onboarding" }: OAuthButtonsProps) {
   const { signInWithOAuth } = useAuth();
+  const router = useRouter();
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
 
-  const handleGoogleAuth = () => {
-    setLoadingProvider("google");
-
-    // Construct standard Google OAuth 2.0 Auth Endpoint URL
-    const googleAuthUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
-    googleAuthUrl.searchParams.append("client_id", GOOGLE_CLIENT_ID);
-    googleAuthUrl.searchParams.append("redirect_uri", GOOGLE_REDIRECT_URI);
-    googleAuthUrl.searchParams.append("response_type", "code");
-    googleAuthUrl.searchParams.append("scope", "openid email profile");
-    googleAuthUrl.searchParams.append("prompt", "select_account");
-
-    // Redirect directly to official Google Accounts login page
-    window.location.href = googleAuthUrl.toString();
-  };
-
-  const handleMicrosoftAuth = () => {
-    setLoadingProvider("microsoft");
-    const msAuthUrl = new URL("https://login.microsoftonline.com/common/oauth2/v2.0/authorize");
-    msAuthUrl.searchParams.append("client_id", process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID || "demo-ms-client-id");
-    msAuthUrl.searchParams.append("redirect_uri", GOOGLE_REDIRECT_URI);
-    msAuthUrl.searchParams.append("response_type", "code");
-    msAuthUrl.searchParams.append("scope", "openid profile email User.Read");
-    msAuthUrl.searchParams.append("prompt", "select_account");
-    window.location.href = msAuthUrl.toString();
-  };
-
-  const handleGitHubAuth = () => {
-    setLoadingProvider("github");
-    const ghAuthUrl = new URL("https://github.com/login/oauth/authorize");
-    ghAuthUrl.searchParams.append("client_id", process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || "demo-github-client-id");
-    ghAuthUrl.searchParams.append("redirect_uri", GOOGLE_REDIRECT_URI);
-    ghAuthUrl.searchParams.append("scope", "user:email");
-    window.location.href = ghAuthUrl.toString();
+  const handleOAuth = async (provider: "google" | "microsoft" | "github") => {
+    setLoadingProvider(provider);
+    try {
+      await signInWithOAuth(provider);
+      router.push(redirectOnSuccess);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingProvider(null);
+    }
   };
 
   return (
     <div className="flex flex-col gap-2.5 w-full">
-      {/* Google Button */}
+      {/* Google */}
       <button
         type="button"
-        onClick={handleGoogleAuth}
+        onClick={() => handleOAuth("google")}
         disabled={!!loadingProvider}
         className="flex h-11 w-full items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-4 text-sm font-medium text-primary transition-all hover:bg-white/[0.08] hover:border-white/20 active:scale-[0.99] disabled:opacity-50"
       >
@@ -92,7 +63,7 @@ export function OAuthButtons({ redirectOnSuccess = "/dashboard" }: OAuthButtonsP
       {/* Microsoft */}
       <button
         type="button"
-        onClick={handleMicrosoftAuth}
+        onClick={() => handleOAuth("microsoft")}
         disabled={!!loadingProvider}
         className="flex h-11 w-full items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-4 text-sm font-medium text-primary transition-all hover:bg-white/[0.08] hover:border-white/20 active:scale-[0.99] disabled:opacity-50"
       >
@@ -112,7 +83,7 @@ export function OAuthButtons({ redirectOnSuccess = "/dashboard" }: OAuthButtonsP
       {/* GitHub */}
       <button
         type="button"
-        onClick={handleGitHubAuth}
+        onClick={() => handleOAuth("github")}
         disabled={!!loadingProvider}
         className="flex h-11 w-full items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-4 text-sm font-medium text-primary transition-all hover:bg-white/[0.08] hover:border-white/20 active:scale-[0.99] disabled:opacity-50"
       >

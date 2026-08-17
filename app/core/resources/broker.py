@@ -5,7 +5,12 @@ Handles allocation, reservations, rate limiting, token budgets, and cost account
 from __future__ import annotations
 import asyncio
 from datetime import datetime, timezone
-from enum import StrEnum
+import sys
+try:
+    from enum import StrEnum
+except ImportError:
+    import enum as _enum
+    class StrEnum(str, _enum.Enum): pass
 from typing import Any, Dict, Optional, List
 from pydantic import BaseModel, Field
 from app.shared.enums import ExecutionMode

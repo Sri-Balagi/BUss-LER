@@ -19,7 +19,6 @@ import {
 } from "lucide-react";
 
 import Link from "next/link";
-import { useBusiness } from "@/lib/business-context";
 
 const ITEMS = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, live: true },
@@ -38,15 +37,9 @@ const ITEMS = [
 export default function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
-  const { isPrimaryAccount } = useBusiness();
   const [expanded, setExpanded] = useState(false);
   const [active, setActive] = useState("dashboard");
   const [toast, setToast] = useState<string | null>(null);
-
-  // Hide sidebar completely for general users (only show contact details)
-  if (!isPrimaryAccount) {
-    return null;
-  }
 
   // Permanently visible on dashboard and utility surfaces (/dashboard & /app/*), hidden on public landing page site
   const isDashboardOrApp = pathname === "/dashboard" || pathname.startsWith("/dashboard/") || pathname.startsWith("/app/");

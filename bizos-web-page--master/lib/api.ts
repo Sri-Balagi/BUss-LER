@@ -1,76 +1,145 @@
-export class BizOSAPIError extends Error {
-  status: number;
-  detail: string;
+/**
+ * BizOS Frontend API Client
+ * Provides typed API wrappers for auth, connectors, and core BizOS backend calls.
+ * Method names are matched exactly to what auth-context.tsx expects.
+ */
 
-  constructor(message: string, status = 400, detail?: string) {
-    super(message);
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+export class BizOSAPIError extends Error {
+  constructor(
+    public status: number,
+    public detail: string,
+    message?: string
+  ) {
+    super(message || detail);
     this.name = "BizOSAPIError";
-    this.status = status;
-    this.detail = detail || message;
   }
 }
 
+async function request<T>(
+  path: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("bizos_session_token")
+      : null;
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(options.headers as Record<string, string>),
+  };
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const res = await fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers,
+  });
+
+  if (!res.ok) {
+    let detail = res.statusText;
+    try {
+      const body = await res.json();
+      detail = body.detail || body.message || detail;
+    } catch {}
+    throw new BizOSAPIError(res.status, detail);
+  }
+
+  if (res.status === 204) return undefined as T;
+  return res.json();
+}
+
+// ─── Auth API ─────────────────────────────────────────────────────────────────
+// Method names must match exactly what lib/auth-context.tsx calls
+
 export const authAPI = {
-  me: async () => {
-    return {
-      id: "usr_101",
-      name: "Sri Balagi",
-      email: "rsribalagi@gmail.com",
-      verified: true,
-    };
-  },
-  login: async (email: string, password?: string) => {
-    return {
-      user_id: "usr_101",
-      token: "tok_bizos_session_secure_2026",
-      user: {
-        id: "usr_101",
-        name: email.includes("porselvi") ? "Porselvi Uthirakumaran" : "Sri Balagi",
-        email: email,
-        verified: true,
-      },
-    };
-  },
-  register: async (name: string, email: string, password?: string) => {
-    return {
-      user_id: "usr_101",
-      token: "tok_bizos_session_secure_2026",
-      user: {
-        id: "usr_101",
-        name: name || "Sri Balagi",
-        email: email || "rsribalagi@gmail.com",
-        verified: true,
-      },
-    };
-  },
-  verifyEmail: async (code: string) => {
-    return { verified: true };
-  },
-  forgotPassword: async (email: string) => {
-    return { sent: true };
-  },
-  logout: async () => {
-    return { success: true };
-  },
+  /** Called as authAPI.register(name, email, password) */
+  register: (name: string, email: string, password: string) =>
+    request<{ user_id: string; token?: string; user?: any; message?: string }>(
+      "/api/v1/auth/signup",
+      { method: "POST", body: JSON.stringify({ name, email, password }) }
+    ),
+
+  /** Called as authAPI.login(email, password) */
+  login: (email: string, password: string) =>
+    request<{ user_id: string; token?: string; access_token?: string; user?: any }>(
+      "/api/v1/auth/signin",
+      { method: "POST", body: JSON.stringify({ email, password }) }
+    ),
+
+  /** Called as authAPI.logout() */
+  logout: () =>
+    request<void>("/api/v1/auth/signout", { method: "POST" }),
+
+  /** Called as authAPI.forgotPassword(email) */
+  forgotPassword: (email: string) =>
+    request<{ sent?: boolean; message?: string }>("/api/v1/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    }),
+
+  /** Called as authAPI.verifyEmail(code) */
+  verifyEmail: (code: string) =>
+    request<{ verified?: boolean; message?: string }>("/api/v1/auth/verify-email", {
+      method: "POST",
+      body: JSON.stringify({ code }),
+    }),
+
+  /** Called as authAPI.sendVerificationEmail(email) */
+  sendVerificationEmail: (email: string) =>
+    request<{ message?: string }>("/api/v1/auth/send-verification-email", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    }),
+
+  me: () => request<any>("/api/v1/auth/me"),
+
+  oauthUrl: (provider: string) =>
+    request<{ url: string }>(`/api/v1/auth/oauth/${provider}`),
 };
+
+// ─── Connectors API ───────────────────────────────────────────────────────────
 
 export const connectorsAPI = {
-  authenticate: async (provider: string, payload: any) => {
-    return { auth_url: "/app/memory", redirect_url: "/app/memory" };
-  },
+  list: () => request<any[]>("/api/v1/connectors"),
+
+  /** Called as connectorsAPI.authenticate(provider, { user_email, tenant_id, account_id }) */
+  authenticate: (connectorId: string, config: Record<string, any>) =>
+    request<{ auth_url?: string; status?: string }>(`/api/v1/connectors/${connectorId}/authenticate`, {
+      method: "POST",
+      body: JSON.stringify(config),
+    }),
+
+  connect: (connectorId: string, config: Record<string, any>) =>
+    request<any>(`/api/v1/connectors/${connectorId}/connect`, {
+      method: "POST",
+      body: JSON.stringify(config),
+    }),
+
+  disconnect: (connectorId: string) =>
+    request<void>(`/api/v1/connectors/${connectorId}/disconnect`, {
+      method: "DELETE",
+    }),
+
+  status: (connectorId: string) =>
+    request<any>(`/api/v1/connectors/${connectorId}/status`),
 };
 
-export const onboardingAPI = {
-  saveBusinessInfo: async (payload: any) => {
-    return { success: true };
-  },
-  saveModules: async (modules: string[]) => {
-    return { success: true };
-  },
-  savePreferences: async (payload: any) => {
-    return { success: true };
-  },
-  complete: async (payload: any) => {
-    return { success: true };
-  },
+// ─── Runtime API ──────────────────────────────────────────────────────────────
+
+export const runtimeAPI = {
+  status: () => request<any>("/api/v1/runtime/status"),
+  health: () => request<any>("/api/v1/runtime/health"),
+};
+
+// ─── Knowledge API ────────────────────────────────────────────────────────────
+
+export const knowledgeAPI = {
+  graph: () => request<any>("/api/v1/knowledge/graph"),
+  search: (query: string) =>
+    request<any>(`/api/v1/knowledge/search?q=${encodeURIComponent(query)}`),
 };

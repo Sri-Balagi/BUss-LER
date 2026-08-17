@@ -1,567 +1,488 @@
 "use client";
 
-import { useCallback, useState, useEffect } from "react";
+import { useMemo } from "react";
 import {
   ReactFlow,
+  Background,
   useNodesState,
   useEdgesState,
   Handle,
   Position,
   NodeProps,
-  addEdge,
-  Connection,
-  EdgeProps,
-  getBezierPath,
   MarkerType,
-  Background,
-  BackgroundVariant,
-  Controls,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
+import { Building2, Utensils, Award, ChefHat, Truck, Sparkles, Users2, Coffee } from "lucide-react";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-type ND = {
-  label: string;
-  sub?: string;
-  detail?: string;
-  metrics?: { v: string; l: string }[];
-  color: string;
-  accent: string;
-  textColor: string;
-  icon: string;
-  level: number;
-  badge?: string;
+// Color themes mapping boundary color to matching background, border, and text styles in both light and dark mode
+const COLOR_STYLES: Record<string, {
+  border: string;
+  cardBg: string;
+  titleText: string;
+  mutedText: string;
+  badgeBg: string;
+  badgeText: string;
+  handleBg: string;
+  glow: string;
+}> = {
+  "#0EA5E9": { // Sky Blue (Main Dining Hall)
+    border: "border-sky-500 dark:border-sky-400 border-2",
+    cardBg: "bg-sky-50/95 dark:bg-sky-950/80 backdrop-blur-xl shadow-md shadow-sky-500/10",
+    titleText: "text-sky-950 dark:text-sky-100",
+    mutedText: "text-sky-700 dark:text-sky-300",
+    badgeBg: "bg-sky-200/80 dark:bg-sky-900/60 border border-sky-400/40 dark:border-sky-700",
+    badgeText: "text-sky-900 dark:text-sky-200",
+    handleBg: "#0EA5E9",
+    glow: "shadow-[0_0_20px_rgba(14,165,233,0.25)]",
+  },
+  "#A78BFA": { // Violet / Purple (Balagi Mandapam Banquet)
+    border: "border-purple-500 dark:border-purple-400 border-2",
+    cardBg: "bg-purple-50/95 dark:bg-purple-950/80 backdrop-blur-xl shadow-md shadow-purple-500/10",
+    titleText: "text-purple-950 dark:text-purple-100",
+    mutedText: "text-purple-700 dark:text-purple-300",
+    badgeBg: "bg-purple-200/80 dark:bg-purple-900/60 border border-purple-400/40 dark:border-purple-700",
+    badgeText: "text-purple-900 dark:text-purple-200",
+    handleBg: "#A78BFA",
+    glow: "shadow-[0_0_20px_rgba(167,139,250,0.25)]",
+  },
+  "#ED7D27": { // Warm Amber Orange (Central Kitchen & Root)
+    border: "border-[#ED7D27] border-2",
+    cardBg: "bg-orange-50/95 dark:bg-orange-950/80 backdrop-blur-xl shadow-md shadow-orange-500/10",
+    titleText: "text-orange-950 dark:text-orange-100",
+    mutedText: "text-orange-800 dark:text-orange-300",
+    badgeBg: "bg-orange-200/80 dark:bg-orange-900/60 border border-orange-400/40 dark:border-orange-700",
+    badgeText: "text-orange-950 dark:text-orange-200",
+    handleBg: "#ED7D27",
+    glow: "shadow-[0_0_25px_rgba(237,125,39,0.3)]",
+  },
+  "#10B981": { // Emerald Green (Supply & Inventory)
+    border: "border-emerald-500 dark:border-emerald-400 border-2",
+    cardBg: "bg-emerald-50/95 dark:bg-emerald-950/80 backdrop-blur-xl shadow-md shadow-emerald-500/10",
+    titleText: "text-emerald-950 dark:text-emerald-100",
+    mutedText: "text-emerald-700 dark:text-emerald-300",
+    badgeBg: "bg-emerald-200/80 dark:bg-emerald-900/60 border border-emerald-400/40 dark:border-emerald-700",
+    badgeText: "text-emerald-900 dark:text-emerald-200",
+    handleBg: "#10B981",
+    glow: "shadow-[0_0_20px_rgba(16,185,129,0.25)]",
+  },
 };
 
-// ─── Palette ──────────────────────────────────────────────────────────────────
-const P = {
-  root:  { color: "#7C3AED", accent: "#A855F7", textColor: "#fff" },
-  rec:   { color: "#D97706", accent: "#F59E0B", textColor: "#fff" },
-  sup:   { color: "#059669", accent: "#10B981", textColor: "#fff" },
-  pos:   { color: "#2563EB", accent: "#3B82F6", textColor: "#fff" },
-  cust:  { color: "#DB2777", accent: "#EC4899", textColor: "#fff" },
-  ops:   { color: "#DC2626", accent: "#EF4444", textColor: "#fff" },
-};
+// Custom Styled Node Component for Hotel Balagi Bhavan Knowledge Tree
+function BalagiNode({ data }: NodeProps) {
+  const level = (data.level as number) || 1;
+  const color = (data.color as string) || "#ED7D27";
+  const icon = data.iconName;
 
-// ─── Custom gradient bezier edge ─────────────────────────────────────────────
-function KGEdge({ sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, data }: EdgeProps) {
-  const d = data as { color: string };
-  const [edgePath] = getBezierPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition, curvature: 0.35 });
-  const uid = `eg-${Math.abs(Math.round(sourceX * 10 + targetY * 10))}`;
-  return (
-    <>
-      <defs>
-        <linearGradient id={uid} x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor={d.color} stopOpacity="1" />
-          <stop offset="100%" stopColor={d.color} stopOpacity="0.3" />
-        </linearGradient>
-      </defs>
-      {/* glow */}
-      <path d={edgePath} stroke={d.color} strokeWidth={6} fill="none" opacity={0.08} />
-      {/* main line */}
-      <path d={edgePath} stroke={`url(#${uid})`} strokeWidth={2} fill="none" opacity={0.85} />
-    </>
-  );
-}
+  const theme = COLOR_STYLES[color] || COLOR_STYLES["#ED7D27"];
 
-// ─── ROOT NODE ────────────────────────────────────────────────────────────────
-function RootNode({ data, selected }: NodeProps) {
-  const d = data as unknown as ND;
-  return (
-    <motion.div
-      initial={{ scale: 0.6, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      style={{
-        background: `linear-gradient(135deg, ${d.color} 0%, ${d.accent} 100%)`,
-        borderRadius: 24,
-        padding: "20px 28px",
-        minWidth: 260,
-        textAlign: "center",
-        boxShadow: `0 0 0 8px ${d.color}1A, 0 20px 60px ${d.color}50, 0 8px 24px rgba(0,0,0,0.18)`,
-        border: selected ? "2px solid white" : "2px solid transparent",
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
-      {/* inner shine */}
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "50%", background: "rgba(255,255,255,0.15)", borderRadius: "24px 24px 60% 60%" }} />
-      <Handle type="source" position={Position.Bottom} style={{ background: "#fff", border: `2px solid ${d.color}`, width: 12, height: 12, bottom: -7 }} />
-      <div style={{ fontSize: 26, marginBottom: 8, position: "relative" }}>{d.icon}</div>
-      <div style={{ fontFamily: "'Inter', monospace", fontSize: 16, fontWeight: 900, color: "#fff", letterSpacing: "-0.02em", position: "relative" }}>
-        {d.label}
-      </div>
-      {d.sub && (
-        <div style={{ fontFamily: "monospace", fontSize: 10.5, color: "rgba(255,255,255,0.75)", marginTop: 6, lineHeight: 1.6, position: "relative" }}>
-          {d.sub}
+  const IconComponent = useMemo(() => {
+    switch (icon) {
+      case "hotel": return Building2;
+      case "hall": return Users2;
+      case "banquet": return Award;
+      case "kitchen": return ChefHat;
+      case "supply": return Truck;
+      case "food": return Utensils;
+      case "coffee": return Coffee;
+      case "special": return Sparkles;
+      default: return Utensils;
+    }
+  }, [icon]);
+
+  // Root Node (Top Tier — Hotel Balagi Bhavan HQ)
+  if (level === 0) {
+    return (
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        className={`relative px-7 py-5 rounded-2xl ${theme.cardBg} ${theme.border} ${theme.glow} flex flex-col items-center gap-2 min-w-[340px] text-center group cursor-pointer transition-all duration-300`}
+      >
+        <Handle type="source" position={Position.Bottom} className="!w-3 !h-3 !border-2 !border-white dark:!border-black" style={{ background: theme.handleBg }} />
+
+        <div className={`flex items-center gap-2.5 px-3.5 py-1 rounded-full ${theme.badgeBg}`}>
+          <Building2 className="w-4 h-4" style={{ color }} />
+          <span className={`font-mono text-[10px] font-bold uppercase tracking-[0.2em] ${theme.badgeText}`}>
+            Root Entity · Headquarters
+          </span>
         </div>
-      )}
-      {d.metrics && (
-        <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 12, flexWrap: "wrap", position: "relative" }}>
-          {d.metrics.map((m) => (
-            <div key={m.l} style={{
-              background: "rgba(255,255,255,0.2)",
-              backdropFilter: "blur(8px)",
-              borderRadius: 8,
-              padding: "4px 10px",
-              fontFamily: "monospace", fontSize: 11,
-            }}>
-              <span style={{ color: "rgba(255,255,255,0.65)", fontSize: 9 }}>{m.l} </span>
-              <strong style={{ color: "#fff" }}>{m.v}</strong>
+
+        <h2 className={`font-display text-xl font-bold tracking-wide ${theme.titleText}`}>
+          Hotel Balagi Bhavan
+        </h2>
+        <p className={`font-mono text-[11px] ${theme.mutedText}`}>
+          Central Knowledge Graph · Authentic Indian Restaurant
+        </p>
+
+        <div className="flex items-center gap-3 mt-1 pt-2 border-t border-orange-200 dark:border-orange-800/40 w-full justify-center">
+          <span className="font-mono text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-700">
+            ● Active Operations
+          </span>
+          <span className={`font-mono text-[10px] ${theme.mutedText}`}>
+            312 Sub-entities
+          </span>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Tier 1 Nodes (Main Sections / Halls / Kitchen)
+  if (level === 1) {
+    return (
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        className={`relative px-5 py-3.5 rounded-xl ${theme.cardBg} ${theme.border} ${theme.glow} flex flex-col items-start gap-1.5 min-w-[245px] group hover:scale-[1.02] transition-all duration-300`}
+      >
+        <Handle type="target" position={Position.Top} className="!w-2.5 !h-2.5 !border-none" style={{ background: theme.handleBg }} />
+        <Handle type="source" position={Position.Bottom} className="!w-2.5 !h-2.5 !border-none" style={{ background: theme.handleBg }} />
+
+        <div className="flex items-center gap-2 w-full justify-between">
+          <div className="flex items-center gap-2">
+            <div className={`p-1.5 rounded-lg ${theme.badgeBg}`}>
+              <IconComponent className="w-4 h-4" style={{ color }} strokeWidth={2} />
             </div>
-          ))}
+            <span className={`font-mono text-[10px] font-bold uppercase tracking-wider ${theme.mutedText}`}>
+              {data.category as string}
+            </span>
+          </div>
+          <span className={`font-mono text-[9px] px-2 py-0.5 rounded-full ${theme.badgeBg} ${theme.badgeText} font-bold`}>
+            {data.count as string}
+          </span>
         </div>
-      )}
-    </motion.div>
-  );
-}
 
-// ─── DOMAIN NODE ──────────────────────────────────────────────────────────────
-function DomainNode({ data, selected }: NodeProps) {
-  const d = data as unknown as ND;
-  return (
-    <motion.div
-      initial={{ y: 20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
-      style={{
-        background: `linear-gradient(135deg, ${d.color} 0%, ${d.accent} 100%)`,
-        borderRadius: 18,
-        padding: "14px 18px",
-        minWidth: 185,
-        boxShadow: selected
-          ? `0 0 0 3px white, 0 0 0 5px ${d.color}, 0 16px 40px ${d.color}55`
-          : `0 12px 36px ${d.color}40, 0 4px 12px rgba(0,0,0,0.12)`,
-        position: "relative",
-        overflow: "hidden",
-        transition: "all 0.2s ease",
-      }}
-    >
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "45%", background: "rgba(255,255,255,0.12)", borderRadius: "18px 18px 60% 60%" }} />
-      <Handle type="target" position={Position.Top} style={{ background: "#fff", border: `2px solid ${d.color}`, width: 10, height: 10, top: -6 }} />
-      <Handle type="source" position={Position.Bottom} style={{ background: "#fff", border: `2px solid ${d.color}`, width: 10, height: 10, bottom: -6 }} />
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, position: "relative" }}>
-        <span style={{ fontSize: 15 }}>{d.icon}</span>
-        {d.badge && (
-          <span style={{
-            background: "rgba(255,255,255,0.25)",
-            color: "#fff", borderRadius: 6, padding: "1px 8px",
-            fontSize: 9, fontFamily: "monospace", fontWeight: 800, letterSpacing: "0.1em",
-          }}>{d.badge}</span>
+        <span className={`font-display text-sm font-semibold mt-1 ${theme.titleText}`}>
+          {data.label as string}
+        </span>
+
+        {typeof data.detail === "string" && (
+          <span className={`font-mono text-[10.5px] ${theme.mutedText} leading-snug`}>
+            {data.detail}
+          </span>
         )}
-      </div>
-      <div style={{ fontFamily: "'Inter', monospace", fontSize: 13, fontWeight: 800, color: "#fff", lineHeight: 1.3, position: "relative" }}>{d.label}</div>
-      {d.sub && <div style={{ fontFamily: "monospace", fontSize: 10, color: "rgba(255,255,255,0.72)", marginTop: 4, lineHeight: 1.5, position: "relative" }}>{d.sub}</div>}
-    </motion.div>
-  );
-}
+      </motion.div>
+    );
+  }
 
-// ─── LEAF NODE ────────────────────────────────────────────────────────────────
-function LeafNode({ data, selected }: NodeProps) {
-  const d = data as unknown as ND;
+  // Tier 2 Nodes (Child Details / Specific Stations / Outlets / Vendors)
   return (
     <motion.div
-      initial={{ y: 14, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-      style={{
-        background: "#fff",
-        border: `2px solid ${selected ? d.color : d.color + "35"}`,
-        borderTop: `4px solid ${d.color}`,
-        borderRadius: 14,
-        padding: "12px 14px",
-        minWidth: 172,
-        maxWidth: 215,
-        boxShadow: selected
-          ? `0 0 0 3px ${d.color}20, 0 12px 32px rgba(0,0,0,0.12)`
-          : `0 4px 20px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04)`,
-        transition: "all 0.2s ease",
-      }}
+      initial={{ scale: 0.9, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      className={`relative px-4 py-2.5 rounded-lg ${theme.cardBg} ${theme.border} flex flex-col items-start gap-1 min-w-[190px] max-w-[210px] hover:scale-[1.02] transition-all duration-200`}
     >
-      <Handle type="target" position={Position.Top} style={{ background: d.color, border: "2px solid white", width: 8, height: 8, top: -5 }} />
-      <div style={{ fontFamily: "monospace", fontSize: 11.5, fontWeight: 800, color: "#111", lineHeight: 1.35, marginBottom: 4 }}>{d.label}</div>
-      {d.sub && <div style={{ fontFamily: "monospace", fontSize: 9.5, color: "#6B7280", lineHeight: 1.55, marginBottom: 4 }}>{d.sub}</div>}
-      {d.detail && (
-        <div style={{
-          fontFamily: "monospace", fontSize: 9, fontWeight: 600,
-          color: d.color, marginTop: 3,
-          background: `${d.color}0F`, borderRadius: 5, padding: "2px 6px",
-          display: "inline-block",
-        }}>→ {d.detail}</div>
-      )}
-      {d.metrics && (
-        <div style={{ display: "flex", gap: 5, marginTop: 8, flexWrap: "wrap" }}>
-          {d.metrics.map((m) => (
-            <div key={m.l} style={{
-              background: `${d.color}12`, border: `1px solid ${d.color}30`,
-              borderRadius: 6, padding: "2px 7px",
-              fontFamily: "monospace", fontSize: 9.5, fontWeight: 700, color: d.color,
-            }}>{m.v}</div>
-          ))}
-        </div>
+      <Handle type="target" position={Position.Top} className="!w-2 !h-2 !border-none" style={{ background: theme.handleBg }} />
+      <Handle type="source" position={Position.Bottom} className="!w-2 !h-2 !border-none" style={{ background: theme.handleBg }} />
+
+      <div className="flex items-center gap-1.5">
+        <span className="w-2 h-2 rounded-full shrink-0 shadow-sm" style={{ background: color }} />
+        <span className={`font-mono text-[9.5px] uppercase tracking-wider font-semibold ${theme.mutedText}`}>
+          {data.category as string}
+        </span>
+      </div>
+
+      <span className={`font-mono text-xs font-semibold leading-snug ${theme.titleText}`}>
+        {data.label as string}
+      </span>
+
+      {typeof data.status === "string" && (
+        <span className={`font-mono text-[9px] font-bold mt-0.5 ${theme.mutedText}`}>
+          ✓ {data.status}
+        </span>
       )}
     </motion.div>
   );
 }
 
-const nodeTypes = { root: RootNode, domain: DomainNode, leaf: LeafNode };
-const edgeTypes = { kg: KGEdge };
+const nodeTypes = {
+  balagi: BalagiNode,
+};
 
-// ─── Layout ────────────────────────────────────────────────────────────────────
-const ROW = 180;
+// Tree-based Node Array specifically mapped for Hotel Balagi Bhavan
 const initialNodes = [
-  // ROOT
-  { id: "root", type: "root", position: { x: 940, y: 0 },
-    data: { ...P.root, icon: "🏨", level: 0,
+  // Tier 0: Root Entity
+  {
+    id: "root-balagi",
+    type: "balagi",
+    position: { x: 500, y: 20 },
+    data: {
       label: "Hotel Balagi Bhavan",
-      sub: "Enterprise Knowledge Graph · 5 Domains",
-      metrics: [{ l: "Staff", v: "45" }, { l: "Halls", v: "4" }, { l: "Menu", v: "14 items" }],
+      level: 0,
+      iconName: "hotel",
+      color: "#ED7D27",
     },
   },
 
-  // DOMAIN HUBS
-  { id: "rec",  type: "domain", position: { x: 60,   y: ROW },
-    data: { ...P.rec,  icon: "🍛", level: 1, badge: "KITCHEN",  label: "Culinary Recipes",       sub: "Thali SOPs · Breakfast · Specials" } },
-  { id: "sup",  type: "domain", position: { x: 500,  y: ROW },
-    data: { ...P.sup,  icon: "🚚", level: 1, badge: "SUPPLY",   label: "Vendor & SLA Network",   sub: "3 suppliers · Daily deliveries" } },
-  { id: "pos",  type: "domain", position: { x: 940,  y: ROW },
-    data: { ...P.pos,  icon: "📱", level: 1, badge: "CHANNELS", label: "POS & Delivery",         sub: "Swiggy · Zomato · Counter POS" } },
-  { id: "cust", type: "domain", position: { x: 1380, y: ROW },
-    data: { ...P.cust, icon: "💬", level: 1, badge: "CX AI",    label: "Customer Experience",    sub: "WhatsApp AI · Maps · Events" } },
-  { id: "ops",  type: "domain", position: { x: 1820, y: ROW },
-    data: { ...P.ops,  icon: "⚙️", level: 1, badge: "OPS",      label: "Staff & Operations",     sub: "45 staff · 4 halls · Audit" } },
-
-  // CULINARY LEAVES
-  { id: "r1", type: "leaf", position: { x: -60,  y: ROW * 2 },
-    data: { ...P.rec, level: 2, label: "South Indian Thali SOP",
-      sub: "200-person batch · 9:30 AM trigger",
-      detail: "Sambar, Rasam, Kuzhambu, Payasam",
-      metrics: [{ l: "", v: "200 pax" }, { l: "", v: "₹82/plate" }],
+  // Tier 1: Main Branches / Halls / Operations
+  {
+    id: "branch-dining",
+    type: "balagi",
+    position: { x: 30, y: 200 },
+    data: {
+      label: "Main Dining Hall (AC & Non-AC)",
+      category: "Dining Area",
+      detail: "120 Seats · Express Tiffin Counter",
+      count: "15 Tables",
+      color: "#0EA5E9",
+      level: 1,
+      iconName: "hall",
     },
   },
-  { id: "r2", type: "leaf", position: { x: 150,  y: ROW * 2 },
-    data: { ...P.rec, level: 2, label: "Breakfast Menu",
-      sub: "7–10 AM · Idli, Dosa, Pongal, Upma",
-      detail: "150 plates avg · 50/hr",
+  {
+    id: "branch-banquet",
+    type: "balagi",
+    position: { x: 340, y: 200 },
+    data: {
+      label: "Balagi Mandapam (Banquet)",
+      category: "Event Hall",
+      detail: "250 Pax · Marriage & Catering",
+      count: "Hall A & B",
+      color: "#A78BFA",
+      level: 1,
+      iconName: "banquet",
     },
   },
-  { id: "r3", type: "leaf", position: { x: 350,  y: ROW * 2 },
-    data: { ...P.rec, level: 2, label: "Filter Coffee SOP",
-      sub: "5:45 AM · Chicory 30% · 300 cups",
-      detail: "6-min boil trigger",
-      metrics: [{ l: "", v: "300 cups/day" }],
+  {
+    id: "branch-kitchen",
+    type: "balagi",
+    position: { x: 650, y: 200 },
+    data: {
+      label: "Central Kitchen & Tandoor",
+      category: "Culinary Core",
+      detail: "Chef Venkatesh · Biryani Counters",
+      count: "4 Stations",
+      color: "#ED7D27",
+      level: 1,
+      iconName: "kitchen",
     },
   },
-
-  // SUPPLIER LEAVES
-  { id: "s1", type: "leaf", position: { x: 400,  y: ROW * 2 },
-    data: { ...P.sup, level: 2, label: "Aavin Milk 150L SLA",
-      sub: "05:30 AM · Fat ≥ 3.5%",
-      detail: "Reject if after 06:00 AM",
-      metrics: [{ l: "", v: "150 L/day" }],
-    },
-  },
-  { id: "s2", type: "leaf", position: { x: 590,  y: ROW * 2 },
-    data: { ...P.sup, level: 2, label: "Agmark Ghee 45 kg",
-      sub: "Monthly bulk · Alert at 15% stock",
-      detail: "1.5 kg/day avg consumption",
-    },
-  },
-  { id: "s3", type: "leaf", position: { x: 780,  y: ROW * 2 },
-    data: { ...P.sup, level: 2, label: "Koyambedu Veggie",
-      sub: "Daily auction feed · 6:00 AM",
-      detail: "Auto reorder on 3-day avg",
-    },
-  },
-
-  // POS LEAVES
-  { id: "p1", type: "leaf", position: { x: 820,  y: ROW * 2 },
-    data: { ...P.pos, level: 2, label: "Swiggy Live Stream",
-      sub: "< 12-min prep SLA · ONDC",
-      detail: "80 orders/day peak",
-      metrics: [{ l: "", v: "SLA: 12 min" }],
-    },
-  },
-  { id: "p2", type: "leaf", position: { x: 1010, y: ROW * 2 },
-    data: { ...P.pos, level: 2, label: "Zomato Delivery",
-      sub: "3.2 km radius · ETA optimizer",
-      detail: "Auto-pause on 0 riders",
-    },
-  },
-  { id: "p3", type: "leaf", position: { x: 1200, y: ROW * 2 },
-    data: { ...P.pos, level: 2, label: "Pine Labs POS #4",
-      sub: "UPI + Cash + Card",
-      detail: "₹42K avg daily turnover",
-      metrics: [{ l: "", v: "3 modes" }],
+  {
+    id: "branch-supply",
+    type: "balagi",
+    position: { x: 960, y: 200 },
+    data: {
+      label: "Supply & Inventory Pantry",
+      category: "Sourcing",
+      detail: "Srinivas Traders · Cold Storage",
+      count: "22 Vendors",
+      color: "#10B981",
+      level: 1,
+      iconName: "supply",
     },
   },
 
-  // CUSTOMER LEAVES
-  { id: "c1", type: "leaf", position: { x: 1270, y: ROW * 2 },
-    data: { ...P.cust, level: 2, label: "WhatsApp AI Bot",
-      sub: "Tamil + Hindi · < 2-min SLA",
-      detail: "Auto-resolution engine",
-      metrics: [{ l: "", v: "SLA: 2 min" }],
+  // Tier 2: Sub-entities for Dining Hall (Sky Blue Theme)
+  {
+    id: "sub-family-section",
+    type: "balagi",
+    position: { x: -20, y: 390 },
+    data: {
+      label: "Family Section (Tables 1-10)",
+      category: "Dining",
+      status: "80% Occupied",
+      color: "#0EA5E9",
+      level: 2,
     },
   },
-  { id: "c2", type: "leaf", position: { x: 1460, y: ROW * 2 },
-    data: { ...P.cust, level: 2, label: "Google Maps 4.8 ★",
-      sub: "4-branch rating aggregator",
-      detail: "Auto-reply to < 3★ reviews",
-    },
-  },
-  { id: "c3", type: "leaf", position: { x: 1650, y: ROW * 2 },
-    data: { ...P.cust, level: 2, label: "Banquet Reservations",
-      sub: "120-seat · 3-day advance min",
-      detail: "Catering config builder",
+  {
+    id: "sub-tiffin-counter",
+    type: "balagi",
+    position: { x: 180, y: 390 },
+    data: {
+      label: "Express Dosa & Coffee Bar",
+      category: "Counter",
+      status: "High Speed",
+      color: "#0EA5E9",
+      level: 2,
     },
   },
 
-  // OPS LEAVES
-  { id: "o1", type: "leaf", position: { x: 1710, y: ROW * 2 },
-    data: { ...P.ops, level: 2, label: "Shift Roster Manager",
-      sub: "3 shifts · Conflict detection",
-      detail: "45 staff · biometric sync",
-      metrics: [{ l: "", v: "3 shifts/day" }],
+  // Tier 2: Sub-entities for Banquet Hall (Violet Theme)
+  {
+    id: "sub-corporate-event",
+    type: "balagi",
+    position: { x: 340, y: 390 },
+    data: {
+      label: "Sharma Corporate Lunch",
+      category: "Event (80 Pax)",
+      status: "Confirmed Sat",
+      color: "#A78BFA",
+      level: 2,
     },
   },
-  { id: "o2", type: "leaf", position: { x: 1910, y: ROW * 2 },
-    data: { ...P.ops, level: 2, label: "FSSAI Hygiene Audit",
-      sub: "23 checkpoints · AM + PM",
-      detail: "SMS alert on any fail",
+  {
+    id: "sub-puja-catering",
+    type: "balagi",
+    position: { x: 500, y: 390 },
+    data: {
+      label: "Puja Thali Catering Order",
+      category: "Special Order",
+      status: "Prepped",
+      color: "#A78BFA",
+      level: 2,
+    },
+  },
+
+  // Tier 2: Sub-entities for Central Kitchen (Orange Theme)
+  {
+    id: "sub-dum-biryani",
+    type: "balagi",
+    position: { x: 660, y: 390 },
+    data: {
+      label: "Hyderabadi Biryani Station",
+      category: "Specialty",
+      status: "Chef Venkatesh",
+      color: "#ED7D27",
+      level: 2,
+    },
+  },
+  {
+    id: "sub-south-meals",
+    type: "balagi",
+    position: { x: 820, y: 390 },
+    data: {
+      label: "South Indian Thali Section",
+      category: "Daily Meal",
+      status: "Active Batch",
+      color: "#ED7D27",
+      level: 2,
+    },
+  },
+
+  // Tier 2: Sub-entities for Supply (Emerald Green Theme)
+  {
+    id: "sub-srinivas-vendor",
+    type: "balagi",
+    position: { x: 980, y: 390 },
+    data: {
+      label: "Srinivas Traders (Rice/Spice)",
+      category: "Vendor #1",
+      status: "Verified",
+      color: "#10B981",
+      level: 2,
+    },
+  },
+  {
+    id: "sub-dairy-storage",
+    type: "balagi",
+    position: { x: 1140, y: 390 },
+    data: {
+      label: "Fresh Dairy & Milk Co-op",
+      category: "Daily Supply",
+      status: "Delivered 6 AM",
+      color: "#10B981",
+      level: 2,
     },
   },
 ];
 
-// ─── Edges ────────────────────────────────────────────────────────────────────
-const mk = (id: string, s: string, t: string, color: string, animated = false) => ({
-  id, source: s, target: t, type: "kg", animated,
-  markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16, color },
-  data: { color },
-  style: { stroke: color },
-});
-
+// Tree Edges linking Hotel Balagi Bhavan to Main Halls and Sub-entities
 const initialEdges = [
-  mk("r-rec",  "root", "rec",  P.rec.color,  true),
-  mk("r-sup",  "root", "sup",  P.sup.color,  true),
-  mk("r-pos",  "root", "pos",  P.pos.color,  true),
-  mk("r-cust", "root", "cust", P.cust.color, true),
-  mk("r-ops",  "root", "ops",  P.ops.color,  true),
-  mk("r-r1", "rec", "r1", P.rec.color),
-  mk("r-r2", "rec", "r2", P.rec.color),
-  mk("r-r3", "rec", "r3", P.rec.color),
-  mk("s-s1", "sup", "s1", P.sup.color),
-  mk("s-s2", "sup", "s2", P.sup.color),
-  mk("s-s3", "sup", "s3", P.sup.color),
-  mk("p-p1", "pos", "p1", P.pos.color),
-  mk("p-p2", "pos", "p2", P.pos.color),
-  mk("p-p3", "pos", "p3", P.pos.color),
-  mk("c-c1", "cust", "c1", P.cust.color),
-  mk("c-c2", "cust", "c2", P.cust.color),
-  mk("c-c3", "cust", "c3", P.cust.color),
-  mk("o-o1", "ops", "o1", P.ops.color),
-  mk("o-o2", "ops", "o2", P.ops.color),
+  // Root to Tier 1 Branches
+  {
+    id: "e-root-dining",
+    source: "root-balagi",
+    target: "branch-dining",
+    animated: true,
+    style: { stroke: "#0EA5E9", strokeWidth: 2.5 },
+    markerEnd: { type: MarkerType.ArrowClosed, color: "#0EA5E9" },
+  },
+  {
+    id: "e-root-banquet",
+    source: "root-balagi",
+    target: "branch-banquet",
+    animated: true,
+    style: { stroke: "#A78BFA", strokeWidth: 2.5 },
+    markerEnd: { type: MarkerType.ArrowClosed, color: "#A78BFA" },
+  },
+  {
+    id: "e-root-kitchen",
+    source: "root-balagi",
+    target: "branch-kitchen",
+    animated: true,
+    style: { stroke: "#ED7D27", strokeWidth: 2.5 },
+    markerEnd: { type: MarkerType.ArrowClosed, color: "#ED7D27" },
+  },
+  {
+    id: "e-root-supply",
+    source: "root-balagi",
+    target: "branch-supply",
+    animated: true,
+    style: { stroke: "#10B981", strokeWidth: 2.5 },
+    markerEnd: { type: MarkerType.ArrowClosed, color: "#10B981" },
+  },
+
+  // Tier 1 to Tier 2 Children
+  {
+    id: "e-dining-family",
+    source: "branch-dining",
+    target: "sub-family-section",
+    style: { stroke: "#0EA5E9", strokeWidth: 1.5, strokeDasharray: "4 4" },
+  },
+  {
+    id: "e-dining-tiffin",
+    source: "branch-dining",
+    target: "sub-tiffin-counter",
+    style: { stroke: "#0EA5E9", strokeWidth: 1.5, strokeDasharray: "4 4" },
+  },
+  {
+    id: "e-banquet-sharma",
+    source: "branch-banquet",
+    target: "sub-corporate-event",
+    style: { stroke: "#A78BFA", strokeWidth: 1.5, strokeDasharray: "4 4" },
+  },
+  {
+    id: "e-banquet-puja",
+    source: "branch-banquet",
+    target: "sub-puja-catering",
+    style: { stroke: "#A78BFA", strokeWidth: 1.5, strokeDasharray: "4 4" },
+  },
+  {
+    id: "e-kitchen-biryani",
+    source: "branch-kitchen",
+    target: "sub-dum-biryani",
+    style: { stroke: "#ED7D27", strokeWidth: 1.5, strokeDasharray: "4 4" },
+  },
+  {
+    id: "e-kitchen-meals",
+    source: "branch-kitchen",
+    target: "sub-south-meals",
+    style: { stroke: "#ED7D27", strokeWidth: 1.5, strokeDasharray: "4 4" },
+  },
+  {
+    id: "e-supply-srinivas",
+    source: "branch-supply",
+    target: "sub-srinivas-vendor",
+    style: { stroke: "#10B981", strokeWidth: 1.5, strokeDasharray: "4 4" },
+  },
+  {
+    id: "e-supply-dairy",
+    source: "branch-supply",
+    target: "sub-dairy-storage",
+    style: { stroke: "#10B981", strokeWidth: 1.5, strokeDasharray: "4 4" },
+  },
 ];
 
-// ─── Main export ──────────────────────────────────────────────────────────────
 export function KnowledgeUniverseVisualizer() {
-  const [isDark, setIsDark] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | null>("root");
-
-  useEffect(() => {
-    const check = () => setIsDark(document.documentElement.classList.contains("dark"));
-    check();
-    const obs = new MutationObserver(check);
-    obs.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
-    return () => obs.disconnect();
-  }, []);
-
-  const [nodes, , onNodesChange] = useNodesState(initialNodes);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-
-  const onConnect = useCallback(
-    (params: Connection) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges]
-  );
-
-  const selNode = nodes.find((n) => n.id === selectedId);
-  const selData = selNode?.data as unknown as ND | undefined;
-
-  const bg     = isDark ? "#0D0B14" : "#ffffff";
-  const dotCol = isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.05)";
-  const panBg  = isDark ? "rgba(15,12,25,0.97)" : "rgba(255,255,255,0.98)";
-  const panBdr = (c: string) => isDark ? `${c}55` : `${c}55`;
-  const subTxt = isDark ? "rgba(200,180,240,0.5)" : "#9CA3AF";
-  const legBg  = isDark ? "rgba(15,12,25,0.95)" : "rgba(255,255,255,0.97)";
-  const legBdr = isDark ? "rgba(120,80,200,0.18)" : "rgba(0,0,0,0.08)";
 
   return (
     <div className="w-full h-full absolute inset-0">
       <ReactFlow
-        nodes={nodes.map((n) => ({ ...n, selected: n.id === selectedId }))}
+        nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        onNodeClick={(_, node) => setSelectedId(node.id)}
         nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes}
         fitView
-        fitViewOptions={{ padding: 0.12 }}
+        minZoom={0.5}
+        maxZoom={1.5}
+        className="bg-[#FAF7F2] dark:bg-deep-space transition-colors duration-300"
         proOptions={{ hideAttribution: true }}
-        style={{ background: bg }}
       >
-        <Background color={dotCol} gap={24} size={1} variant={BackgroundVariant.Dots} />
-        <Controls style={{
-          background: panBg, border: `1px solid ${legBdr}`,
-          borderRadius: 12, boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
-        }} />
+        <Background color="rgba(237,125,39,0.12)" gap={36} size={1.2} />
       </ReactFlow>
-
-      {/* ── Inspector ──────────────────────────────────────────────────────────── */}
-      <AnimatePresence mode="wait">
-        {selNode && selData && (
-          <motion.div
-            key={selNode.id}
-            initial={{ opacity: 0, y: 12, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.97 }}
-            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute top-6 left-6 z-30"
-            style={{
-              background: panBg,
-              border: `1.5px solid ${panBdr(selData.color)}`,
-              borderTop: `4px solid ${selData.color}`,
-              borderRadius: 18,
-              padding: 20,
-              backdropFilter: "blur(24px)",
-              boxShadow: `0 16px 48px rgba(0,0,0,0.1), 0 0 0 1px ${selData.color}18`,
-              minWidth: 260, maxWidth: 300,
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-              <span style={{
-                background: `linear-gradient(135deg, ${selData.color}, ${selData.accent})`,
-                color: "#fff", borderRadius: 7, padding: "2px 10px",
-                fontFamily: "monospace", fontSize: 9, fontWeight: 800, letterSpacing: "0.1em",
-              }}>
-                {selData.badge ?? `LEVEL ${selData.level}`}
-              </span>
-              <span style={{ fontFamily: "monospace", fontSize: 9, color: subTxt }}>#{selNode.id}</span>
-            </div>
-
-            <div style={{ fontSize: 20, marginBottom: 6 }}>{selData.icon}</div>
-            <div style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 900, color: selData.color, marginBottom: 4, lineHeight: 1.3 }}>
-              {selData.label}
-            </div>
-            {selData.sub && (
-              <div style={{ fontFamily: "monospace", fontSize: 10.5, color: isDark ? "rgba(200,180,240,0.7)" : "#6B7280", lineHeight: 1.6, marginBottom: 5 }}>
-                {selData.sub}
-              </div>
-            )}
-            {selData.detail && (
-              <div style={{
-                fontFamily: "monospace", fontSize: 10, color: selData.color, fontWeight: 700,
-                background: `${selData.color}10`, borderRadius: 7, padding: "4px 10px",
-                marginBottom: 8, display: "inline-block",
-              }}>
-                → {selData.detail}
-              </div>
-            )}
-            {selData.metrics && selData.metrics.length > 0 && (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
-                {selData.metrics.map((m) => (
-                  <span key={m.l + m.v} style={{
-                    background: `${selData.color}18`, border: `1px solid ${selData.color}35`,
-                    borderRadius: 8, padding: "3px 10px",
-                    fontFamily: "monospace", fontSize: 10, color: selData.color, fontWeight: 700,
-                  }}>{m.v}</span>
-                ))}
-              </div>
-            )}
-
-            {/* depth bar */}
-            <div style={{ marginTop: 14 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-                <span style={{ fontFamily: "monospace", fontSize: 9, color: subTxt }}>Tree Depth</span>
-                <span style={{ fontFamily: "monospace", fontSize: 9, color: selData.color, fontWeight: 700 }}>
-                  {selData.level === 0 ? "Root" : selData.level === 1 ? "Domain" : "Detail"}
-                </span>
-              </div>
-              <div style={{ height: 4, borderRadius: 2, background: isDark ? "rgba(255,255,255,0.06)" : "#F3F4F6" }}>
-                <motion.div
-                  style={{ height: "100%", borderRadius: 2, background: `linear-gradient(90deg, ${selData.color}, ${selData.accent})` }}
-                  initial={{ width: 0 }}
-                  animate={{ width: `${((selData.level + 1) / 3) * 100}%` }}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
-                />
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ── Legend ──────────────────────────────────────────────────────────────── */}
-      <motion.div
-        className="absolute bottom-6 right-6 z-20"
-        initial={{ opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        style={{
-          background: legBg, border: `1px solid ${legBdr}`,
-          borderRadius: 16, padding: "14px 18px",
-          backdropFilter: "blur(20px)",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.06)",
-          display: "flex", flexDirection: "column", gap: 8,
-        }}
-      >
-        <div style={{ fontFamily: "monospace", fontSize: 9, fontWeight: 800, letterSpacing: "0.12em", color: subTxt, marginBottom: 2 }}>
-          DOMAINS
-        </div>
-        {[
-          { label: "Culinary",      ...P.rec  },
-          { label: "Vendor & SLA", ...P.sup  },
-          { label: "POS / Delivery",...P.pos  },
-          { label: "Customer CX",  ...P.cust },
-          { label: "Operations",   ...P.ops  },
-        ].map((d) => (
-          <div key={d.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{
-              width: 28, height: 8, borderRadius: 4,
-              background: `linear-gradient(90deg, ${d.color}, ${d.accent})`,
-              boxShadow: `0 0 6px ${d.color}60`,
-            }} />
-            <span style={{ fontFamily: "monospace", fontSize: 10.5, color: isDark ? "rgba(210,200,240,0.7)" : "#374151", fontWeight: 600 }}>
-              {d.label}
-            </span>
-          </div>
-        ))}
-      </motion.div>
-
-      {/* ── Bottom pill ──────────────────────────────────────────────────────────── */}
-      <motion.div
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 px-6 py-3 rounded-full"
-        style={{
-          background: legBg, border: `1px solid ${legBdr}`,
-          backdropFilter: "blur(16px)",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
-          fontFamily: "monospace", fontSize: 11,
-        }}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.35 }}
-      >
-        <span className="relative flex h-2.5 w-2.5">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60" style={{ backgroundColor: P.root.color }} />
-          <span className="relative inline-flex h-2.5 w-2.5 rounded-full" style={{ backgroundColor: P.root.color }} />
-        </span>
-        <span style={{ fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase", color: isDark ? "#A78BFA" : P.root.color }}>
-          Decision Knowledge Tree
-        </span>
-        <span style={{ color: subTxt }}>·</span>
-        <span style={{ color: subTxt }}>Click to inspect · Scroll to zoom</span>
-      </motion.div>
     </div>
   );
 }

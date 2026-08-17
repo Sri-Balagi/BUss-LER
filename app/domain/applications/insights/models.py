@@ -8,7 +8,7 @@ from app.domain.intelligence.capability import CapabilityType
 from app.shared.events.models import DomainEvent
 
 
-class InsightType(enum.StrEnum):
+class InsightType(str, enum.Enum):
     ANOMALY = "ANOMALY"
     STRATEGIC_FORESIGHT = "STRATEGIC_FORESIGHT"
     PERFORMANCE_SUMMARY = "PERFORMANCE_SUMMARY"

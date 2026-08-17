@@ -103,14 +103,19 @@ export default function SignUpPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Min. 8 characters"
-              className="h-11 w-full rounded-xl border border-white/10 bg-white/[0.04] pl-10 pr-10 text-sm text-primary placeholder:text-tertiary focus:border-accent focus:bg-white/[0.06] focus:outline-none transition-all"
+              className="h-11 w-full rounded-xl border border-white/10 bg-white/[0.04] pl-10 pr-12 text-sm text-primary placeholder:text-tertiary focus:border-accent focus:bg-white/[0.06] focus:outline-none transition-all"
             />
             <button
               type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-tertiary hover:text-primary transition-colors"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setShowPassword((prev) => !prev);
+              }}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-tertiary hover:text-primary transition-colors z-10 cursor-pointer p-1.5 focus:outline-none"
+              aria-label={showPassword ? "Hide password" : "Show password"}
             >
-              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {showPassword ? <EyeOff className="h-4 w-4 text-accent" /> : <Eye className="h-4 w-4 text-tertiary" />}
             </button>
           </div>
         </div>
