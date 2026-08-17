@@ -134,9 +134,9 @@ def create_app() -> FastAPI:
         description="AI Operating System for Entities — v6.0.0",
         version="6.0.0",
         lifespan=lifespan,
-        docs_url="/docs" if settings.app_debug else None,
-        redoc_url="/redoc" if settings.app_debug else None,
-        openapi_url="/openapi.json" if settings.app_debug else None,
+        docs_url="/docs",
+        redoc_url="/redoc",
+        openapi_url="/openapi.json",
     )
 
     # ── Middleware (applied in reverse registration order) ────────────────────
@@ -175,7 +175,7 @@ def create_app() -> FastAPI:
         duration = time.perf_counter() - start
 
         # Exclude noisy health probes from access logs
-        if request.url.path not in {"/api/v1/health", "/api/v1/live"}:
+        if request.url.path not in {"/api/v1/health", "/api/v1/live", "/", "/health"}:
             logger.info(
                 "http.request",
                 method=request.method,
@@ -187,6 +187,20 @@ def create_app() -> FastAPI:
             )
 
         return response
+
+    # ── Root Welcome & Health Endpoints ─────────────────────────────────────
+    @app.get("/")
+    async def _root() -> dict[str, str]:
+        return {
+            "status": "online",
+            "service": "BizOS Backend API Engine",
+            "version": "6.0.0",
+            "message": "BizOS backend is running 24/7 on Railway"
+        }
+
+    @app.get("/health")
+    async def _health() -> dict[str, str]:
+        return {"status": "ok"}
 
     # ── Prometheus /metrics endpoint ──────────────────────────────────────────
     @app.get("/metrics", include_in_schema=False)
