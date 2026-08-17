@@ -105,18 +105,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const sendOtpCode = (email: string): string => {
-    // Generate 6-digit verification code
-    let code = "849201";
-    if (email !== "rsribalagi@gmail.com") {
-      const hash = email.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      code = String(100000 + (hash * 137) % 899999);
-    }
+    // Generate random 6-digit verification code
+    const code = String(Math.floor(100000 + Math.random() * 900000));
     setPendingEmail(email);
     setActiveOtpCode(code);
     localStorage.setItem(PENDING_EMAIL_KEY, email);
     localStorage.setItem(OTP_CODE_KEY, code);
 
-    // Trigger real email dispatch via backend Gmail SMTP service
+    // Trigger real email dispatch via backend Gmail SMTP service using provided app passkey
     fetch("http://localhost:8000/api/v1/auth/send-verification-email", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

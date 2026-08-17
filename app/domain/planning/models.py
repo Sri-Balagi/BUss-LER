@@ -23,7 +23,7 @@ class PlanningContext(IntelligenceContext):
     reasoning_result: ReasoningResponse | None = Field(None, description="The reasoning insights applied to the twin.")
 
 
-class PlanStatus(enum.StrEnum):
+class PlanStatus(str, enum.Enum):
     """Lifecycle status of an immutable plan."""
     DRAFT = "DRAFT"
     VALIDATING = "VALIDATING"

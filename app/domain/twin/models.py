@@ -6,7 +6,7 @@ from uuid import UUID, uuid4
 from pydantic import BaseModel, Field
 
 
-class TwinLifecycleStatus(enum.StrEnum):
+class TwinLifecycleStatus(str, enum.Enum):
     ACTIVE = "ACTIVE"
     INACTIVE = "INACTIVE"
     ARCHIVED = "ARCHIVED"

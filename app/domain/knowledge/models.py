@@ -7,7 +7,7 @@ from pydantic import Field
 from app.domain.common.biz_object import BizObject
 
 
-class EntityType(enum.StrEnum):
+class EntityType(str, enum.Enum):
     EMPLOYEE = "Employee"
     DEPARTMENT = "Department"
     ORGANIZATION = "Organization"
@@ -20,7 +20,7 @@ class EntityType(enum.StrEnum):
     WORKFLOW = "Workflow"
 
 
-class RelationshipType(enum.StrEnum):
+class RelationshipType(str, enum.Enum):
     REPORTS_TO = "REPORTS_TO"
     BELONGS_TO = "BELONGS_TO"
     MANAGES = "MANAGES"

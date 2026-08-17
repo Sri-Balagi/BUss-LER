@@ -6,11 +6,11 @@ from __future__ import annotations
 import asyncio
 import random
 from datetime import datetime, timezone
-from enum import StrEnum
+from enum import (str, enum.Enum)
 from typing import Any, Callable, Dict, List, Optional
 from pydantic import BaseModel, Field
 
-class ScheduleTaskType(StrEnum):
+class ScheduleTaskType(str, enum.Enum):
     CONNECTOR_POLL = "CONNECTOR_POLL"
     WORKFLOW = "WORKFLOW"
     TWIN_RECONCILIATION = "TWIN_RECONCILIATION"

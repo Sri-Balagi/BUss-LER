@@ -5,19 +5,19 @@ Handles allocation, reservations, rate limiting, token budgets, and cost account
 from __future__ import annotations
 import asyncio
 from datetime import datetime, timezone
-from enum import StrEnum
+from enum import (str, enum.Enum)
 from typing import Any, Dict, Optional, List
 from pydantic import BaseModel, Field
 from app.shared.enums import ExecutionMode
 
-class ResourceCategory(StrEnum):
+class ResourceCategory(str, enum.Enum):
     AGENT = "AGENT"
     LLM_TOKEN = "LLM_TOKEN"
     CONNECTOR = "CONNECTOR"
     WORKFLOW = "WORKFLOW"
     MEMORY = "MEMORY"
 
-class AllocationPolicy(StrEnum):
+class AllocationPolicy(str, enum.Enum):
     FAIR = "FAIR"
     PRIORITY = "PRIORITY"
     WEIGHTED = "WEIGHTED"

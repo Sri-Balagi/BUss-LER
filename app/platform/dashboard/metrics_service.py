@@ -4,21 +4,21 @@ Exposes platform telemetry, historical metrics, cost tracking, and live dependen
 """
 from __future__ import annotations
 from datetime import datetime, timezone
-from enum import StrEnum
+from enum import (str, enum.Enum)
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 from app.core.resources.broker import ResourceBroker
 from app.connectors.scheduler.platform_scheduler import PlatformScheduler
 from app.runtime.distributed.coordinator import WorkerRegistry
 
-class MetricScope(StrEnum):
+class MetricScope(str, enum.Enum):
     GLOBAL = "GLOBAL"
     TENANT = "TENANT"
     MODULE = "MODULE"
     WORKFLOW = "WORKFLOW"
     CONNECTOR = "CONNECTOR"
 
-class MetricWindow(StrEnum):
+class MetricWindow(str, enum.Enum):
     LAST_HOUR = "LAST_HOUR"
     LAST_24_HOURS = "LAST_24_HOURS"
     LAST_WEEK = "LAST_WEEK"

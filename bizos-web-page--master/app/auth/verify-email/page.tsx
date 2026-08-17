@@ -82,7 +82,7 @@ export default function VerifyEmailPage() {
           router.push(isBalagi ? "/dashboard" : "/onboarding");
         }, 800);
       } else {
-        setError(`Invalid verification code. Use code ${displayCode} or click Quick Fill.`);
+        setError("Invalid verification code. Please check your email inbox and try again.");
       }
     } catch (err: any) {
       setError(err?.message || "Verification failed.");
@@ -114,25 +114,6 @@ export default function VerifyEmailPage() {
           We sent a 6-digit verification code to{" "}
           <strong className="text-primary font-medium">{targetEmail}</strong>
         </p>
-      </div>
-
-      {/* Live Verification Code Banner */}
-      <div className="rounded-xl border border-accent/30 bg-accent/10 p-3.5 flex items-center justify-between text-xs text-primary shadow-sm">
-        <div className="flex items-center gap-2.5">
-          <KeyRound className="h-4 w-4 text-accent shrink-0" />
-          <div>
-            <span className="text-tertiary block text-[10px]">Verification Code Sent:</span>
-            <span className="font-mono text-sm font-bold text-accent tracking-widest">{displayCode}</span>
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={handleQuickFill}
-          className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-accent/20 hover:bg-accent/30 text-accent text-[11px] font-medium transition-colors border border-accent/30"
-        >
-          <Sparkles className="h-3 w-3" />
-          <span>Auto Fill</span>
-        </button>
       </div>
 
       {error && (

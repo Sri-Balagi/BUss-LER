@@ -3,7 +3,7 @@ import enum
 from pydantic import BaseModel, Field
 
 
-class CapabilityType(enum.StrEnum):
+class CapabilityType(str, enum.Enum):
     REASONING = "REASONING"
     PLANNING = "PLANNING"
     RETRIEVAL = "RETRIEVAL"

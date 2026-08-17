@@ -5,11 +5,11 @@ Establishes worker roles, dynamic capability discovery, task leases, and transpo
 from __future__ import annotations
 import asyncio
 from datetime import datetime, timezone
-from enum import StrEnum
+from enum import (str, enum.Enum)
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
-class WorkerRole(StrEnum):
+class WorkerRole(str, enum.Enum):
     PLANNER_NODE = "PLANNER_NODE"
     WORKFLOW_NODE = "WORKFLOW_NODE"
     AGENT_NODE = "AGENT_NODE"
@@ -17,7 +17,7 @@ class WorkerRole(StrEnum):
     MEMORY_WORKER = "MEMORY_WORKER"
     EVENT_WORKER = "EVENT_WORKER"
 
-class RuntimeTransportType(StrEnum):
+class RuntimeTransportType(str, enum.Enum):
     IN_PROCESS = "IN_PROCESS"
     REDIS = "REDIS"
     NATS = "NATS"

@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 from app.domain.intelligence.context import IntelligenceContext
 
 
-class RetrievalSource(enum.StrEnum):
+class RetrievalSource(str, enum.Enum):
     GRAPH = "GRAPH"
     MEMORY = "MEMORY"
     VECTOR = "VECTOR"

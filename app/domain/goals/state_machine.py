@@ -10,7 +10,7 @@ from typing import Dict, Set
 from uuid import UUID, uuid4
 
 
-class GoalState(enum.StrEnum):
+class GoalState(str, enum.Enum):
     CREATED = "CREATED"
     PLANNED = "PLANNED"
     ACTIVE = "ACTIVE"

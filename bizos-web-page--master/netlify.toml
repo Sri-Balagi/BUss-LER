@@ -1,0 +1,19 @@
+# Netlify Configuration for BizOS Next.js Web App
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NEXT_PUBLIC_BIZOS_API_URL = "https://bizos-api.onrender.com"
+
+# API Proxy Rewrites: Redirects /api/v1/* requests from Netlify directly to live FastAPI backend
+[[redirects]]
+  from = "/api/v1/*"
+  to = "https://bizos-api.onrender.com/api/v1/:splat"
+  status = 200
+  force = true
